@@ -176,13 +176,33 @@ function SignUp() {
             variant="contained"
             color="primary"
             className={classes.submit}
-          >
+            onClick={()=>{
+              let user = {
+                userName :document.getElementById('userName').value,
+                password : document.getElementById('password').value,
+                firstName : document.getElementById('firstName').value,
+                lastName : document.getElementById('lastName').value,
+                email : document.getElementById('email').value,
+                nickName : document.getElementById('nickName').value
+                         }
+              let data = new FormData();
+              data.append( "json", JSON.stringify( user ) );
+              fetch('http://localhost:8000/user', {
+              method: 'POST', // *GET, POST, PUT, DELETE, etc.
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+              },
+              credentials: 'include',
+              body: 'json='+JSON.stringify( user )
+            });
+          }}>   
+          
             Sign Up
           </Button>
           <Grid container justify="flex-end">
             <Grid item>
               <Link to="/SignIn" variant="body2">
-                Already have an account? Sign in
+                Already have an account? Sign In
               </Link>
             </Grid>
           </Grid>
@@ -208,7 +228,9 @@ function LinksPage(){
           <Route exact path="/SignUp">
             <SignUp />
           </Route>
-          
+          <Route exact path="/Home">
+            <Home />
+          </Route>
         </Switch>
         </div>
   );
@@ -278,11 +300,31 @@ function SignIn() {
   return (
     <div className="App" >
       <header className="App-header" >
-        <div>
-        <Typography variant="h1" component="h2" gutterBottom className={classes.root}>
+
+      {/* <Grid container spacing={2}>
+            <Grid item xs={3} sm={6}>
+      <Link to="/Home" variant="body2">
+               <Button variant="contained" color="secondary" className={classes.button}>
+                 Home Page
+               </Button>
+               </Link>
+       </Grid>
+  </Grid> 
+ */}
+
+       
+      <Container component="main" maxWidth="xs">
+      <CssBaseline />
+      <div className={classes.paper}>
+        <form className={classes.form} noValidate>
+          
+      <Grid container spacing={5}>
+      <Grid item xs={12}>
+      <Typography variant="h1" component="h2" gutterBottom className={classes.root}>
         Sign In
       </Typography>
-
+      </Grid>
+            <Grid item xs={12} sm={6}>
         <TextField
           id="UserNameInput"
           className={classes.textField}
@@ -290,7 +332,9 @@ function SignIn() {
           margin="normal"
           variant="filled"
         />
-        
+        </Grid>
+        <Grid item xs={12} sm={6}>
+
         <TextField
           id="PasswordInput"
           label="Password"
@@ -300,16 +344,17 @@ function SignIn() {
           margin="normal"
           variant="filled"
         />
-        </div>
-      
-        <Button variant="contained" color="primary" className={classes.button}
+     </Grid>
+     <Grid item xs={12} justify="flex-end">
+
+        <Button variant="contained" color="primary" fullWidth className={classes.button}
         onClick={()=>{
           let user = {username :document.getElementById('UserNameInput').value,
                       password : document.getElementById('PasswordInput').value }
           let data = new FormData();
           data.append( "json", JSON.stringify( user ) );
           fetch('http://localhost:8000/user', {
-          method: 'POST', // *GET, POST, PUT, DELETE, etc.
+          method: 'GET', // *GET, POST, PUT, DELETE, etc.
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
           },
@@ -319,7 +364,21 @@ function SignIn() {
       }}>   
         Sign In
       </Button>
-      
+      </Grid>
+     </Grid>
+     </form>
+          </div>
+          </Container>
+              <Link to="/SignUp" variant="body2">
+              <Typography variant="h6" component="h3" gutterBottom className={classes.root}>
+
+                Don't have an account? Sign Up
+                </Typography>
+               </Link>
+
+               
+
+           
 
       </header>
       

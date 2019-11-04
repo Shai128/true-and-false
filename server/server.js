@@ -24,8 +24,9 @@ app.get('/', (req, res) => res.send("request for / recieved"))
 app.get('/welcome',(req,res)=> res.send(`hello ${req.body.shalom.bla}`))
 
 app.post('/user',(req,res)=> {
+    console.log('got here');
     let data = JSON.parse(req.body.json)
-    createUser(data.username, data.password,
+    createUser(data,
     ()=>{res.send("success")},(err)=>{console.log(err)});}
      
       )

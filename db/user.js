@@ -1,18 +1,41 @@
 const {mongoose} = require("./config")
+const salt = '' //todo: change to a real good salt
+const iterations = 1000;
 
-const userSchema = new mongoose.Schema({ username: String , password:String});
+const userSchema = new mongoose.Schema(
+    { 
+        username: String,
+        password:String,
+        email: String,
+        salt: String,
+        iterations: Number,
+        firstName: String,
+        lastName: String,
+        nickName: String,
+        games: {} //todo
+        });
 const userModel = mongoose.model('user',userSchema) //creating the class userModel. a class of types
                                                     // that comply the conditions of {userSchema and document}
 
 /**
- * creates a new userModel object with the given username and saves it in the db
- * @param {String} username 
+ * creates a new userModel object with the given user and saves it in the db
+ * @param  user 
  * @param {function: what to do if the operation succeeded} success 
  * @param {function: what to do if the operation failed} failure 
  */
-function createUser(givenUserName, givenPassword,success,failure){
-    const newUser = new userModel({ username: givenUserName,
-                                    password: givenPassword });
+function createUser(user,success,failure){
+    let hashedPassword = user.password; //todo: activate pbkdf2
+    const newUser = new userModel({
+        username: user.userName,
+        password: hashedPassword,
+        email: user.email,
+        salt: salt,
+        iterations: iterations,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        nickName: user.nickName,
+        games: {} // creating a user with no games
+                                 });
     //saves the user in the db
     newUser.save((err)=>{
         if(err)
