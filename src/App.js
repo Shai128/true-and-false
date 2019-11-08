@@ -77,7 +77,22 @@ export const useStyles = makeStyles(theme => ({
     width: '100%',
     maxWidth: 500,
     color: '#000000'
+  },
+  gamesListItems:{
+    background: 'linear-gradient(to right, #4ecdc4, #556270)', /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    border: '0',
+    borderRadius: 3,
+    color: 'white',
+    height: 48,
+    padding: '0 30px',
+    margin: '5px'
+  },
+  list: {
+    marginBottom: theme.spacing(2),
+    margin: '5px'
   }
+
+
 }));
 
 

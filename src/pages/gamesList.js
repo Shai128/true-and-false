@@ -90,7 +90,7 @@ function GetGamesComponentsByGames(games){
     return (<List className={classes.list}>
           {games.map(({ id, date, playersNum }) => (
             <React.Fragment key={id}>
-              <ListItem button>
+              <ListItem button  className={classes.gamesListItems}>
                 <ListItemText primary={'date: '+date} secondary={'number of participants : '+playersNum} />
               </ListItem>
             </React.Fragment>
