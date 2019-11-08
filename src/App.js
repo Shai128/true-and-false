@@ -19,6 +19,8 @@ import {
   Link
 } from "react-router-dom";
 
+import {GamesListPage as GamesList} from './pages/gamesList.js';
+
 function Copyright() {
   return (
  <Typography variant="body2" color="textSecondary" align="center">
@@ -33,7 +35,7 @@ function Copyright() {
   );
 }
 
-const useStyles = makeStyles(theme => ({
+export const useStyles = makeStyles(theme => ({
   '@global': {
     body: {
       backgroundColor: theme.palette.common.white,
@@ -231,22 +233,27 @@ function LinksPage(){
           <Route exact path="/Home">
             <Home />
           </Route>
+
+          <Route exact path="/GamesList">
+            <GamesList />
+          </Route>
+
         </Switch>
         </div>
   );
 }
 
 export default function App() {
+  
   return (
     <Router>
-{/* A <Switch> looks through its children <Route>s and
-            renders the first one that matches the current URL. */}
   
     <LinksPage />
   </Router>
         
          
   );
+
 }
 
 function Home(){
@@ -254,6 +261,7 @@ function Home(){
 
 
   return (
+
     <Container component="main" maxWidth="md">
       <CssBaseline />
       <div className={classes.paper}>
@@ -277,6 +285,15 @@ function Home(){
       </Button>
       </Link>
             </Grid>
+        
+            <Grid item xs={12} sm={6}>
+            <Link to="/GamesList">
+            <Button variant="contained" color="primary" fullWidth  className={classes.button}>
+            Games List
+          </Button>
+          </Link>
+            </Grid>
+
             
           </Grid>
         </form>
@@ -301,16 +318,17 @@ function SignIn() {
     <div className="App" >
       <header className="App-header" >
 
-      {/* <Grid container spacing={2}>
-            <Grid item xs={3} sm={6}>
-      <Link to="/Home" variant="body2">
-               <Button variant="contained" color="secondary" className={classes.button}>
-                 Home Page
-               </Button>
-               </Link>
-       </Grid>
-  </Grid> 
- */}
+{/* 
+       { <Grid container spacing={2}>
+             <Grid item xs={3} sm={6}>
+       <Link to="/Home" variant="body2">
+                <Button variant="contained" color="secondary" className={classes.button}>
+                  Home Page
+                </Button>
+                </Link>
+        </Grid>
+   </Grid> 
+  } */}
 
        
       <Container component="main" maxWidth="xs">
@@ -385,6 +403,9 @@ function SignIn() {
     </div>
   );
 }
+
+
+
 /*
 export default App;
 */
