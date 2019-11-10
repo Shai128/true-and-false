@@ -22,12 +22,13 @@ const useButtonStyles = makeStyles({
         props.color ='linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
       border: 0,
       borderRadius: 3,
+      paddingLeft: '0pt',
       boxShadow: props =>
         props.color = '0 3px 5px 2px rgba(33, 203, 243, .3)',
       color: 'white',
       height: 48,
-      padding: '0 30px',
-      margin: 8,
+      //padding: '0 30px',
+      //margin: 8,
     },
   });
 
@@ -179,17 +180,21 @@ function GetSentencesComponentsByList(props){
    
     const listStyles = makeStyles(theme=>({
         listItem:{
+           width: '100%',
            border: '0',
            borderRadius: 3,
            color: 'white',
            height: 48,
-           padding: '0 30px',
-           margin: '5px',
+           //padding: '0 30px',
+           //margin: '5px',
+
            display: 'flex',
-           flexWrap: 'wrap',
+           //flexWrap: 'wrap',
            marginBottom: theme.spacing(2),
+           paddingLeft: '0pt'
           },
         list: {
+            width: '100%',
             marginBottom: theme.spacing(2),
             margin: '5px'
           },
@@ -229,10 +234,10 @@ function GetSentencesComponentsByList(props){
     <List className={classes.list}>
    
     {sentences.map(({ id, value }) => (
-        <ListItem className={classes.listItem} key={id}>
-
+        <ListItem className={classes.listItem} key={id} alignItems='flex-start'>
+            
         <Grid container spacing={2}>  
-          <Grid item xs={12} sm={11}>          
+          <Grid item xs={10}>          
           <TextField
                 className={classes.textField}
                 variant="outlined"
@@ -247,7 +252,7 @@ function GetSentencesComponentsByList(props){
                 }
               />
               </Grid>
-              <Grid item xs={12} sm={1} >          
+              <Grid item xs={2}>          
 
               <IconButton
                 style={{justifyContent: 'center', width:'10%'}}
