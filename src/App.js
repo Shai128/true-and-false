@@ -1,12 +1,10 @@
-import React from 'react';
+import React, {useState} from 'react';
 import './App.css';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Avatar from '@material-ui/core/Avatar';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
@@ -19,13 +17,13 @@ import {
   Link
 } from "react-router-dom";
 
-import {GamesListPage as GamesList} from './pages/gamesList.js';
+import {LoginScreen} from './pages/LoginScreen.js';
 
 function Copyright() {
   return (
  <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
-      <Link color="inherit" href="">
+      <Link to='/' color="inherit">
         True and False
       </Link>{' '}
       {new Date().getFullYear()}
@@ -91,14 +89,13 @@ export const useStyles = makeStyles(theme => ({
     marginBottom: theme.spacing(2),
     margin: '5px'
   }
-
-
 }));
 
 
 
 function SignUp() {
   const classes = useStyles();
+  const [user, setUser] = useState({});
 
   return (
     <Container component="main" maxWidth="xs">
@@ -112,40 +109,7 @@ function SignUp() {
         </Typography>
         <form className={classes.form} noValidate>
           <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                autoComplete="fname"
-                name="firstName"
-                variant="outlined"
-                required
-                fullWidth
-                id="firstName"
-                label="First Name"
-                autoFocus
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                id="lastName"
-                label="Last Name"
-                name="lastName"
-                autoComplete="lname"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                id="userName"
-                label="User Name"
-                name="userName"
-                autoComplete="userName"
-              />
-              </Grid>
+           
               <Grid item xs={12}>
               <TextField
                 variant="outlined"
@@ -155,6 +119,10 @@ function SignUp() {
                 label="Nick Name"
                 name="nickName"
                 autoComplete="nickName"
+                onChange = {(event)=>{
+                  let new_user = user;
+                  new_user.nickName = event.target.value;
+                  setUser(new_user)}}
               />
               </Grid>
             <Grid item xs={12}>
@@ -166,6 +134,10 @@ function SignUp() {
                 label="Email Address"
                 name="email"
                 autoComplete="email"
+                onChange = {(event)=>{
+                  let new_user = user;
+                  new_user.email = event.target.value;
+                  setUser(new_user)}}
               />
             </Grid>
             <Grid item xs={12}>
@@ -178,14 +150,13 @@ function SignUp() {
                 type="password"
                 id="password"
                 autoComplete="current-password"
+                onChange = {(event)=>{
+                  let new_user = user;
+                  new_user.password = event.target.value;
+                  setUser(new_user)}}
               />
             </Grid>
-            <Grid item xs={12}>
-              <FormControlLabel
-                control={<Checkbox value="allowExtraEmails" color="primary" />}
-                label="I want to receive inspiration, marketing promotions and updates via email."
-              />
-            </Grid>
+           
           </Grid>
           <Button
             type="submit"
@@ -194,16 +165,8 @@ function SignUp() {
             color="primary"
             className={classes.submit}
             onClick={()=>{
-              let user = {
-                userName :document.getElementById('userName').value,
-                password : document.getElementById('password').value,
-                firstName : document.getElementById('firstName').value,
-                lastName : document.getElementById('lastName').value,
-                email : document.getElementById('email').value,
-                nickName : document.getElementById('nickName').value
-                         }
               let data = new FormData();
-              data.append( "json", JSON.stringify( user ) );
+              data.append( "json", JSON.stringify(user));
               fetch('http://localhost:8000/user', {
               method: 'POST', // *GET, POST, PUT, DELETE, etc.
               headers: {
@@ -216,7 +179,7 @@ function SignUp() {
           
             Sign Up
           </Button>
-          <Grid container justify="flex-end">
+          <Grid container justify="center">
             <Grid item>
               <Link to="/SignIn" variant="body2">
                 Already have an account? Sign In
@@ -248,10 +211,11 @@ function LinksPage(){
           <Route exact path="/Home">
             <Home />
           </Route>
-
-          <Route exact path="/GamesList">
-            <GamesList />
+          <Route path="/LoginScreen">
+            <LoginScreen />
           </Route>
+
+          
 
         </Switch>
         </div>
@@ -302,9 +266,9 @@ function Home(){
             </Grid>
         
             <Grid item xs={12} sm={6}>
-            <Link to="/GamesList">
+            <Link to="/LoginScreen">
             <Button variant="contained" color="primary" fullWidth  className={classes.button}>
-            Games List
+            LoginScreen
           </Button>
           </Link>
             </Grid>
@@ -312,10 +276,11 @@ function Home(){
             
           </Grid>
         </form>
-      </div>
-      <Box mt={5}>
+        <Box mt={5}>
         <Copyright />
       </Box>
+      </div>
+      
 
     </Container>
     
@@ -364,6 +329,7 @@ function SignIn() {
           label="Username"
           margin="normal"
           variant="filled"
+          fullWidth
         />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -376,9 +342,10 @@ function SignIn() {
           autoComplete="current-password"
           margin="normal"
           variant="filled"
+          fullWidth
         />
      </Grid>
-     <Grid item xs={12} justify="flex-end">
+     <Grid item xs={12}>
 
         <Button variant="contained" color="primary" fullWidth className={classes.button}
         onClick={()=>{
