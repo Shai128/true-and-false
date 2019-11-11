@@ -18,17 +18,23 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 
 import GamesIcon from '@material-ui/icons/Games';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+import HomeIcon from '@material-ui/icons/Home';
 import {
     BrowserRouter as Router,
     Switch,
     Route,
     Link,
-    useRouteMatch
+    useRouteMatch,
+    Redirect
   } from "react-router-dom";
+  import { createBrowserHistory } from "history";
 
 import {GamesListPage as GamesList} from './GamesList.js';
 
+import {LoginScreenHome as Home} from './LoginScreenHome.js';
+
 import {MyProfile} from './MyProfile.js';
+
 
 const drawerWidth = 240;
 
@@ -123,7 +129,7 @@ export function LoginScreen(){
       setOpen(false);
     };
     const classes = useStyles();
-  
+
 
     let { path, url } = useRouteMatch();
 
@@ -131,6 +137,14 @@ export function LoginScreen(){
     const listItems=(
         <div>
 
+    <Link to={`${url}/Home`}> 
+    <ListItem button>
+     <ListItemIcon> 
+         <HomeIcon /> 
+         </ListItemIcon> 
+         <ListItemText primary="Home" />
+          </ListItem> 
+          </Link>
 
         <Link to={`${url}/MyProfile`}>      
             <ListItem button>
@@ -197,13 +211,18 @@ export function LoginScreen(){
         <main className={classes.content}>
         <div className={classes.appBarSpacer} />
 
-  
+        
+        <RedirectToHomeIfNeeded url={url} />
         <Switch>
-        <Route exact path={path}>
-            
+        <Route exact path={path}>  
           </Route>
+
           <Route path={`${path}/GamesList`}>
             <GamesList />
+          </Route>
+
+          <Route path={`${path}/Home`}>
+            <Home />
           </Route>
 
           <Route path={`${path}/MyProfile`}>
@@ -211,10 +230,22 @@ export function LoginScreen(){
           </Route>
 
         </Switch>
-
         </main>
+
         </div>
       </Router>
     );
     
+}
+function RedirectToHomeIfNeeded(props){
+    const history = createBrowserHistory();
+    let url =  props.url;
+    const path_array = history.location.pathname.split("/");
+    const length = path_array.length;
+    const this_page_name = 'LoginScreen';
+    if(path_array[length-1] === this_page_name || 
+        (path_array[length-2] === this_page_name&&path_array[length-1]===''))
+        return (<Redirect to={`${url}/Home`}  />);
+    else 
+        return (<div></div>);
 }

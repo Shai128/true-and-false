@@ -12,6 +12,7 @@ import Button from '@material-ui/core/Button';
 import AddCircleTwoToneIcon from '@material-ui/icons/AddCircleTwoTone';
 import IconButton from '@material-ui/core/IconButton';
 
+
 import './MyProfile.css';
 import {useStyles as AppUseStyles} from './../App.js';
 import DeleteTwoToneIcon from '@material-ui/icons/DeleteTwoTone';
@@ -142,6 +143,19 @@ export function MyProfile(){
 
               <Button className={buttonClasses.root} fullWidth
               onClick={()=>{
+               let new_user = user;
+               new_user.truths = truths;
+               new_user.lies = lies;
+                    let data = new FormData();
+                    data.append( "json", JSON.stringify( user ) );
+                    fetch('http://localhost:8000/user', {
+                    method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                    headers: {
+                      'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    credentials: 'include',
+                    body: 'json='+JSON.stringify( user )
+                  });
 
                 //todo: save truths and lies in the user.
                   console.log('truths: ', truths); //to delete
@@ -177,7 +191,6 @@ function getUser(){
 }
 
 function GetSentencesComponentsByList(props){
-   
     const listStyles = makeStyles(theme=>({
         listItem:{
            width: '100%',
