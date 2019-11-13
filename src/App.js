@@ -371,7 +371,6 @@ function SignIn() {
           </Container>
               <Link to="/SignUp" variant="body2">
               <Typography variant="h6" component="h3" gutterBottom className={classes.root}>
-
                 Don't have an account? Sign Up
                 </Typography>
                </Link>
