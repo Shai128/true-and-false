@@ -58,6 +58,36 @@ app.get('/user/:username/:password', (req, res) => {
 
 })
 
+
+app.get('/randomSentence/:username', (req, res) => {
+  console.log('random sentence');
+  let data = {
+    username: req.params.username,
+  }
+  findUser(data,
+    (found_user)=>{
+      const truths = found_user.get('truths');
+      const lies = found_user.get('lies');
+      if (truths.length >= 1 && lies.length >= 1) {
+        let is_true = (Math.random() >= 0.5) ? 1 : 0;
+        let arr = [lies, truths][is_true];
+        let sentence = arr[Math.floor(Math.random() * arr.length)];
+        console.log("chosen sentense: " + sentence + ", is_true: " + is_true);
+        res.send(JSON.stringify({
+          is_true: is_true,
+          sentence: sentence
+        }))
+      } else { // TODO: should probably look at another user's sentences first
+        console.log("not enough sentences for user: " + req.params.username);
+        res.send("not enough sentences");
+      }
+    },(err)=>{
+      console.log(err)
+      res.send(err);
+    });
+
+})
+
 /**
  * Universal function for updating any kind of information on existing user.
  */
