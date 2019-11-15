@@ -39,7 +39,28 @@ function createUser(user,success,failure){
     })
 }
 
+async function findUser(data, success, failure) {
+    const docs = await userModel.find({username: data.username});
+    
+    if (docs.length !== 1) {
+        failure("no username " + data.username + " found.");
+    } else {
+        success(docs[0]);
+    }
+}
+
+async function updateUser(data, success, failure) {
+    const doc = await userModel.findOneIdAndUpdate(
+        {_id: data._id},
+        data
+    );
+    console.log("updated: " + doc);
+
+}
+
 
 exports.createUser = createUser
+exports.findUser = findUser
+exports.updateUser = updateUser
 
 
