@@ -8,6 +8,7 @@ import Divider from '@material-ui/core/Divider';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import SendIcon from '@material-ui/icons/Send';
+import openSocket from 'socket.io-client';
 
 
 import {useStyles as AppUseStyles} from './../App.js';
@@ -41,7 +42,8 @@ export function Chat(){
 
     const [chatContent, setChatContent] = React.useState('initial chat content');
     const [currentMessage, setCurrentMessage] = React.useState('initial current message');
-    var socket = io.connect('http://localhost:8000');
+    const socket = openSocket('http://localhost:8000')
+    //var socket = io.connect('http://localhost:8000');
 
     return (
         <Container component="main" maxWidth="xs">

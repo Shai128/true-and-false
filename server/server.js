@@ -4,6 +4,8 @@ const app = express()
 const port = 8000
 bodyParser = require("body-parser")
 
+const socket = require('socket.io')
+
 
 app.use(express.json())
 app.use(bodyParser.json())
@@ -31,6 +33,7 @@ app.post('/user',(req,res)=> {
      
       )
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+var server = app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+var io = socket(server);
 
 console.log("123")

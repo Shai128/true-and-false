@@ -4,7 +4,7 @@ import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import Box from '@material-ui/core/Box';
 
-import {useStyles as AppUseStyles} from './../App.js';
+import {useStyles as AppUseStyles} from '../App.js';
 import {GamePage} from './GamePage.js'
 import {
   useRouteMatch,
@@ -12,8 +12,8 @@ import {
   Route,
 } from "react-router-dom";
 
-import {PrintGames} from './../PagesUtils.js';
-import {getParticipatedGames, getCreatedGames} from './../user.js';
+import {PrintGames} from '../PagesUtils.js';
+import {getParticipatedGames, getCreatedGames} from '../user.js';
 
 export function GamesListPage(){
   let { path, url } = useRouteMatch();
