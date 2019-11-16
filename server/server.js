@@ -33,7 +33,18 @@ app.post('/user',(req,res)=> {
      
       )
 
-var server = app.listen(port, () => console.log(`Example app listening on port ${port}!`))
-var io = socket(server);
+const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`))
+const io = socket(server);
 
 console.log("123")
+
+io.on('connection', function(socket){
+  console.log('tut bananim')
+
+  socket.on('chat', function(data){
+    io.sockets.emit('chat', data)
+  })
+
+})
+
+io.listen(port);

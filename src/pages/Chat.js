@@ -8,11 +8,12 @@ import Divider from '@material-ui/core/Divider';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import SendIcon from '@material-ui/icons/Send';
-import openSocket from 'socket.io-client';
-
+//import socketIOClient from 'socket.io-client';
 
 import {useStyles as AppUseStyles} from './../App.js';
 import { expression } from '@babel/template';
+
+const io = require('socket.io-client');
 
 const useButtonStyles = makeStyles({
     root: {
@@ -42,8 +43,13 @@ export function Chat(){
 
     const [chatContent, setChatContent] = React.useState('initial chat content');
     const [currentMessage, setCurrentMessage] = React.useState('initial current message');
-    const socket = openSocket('http://localhost:8000')
-    //var socket = io.connect('http://localhost:8000');
+    const socket = io('http://localhost:8000')
+    
+    console.log('ad matay');
+
+    socket.on('chat', function(data){
+      data.setChatContent(data.chatContent + "\n" + data.author + ": " + data.messageContent);
+    })
 
     return (
         <Container component="main" maxWidth="xs">
@@ -62,28 +68,14 @@ export function Chat(){
         <Grid item xs={12} >
 
         {/**chat window */}
-         <Typography component="h5" variant="h5" fullHeight justify="center"
+         <Typography component="h5" variant="h5" justify="center"
           value={chatContent}
          />
 
         </Grid>
 
         
-            <Grid item xs={2} >
-              <Button className={buttonClasses.root} fullWidth
-              onClick={()=>{
-                socket.emit('chat',{
-                    author: this_user.nickName,
-                    messageContent: currentMessage,
-                    chatContent: chatContent,
-                    setChatContent: setChatContent
-                });
-                setCurrentMessage('');
-                }
-            }>
-              <SendIcon/>
-              </Button>
-              </Grid>
+            
 
             <Grid item xs={10} >
                 <TextField
@@ -98,6 +90,21 @@ export function Chat(){
                     setCurrentMessage(event.target.value);
                 }}
               />
+              </Grid>
+              <Grid item xs={2} >
+              <Button className={buttonClasses.root} fullWidth
+              onClick={()=>{
+                socket.emit('chat',{
+                    author: this_user.nickName,
+                    messageContent: currentMessage,
+                    chatContent: chatContent,
+                    setChatContent: setChatContent
+                });
+                setCurrentMessage('');
+                }
+            }>
+              <SendIcon/>
+              </Button>
               </Grid>
 </Grid>
 </div>
