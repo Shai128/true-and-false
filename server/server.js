@@ -2,7 +2,8 @@ const express  = require("express") //express contains functions including app, 
 const {
         createUser,
         findUser, 
-        updateUser
+        updateUser,
+        findUserByField
       } =require("../db/user") //imports create user
 
 const {
@@ -25,9 +26,6 @@ app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
     next();
   });
-  
-
-
 
 app.get('/', (req, res) => res.send("request for / recieved"))
 
@@ -37,9 +35,8 @@ app.post('/user',(req,res)=> {
     console.log('got here');
     let data = JSON.parse(req.body.json)
     createUser(data,
-    ()=>{res.send("success")},(err)=>{StandardErrorHandling(res, err)});}
-     
-      )
+    ()=>{res.send("success")},(err)=>{StandardErrorHandling(res, err)});
+})
 
 /**
  * a simple login function
@@ -78,7 +75,6 @@ app.get('/randomSentence/:username', (req, res) => {
   }
   findUser(data,
     (found_user)=>{
-
       GetRandomSentence(found_user, [], 
         (data) => {
           console.log("chosen sentense: " + data.sentence + ", is_true: " + data.is_true);
@@ -88,6 +84,23 @@ app.get('/randomSentence/:username', (req, res) => {
       )
     },(err)=>{StandardErrorHandling(res, err)});
 
+})
+
+/**
+ * Checks whether a user exists with field == value.
+ * (For example, field can be 'username' or 'email')
+ */
+app.get('/userExists/:field/:value', (req, res) => {
+  console.log('user exists');
+  findUserByField(
+    req.params.field, 
+    req.params.value,
+    (users) => {
+      console.log('searched user with ' + req.params.field + ': ' + req.params.value + '. result: ' + (users.length !== 0))
+      res.send(toString(users.length !== 0))
+    },
+    (err) => StandardErrorHandling(res, err)
+  );
 })
 
 /**
