@@ -233,6 +233,8 @@ function PrintCreateGameDialog(props){
         <DialogContent>
           <DialogContentText>
           </DialogContentText>
+          <Grid container spacing={2}>
+          <Grid item xs={12}>
           <TextField
             autoFocus
             margin="dense"
@@ -242,6 +244,8 @@ function PrintCreateGameDialog(props){
                 setGameName(event.target.value);
             }}
           />
+          </Grid>
+          <Grid item xs={12}>
           <TextField
             autoFocus
             margin="dense"
@@ -252,6 +256,8 @@ function PrintCreateGameDialog(props){
                 setCurrentGameNickName(event.target.value);
             }}
           />
+          </Grid>
+          </Grid>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseCreateGameWindow} color="primary">
@@ -286,6 +292,8 @@ function PrintJoinGameDialog(props){
       <DialogContent>
         <DialogContentText>
         </DialogContentText>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
         <TextField
           autoFocus
           margin="dense"
@@ -295,6 +303,9 @@ function PrintJoinGameDialog(props){
             setGameID(event.target.value);
           }}
         />
+        </Grid>
+        <Grid item xs={12}>
+
         <TextField
           autoFocus
           margin="dense"
@@ -305,6 +316,8 @@ function PrintJoinGameDialog(props){
               setCurrentGameNickName(event.target.value);
           }}
         />
+        </Grid>
+        </Grid>
       </DialogContent>
       <DialogActions>
         <Button onClick={handleCloseWindow} color="primary">

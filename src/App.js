@@ -10,6 +10,12 @@ import Box from '@material-ui/core/Box';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
+
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import {
   BrowserRouter as Router,
   Switch,
@@ -18,6 +24,7 @@ import {
 } from "react-router-dom";
 
 import {LoginScreen} from './pages/LoginScreen.js';
+import {Chat as ChatRoom} from './pages/Chat.js';
 
 function Copyright() {
   return (
@@ -215,6 +222,11 @@ function LinksPage(){
             <LoginScreen />
           </Route>
 
+          <Route path="/ChatRoom">
+            <ChatRoom />
+          </Route>
+          
+
           
 
         </Switch>
@@ -238,7 +250,14 @@ export default function App() {
 function Home(){
   const classes = useStyles();
 
+  const [guestLoginWindowOpen, setguestLoginWindowOpen] = React.useState(false);
+  const handleClickGuestLogin = () => {
+    setguestLoginWindowOpen(true);
+};
 
+const handleCloseGuestLoginWindow = () => {
+  setguestLoginWindowOpen(false);
+};
   return (
 
     <Container component="main" maxWidth="md">
@@ -273,8 +292,25 @@ function Home(){
           </Link>
             </Grid>
 
-            
+            <Grid item xs={12} sm={6}>
+            <Button variant="contained" color="primary" fullWidth onClick={handleClickGuestLogin} className={classes.button}>
+            Guest Login
+            </Button>
+            </Grid>
+            <PrintGuestLoginDialog
+            handleCloseGuestLoginWindow= {handleCloseGuestLoginWindow}
+            guestLoginWindowOpen= {guestLoginWindowOpen}/>
           </Grid>
+
+
+          <Grid item xs={12} sm={6}>
+            <Link to="/ChatRoom">
+            <Button variant="contained" color="primary" fullWidth  className={classes.button}>
+              Chat
+          </Button>
+          </Link>
+            </Grid>
+
         </form>
         <Box mt={5}>
         <Copyright />
@@ -287,6 +323,64 @@ function Home(){
   );
 
 }
+
+
+function PrintGuestLoginDialog(props){
+  const {handleCloseGuestLoginWindow,  guestLoginWindowOpen} = props;
+  const [gameID, setGameID] = React.useState("");
+  const [currentGameNickName, setCurrentGameNickName] = React.useState('');
+
+  const startGame = ()=>{
+      //todo
+      console.log("starting game!");
+      console.log("game ID:", gameID);
+      console.log('user nickname: ', currentGameNickName);
+      handleCloseGuestLoginWindow();
+  }
+  return(
+      <Dialog open={guestLoginWindowOpen} onClose={handleCloseGuestLoginWindow} aria-labelledby="form-dialog-title">
+      <DialogTitle id="form-dialog-title">Select Room Name</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+        </DialogContentText>
+        <Grid container spacing={2}>
+        <Grid item xs={12}>
+        <TextField
+          autoFocus
+          margin="dense"
+          id="roomID"
+          label="Room ID"
+          onChange={(event)=>{
+            setGameID(event.target.value);
+          }}
+        />
+        </Grid>
+        <Grid item xs={12}>
+        <TextField
+          autoFocus
+          margin="dense"
+          id="nickName"
+          label="Nick Name"
+          onChange={(event)=>{
+              setCurrentGameNickName(event.target.value);
+          }}
+        />
+        </Grid>
+        </Grid>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleCloseGuestLoginWindow} color="primary">
+          Cancel
+        </Button>
+        <Button onClick={startGame} color="primary">
+              Start
+        </Button>
+      </DialogActions>
+    </Dialog>
+
+  );
+}
+
 
 function SignIn() {
 

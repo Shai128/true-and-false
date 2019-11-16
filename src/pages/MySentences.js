@@ -45,7 +45,7 @@ export function MySentences(){
         <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper} >
-          <Typography component="h1" variant="h2" justify="center">
+          <Typography component="h2" variant="h3" justify="center">
             My Sentences
           </Typography>
          
@@ -188,7 +188,7 @@ function GetSentencesComponentsByList(props){
           <Grid item xs={10}>          
           <TextField
                 className={classes.textField}
-                variant="outlined"
+                variant="filled"
                 fullWidth
                 label={'Sentence '+(id+1)}
                 value={value}
