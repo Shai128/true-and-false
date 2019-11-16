@@ -1,10 +1,13 @@
+/**
+ * Selects a random sentence from a users truths and lies.
+ * @param {*} user The subject of the true/lie sentence
+ * @param {*} already_seen Sentences to exclude from returning
+ * @param {*} success Executes after a sentence is selcted
+ * @param {*} failure Executes if selection fails
+ */
 function GetRandomSentence(user, already_seen=[], success, failure) { 
     const truths = user.get('truths');
-    const lies = user.get('lies');
-  //  let saw = found_user.get('sentences_saw') // sentences the user already saw - should not be used
-    //saw = (saw == null) ? [] : saw
-
-   // let filtered_lies = lies.filter(x => !saw.includes(x));
+    const lies = user.get('lies').filter(x => !already_seen.includes(x));
 
     if (truths.length >= 1 && lies.length >= 1) {
       let is_true = (Math.random() >= 0.5) ? 1 : 0;
@@ -14,7 +17,6 @@ function GetRandomSentence(user, already_seen=[], success, failure) {
         is_true: is_true,
         sentence: sentence
       });
-    //  console.log("chosen sentense: " + sentence + ", is_true: " + is_true);
     } else {
         failure("not enough sentences")
     }
