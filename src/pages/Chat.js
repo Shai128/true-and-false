@@ -1,19 +1,18 @@
-import React, {Component} from 'react';
+import React from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
-import Divider from '@material-ui/core/Divider';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import SendIcon from '@material-ui/icons/Send';
 //import socketIOClient from 'socket.io-client';
 
 import {useStyles as AppUseStyles} from './../App.js';
-import { expression } from '@babel/template';
 
 const io = require('socket.io-client');
+const socket = io('http://localhost:8000');
 
 const useButtonStyles = makeStyles({
     root: {
@@ -38,18 +37,16 @@ const useButtonStyles = makeStyles({
 export function Chat(){
     const classes = AppUseStyles();
     const buttonClasses = useButtonStyles();
+ 
     let this_user = getCurrentUser();
     let other_user = getOtherUser();
-
-    const [chatContent, setChatContent] = React.useState('initial chat content');
-    const [currentMessage, setCurrentMessage] = React.useState('initial current message');
-    const socket = io('http://localhost:8000')
-    
-    console.log('ad matay');
-
+    const [chatContent, setChatContent] = React.useState('');
+    const [currentMessage, setCurrentMessage] = React.useState('');
     socket.on('chat', function(data){
-      data.setChatContent(data.chatContent + "\n" + data.author + ": " + data.messageContent);
+        console.log(data);
+        setChatContent(data.chatContent + "\n" + data.author + ": " + data.messageContent);
     })
+    
 
     return (
         <Container component="main" maxWidth="xs">
@@ -68,7 +65,7 @@ export function Chat(){
         <Grid item xs={12} >
 
         {/**chat window */}
-         <Typography component="h5" variant="h5" justify="center"
+         <TextField
           value={chatContent}
          />
 
@@ -98,7 +95,8 @@ export function Chat(){
                     author: this_user.nickName,
                     messageContent: currentMessage,
                     chatContent: chatContent,
-                    setChatContent: setChatContent
+                    user: this_user,
+                    receiverUser: other_user,
                 });
                 setCurrentMessage('');
                 }
@@ -117,7 +115,8 @@ export function Chat(){
 
 function getCurrentUser(){
     return {
-        email: "email@gmail.com",
+        socketID: socket.id,
+        email: "shai@gmail.com",
         nickName: 'Shai',
         password: 'password',
         truths: [{id: 0, value:"My name is Alon"}, {id: 1,value:"I have Pizza"}],
@@ -127,7 +126,8 @@ function getCurrentUser(){
 
 function getOtherUser(){
     return {
-        email: "email@gmail.com",
+        socketID: socket.id,
+        email: "sagi@gmail.com",
         nickName: 'Sagi',
         password: 'password',
         truths: [{id: 0, value:"My name is Alon"}, {id: 1,value:"I have Pizza"}],
