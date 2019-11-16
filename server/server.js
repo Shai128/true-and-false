@@ -1,7 +1,15 @@
 const express  = require("express") //express contains functions including app, which is the server
-const {createUser } =require("../db/user") //imports create user
-const {findUser } = require("../db/user")
-const {updateUser} = require("../db/user")
+const {
+        createUser,
+        findUser, 
+        updateUser
+      } =require("../db/user") //imports create user
+
+const {
+        GetRandomSentence,
+        StandardErrorHandling
+      } = require("./server_util")
+
 const app = express()
 const port = 8000
 bodyParser = require("body-parser")
@@ -29,10 +37,14 @@ app.post('/user',(req,res)=> {
     console.log('got here');
     let data = JSON.parse(req.body.json)
     createUser(data,
-    ()=>{res.send("success")},(err)=>{console.log(err)});}
+    ()=>{res.send("success")},(err)=>{StandardErrorHandling(res, err)});}
      
       )
 
+/**
+ * a simple login function
+ * TODO: should create a session and save it on the database
+ */
 app.get('/user/:username/:password', (req, res) => {
   console.log('get user');
   let data = {
@@ -51,14 +63,14 @@ app.get('/user/:username/:password', (req, res) => {
           + data.username);
         res.send("password does not match");
       }
-    },(err)=>{
-      console.log(err)
-      res.send(err);
-    });
-
+    },(err)=>{StandardErrorHandling(res, err)});
 })
 
-
+/**
+ * receives a username and returns a random sentence about him
+ * with probability 50/50 of the sentence being true.
+ * Only works if the user has at least one truth and at least one lie.
+ */
 app.get('/randomSentence/:username', (req, res) => {
   console.log('random sentence');
   let data = {
@@ -66,25 +78,15 @@ app.get('/randomSentence/:username', (req, res) => {
   }
   findUser(data,
     (found_user)=>{
-      const truths = found_user.get('truths');
-      const lies = found_user.get('lies');
-      if (truths.length >= 1 && lies.length >= 1) {
-        let is_true = (Math.random() >= 0.5) ? 1 : 0;
-        let arr = [lies, truths][is_true];
-        let sentence = arr[Math.floor(Math.random() * arr.length)];
-        console.log("chosen sentense: " + sentence + ", is_true: " + is_true);
-        res.send(JSON.stringify({
-          is_true: is_true,
-          sentence: sentence
-        }))
-      } else { // TODO: should probably look at another user's sentences first
-        console.log("not enough sentences for user: " + req.params.username);
-        res.send("not enough sentences");
-      }
-    },(err)=>{
-      console.log(err)
-      res.send(err);
-    });
+
+      GetRandomSentence(found_user, [], 
+        (data) => {
+          console.log("chosen sentense: " + data.sentence + ", is_true: " + data.is_true);
+          res.send(JSON.stringify(data))
+        },
+        (err)=>{StandardErrorHandling(res, err)}
+      )
+    },(err)=>{StandardErrorHandling(res, err)});
 
 })
 
@@ -99,12 +101,7 @@ app.post('/userupdate', (req, res) => {
       console.log("succesfully updated user: " + data.username)
       res.send("success");
     }
-    ,(err)=>{
-      console.log(err)
-      res.send(err);
-    });
+    ,(err)=>{StandardErrorHandling(res, err)});
 })
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
-
-console.log("123")

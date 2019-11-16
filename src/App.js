@@ -352,7 +352,8 @@ function SignIn() {
           console.log("sending sign in");
           let user = {username :document.getElementById('UserNameInput').value,
                       password : document.getElementById('PasswordInput').value }
-          fetch('http://localhost:8000/user/' + user.username + '/' + user.password, {
+        //  fetch('http://localhost:8000/user/' + user.username + '/' + user.password, {
+          fetch('http://localhost:8000/randomSentence/' + user.username, {
           method: 'GET', // *GET, POST, PUT, DELETE, etc.
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
