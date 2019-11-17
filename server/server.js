@@ -109,21 +109,64 @@ const server = app.listen(port, () => console.log(`Example app listening on port
 const io = socket(server);
 
 console.log("123")
-const rooms = [];
+
 io.on('connection', function(socket){
   console.log('tut bananim')
 
   socket.on('chat', function(data){
     io.sockets.connected[data.user.socketID].emit('chat',data);
     io.sockets.connected[data.receiverUser.socketID].emit('chat',data);
-  });
+  })
 
+  socket.on('openRoom', function(data){
+    //var roomArray = //todo- get roomArray from database
+    var r;
+    do{
+      r = Math.floor(Math.random() * 1000) + 1;
+    }
+    while(roomArray[r]);
+    roomArray[r] = 1;
+    //todo- update roomArrayTo database
+
+    var room = {
+      roomID: r,
+      roomName: data.roomName,
+      users: [data.user]
+    }
+    //todo- add room to the database
+    io.sockets.connected[data.user.socketID].emit('roomOpened', room.roomID)
+  })
 
   socket.on('joinRoom', function(data){
-    for(let i)
-    io.sockets.connected[data.user.socketID].emit('chat',data);
-    io.sockets.connected[data.receiverUser.socketID].emit('chat',data);
+      //var room = //todo- get room from database with data.roomID
+      var isTaken = false;
+      for(let user of room.users){
+        if(user.gameNickName == data.nickName){
+            io.sockets.connected[data.user.socketID].emit('nickNameTaken');
+            isTaken = true;
+            break
+        }
+      }
+
+      if(isTaken == false){
+      
+
+      for(let user of room.users){
+        io.sockets.connected[data.user.socketID].emit('someonejoinedGame', data.user);
+      }
+
+      room.users.push(data.user);
+      //todo- update database with updated room
+
+      io.sockets.connected[data.user.socketID].emit('joinedGame', room);
+
+      
+    }
   });
 
-})
+  socket.on('joinRoom', function(data){
+    io.sockets.connected[data.user.socketID].emit('chat',data);
+    io.sockets.connected[data.receiverUser.socketID].emit('chat',data);
+  })
 
+})

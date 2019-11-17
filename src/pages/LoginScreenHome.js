@@ -21,6 +21,7 @@ import {
 import {GamePage} from './GamePage.js';
 import {getCreatedGames, getParticipatedGames} from './../user';
 import {PrintGames} from './../PagesUtils';
+import { Socket } from 'net';
 
 export function LoginScreenHome(){
     let { path, url } = useRouteMatch();
@@ -221,7 +222,21 @@ function PrintCreateGameDialog(props){
     const [currentGameNickName, setCurrentGameNickName] = React.useState(getCurrentUser().nickName);
 
     const startGame = ()=>{
-        //todo
+
+        //var user = //todo- get user from session
+        var roomData = {
+          roomName: gameName,
+          user: user
+        }
+
+        socket.on('roomOpened', function(roomID){
+          //todo- redirect to room page
+        });
+
+        socket.emit('openRoom', roomData)
+
+        
+
         console.log("starting game!");
         console.log("game name:", gameName);
         console.log('user nickname: ', currentGameNickName);
@@ -279,9 +294,39 @@ function PrintJoinGameDialog(props){
   const [gameID, setGameID] = React.useState("");
   const [currentGameNickName, setCurrentGameNickName] = React.useState(getCurrentUser().nickName);
 
+  socket.on('joinedRoom', function(roomID){
+    //todo- redirect to room page
+  });
+  socket.on('nickNameTaken', function(){
+    //todo- open message 'try a different name'
+  });
+  socket.on('wrongRoomID', function(){
+    //todo- open message 'try a different roomID'
+  });
+  
   const joinGame = ()=>{
-      //todo
-      console.log("starting game!");
+
+    //var user = //todo- get user from session
+    var roomData = {
+      roomName: gameName,
+      user: user
+    }
+
+    
+    var user = {
+      //todo- get socketID from session
+      //socketID: ,
+      gameNickName: currentGameNickName
+    }
+    var data = {
+      user: user,
+      roomID: gameID
+    }
+
+    socket.emit('joinRoom', data);
+
+
+    console.log("starting game!");
       console.log("game ID:", gameID);
       console.log('user nickname: ', currentGameNickName);
       handleCloseWindow();
