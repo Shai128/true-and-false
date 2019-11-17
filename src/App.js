@@ -23,7 +23,7 @@ import {
   Link
 } from "react-router-dom";
 
-import {LoginScreen} from './pages/LoginScreen.js';
+import {LoginScreenRouter as LoginScreen} from './pages/LoginScreen.js';
 import {Chat as ChatRoom} from './pages/Chat.js';
 
 function Copyright() {

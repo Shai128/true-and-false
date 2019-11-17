@@ -19,13 +19,15 @@ import ListIcon from '@material-ui/icons/List';
 import GamesIcon from '@material-ui/icons/Games';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import HomeIcon from '@material-ui/icons/Home';
+import Button from '@material-ui/core/Button';
+import App from './../App.js'
 import {
     BrowserRouter as Router,
     Switch,
     Route,
     Link,
     useRouteMatch,
-    Redirect
+    Redirect,
   } from "react-router-dom";
   import { createBrowserHistory } from "history";
 
@@ -38,7 +40,9 @@ import {MySentences} from './MySentences.js';
 
 
 const drawerWidth = 240;
-
+const logout = ()=>{
+  //todo: implement logout
+}
 const useStyles = makeStyles(theme => ({
     root: {
       display: 'flex',
@@ -118,9 +122,33 @@ const useStyles = makeStyles(theme => ({
     },
   }));
 
+/**
+ *  <Switch>
+  <Route exact path={'/Home'}>  
+          <App/>
+          </Route>
+  </Switch>
+ */
+
+export function LoginScreenRouter(){
+  return(
+  <Router>
+  <Switch>
+    
+  <Route exact path={'/'}>  
+          <App/>
+  </Route>
+
+  <Route exact path={'/LoginScreen'}>  
+  <LoginScreen/>
+  </Route>
+  </Switch>
 
 
-export function LoginScreen(){
+  </Router>
+  );
+}
+function LoginScreen(){
 
     const [open, setOpen] = React.useState(false);
     const handleDrawerOpen = () => {
@@ -181,6 +209,7 @@ export function LoginScreen(){
 
     return(
         <Router>
+         
  <div className={classes.root}>
       <CssBaseline />
       <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
@@ -197,8 +226,19 @@ export function LoginScreen(){
     <Typography variant="h6" className={classes.title}>
     Two Truths and One Lie
    </Typography>
-      
+
+      <Link to={'/'}> 
+            <Button color="inherit"
+            onClick={logout}
+            >
+              Log Out
+              </Button>
+              </Link>
   </Toolbar>
+  
+
+ 
+
 </AppBar>
 
 <Drawer
@@ -224,16 +264,20 @@ export function LoginScreen(){
         
         <RedirectToHomeIfNeeded url={url} />
         <Switch>
-        <Route exact path={path}>  
+        {/**
+         * <Route exact path={path}>  
+          </Route>
+        */}
+
+         
+          <Route exact path={`${path}/Home`}>
+            <Home />
           </Route>
 
           <Route path={`${path}/GamesList`}>
             <GamesList />
           </Route>
 
-          <Route path={`${path}/Home`}>
-            <Home />
-          </Route>
 
           <Route path={`${path}/MyProfile`}>
             <MyProfile />

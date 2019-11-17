@@ -109,14 +109,21 @@ const server = app.listen(port, () => console.log(`Example app listening on port
 const io = socket(server);
 
 console.log("123")
-
+const rooms = [];
 io.on('connection', function(socket){
   console.log('tut bananim')
 
   socket.on('chat', function(data){
     io.sockets.connected[data.user.socketID].emit('chat',data);
     io.sockets.connected[data.receiverUser.socketID].emit('chat',data);
-  })
+  });
+
+
+  socket.on('joinRoom', function(data){
+    for(let i)
+    io.sockets.connected[data.user.socketID].emit('chat',data);
+    io.sockets.connected[data.receiverUser.socketID].emit('chat',data);
+  });
 
 })
 
