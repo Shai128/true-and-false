@@ -28,10 +28,11 @@ import {
     Link,
     useRouteMatch,
     Redirect,
+    useHistory,
   } from "react-router-dom";
   import { createBrowserHistory } from "history";
 
-import {GamesListPage as GamesList} from './GamesList.js';
+  import {GamesListPage as GamesList} from './GamesList.js';
 
 import {LoginScreenHome as Home} from './LoginScreenHome.js';
 
@@ -40,9 +41,6 @@ import {MySentences} from './MySentences.js';
 
 
 const drawerWidth = 240;
-const logout = ()=>{
-  //todo: implement logout
-}
 const useStyles = makeStyles(theme => ({
     root: {
       display: 'flex',
@@ -131,16 +129,19 @@ const useStyles = makeStyles(theme => ({
  */
 
 export function LoginScreenRouter(){
+
   return(
   <Router>
   <Switch>
     
-  <Route exact path={'/'}>  
-          <App/>
-  </Route>
+  
+        
+  <Route exact path={`/`}>
+            <App />
+          </Route>
 
-  <Route exact path={'/LoginScreen'}>  
-  <LoginScreen/>
+  <Route path={'/LoginScreen'}>  
+  <LoginScreen />
   </Route>
   </Switch>
 
@@ -148,7 +149,7 @@ export function LoginScreenRouter(){
   </Router>
   );
 }
-function LoginScreen(){
+function LoginScreen(props){
 
     const [open, setOpen] = React.useState(false);
     const handleDrawerOpen = () => {
@@ -158,8 +159,12 @@ function LoginScreen(){
       setOpen(false);
     };
     const classes = useStyles();
+    let history = useHistory();
 
-
+    const logout = ()=>{
+      history.push("/"); // moves to main page (localhost:3000)
+      //todo: implement logout
+    }
     let { path, url } = useRouteMatch();
 
 
@@ -208,8 +213,8 @@ function LoginScreen(){
 
 
     return(
+      <div>
         <Router>
-         
  <div className={classes.root}>
       <CssBaseline />
       <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
@@ -226,19 +231,18 @@ function LoginScreen(){
     <Typography variant="h6" className={classes.title}>
     Two Truths and One Lie
    </Typography>
+   <Switch>
+     
+   </Switch>
+   <Route exact path={'/'} component = {App}/>  
 
-      <Link to={'/'}> 
-            <Button color="inherit"
-            onClick={logout}
-            >
-              Log Out
-              </Button>
-              </Link>
+    <Button color="inherit"
+    onClick={logout}>
+      Log Out
+      </Button>
+
   </Toolbar>
   
-
- 
-
 </AppBar>
 
 <Drawer
@@ -263,14 +267,15 @@ function LoginScreen(){
 
         
         <RedirectToHomeIfNeeded url={url} />
-        <Switch>
-        {/**
-         * <Route exact path={path}>  
+        <Switch>  
+          
+        
+        <Route exact path={`/`}>
+            <App />
           </Route>
-        */}
 
          
-          <Route exact path={`${path}/Home`}>
+          <Route path={`${path}/Home`}>
             <Home />
           </Route>
 
@@ -293,6 +298,7 @@ function LoginScreen(){
 
         </div>
       </Router>
+      </div>
     );
     
 }

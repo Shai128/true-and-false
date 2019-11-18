@@ -30,3 +30,13 @@ export function getParticipatedGames(){
         playersNum: 100
     }];
 }
+
+
+const io = require('socket.io-client');
+export const socket = io('http://localhost:8000');
+
+export function getCurrentUser(){
+    return {
+        nickName: 'The nickname I chose'
+    }
+}

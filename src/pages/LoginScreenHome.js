@@ -19,9 +19,10 @@ import {
     Route,
   } from "react-router-dom";
 import {GamePage} from './GamePage.js';
-import {getCreatedGames, getParticipatedGames} from './../user';
-import {PrintGames} from './../PagesUtils';
-import { Socket } from 'net';
+import {getCreatedGames, getParticipatedGames, getCurrentUser} from './../user';
+import {PrintGames, PrintJoinGameDialog} from './../PagesUtils';
+
+
 
 export function LoginScreenHome(){
     let { path, url } = useRouteMatch();
@@ -124,7 +125,8 @@ const handleCloseJoinGameWindow = () => {
         </Button>   
         <PrintJoinGameDialog
         handleCloseWindow= {handleCloseJoinGameWindow}
-        WindowOpen= {joinGameWindowOpen}/>
+        WindowOpen= {joinGameWindowOpen}
+        nickName = {getCurrentUser().nickName}/>
         </Grid>
 
         </Grid>
@@ -210,11 +212,6 @@ const usegameListItemsStyles = makeStyles(theme=>({
     
 }
 
-function getCurrentUser(){
-    return {
-        nickName: 'The nickname I chose'
-    }
-}
 
 function PrintCreateGameDialog(props){
     const {handleCloseCreateGameWindow,  createGameWindowOpen} = props;
@@ -222,7 +219,7 @@ function PrintCreateGameDialog(props){
     const [currentGameNickName, setCurrentGameNickName] = React.useState(getCurrentUser().nickName);
 
     const startGame = ()=>{
-
+/*
         //var user = //todo- get user from session
         var roomData = {
           roomName: gameName,
@@ -234,13 +231,14 @@ function PrintCreateGameDialog(props){
         });
 
         socket.emit('openRoom', roomData)
-
+*/
         
 
         console.log("starting game!");
         console.log("game name:", gameName);
         console.log('user nickname: ', currentGameNickName);
-        handleCloseCreateGameWindow();
+        //handleCloseCreateGameWindow();
+        //todo: redirect to room page
     }
     return(
         <Dialog open={createGameWindowOpen} onClose={handleCloseCreateGameWindow} aria-labelledby="form-dialog-title">
@@ -289,91 +287,4 @@ function PrintCreateGameDialog(props){
 
 
 
-function PrintJoinGameDialog(props){
-  const {handleCloseWindow,  WindowOpen} = props;
-  const [gameID, setGameID] = React.useState("");
-  const [currentGameNickName, setCurrentGameNickName] = React.useState(getCurrentUser().nickName);
-
-  socket.on('joinedRoom', function(roomID){
-    //todo- redirect to room page
-  });
-  socket.on('nickNameTaken', function(){
-    //todo- open message 'try a different name'
-  });
-  socket.on('wrongRoomID', function(){
-    //todo- open message 'try a different roomID'
-  });
-  
-  const joinGame = ()=>{
-
-    //var user = //todo- get user from session
-    var roomData = {
-      roomName: gameName,
-      user: user
-    }
-
-    
-    var user = {
-      //todo- get socketID from session
-      //socketID: ,
-      gameNickName: currentGameNickName
-    }
-    var data = {
-      user: user,
-      roomID: gameID
-    }
-
-    socket.emit('joinRoom', data);
-
-
-    console.log("starting game!");
-      console.log("game ID:", gameID);
-      console.log('user nickname: ', currentGameNickName);
-      handleCloseWindow();
-  }
-  return(
-      <Dialog open={WindowOpen} onClose={handleCloseWindow} aria-labelledby="form-dialog-title">
-      <DialogTitle id="form-dialog-title">Select Room</DialogTitle>
-      <DialogContent>
-        <DialogContentText>
-        </DialogContentText>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-        <TextField
-          autoFocus
-          margin="dense"
-          id="room id"
-          label="Room ID"
-          onChange={(event)=>{
-            setGameID(event.target.value);
-          }}
-        />
-        </Grid>
-        <Grid item xs={12}>
-
-        <TextField
-          autoFocus
-          margin="dense"
-          id="nickName"
-          label="Nick Name"
-          defaultValue={getCurrentUser().nickName}
-          onChange={(event)=>{
-              setCurrentGameNickName(event.target.value);
-          }}
-        />
-        </Grid>
-        </Grid>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleCloseWindow} color="primary">
-          Cancel
-        </Button>
-        <Button onClick={joinGame} color="primary">
-              Start
-        </Button>
-      </DialogActions>
-    </Dialog>
-
-  );
-}
 

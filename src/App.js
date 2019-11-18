@@ -11,11 +11,6 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
 import {
   BrowserRouter as Router,
   Switch,
@@ -25,7 +20,7 @@ import {
 
 import {LoginScreenRouter as LoginScreen} from './pages/LoginScreen.js';
 import {Chat as ChatRoom} from './pages/Chat.js';
-
+import {PrintJoinGameDialog} from './PagesUtils.js';
 function Copyright() {
   return (
  <Typography variant="body2" color="textSecondary" align="center">
@@ -215,9 +210,10 @@ function LinksPage(){
           <Route exact path="/SignUp">
             <SignUp />
           </Route>
-          <Route exact path="/Home">
+          {/*<Route exact path="/Home">
             <Home />
           </Route>
+  */}
           <Route path="/LoginScreen">
             <LoginScreen />
           </Route>
@@ -297,9 +293,10 @@ const handleCloseGuestLoginWindow = () => {
             Guest Login
             </Button>
             </Grid>
-            <PrintGuestLoginDialog
-            handleCloseGuestLoginWindow= {handleCloseGuestLoginWindow}
-            guestLoginWindowOpen= {guestLoginWindowOpen}/>
+            <PrintJoinGameDialog
+            handleCloseWindow= {handleCloseGuestLoginWindow}
+            WindowOpen= {guestLoginWindowOpen}
+            nickName = ''/>
           </Grid>
 
 
@@ -324,6 +321,7 @@ const handleCloseGuestLoginWindow = () => {
 
 }
 
+/*
 
 function PrintGuestLoginDialog(props){
   const {handleCloseGuestLoginWindow,  guestLoginWindowOpen} = props;
@@ -380,7 +378,7 @@ function PrintGuestLoginDialog(props){
 
   );
 }
-
+*/
 
 function SignIn() {
 

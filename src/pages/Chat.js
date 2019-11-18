@@ -7,8 +7,9 @@ import Grid from '@material-ui/core/Grid';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import SendIcon from '@material-ui/icons/Send';
-//import socketIOClient from 'socket.io-client';
+import clsx from 'clsx';
 
+import Paper from '@material-ui/core/Paper';
 import {useStyles as AppUseStyles} from './../App.js';
 
 const io = require('socket.io-client');
@@ -31,10 +32,43 @@ const useButtonStyles = makeStyles({
   });
 
 
+  const useStyles = makeStyles(theme => ({
+    container: {
+      paddingTop: theme.spacing(4),
+      paddingBottom: theme.spacing(4),
+    },
+    paper: {
+      padding: theme.spacing(2),
+      display: 'flex',
+      overflow: 'auto',
+      flexDirection: 'column',
+    },
+    fixedHeight: {
+      height: 440,
+    },
+    button: {
+        background: props =>
+    props.color ='linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+  border: 0,
+  borderRadius: 3,
+  paddingLeft: '0pt',
+  boxShadow: props =>
+    props.color = '0 3px 5px 2px rgba(33, 203, 243, .3)',
+  color: 'white',
+  height: 48,
+    },
+    
+    }));
+
 
 
 
 export function Chat(){
+    
+    const paperClasses = useStyles();
+    const fixedHeightPaper = clsx(paperClasses.paper, paperClasses.fixedHeight);
+
+
     const classes = AppUseStyles();
     const buttonClasses = useButtonStyles();
  
@@ -47,36 +81,54 @@ export function Chat(){
         setChatContent(data.chatContent + "\n" + data.author + ": " + data.messageContent);
     })
     
-
+    const sendMessage = ()=>{
+        this_user.socketID = socket.id;
+        other_user.socketID = socket.id;//todo: edit....
+        socket.emit('chat',{
+            author: this_user.nickName,
+            messageContent: currentMessage,
+            chatContent: chatContent,
+            user: this_user,
+            receiverUser: other_user,
+        });
+        setCurrentMessage('');
+    };
     return (
         <Container component="main" maxWidth="xs">
         <CssBaseline />
 
-        <div className={classes.paper} >
+        <div className={classes.paper}>
         <Grid container spacing={2}>  
 
         <Grid item xs={12} >
-                
+        <Paper>
         <Typography component="h4" variant="h4" justify="flex-end">
             {other_user.nickName}
           </Typography>
-          
+        </Paper> 
+
         </Grid>
         <Grid item xs={12} >
 
         {/**chat window */}
-         <TextField
-          value={chatContent}
-         />
+        <Paper className={fixedHeightPaper}>
+         <pre style={{ fontFamily: 'inherit' }}>
+         {chatContent}
+            </pre>
 
+          </Paper>
         </Grid>
 
-        
-            
 
-            <Grid item xs={10} >
+        <Grid item xs={9} >
                 <TextField
-                //variant="outlined"
+                variant="outlined"
+                onKeyPress={(ev) => {
+                    if (ev.key === 'Enter') {
+                      sendMessage();
+                    }
+                }
+                }
                 required
                 fullWidth
                 id="message"
@@ -88,19 +140,9 @@ export function Chat(){
                 }}
               />
               </Grid>
-              <Grid item xs={2} >
+              <Grid item xs={3} >
               <Button className={buttonClasses.root} fullWidth
-              onClick={()=>{
-                socket.emit('chat',{
-                    author: this_user.nickName,
-                    messageContent: currentMessage,
-                    chatContent: chatContent,
-                    user: this_user,
-                    receiverUser: other_user,
-                });
-                setCurrentMessage('');
-                }
-            }>
+              onClick={sendMessage}>
               <SendIcon/>
               </Button>
               </Grid>
