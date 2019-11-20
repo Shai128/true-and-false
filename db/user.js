@@ -40,6 +40,42 @@ function createUser(user,success,failure){
 }
 
 
-exports.createUser = createUser
+async function findUser(user_data, success, failure) {
+    findUserByField(
+        'username', 
+        user_data.username,
+        (users) => {
+            if (users.length !== 1) {
+                failure("no username " + user_data.username + " found.");
+            } else {
+                success(users[0]);
+            }
+        },
+        failure)
+}
 
+async function findUserByField(field, value, success, failure) {
+    var query = {};
+    query[field] = value;
+    return userModel.find(query, (err, docs) => {
+        if (err) {failure(err)} else {success(docs)}
+    });
+}
+
+async function updateUser(data, success, failure) {
+    const doc = await userModel.findOneIdAndUpdate(
+        {_id: data._id},
+        data
+    );
+    console.log("updated: " + doc);
+
+}
+
+
+
+
+exports.createUser = createUser
+exports.findUser = findUser
+exports.updateUser = updateUser
+exports.findUserByField = findUserByField
 

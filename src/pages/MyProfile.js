@@ -1,21 +1,21 @@
-import React, {useState } from 'react';
+import React from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
 import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 import Divider from '@material-ui/core/Divider';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import AddCircleTwoToneIcon from '@material-ui/icons/AddCircleTwoTone';
-import IconButton from '@material-ui/core/IconButton';
 
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
-import './MyProfile.css';
 import {useStyles as AppUseStyles} from './../App.js';
-import DeleteTwoToneIcon from '@material-ui/icons/DeleteTwoTone';
+import {getCurrentUser} from './../user.js'
 
 const useButtonStyles = makeStyles({
     root: {
@@ -40,12 +40,22 @@ const useButtonStyles = makeStyles({
 export function MyProfile(){
     const classes = AppUseStyles();
     const buttonClasses = useButtonStyles();
-    let user = getUser();
+    const [user, setUser] = React.useState(getCurrentUser());
+    const [oldUser, setOldUser] = React.useState(getCurrentUser());
 
-    const [truths, setTruths] = useState(user.truths);
-    const [lies, setLies] = useState(user.lies);
+    const [changePasswordWindowOpen, setchangePasswordWindowOpen] = React.useState(false);
 
-    
+    const setNewPassword = (new_password) =>{
+      let new_user = user;
+      new_user.password = new_password;
+      setUser(new_user);
+    }
+    const handleCloseChangePasswordWindow = () => {
+      setchangePasswordWindowOpen(false);
+    };
+    const handleClickChangePasswordWindow = () => {
+      setchangePasswordWindowOpen(true);
+    };
     return (
         <Container component="main" maxWidth="xs">
         <CssBaseline />
@@ -65,17 +75,37 @@ export function MyProfile(){
                 <Divider/>
                 </Grid>
           
-                      
+              <Grid item xs={12}>
+              <TextField
+                variant="outlined"
+                fullWidth
+                id="firstName"
+                label="First Name"
+                name="firstName"
+                autoComplete="firstName"
+                defaultValue={user.firstName}
+                onChange={(e)=>{
+                  let new_user = user;
+                  new_user.firstName = e.target.value
+                  setUser(new_user)}
+                  }
+              />
+              </Grid>
+
             <Grid item xs={12}>
               <TextField
                 variant="outlined"
-                required
                 fullWidth
                 id="nickName"
                 label="Nick Name"
                 name="nickName"
                 autoComplete="nickName"
-                value={user.nickName}
+                defaultValue={user.nickName}
+                onChange={(e)=>{
+                  let new_user = user;
+                  new_user.nickName = e.target.value
+                  setUser(new_user)}
+                  }
               />
               </Grid>
             <Grid item xs={12}>
@@ -87,80 +117,37 @@ export function MyProfile(){
                 label="Email Address"
                 name="email"
                 autoComplete="email"
-                value={user.email}
-                
+                defaultValue={user.email}
+                onChange={(e)=>{
+                  let new_user = user;
+                  new_user.email = e.target.value
+                  setUser(new_user)}
+                  }                
               />
             </Grid>
-            <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-                value={user.password}
+            <Grid container  justify='center'  >
+            <Button className={buttonClasses.root} justify="center" onClick={()=>{handleClickChangePasswordWindow(true)}}>
+              Change Password
+            </Button>
 
-              />
-            </Grid>
-            <Grid item xs={12} />
+          <PrintChangePassword 
+          handleCloseWindow={handleCloseChangePasswordWindow} 
+          WindowOpen = {changePasswordWindowOpen}
+          setNewPassword= {setNewPassword}
+          oldUser = {oldUser}
+          setOldUser = {setOldUser}
+          />
 
-
-            <Grid item xs={12} >
-            <Typography component="h3" variant="h5" justify="center">
-            My Sentences          
-            </Typography>
-            <Divider/>
-           
-            </Grid>
-            <Grid item l={12} >
-            <Typography component="h5" variant="h6" justify="center">
-            Truth Sentences
-            </Typography>
-            <Divider/>
             </Grid>
 
-           
-
-            <Grid item xs={12} >
-            <GetSentencesComponentsByList sentences={truths} setSentences={setTruths} />
-            </Grid>
-            <Grid item l={12} >
-            <Typography component="h5" variant="h6" justify="center">
-            False Sentences
-            </Typography>
-            <Divider/>
-            </Grid>
-            <Grid item xs={12} >
-            <GetSentencesComponentsByList sentences={lies} setSentences={setLies} />               
-                </Grid>
-
+            
             
 
             <Grid item xs={12} >
-
               <Button className={buttonClasses.root} fullWidth
               onClick={()=>{
-               let new_user = user;
-               new_user.truths = truths;
-               new_user.lies = lies;
-                    let data = new FormData();
-                    data.append( "json", JSON.stringify( user ) );
-                    fetch('http://localhost:8000/user', {
-                    method: 'POST', // *GET, POST, PUT, DELETE, etc.
-                    headers: {
-                      'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    credentials: 'include',
-                    body: 'json='+JSON.stringify( user )
-                  });
-
-                //todo: save truths and lies in the user.
-                  console.log('truths: ', truths); //to delete
-                  console.log('lies: ', lies);// to delete
-
+                    saveUserInDataBase(user);
+                    setOldUser(user);
                 }
             }>
               Save
@@ -180,122 +167,187 @@ export function MyProfile(){
 
 }
 
-function getUser(){
-    return {
-        email: "email@gmail.com",
-        nickName: 'nickname',
-        password: 'password',
-        truths: [{id: 0, value:"My name is Alon"}, {id: 1,value:"I have Pizza"}],
-        lies: [{id:0, value:"I love computer science"}, {id:1, value:"this is a lie"}]
+function PrintChangePassword(props){
+  const {handleCloseWindow,  WindowOpen, setNewPassword, oldUser, setOldUser} = props;
+  const [passwords, setPasswords] = React.useState({});
+  const [errorOldPassword, setErrorOldPassword] = React.useState(false);
+  const [errorNewPassword, setErrorNewPassword] = React.useState(false);
+  const [errorConfirmPassword, setErrorConfirmPassword] = React.useState(false);
+
+  const [oldPasswordHelperText, setOldPasswordHelperText] = React.useState('');
+  const [newPasswordHelperText, setNewPasswordHelperText] = React.useState('');
+  const [confirmPasswordHelperText, setConfirmPasswordHelperText] = React.useState('');
+
+  const [passwordChangeMessage, setPasswordChangeMessage] = React.useState('');
+
+
+    const onCloseWindow = ()=>{
+      resetDisplaysContent();
+      handleCloseWindow();
     }
-}
 
-function GetSentencesComponentsByList(props){
-    const listStyles = makeStyles(theme=>({
-        listItem:{
-           width: '100%',
-           border: '0',
-           borderRadius: 3,
-           color: 'white',
-           height: 48,
-           //padding: '0 30px',
-           //margin: '5px',
+    // reset errors (red border) + reset text helpers
+    const resetDisplaysContent = ()=>{
+      setErrorOldPassword(false);
+      setErrorNewPassword(false);
+      setErrorConfirmPassword(false);
+      setConfirmPasswordHelperText(' ');
+      setNewPasswordHelperText(' ');
+      setOldPasswordHelperText(' ');
+      setPasswordChangeMessage('');
+    }
 
-           display: 'flex',
-           //flexWrap: 'wrap',
-           marginBottom: theme.spacing(2),
-           paddingLeft: '0pt'
-          },
-        list: {
-            width: '100%',
-            marginBottom: theme.spacing(2),
-            margin: '5px'
-          },
-          textField: {
-            borderRadius: 3,
-            width: '100%',            
-            paddingBottom: 0,
-            marginTop: 0,
-            fontWeight: 500,
-            marginBottom: theme.spacing(2),
-            //background: '#2193b0',  /* fallback for old browsers */
-            //background: '-webkit-linear-gradient(to right, #6dd5ed, #2193b0)', /* Chrome 10-25, Safari 5.1-6 */
-            background: 'linear-gradient(to right, #6dd5ed, #2193b0)', /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-           },
-    }));
-    
-    const classes = listStyles();
-    const sentences = props.sentences;
-    const setSentences = props.setSentences;
-    //const [sentences, setSentences] = useState(props.sentences);
-    const handleAddSentence = () =>{
-        setSentences(sentences.concat({id: sentences.length, value:''}));
-    };
-    const handledeleteSentence = (id) =>{        
-        //removing the last item
-        let new_array= sentences.slice();
-        new_array.splice(id, 1);
 
-        for(let i=id; i<new_array.length; i++){
-            new_array[i].id-=1;
+    const onClickSave = ()=>{
+      resetDisplaysContent();
+      if(!validOldPassword(oldUser.password, passwords.enteredOldPassword)){
+        displayWrongOldPassword();
+        return;
+      }
+      if(passwords.enteredConfirmPassword !== passwords.enteredNewPassword){
+        displayPasswordsDontMatch();
+        return;
+      }
+
+      if(typeof passwords.enteredNewPassword === 'undefined' || !passwordIsStrongEnough(passwords.enteredNewPassword)){
+        displayWeakPassword();
+        return;
+      }
+
+      // the new given password is valid
+      setNewPassword(passwords.enteredNewPassword);
+      let user_to_save =  oldUser;
+      user_to_save.password = passwords.enteredNewPassword;
+      setOldUser(user_to_save);
+      saveUserInDataBase(user_to_save);
+      displayPasswordSuccessfullyChanged();
+    }
+    const displayWrongOldPassword = ()=>{
+      console.log('wrong old password');
+      setErrorOldPassword(true);
+      setOldPasswordHelperText('Wrong Old Password');
+    }
+    const displayPasswordsDontMatch = ()=>{
+      console.log('confirm and new passwords does not match');
+      setErrorConfirmPassword(true);
+      setConfirmPasswordHelperText('Confirm password and new password does not match');
         }
 
-        setSentences(new_array);
+    const displayPasswordSuccessfullyChanged = ()=>{
+      console.log('password saved successfuly!');
+      setPasswordChangeMessage('password saved successfuly!');
     }
-    return (
-    <div>
-    <List className={classes.list}>
-   
-    {sentences.map(({ id, value }) => (
-        <ListItem className={classes.listItem} key={id} alignItems='flex-start'>
-            
-        <Grid container spacing={2}>  
-          <Grid item xs={10}>          
-          <TextField
-                className={classes.textField}
-                variant="outlined"
-                fullWidth
-                label={'Sentence '+(id+1)}
-                value={value}
-                onChange={(event)=>{
-                    let new_sentences = sentences.slice();
-                    new_sentences[id].value = event.target.value;
-                    setSentences(new_sentences);
-                }
-                }
-              />
-              </Grid>
-              <Grid item xs={2}>          
 
-              <IconButton
-                style={{justifyContent: 'center', width:'10%'}}
-                edge="start"
-                color="primary"
-                aria-label="open drawer"
-                onClick={()=>{handledeleteSentence(id)}}
-                >
-                <DeleteTwoToneIcon />
-                </IconButton>
-                
-                </Grid>
-                </Grid>
-              </ListItem>
-    ))}
-  </List>
-<Grid container spacing={2}>  
-  <Grid item xs={12} style={{justifyContent: 'center'}}>
-  <IconButton
-  style={{justifyContent: 'center', width:'100%'}}
-  edge="start"
-  color="primary"
-  aria-label="open drawer"
-  onClick={handleAddSentence}
->
-  <AddCircleTwoToneIcon />
-</IconButton>
-      </Grid>
-      </Grid>
-      </div>
+    const displayWeakPassword = () =>{
+      console.log('your password is too weak!');
+      setNewPasswordHelperText('this password is too weak');
+      setErrorNewPassword(true);
+    }
+  return(
+    <Dialog open={WindowOpen} onClose={onCloseWindow} aria-labelledby="form-dialog-title">
+      <DialogTitle id="form-dialog-title">Change Password</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+        </DialogContentText>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+              <TextField
+                error = {errorOldPassword}
+                helperText={oldPasswordHelperText}
+                variant="outlined"
+                required
+                fullWidth
+                label="old password"
+                type="password"
+                autoComplete="current-password"
+                onChange={(e)=>{
+                  let new_passwords = passwords;
+                  new_passwords.enteredOldPassword = e.target.value;
+                  setPasswords(new_passwords);
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                error = {errorNewPassword}
+                helperText = {newPasswordHelperText}
+                variant="outlined"
+                required
+                fullWidth
+                label="new password"
+                type="password"
+                id="password"
+                autoComplete="current-password"
+                onChange={(e)=>{
+                  let new_passwords = passwords;
+                  new_passwords.enteredNewPassword = e.target.value;
+                  setPasswords(new_passwords);
+                }}
+              />
+        </Grid>
+        <Grid item xs={12}>
+              <TextField      
+                error = {errorConfirmPassword}
+                helperText = {confirmPasswordHelperText}
+                variant="outlined"
+                required
+                fullWidth
+                label="confirm password"
+                type="password"
+                autoComplete="current-password"
+                onChange={(e)=>{
+                  let new_passwords = passwords;
+                  new_passwords.enteredConfirmPassword = e.target.value;
+                  setPasswords(new_passwords);
+                }}
+              />
+            </Grid>
+        </Grid>
+        <Grid container justify='center'>
+        <Typography variant="h5">
+          {passwordChangeMessage}
+        </Typography>
+        </Grid>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onCloseWindow} color="primary">
+          Cancel
+        </Button>
+        <Button onClick={onClickSave} color="primary">
+              Save
+        </Button>
+
+
+      </DialogActions>
+    </Dialog>
+          
+
+
+
   );
+
 }
 
+function validOldPassword(oldPassword, enteredOldPassword){
+  return oldPassword === enteredOldPassword // todo: hash the entered old password
+}
+
+function passwordIsStrongEnough(password){
+  return password.length >= 6; // todo: hash the entered old password
+}
+
+
+function saveUserInDataBase(user){
+        console.log("updated user: ", user);
+
+        // let data = new FormData();
+        // data.append( "json", JSON.stringify( user ) );
+        fetch('http://localhost:8000/user', {
+        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        credentials: 'include',
+        body: 'json='+JSON.stringify( user )
+      });
+}

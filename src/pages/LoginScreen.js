@@ -15,29 +15,32 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
-
+import ListIcon from '@material-ui/icons/List';
 import GamesIcon from '@material-ui/icons/Games';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import HomeIcon from '@material-ui/icons/Home';
+import Button from '@material-ui/core/Button';
+import App from './../App.js'
 import {
     BrowserRouter as Router,
     Switch,
     Route,
     Link,
     useRouteMatch,
-    Redirect
+    Redirect,
+    useHistory,
   } from "react-router-dom";
   import { createBrowserHistory } from "history";
 
-import {GamesListPage as GamesList} from './GamesList.js';
+  import {GamesListPage as GamesList} from './GamesList.js';
 
 import {LoginScreenHome as Home} from './LoginScreenHome.js';
 
 import {MyProfile} from './MyProfile.js';
+import {MySentences} from './MySentences.js';
 
 
 const drawerWidth = 240;
-
 const useStyles = makeStyles(theme => ({
     root: {
       display: 'flex',
@@ -117,9 +120,36 @@ const useStyles = makeStyles(theme => ({
     },
   }));
 
+/**
+ *  <Switch>
+  <Route exact path={'/Home'}>  
+          <App/>
+          </Route>
+  </Switch>
+ */
+
+export function LoginScreenRouter(){
+
+  return(
+  <Router>
+  <Switch>
+    
+  
+        
+  <Route exact path={`/`}>
+            <App />
+          </Route>
+
+  <Route path={'/LoginScreen'}>  
+  <LoginScreen />
+  </Route>
+  </Switch>
 
 
-export function LoginScreen(){
+  </Router>
+  );
+}
+function LoginScreen(props){
 
     const [open, setOpen] = React.useState(false);
     const handleDrawerOpen = () => {
@@ -129,8 +159,12 @@ export function LoginScreen(){
       setOpen(false);
     };
     const classes = useStyles();
+    let history = useHistory();
 
-
+    const logout = ()=>{
+      history.push("/"); // moves to main page (localhost:3000)
+      //todo: implement logout
+    }
     let { path, url } = useRouteMatch();
 
 
@@ -155,6 +189,15 @@ export function LoginScreen(){
             </ListItem>
             </Link>
 
+            <Link to={`${url}/MySentences`}>      
+            <ListItem button>
+              <ListItemIcon>
+                  <ListIcon />
+              </ListItemIcon>
+            <ListItemText primary="My Sentences" />
+            </ListItem>
+            </Link>
+
 
         <Link to={`${url}/GamesList`}>      
           <ListItem button>
@@ -170,6 +213,7 @@ export function LoginScreen(){
 
 
     return(
+      <div>
         <Router>
  <div className={classes.root}>
       <CssBaseline />
@@ -187,8 +231,18 @@ export function LoginScreen(){
     <Typography variant="h6" className={classes.title}>
     Two Truths and One Lie
    </Typography>
-      
+   <Switch>
+     
+   </Switch>
+   <Route exact path={'/'} component = {App}/>  
+
+    <Button color="inherit"
+    onClick={logout}>
+      Log Out
+      </Button>
+
   </Toolbar>
+  
 </AppBar>
 
 <Drawer
@@ -213,20 +267,30 @@ export function LoginScreen(){
 
         
         <RedirectToHomeIfNeeded url={url} />
-        <Switch>
-        <Route exact path={path}>  
+        <Switch>  
+          
+        
+        <Route exact path={`/`}>
+            <App />
+          </Route>
+
+         
+          <Route path={`${path}/Home`}>
+            <Home />
           </Route>
 
           <Route path={`${path}/GamesList`}>
             <GamesList />
           </Route>
 
-          <Route path={`${path}/Home`}>
-            <Home />
-          </Route>
 
           <Route path={`${path}/MyProfile`}>
             <MyProfile />
+          </Route>
+
+
+          <Route path={`${path}/MySentences`}>
+            <MySentences />
           </Route>
 
         </Switch>
@@ -234,6 +298,7 @@ export function LoginScreen(){
 
         </div>
       </Router>
+      </div>
     );
     
 }
