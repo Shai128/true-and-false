@@ -112,10 +112,24 @@ function SignUp() {
         <form className={classes.form} noValidate>
           <Grid container spacing={2}>
            
-              <Grid item xs={12}>
+          <Grid item xs={12}>
               <TextField
                 variant="outlined"
                 required
+                fullWidth
+                id="firstName"
+                label="First Name"
+                name="firstName"
+                autoComplete="firstName"
+                onChange = {(event)=>{
+                  let new_user = user;
+                  new_user.firstName = event.target.value;
+                  setUser(new_user)}}
+              />
+              </Grid>
+              <Grid item xs={12}>
+              <TextField
+                variant="outlined"
                 fullWidth
                 id="nickName"
                 label="Nick Name"
@@ -167,8 +181,8 @@ function SignUp() {
             color="primary"
             className={classes.submit}
             onClick={()=>{
-              let data = new FormData();
-              data.append( "json", JSON.stringify(user));
+              // let data = new FormData();
+              // data.append( "json", JSON.stringify(user));
               fetch('http://localhost:8000/user', {
               method: 'POST', // *GET, POST, PUT, DELETE, etc.
               headers: {

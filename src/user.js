@@ -35,8 +35,14 @@ export function getParticipatedGames(){
 const io = require('socket.io-client');
 export const socket = io('http://localhost:8000');
 
+
+
 export function getCurrentUser(){
     return {
-        nickName: 'The nickname I chose'
+        email: "email@gmail.com",
+        nickName: 'my special nickname',
+        password: 'password',
+        truths: [{id: 0, value:"My name is Alon"}, {id: 1,value:"I have Pizza"}],
+        lies: [{id:0, value:"I love computer science"}, {id:1, value:"this is a lie"}]
     }
 }
