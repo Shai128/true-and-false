@@ -4,15 +4,12 @@ const iterations = 1000;
 
 const userSchema = new mongoose.Schema(
     { 
-        username: String,
         password:String,
         email: String,
         salt: String,
         iterations: Number,
-        firstName: String,
-        lastName: String,
         nickName: String,
-        games: {} //todo
+        //games: {} //todo
         });
 const userModel = mongoose.model('user',userSchema) //creating the class userModel. a class of types
                                                     // that comply the conditions of {userSchema and document}
@@ -26,15 +23,12 @@ const userModel = mongoose.model('user',userSchema) //creating the class userMod
 function createUser(user,success,failure){
     let hashedPassword = user.password; //todo: activate pbkdf2
     const newUser = new userModel({
-        username: user.userName,
         password: hashedPassword,
         email: user.email,
         salt: salt,
         iterations: iterations,
-        firstName: user.firstName,
-        lastName: user.lastName,
         nickName: user.nickName,
-        games: {} // creating a user with no games
+        //games: {} // creating a user with no games
                                  });
     //saves the user in the db
     newUser.save((err)=>{
@@ -46,6 +40,42 @@ function createUser(user,success,failure){
 }
 
 
-exports.createUser = createUser
+async function findUser(user_data, success, failure) {
+    findUserByField(
+        'username', 
+        user_data.username,
+        (users) => {
+            if (users.length !== 1) {
+                failure("no username " + user_data.username + " found.");
+            } else {
+                success(users[0]);
+            }
+        },
+        failure)
+}
 
+async function findUserByField(field, value, success, failure) {
+    var query = {};
+    query[field] = value;
+    return userModel.find(query, (err, docs) => {
+        if (err) {failure(err)} else {success(docs)}
+    });
+}
+
+async function updateUser(data, success, failure) {
+    const doc = await userModel.findOneIdAndUpdate(
+        {_id: data._id},
+        data
+    );
+    console.log("updated: " + doc);
+
+}
+
+
+
+
+exports.createUser = createUser
+exports.findUser = findUser
+exports.updateUser = updateUser
+exports.findUserByField = findUserByField
 
