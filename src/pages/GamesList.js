@@ -3,9 +3,6 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import Box from '@material-ui/core/Box';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
 
 import {useStyles as AppUseStyles} from '../App.js';
 import {GamePage} from './GamePage.js'
@@ -13,8 +10,11 @@ import {
   useRouteMatch,
   Switch,
   Route,
-    Link,
 } from "react-router-dom";
+
+import {PrintGames} from '../PagesUtils.js';
+import {getParticipatedGames, getCreatedGames} from '../user.js';
+
 export function GamesListPage(){
   let { path, url } = useRouteMatch();
   
@@ -31,11 +31,7 @@ export function GamesListPage(){
       );
 
 };
-/*
 
-          <Route path={`${path}/GamePage/:id`}>
-            <GamePage game={{date:'1.1.1111'}} />
-            </Route> */
 
 function Home(props){
   const classes = AppUseStyles();
@@ -57,35 +53,6 @@ function Home(props){
          
         </Container>
       );
-}
-
-function getCreatedGames(){
-    return [
-        {
-        id:0,
-        date: '8.11.2019',
-        playersNum: 3
-    },
-    {
-        id:1,
-        date: '6.11.2019',
-        playersNum: 20
-    }];
-}
-
-
-function getParticipatedGames(){
-    return [
-        {
-        id: 0,
-        date: '20.3.2017',
-        playersNum: 5
-    },
-    {
-        id:1,
-        date: '22.3.2017',
-        playersNum: 100
-    }];
 }
 
 
@@ -112,32 +79,9 @@ function GetGamesComponents(props){
 
 }
 function GetCreatedGamesComponents(props){
-    return (<GetGamesComponentsByGames games= {getCreatedGames()} url ={props.url}/>);
+    return (<PrintGames classes={AppUseStyles()} games= {getCreatedGames()} url ={props.url}/>);
 }
 function GetParticipatedGamesComponents(props){
-  return (<GetGamesComponentsByGames games= {getParticipatedGames()} url ={props.url}/>);
+  return (<PrintGames classes={AppUseStyles()} games= {getParticipatedGames()} url ={props.url}/>);
 }
 
-
-function GetGamesComponentsByGames(props){
-    const games =props.games;
-    const classes = AppUseStyles();
-    let url = props.url;
-    return (<List className={classes.list}>
-          {games.map(({ id, date, playersNum }) => (
-            <React.Fragment key={id}>
-              <Link to={
-                {
-                  pathname: `${url}/GamePage/`+id,
-                  game: games[id]
-                }
-              }
-              >
-              <ListItem button  className={classes.gamesListItems}>
-                <ListItemText primary={'date: '+date} secondary={'number of participants : '+playersNum} />
-              </ListItem>
-              </Link>
-            </React.Fragment>
-          ))}
-        </List>);
-}

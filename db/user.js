@@ -4,11 +4,11 @@ const iterations = 1000;
 
 const userSchema = new mongoose.Schema(
     { 
-        password:String,
-        email: String,
+        password: {type: String, required: true},
+        email: {type: String, unique: true, required: true},
         salt: String,
         iterations: Number,
-        nickName: String,
+        nickName: {type: String, required: true},
         //games: {} //todo
         });
 const userModel = mongoose.model('user',userSchema) //creating the class userModel. a class of types
@@ -32,8 +32,15 @@ function createUser(user,success,failure){
                                  });
     //saves the user in the db
     newUser.save((err)=>{
-        if(err)
-            failure(err)
+        if(err) {
+            switch(err.code) {
+                case 11000:
+                    failure("email already taken");
+                    break;
+                default:
+                    failure(err)
+            }
+        }
         else 
             success()
     })
@@ -42,11 +49,11 @@ function createUser(user,success,failure){
 
 async function findUser(user_data, success, failure) {
     findUserByField(
-        'username', 
-        user_data.username,
+        'email', 
+        user_data.email,
         (users) => {
             if (users.length !== 1) {
-                failure("no username " + user_data.username + " found.");
+                failure("no email " + user_data.email + " found.");
             } else {
                 success(users[0]);
             }

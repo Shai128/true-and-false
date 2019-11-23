@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import './App.css';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -10,6 +10,7 @@ import Box from '@material-ui/core/Box';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
+
 import {
   BrowserRouter as Router,
   Switch,
@@ -17,11 +18,12 @@ import {
   Link
 } from "react-router-dom";
 
-import {LoginScreen} from './pages/LoginScreen.js';
-
+import { LoginScreenRouter as LoginScreen } from './pages/LoginScreen.js';
+import { Chat as ChatRoom } from './pages/Chat.js';
+import { PrintJoinGameDialog } from './PagesUtils.js';
 function Copyright() {
   return (
- <Typography variant="body2" color="textSecondary" align="center">
+    <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
       <Link to='/' color="inherit">
         True and False
@@ -29,9 +31,11 @@ function Copyright() {
       {new Date().getFullYear()}
       {'.'}
     </Typography>
-   
+
   );
 }
+
+
 
 export const useStyles = makeStyles(theme => ({
   '@global': {
@@ -76,7 +80,7 @@ export const useStyles = makeStyles(theme => ({
     maxWidth: 500,
     color: '#000000'
   },
-  gamesListItems:{
+  gamesListItems: {
     background: 'linear-gradient(to right, #4ecdc4, #556270)', /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
     border: '0',
     borderRadius: 3,
@@ -109,8 +113,8 @@ function SignUp() {
         </Typography>
         <form className={classes.form} noValidate>
           <Grid container spacing={2}>
-           
-              <Grid item xs={12}>
+
+            <Grid item xs={12}>
               <TextField
                 variant="outlined"
                 required
@@ -119,12 +123,13 @@ function SignUp() {
                 label="Nick Name"
                 name="nickName"
                 autoComplete="nickName"
-                onChange = {(event)=>{
+                onChange={(event) => {
                   let new_user = user;
                   new_user.nickName = event.target.value;
-                  setUser(new_user)}}
+                  setUser(new_user)
+                }}
               />
-              </Grid>
+            </Grid>
             <Grid item xs={12}>
               <TextField
                 variant="outlined"
@@ -134,10 +139,11 @@ function SignUp() {
                 label="Email Address"
                 name="email"
                 autoComplete="email"
-                onChange = {(event)=>{
+                onChange={(event) => {
                   let new_user = user;
                   new_user.email = event.target.value;
-                  setUser(new_user)}}
+                  setUser(new_user)
+                }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -150,13 +156,14 @@ function SignUp() {
                 type="password"
                 id="password"
                 autoComplete="current-password"
-                onChange = {(event)=>{
+                onChange={(event) => {
                   let new_user = user;
                   new_user.password = event.target.value;
-                  setUser(new_user)}}
+                  setUser(new_user)
+                }}
               />
             </Grid>
-           
+
           </Grid>
           <Button
             type="submit"
@@ -164,19 +171,19 @@ function SignUp() {
             variant="contained"
             color="primary"
             className={classes.submit}
-            onClick={()=>{
+            onClick={() => {
               let data = new FormData();
-              data.append( "json", JSON.stringify(user));
+              data.append("json", JSON.stringify(user));
               fetch('http://localhost:8000/user', {
-              method: 'POST', // *GET, POST, PUT, DELETE, etc.
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-              },
-              credentials: 'include',
-              body: 'json='+JSON.stringify( user )
-            });
-          }}>   
-          
+                method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                credentials: 'include',
+                body: 'json=' + JSON.stringify(user)
+              });
+            }}>
+
             Sign Up
           </Button>
           <Grid container justify="center">
@@ -188,57 +195,70 @@ function SignUp() {
           </Grid>
         </form>
       </div>
-      
+
     </Container>
-    
+
   );
 }
 
-function LinksPage(){
+function LinksPage() {
   return (
     <div>
       <Switch>
-      <Route exact path="/">
+        <Route exact path="/">
+          <Home />
+        </Route>
+
+        <Route exact path="/SignIn">
+          <SignIn />
+        </Route>
+        <Route exact path="/SignUp">
+          <SignUp />
+        </Route>
+        {/*<Route exact path="/Home">
             <Home />
           </Route>
-          
-         <Route exact path="/SignIn">
-            <SignIn />
-          </Route>
-          <Route exact path="/SignUp">
-            <SignUp />
-          </Route>
-          <Route exact path="/Home">
-            <Home />
-          </Route>
-          <Route path="/LoginScreen">
-            <LoginScreen />
-          </Route>
+  */}
+        <Route path="/LoginScreen">
+          <LoginScreen />
+        </Route>
 
-          
+        <Route path="/ChatRoom">
+          <ChatRoom />
+        </Route>
 
-        </Switch>
-        </div>
+
+
+
+      </Switch>
+    </div>
   );
 }
 
 export default function App() {
-  
+
   return (
     <Router>
-  
-    <LinksPage />
-  </Router>
-        
-         
+
+      <LinksPage />
+    </Router>
+
+
   );
 
 }
 
-function Home(){
+function Home() {
   const classes = useStyles();
 
+  const [guestLoginWindowOpen, setguestLoginWindowOpen] = React.useState(false);
+  const handleClickGuestLogin = () => {
+    setguestLoginWindowOpen(true);
+  };
 
+  const handleCloseGuestLoginWindow = () => {
+    setguestLoginWindowOpen(false);
+  };
   return (
 
     <Container component="main" maxWidth="md">
@@ -250,43 +270,120 @@ function Home(){
         <form className={classes.form} noValidate>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-            <Link to="/SignIn">
-            <Button variant="contained" color="primary" fullWidth  className={classes.button}>
-            Sign In
+              <Link to="/SignIn">
+                <Button variant="contained" color="primary" fullWidth className={classes.button}>
+                  Sign In
             </Button>
-            </Link>
+              </Link>
 
             </Grid>
             <Grid item xs={12} sm={6}>
-            <Link to="/SignUp">
-            <Button variant="contained" color="primary" fullWidth  className={classes.button}>
-      Sign Up
+              <Link to="/SignUp">
+                <Button variant="contained" color="primary" fullWidth className={classes.button}>
+                  Sign Up
       </Button>
-      </Link>
-            </Grid>
-        
-            <Grid item xs={12} sm={6}>
-            <Link to="/LoginScreen">
-            <Button variant="contained" color="primary" fullWidth  className={classes.button}>
-            LoginScreen
-          </Button>
-          </Link>
+              </Link>
             </Grid>
 
-            
+            <Grid item xs={12} sm={6}>
+              <Link to="/LoginScreen">
+                <Button variant="contained" color="primary" fullWidth className={classes.button}>
+                  LoginScreen
+          </Button>
+              </Link>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <Button variant="contained" color="primary" fullWidth onClick={handleClickGuestLogin} className={classes.button}>
+                Guest Login
+            </Button>
+            </Grid>
+            <PrintJoinGameDialog
+              handleCloseWindow={handleCloseGuestLoginWindow}
+              WindowOpen={guestLoginWindowOpen}
+              nickName='' />
           </Grid>
+
+
+          <Grid item xs={12} sm={6}>
+            <Link to="/ChatRoom">
+              <Button variant="contained" color="primary" fullWidth className={classes.button}>
+                Chat
+          </Button>
+            </Link>
+          </Grid>
+
         </form>
         <Box mt={5}>
-        <Copyright />
-      </Box>
+          <Copyright />
+        </Box>
       </div>
-      
+
 
     </Container>
-    
+
   );
 
 }
+
+/*
+
+function PrintGuestLoginDialog(props){
+  const {handleCloseGuestLoginWindow,  guestLoginWindowOpen} = props;
+  const [gameID, setGameID] = React.useState("");
+  const [currentGameNickName, setCurrentGameNickName] = React.useState('');
+
+  const startGame = ()=>{
+      //todo
+      console.log("starting game!");
+      console.log("game ID:", gameID);
+      console.log('user nickname: ', currentGameNickName);
+      handleCloseGuestLoginWindow();
+  }
+  return(
+      <Dialog open={guestLoginWindowOpen} onClose={handleCloseGuestLoginWindow} aria-labelledby="form-dialog-title">
+      <DialogTitle id="form-dialog-title">Select Room Name</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+        </DialogContentText>
+        <Grid container spacing={2}>
+        <Grid item xs={12}>
+        <TextField
+          autoFocus
+          margin="dense"
+          id="roomID"
+          label="Room ID"
+          onChange={(event)=>{
+            setGameID(event.target.value);
+          }}
+        />
+        </Grid>
+        <Grid item xs={12}>
+        <TextField
+          autoFocus
+          margin="dense"
+          id="nickName"
+          label="Nick Name"
+          onChange={(event)=>{
+              setCurrentGameNickName(event.target.value);
+          }}
+        />
+        </Grid>
+        </Grid>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleCloseGuestLoginWindow} color="primary">
+          Cancel
+        </Button>
+        <Button onClick={startGame} color="primary">
+              Start
+        </Button>
+      </DialogActions>
+    </Dialog>
+
+  );
+}
+*/
 
 function SignIn() {
 
@@ -298,7 +395,7 @@ function SignIn() {
     <div className="App" >
       <header className="App-header" >
 
-{/* 
+        {/* 
        { <Grid container spacing={2}>
              <Grid item xs={3} sm={6}>
        <Link to="/Home" variant="body2">
@@ -310,76 +407,78 @@ function SignIn() {
    </Grid> 
   } */}
 
-       
-      <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <div className={classes.paper}>
-        <form className={classes.form} noValidate>
-          
-      <Grid container spacing={5}>
-      <Grid item xs={12}>
-      <Typography variant="h1" component="h2" gutterBottom className={classes.root}>
-        Sign In
+
+        <Container component="main" maxWidth="xs">
+          <CssBaseline />
+          <div className={classes.paper}>
+            <form className={classes.form} noValidate>
+
+              <Grid container spacing={5}>
+                <Grid item xs={12}>
+                  <Typography variant="h1" component="h2" gutterBottom className={classes.root}>
+                    Sign In
       </Typography>
-      </Grid>
-            <Grid item xs={12} sm={6}>
-        <TextField
-          id="UserNameInput"
-          className={classes.textField}
-          label="Username"
-          margin="normal"
-          variant="filled"
-          fullWidth
-        />
-        </Grid>
-        <Grid item xs={12} sm={6}>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    id="UserNameInput"
+                    className={classes.textField}
+                    label="Username"
+                    margin="normal"
+                    variant="filled"
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
 
-        <TextField
-          id="PasswordInput"
-          label="Password"
-          className={classes.textField}
-          type="password"
-          autoComplete="current-password"
-          margin="normal"
-          variant="filled"
-          fullWidth
-        />
-     </Grid>
-     <Grid item xs={12}>
+                  <TextField
+                    id="PasswordInput"
+                    label="Password"
+                    className={classes.textField}
+                    type="password"
+                    autoComplete="current-password"
+                    margin="normal"
+                    variant="filled"
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12}>
 
-        <Button variant="contained" color="primary" fullWidth className={classes.button}
-        onClick={()=>{
-          console.log("sending sign in");
-          let user = {username :document.getElementById('UserNameInput').value,
-                      password : document.getElementById('PasswordInput').value }
-          fetch('http://localhost:8000/user/' + user.username + '/' + user.password, {
-          method: 'GET', // *GET, POST, PUT, DELETE, etc.
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          },
-          credentials: 'include'
-        });
-      }}>   
-        Sign In
+                  <Button variant="contained" color="primary" fullWidth className={classes.button}
+                    onClick={() => {
+                      console.log("sending sign in");
+                      let user = {
+                        username: document.getElementById('UserNameInput').value,
+                        password: document.getElementById('PasswordInput').value
+                      }
+              
+                      fetch('http://localhost:8000/user/' + user.username + '/' + user.password, {
+                        method: 'GET', // *GET, POST, PUT, DELETE, etc.
+                        headers: {
+                          'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        credentials: 'include'
+                      });
+                    }}>
+                    Sign In
       </Button>
-      </Grid>
-     </Grid>
-     </form>
+                </Grid>
+              </Grid>
+            </form>
           </div>
-          </Container>
-              <Link to="/SignUp" variant="body2">
-              <Typography variant="h6" component="h3" gutterBottom className={classes.root}>
-
-                Don't have an account? Sign Up
+        </Container>
+        <Link to="/SignUp" variant="body2">
+          <Typography variant="h6" component="h3" gutterBottom className={classes.root}>
+            Don't have an account? Sign Up
                 </Typography>
-               </Link>
+        </Link>
 
-               
 
-           
+
+
 
       </header>
-      
+
     </div>
   );
 }

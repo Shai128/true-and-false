@@ -81,7 +81,13 @@ function endSession(req, res) {
   res.redirect('/')
 }
 
+function getIdentifierFromSession(req, success, failure) {
+  const id = req.session.email;
+  if (!id) { failure() } else { success(id) }
+}
+
 exports.getRandomSentence = getRandomSentence
 exports.standardErrorHandling = standardErrorHandling
 exports.endSession = endSession
 exports.getRandomSentenceForDuel = getRandomSentenceForDuel
+exports.getIdentifierFromSession = getIdentifierFromSession
