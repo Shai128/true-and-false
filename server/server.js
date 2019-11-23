@@ -1,10 +1,51 @@
 const express  = require("express") //express contains functions including app, which is the server
 const {
-        createUser,
-        findUser, 
-        updateUser,
-        findUserByField
-      } =require("../db/user") //imports create user
+  createUser,
+  findUser,
+  updateUser,
+  findUserByField
+} = require("../db/user") //imports create user
+const {
+  getRandomSentence,
+  standardErrorHandling,
+  getRandomSentenceForDuel
+} = require("./server_util")
+
+const mongoose = require("../db/config")
+var session = require("express-session");
+const MongoStore = require("connect-mongo")(session);
+session = require("express-session")({
+  secret: "a very good secret",
+  resave: false, // might need this to be true
+  saveUninitialized: true,
+  store: new MongoStore({
+    mongooseConnection: mongoose.connection,
+    url: "mongodb://localhost:27017/TrueAndFalse"
+  })
+})
+
+const app = express()
+const port = 8000
+const bodyParser = require("body-parser")
+const socket = require('socket.io')
+// Session stuff:
+const sharedsession = require("express-socket.io-session");
+const cookieParser = require("cookie-parser")
+app.use(cookieParser())
+app.use(session);
+
+app.use(express.json())
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({ extended: true }))
+
+
+app.use(function (req, res, next) {
+  res.header("Access-Control-Allow-Origin", "http://localhost:8000"); // update to match the domain you will make the request from
+  res.header("Access-Control-Allow-Headers", 'Content-Type');
+  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
+  next();
+});
+
 /*
 const {
   findGame,
@@ -25,42 +66,6 @@ function findGame(game, success, failure) {
     }
   })
 }
-
-const {
-        standardErrorHandling,
-        endSession,
-        getRandomSentenceForDuel
-      } = require("./server_util")
-
-const app = express()
-const port = 8000
-const cookieParser = require("cookie-parser")
-const bodyParser = require("body-parser")
-const session = require("express-session")
-const MongoStore = require("connect-mongo")(session);
-const mongoose = require("../db/config")
-
-
-app.use(express.json())
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({extended: true}))
-app.use(cookieParser())
-app.use(session({
-  secret: "some very good secret",
-  resave: false,
-  saveUninitialized: true,
-  store: new MongoStore({
-    mongooseConnection: mongoose.connection,
-    url: "mongodb://localhost:27017/TrueAndFalse"
-  })
-}))
-
-app.use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "http://localhost:8000"); // update to match the domain you will make the request from
-    res.header("Access-Control-Allow-Headers", 'Content-Type');
-    res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
-    next();
-  });
 
 app.get('/', (req, res) => res.send("request for / recieved"))
 
