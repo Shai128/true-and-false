@@ -41,9 +41,11 @@ app.use(bodyParser.urlencoded({ extended: true }))
 
 
 app.use(function (req, res, next) {
-  res.header("Access-Control-Allow-Origin", "http://localhost:8000"); // update to match the domain you will make the request from
+  res.header("Access-Control-Allow-Origin", "http://localhost:3000"); // update to match the domain you will make the request from
   res.header("Access-Control-Allow-Headers", 'Content-Type');
   res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
+  res.header("Access-Control-Allow-Credentials", "true");
+
   next();
 });
 
@@ -89,7 +91,6 @@ app.get('/user/:email/:password', (req, res) => {
   console.log(req.session.email) // just for debug
   if (! req.session.myInt) { req.session.myInt = 1}
   console.log(req.session.myInt ++)
-
   let data = {
     email: req.params.email,
     password: req.params.password

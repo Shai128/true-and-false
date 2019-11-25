@@ -21,7 +21,7 @@ import {
 import {GamePage} from './GamePage.js';
 import {getCreatedGames, getParticipatedGames, getCurrentUser} from './../user';
 import {PrintGames, PrintJoinGameDialog} from './../PagesUtils';
-
+import {okStatus} from './../Utils.js'
 
 
 export function LoginScreenHome(){
@@ -93,6 +93,23 @@ const handleCloseJoinGameWindow = () => {
 
     const classes = useStyles();
     const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
+    const [currentUser, setCurrentUser] = React.useState(getCurrentUser());
+
+    fetch('http://localhost:8000/getUserFromSession', {
+      method: 'GET', // *GET, POST, PUT, DELETE, etc.
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      credentials: 'include'
+    }).then(function(data){
+      
+      console.log('frontend got data: ', data);
+      if(data.status === okStatus ){
+        let user = data.user;
+        user.firstName = "session thing worked!!!"
+        setCurrentUser(user);
+      }
+    });
 
     return (
 
@@ -104,7 +121,7 @@ const handleCloseJoinGameWindow = () => {
             <Grid item xs={12}>
 
             <Typography component="h1" variant="h2" justify="center">
-              Welcome!
+              Welcome {currentUser.firstName}!
         </Typography>
             </Grid>
         <Grid item xs={12} sm={6}>

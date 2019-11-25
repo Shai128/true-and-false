@@ -15,12 +15,15 @@ import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Link
+  Link,
+  useHistory
 } from "react-router-dom";
 
 import {LoginScreenRouter as LoginScreen} from './pages/LoginScreen.js';
 import {Chat as ChatRoom} from './pages/Chat.js';
 import {PrintJoinGameDialog} from './PagesUtils.js';
+import {okStatus} from './Utils.js'
+
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
@@ -402,6 +405,7 @@ function SignIn() {
 
 
   const classes = useStyles();
+  let history = useHistory();
 
 
   return (
@@ -421,9 +425,9 @@ function SignIn() {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    id="UserNameInput"
+                    id="EmailInput"
                     className={classes.textField}
-                    label="Username"
+                    label="Email"
                     margin="normal"
                     variant="filled"
                     fullWidth
@@ -448,16 +452,23 @@ function SignIn() {
                     onClick={() => {
                       console.log("sending sign in");
                       let user = {
-                        username: document.getElementById('UserNameInput').value,
+                        email: document.getElementById('EmailInput').value,
                         password: document.getElementById('PasswordInput').value
                       }
               
-                      fetch('http://localhost:8000/user/' + user.username + '/' + user.password, {
+                      fetch('http://localhost:8000/user/'+user.email+'/'+user.password, {
                         method: 'GET', // *GET, POST, PUT, DELETE, etc.
                         headers: {
                           'Content-Type': 'application/x-www-form-urlencoded'
                         },
+                        params: user,
                         credentials: 'include'
+                      }).then(function(data){
+                        
+                        console.log('frontend got data: ', data);
+                        if(data.status === okStatus ){
+                          history.push("/LoginScreen");
+                        }
                       });
                     }}>
                     Sign In
