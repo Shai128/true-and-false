@@ -1,34 +1,42 @@
+
+const  players= [{firstName: 'alon', nickName: 'alon', email:'123@gmail.com'}, {firstName: 'km', nickName: 'debil', email:'k@gmai.com',}, {firstName: 'Dan', nickName: 'Halif', email: 'halifadan@gmail.com'}];
 export function getCreatedGames(){
-    return [
-        {
+    var arr = [];
+    arr[3] =  {
         name: 'my best room',
-        id:0,
+        id:3,
         date: '8.11.2019',
-        playersNum: 3
-    },
-    {
+        playersNum: 3,
+        players: players
+        };
+    arr[0] = {
         name: "koby's room",
-        id:1,
+        id:0,
         date: '6.11.2016',
-        playersNum: 20
-    }];
+        playersNum: 20,
+        players: players
+    };
+    return arr;
 }
 
 
 export function getParticipatedGames(){
-    return [
-        {
+    var arr = [];
+    arr[1] ={
         name: 'I love this game!',
-        id: 0,
+        id: 1,
         date: '20.3.2017',
-        playersNum: 5
-    },
-    {
+        playersNum: 5,
+        players:players
+    };
+    arr[2] = {
         name: 'join my game!',
-        id:1,
+        id: 2,
         date: '22.3.2017',
-        playersNum: 100
-    }];
+        playersNum: 100,
+        players:players
+        };
+    return arr;
 }
 
 

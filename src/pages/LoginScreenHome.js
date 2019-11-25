@@ -159,26 +159,24 @@ const handleCloseJoinGameWindow = () => {
 }
 
 function getTwoRecentGames(){
-    //get the first 2 games from each array
-   let participated = getParticipatedGames().slice(0,2);
-   console.log('participated:', participated);
-   let created = getCreatedGames().slice(0,2);
-   console.log('created:', created);
-
-   let games = created.concat(participated);
-   console.log('games:', games);
-   //sorts in O(1) because there are at most 4 elements in the array
-   games.sort(function(game1,game2) {
-    let a=game1.date;
-    let b=game2.date;
-    a = a.split('.').reverse().join('');
-    b = b.split('.').reverse().join('');
-    return a > b ? -1 : a < b ? 1 : 0;
-  });
-
-   console.log('sorted:', games);
-
-   return games.slice(0,2);
+  let participated = getParticipatedGames().slice(0);
+  let created = getCreatedGames().slice(0);
+  let games_num = created.length > participated.length? created.length :  participated.length;
+  let recent_games = [];
+  let games_to_add = 2;
+  
+  for(let games_added=0;games_added<games_to_add; games_added++){
+      if(games_num-games_added<=0)
+        return recent_games;
+      let game_index = games_num - games_added-1;
+      if (typeof created[game_index] !== 'undefined')
+        recent_games.push(created[game_index]);
+      else
+        recent_games.push(participated[game_index]);
+  }
+  
+  return recent_games;
+    
   
 }
 

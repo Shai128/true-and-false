@@ -8,6 +8,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import SendIcon from '@material-ui/icons/Send';
 import clsx from 'clsx';
+import JsxParser from 'react-jsx-parser'
 
 import Paper from '@material-ui/core/Paper';
 import {useStyles as AppUseStyles} from './../App.js';
@@ -31,6 +32,18 @@ const useButtonStyles = makeStyles({
     },
   });
 
+  const useChatStyles = makeStyles(theme => ({
+    paper: {
+      color: 'blue',
+      padding: theme.spacing(2),
+      display: 'flex',
+      overflow: 'auto',
+      flexDirection: 'column',
+    },
+    fixedHeight: {
+      height: 60,
+    },
+}));
 
   const useStyles = makeStyles(theme => ({
     container: {
@@ -58,6 +71,7 @@ const useButtonStyles = makeStyles({
   height: 48,
     },
     
+    
     }));
 
 
@@ -67,6 +81,9 @@ export function Chat(){
     
     const paperClasses = useStyles();
     const fixedHeightPaper = clsx(paperClasses.paper, paperClasses.fixedHeight);
+    const chatClasses =useChatStyles();
+
+    const messageStyle = clsx(chatClasses.paper, chatClasses.fixedHeight);
 
 
     const classes = AppUseStyles();
@@ -78,7 +95,12 @@ export function Chat(){
     const [currentMessage, setCurrentMessage] = React.useState('');
     socket.on('chat', function(data){
         console.log(data);
-        setChatContent(data.chatContent + "\n" + data.author + ": " + data.messageContent);
+        let new_message =  '<Paper className={style}>'
+        +'<Typography component="h5" variant="h6" justify="flex-end">'+
+         data.author + ": " + data.messageContent + 
+         '</Typography>'+
+         '</Paper>'
+        setChatContent(data.chatContent + "\n" + new_message);
     })
     
     const sendMessage = ()=>{
@@ -112,10 +134,21 @@ export function Chat(){
 
         {/**chat window */}
         <Paper className={fixedHeightPaper}>
-         <pre style={{ fontFamily: 'inherit' }}>
-         {chatContent}
-            </pre>
-
+        
+          <pre style={{ fontFamily: "inherit" }}>
+          <JsxParser 
+          bindings ={{
+            style: chatClasses.paper,
+          }}
+          components={{ Paper, Typography }}
+          jsx={chatContent}
+          />
+          </pre>
+        
+     
+         
+          
+          
           </Paper>
         </Grid>
 
