@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import './App.css';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -23,7 +23,7 @@ import {Chat as ChatRoom} from './pages/Chat.js';
 import {PrintJoinGameDialog} from './PagesUtils.js';
 function Copyright() {
   return (
- <Typography variant="body2" color="textSecondary" align="center">
+    <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
       <Link to='/' color="inherit">
         True and False
@@ -31,9 +31,11 @@ function Copyright() {
       {new Date().getFullYear()}
       {'.'}
     </Typography>
-   
+
   );
 }
+
+
 
 export const useStyles = makeStyles(theme => ({
   '@global': {
@@ -78,7 +80,7 @@ export const useStyles = makeStyles(theme => ({
     maxWidth: 500,
     color: '#000000'
   },
-  gamesListItems:{
+  gamesListItems: {
     background: 'linear-gradient(to right, #4ecdc4, #556270)', /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
     border: '0',
     borderRadius: 3,
@@ -135,12 +137,13 @@ function SignUp() {
                 label="Nick Name"
                 name="nickName"
                 autoComplete="nickName"
-                onChange = {(event)=>{
+                onChange={(event) => {
                   let new_user = user;
                   new_user.nickName = event.target.value;
-                  setUser(new_user)}}
+                  setUser(new_user)
+                }}
               />
-              </Grid>
+            </Grid>
             <Grid item xs={12}>
               <TextField
                 variant="outlined"
@@ -150,10 +153,11 @@ function SignUp() {
                 label="Email Address"
                 name="email"
                 autoComplete="email"
-                onChange = {(event)=>{
+                onChange={(event) => {
                   let new_user = user;
                   new_user.email = event.target.value;
-                  setUser(new_user)}}
+                  setUser(new_user)
+                }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -166,13 +170,14 @@ function SignUp() {
                 type="password"
                 id="password"
                 autoComplete="current-password"
-                onChange = {(event)=>{
+                onChange={(event) => {
                   let new_user = user;
                   new_user.password = event.target.value;
-                  setUser(new_user)}}
+                  setUser(new_user)
+                }}
               />
             </Grid>
-           
+
           </Grid>
           <Button
             type="submit"
@@ -184,15 +189,15 @@ function SignUp() {
               // let data = new FormData();
               // data.append( "json", JSON.stringify(user));
               fetch('http://localhost:8000/user', {
-              method: 'POST', // *GET, POST, PUT, DELETE, etc.
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-              },
-              credentials: 'include',
-              body: 'json='+JSON.stringify( user )
-            });
-          }}>   
-          
+                method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                credentials: 'include',
+                body: 'json=' + JSON.stringify(user)
+              });
+            }}>
+
             Sign Up
           </Button>
           <Grid container justify="center">
@@ -204,30 +209,27 @@ function SignUp() {
           </Grid>
         </form>
       </div>
-      
+
     </Container>
-    
+
   );
 }
 
-function LinksPage(){
+function LinksPage() {
   return (
     <div>
       <Switch>
-      <Route exact path="/">
-            <Home />
-          </Route>
-          
-         <Route exact path="/SignIn">
-            <SignIn />
-          </Route>
-          <Route exact path="/SignUp">
-            <SignUp />
-          </Route>
-          {/*<Route exact path="/Home">
-            <Home />
-          </Route>
-  */}
+        <Route exact path="/">
+          <Home />
+        </Route>
+
+        <Route exact path="/SignIn">
+          <SignIn />
+        </Route>
+        <Route exact path="/SignUp">
+          <SignUp />
+        </Route>
+      
           <Route path="/LoginScreen">
             <LoginScreen />
           </Route>
@@ -239,25 +241,27 @@ function LinksPage(){
 
           
 
-        </Switch>
-        </div>
+
+
+      </Switch>
+    </div>
   );
 }
 
 export default function App() {
-  
+
   return (
     <Router>
-  
-    <LinksPage />
-  </Router>
-        
-         
+
+      <LinksPage />
+    </Router>
+
+
   );
 
 }
 
-function Home(){
+function Home() {
   const classes = useStyles();
 
   const [guestLoginWindowOpen, setguestLoginWindowOpen] = React.useState(false);
@@ -279,27 +283,27 @@ const handleCloseGuestLoginWindow = () => {
         <form className={classes.form} noValidate>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-            <Link to="/SignIn">
-            <Button variant="contained" color="primary" fullWidth  className={classes.button}>
-            Sign In
+              <Link to="/SignIn">
+                <Button variant="contained" color="primary" fullWidth className={classes.button}>
+                  Sign In
             </Button>
-            </Link>
+              </Link>
 
             </Grid>
             <Grid item xs={12} sm={6}>
-            <Link to="/SignUp">
-            <Button variant="contained" color="primary" fullWidth  className={classes.button}>
-      Sign Up
+              <Link to="/SignUp">
+                <Button variant="contained" color="primary" fullWidth className={classes.button}>
+                  Sign Up
       </Button>
-      </Link>
+              </Link>
             </Grid>
-        
+
             <Grid item xs={12} sm={6}>
-            <Link to="/LoginScreen">
-            <Button variant="contained" color="primary" fullWidth  className={classes.button}>
-            LoginScreen
+              <Link to="/LoginScreen">
+                <Button variant="contained" color="primary" fullWidth className={classes.button}>
+                  LoginScreen
           </Button>
-          </Link>
+              </Link>
             </Grid>
 
             <Grid item xs={12} sm={6}>
@@ -324,13 +328,13 @@ const handleCloseGuestLoginWindow = () => {
 
         </form>
         <Box mt={5}>
-        <Copyright />
-      </Box>
+          <Copyright />
+        </Box>
       </div>
-      
+
 
     </Container>
-    
+
   );
 
 }
@@ -403,88 +407,78 @@ function SignIn() {
   return (
     <div className="App" >
       <header className="App-header" >
+     
+        <Container component="main" maxWidth="xs">
+          <CssBaseline />
+          <div className={classes.paper}>
+            <form className={classes.form} noValidate>
 
-{/* 
-       { <Grid container spacing={2}>
-             <Grid item xs={3} sm={6}>
-       <Link to="/Home" variant="body2">
-                <Button variant="contained" color="secondary" className={classes.button}>
-                  Home Page
-                </Button>
-                </Link>
-        </Grid>
-   </Grid> 
-  } */}
-
-       
-      <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <div className={classes.paper}>
-        <form className={classes.form} noValidate>
-          
-      <Grid container spacing={5}>
-      <Grid item xs={12}>
-      <Typography variant="h1" component="h2" gutterBottom className={classes.root}>
-        Sign In
+              <Grid container spacing={5}>
+                <Grid item xs={12}>
+                  <Typography variant="h1" component="h2" gutterBottom className={classes.root}>
+                    Sign In
       </Typography>
-      </Grid>
-            <Grid item xs={12} sm={6}>
-        <TextField
-          id="UserNameInput"
-          className={classes.textField}
-          label="Username"
-          margin="normal"
-          variant="filled" 
-          fullWidth
-        />
-        </Grid>
-        <Grid item xs={12} sm={6}>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    id="UserNameInput"
+                    className={classes.textField}
+                    label="Username"
+                    margin="normal"
+                    variant="filled"
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
 
-        <TextField
-          id="PasswordInput"
-          label="Password"
-          className={classes.textField}
-          type="password"
-          autoComplete="current-password"
-          margin="normal"
-          variant="filled"
-          fullWidth
-        />
-     </Grid>
-     <Grid item xs={12}>
+                  <TextField
+                    id="PasswordInput"
+                    label="Password"
+                    className={classes.textField}
+                    type="password"
+                    autoComplete="current-password"
+                    margin="normal"
+                    variant="filled"
+                    fullWidth
+                  />
+                </Grid>
+                <Grid item xs={12}>
 
-        <Button variant="contained" color="primary" fullWidth className={classes.button}
-        onClick={()=>{
-          console.log("sending sign in");
-          let user = {username :document.getElementById('UserNameInput').value,
-                      password : document.getElementById('PasswordInput').value }
-          fetch('http://localhost:8000/user/' + user.username + '/' + user.password, {
-          method: 'GET', // *GET, POST, PUT, DELETE, etc.
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          },
-          credentials: 'include'
-        });
-      }}>   
-        Sign In
+                  <Button variant="contained" color="primary" fullWidth className={classes.button}
+                    onClick={() => {
+                      console.log("sending sign in");
+                      let user = {
+                        username: document.getElementById('UserNameInput').value,
+                        password: document.getElementById('PasswordInput').value
+                      }
+              
+                      fetch('http://localhost:8000/user/' + user.username + '/' + user.password, {
+                        method: 'GET', // *GET, POST, PUT, DELETE, etc.
+                        headers: {
+                          'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        credentials: 'include'
+                      });
+                    }}>
+                    Sign In
       </Button>
-      </Grid>
-     </Grid>
-     </form>
+                </Grid>
+              </Grid>
+            </form>
           </div>
           </Container>
               <Link to="/SignUp" variant="body2">
               <Typography variant="h6" component="h3" gutterBottom className={classes.root}>
                 Don't have an account? Sign Up
                 </Typography>
-               </Link>
+        </Link>
 
-               
 
-           
+
+
 
       </header>
-      
+
     </div>
   );
 }

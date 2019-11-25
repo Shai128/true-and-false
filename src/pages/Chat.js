@@ -83,8 +83,6 @@ export function Chat(){
     const fixedHeightPaper = clsx(paperClasses.paper, paperClasses.fixedHeight);
     const chatClasses =useChatStyles();
 
-    const messageStyle = clsx(chatClasses.paper, chatClasses.fixedHeight);
-
 
     const classes = AppUseStyles();
     const buttonClasses = useButtonStyles();
