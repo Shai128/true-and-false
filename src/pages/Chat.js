@@ -13,7 +13,8 @@ import Paper from '@material-ui/core/Paper';
 import {useStyles as AppUseStyles} from './../App.js';
 
 const io = require('socket.io-client');
-const socket = io('http://localhost:8000');
+const socket = io('http://localhost:8000', {query: "user_id=RonKant66@gmail.com"});
+
 const useButtonStyles = makeStyles({
     root: {
       background: props =>
@@ -73,6 +74,7 @@ export function Chat(){
  
     let this_user = getCurrentUser();
     let other_user = getOtherUser();
+
     const [chatContent, setChatContent] = React.useState('');
     const [currentMessage, setCurrentMessage] = React.useState('');
     socket.on('C_chat', function(data){

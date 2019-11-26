@@ -9,7 +9,8 @@ const {
   getRandomSentence,
   standardErrorHandling,
   getRandomSentenceForDuel,
-  getIdentifierFromSession
+  getIdentifierFromSession,
+  logDiv
 } = require("./server_util")
 
 const mongoose = require("../db/config")
@@ -146,13 +147,13 @@ app.get('/userExists/:field/:value', (req, res) => {
 /**
  * Universal function for updating any kind of information on existing user.
  */
-app.post('/userupdate', (req, res) => {
+app.post('/userupdate/:id', (req, res) => {
   console.log('update user');
   let data = JSON.parse(req.body.json)
-  updateUser(data,
+  updateUser(req.params.id, data,
     ()=>{
       console.log("succesfully updated user: " + data.username)
-      res.send("success");
+      res.status(200).send("success");
     }
     ,(err)=>{standardErrorHandling(res, err)});
 })
@@ -195,28 +196,34 @@ app.get('/getUserFromSession', (req, res) => {
 
 const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 const io = socket(server);
-io.use(sharedsession(session));
+io.use(sharedsession(session, {
+  autoSave: true
+}));
 
 
-var a = 0;
+
 io.on('connection', function (socket) {
-a++;
-  console.log('tut bananim' + a)
+  logDiv("new connection")
+  console.log('socket connection ' + socket.id)
 
-  // socket.on("login", function(userdata) {
-    
-  //   console.log(userdata.user.username + " has logged in");
-  //   console.log(socket.handshake.session.userdata);
-  //   socket.handshake.session.userdata = userdata;
-  //   socket.handshake.session.save();
-  // });
+  console.log("user_id that logged in: ", socket.request._query['user_id'])
+  logDiv()
 
-  // socket.on("logout", function(userdata) {
-  //   if (socket.handshake.session.userdata) {
-  //     delete socket.handshake.session.userdata;
-  //     socket.handshake.session.save();
-  //   }
-  // });
+  socket.handshake.session.user_id = socket.request._query['user_id']
+
+  socket.on("login", function(userdata) {
+    console.log(userdata.user.nickName + " has logged in");
+    console.log(socket.handshake.session.userdata);
+    socket.handshake.session.userdata = userdata;
+    socket.handshake.session.save();
+  });
+
+  socket.on("logout", function(userdata) {
+    if (socket.handshake.session.userdata) {
+      delete socket.handshake.session.userdata;
+      socket.handshake.session.save();
+    }
+  });
 
   socket.on('S_chat', function (data) {
     console.log(data.messageContent + " was written");
@@ -362,6 +369,8 @@ a++;
 //   })
 
   socket.on('disconnect', function () {
-    console.log("pizza")
+    logDiv('new disconnect')
+    console.log("disconnected " + socket.id)
+    logDiv()
   })
 })

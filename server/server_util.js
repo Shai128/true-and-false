@@ -86,8 +86,16 @@ function getIdentifierFromSession(req, success, failure) {
   if (!id) { failure() } else { success(id) }
 }
 
+function logDiv(header='') {
+  const divLen = 60
+  header = header.slice(0, divLen)
+  const divWithoutHeader = divLen - header.length;
+  console.log("-".repeat(divWithoutHeader/2) + header + '-'.repeat((divWithoutHeader+1)/2))
+}
+
 exports.getRandomSentence = getRandomSentence
 exports.standardErrorHandling = standardErrorHandling
 exports.endSession = endSession
 exports.getRandomSentenceForDuel = getRandomSentenceForDuel
 exports.getIdentifierFromSession = getIdentifierFromSession
+exports.logDiv = logDiv
