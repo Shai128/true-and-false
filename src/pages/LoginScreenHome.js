@@ -22,6 +22,8 @@ import {GamePage} from './GamePage.js';
 import {getCreatedGames, getParticipatedGames, getCurrentUser} from './../user';
 import {PrintGames, PrintJoinGameDialog} from './../PagesUtils';
 import {okStatus} from './../Utils.js'
+import { reject } from 'q';
+import { resolve } from 'dns';
 
 
 export function LoginScreenHome(){
@@ -101,14 +103,21 @@ const handleCloseJoinGameWindow = () => {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       credentials: 'include'
-    }).then(function(data){
-      
-      console.log('frontend got data: ', data);
-      if(data.status === okStatus ){
-        let user = data.user;
-        user.firstName = "session thing worked!!!"
-        setCurrentUser(user);
+    }).then(response => {
+      console.log("response status:", response.status)
+      if (response.status !== okStatus) {
+        reject(response.status);
+      } else {
+        return new Promise(function(resolve, reject) {
+          resolve(response.json());
+        })
       }
+    }).then(user => {
+      console.log('frontend got data: ', user);
+        setCurrentUser(user);
+        console.log("updated user", JSON.stringify(currentUser))
+    }, fail_status => {
+      console.log("failed, status:", fail_status)
     });
 
     return (
@@ -121,7 +130,7 @@ const handleCloseJoinGameWindow = () => {
             <Grid item xs={12}>
 
             <Typography component="h1" variant="h2" justify="center">
-              Welcome {currentUser.firstName}!
+              Welcome {currentUser.email} 
         </Typography>
             </Grid>
         <Grid item xs={12} sm={6}>

@@ -8,13 +8,12 @@ import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import SendIcon from '@material-ui/icons/Send';
 import clsx from 'clsx';
-import JsxParser from 'react-jsx-parser'
 
 import Paper from '@material-ui/core/Paper';
 import {useStyles as AppUseStyles} from './../App.js';
 
 const io = require('socket.io-client');
-const socket = io('http://localhost:8000');
+const socket = io('http://localhost:8000', {query: "user_id=RonKant66@gmail.com"});
 
 const useButtonStyles = makeStyles({
     root: {
@@ -32,18 +31,6 @@ const useButtonStyles = makeStyles({
     },
   });
 
-  const useChatStyles = makeStyles(theme => ({
-    paper: {
-      color: 'blue',
-      padding: theme.spacing(2),
-      display: 'flex',
-      overflow: 'auto',
-      flexDirection: 'column',
-    },
-    fixedHeight: {
-      height: 60,
-    },
-}));
 
   const useStyles = makeStyles(theme => ({
     container: {
@@ -71,7 +58,6 @@ const useButtonStyles = makeStyles({
   height: 48,
     },
     
-    
     }));
 
 
@@ -81,7 +67,6 @@ export function Chat(){
     
     const paperClasses = useStyles();
     const fixedHeightPaper = clsx(paperClasses.paper, paperClasses.fixedHeight);
-    const chatClasses =useChatStyles();
 
 
     const classes = AppUseStyles();
@@ -89,22 +74,18 @@ export function Chat(){
  
     let this_user = getCurrentUser();
     let other_user = getOtherUser();
+
     const [chatContent, setChatContent] = React.useState('');
     const [currentMessage, setCurrentMessage] = React.useState('');
-    socket.on('chat', function(data){
+    socket.on('C_chat', function(data){
         console.log(data);
-        let new_message =  '<Paper className={style}>'
-        +'<Typography component="h5" variant="h6" justify="flex-end">'+
-         data.author + ": " + data.messageContent + 
-         '</Typography>'+
-         '</Paper>'
-        setChatContent(data.chatContent + "\n" + new_message);
+        setChatContent(data.chatContent + "\n" + data.author + ": " + data.messageContent);
     })
     
     const sendMessage = ()=>{
         this_user.socketID = socket.id;
         other_user.socketID = socket.id;//todo: edit....
-        socket.emit('chat',{
+        socket.emit('S_chat',{
             author: this_user.nickName,
             messageContent: currentMessage,
             chatContent: chatContent,
@@ -132,21 +113,10 @@ export function Chat(){
 
         {/**chat window */}
         <Paper className={fixedHeightPaper}>
-        
-          <pre style={{ fontFamily: "inherit" }}>
-          <JsxParser 
-          bindings ={{
-            style: chatClasses.paper,
-          }}
-          components={{ Paper, Typography }}
-          jsx={chatContent}
-          />
-          </pre>
-        
-     
-         
-          
-          
+         <pre style={{ fontFamily: 'inherit' }}>
+         {chatContent}
+            </pre>
+
           </Paper>
         </Grid>
 

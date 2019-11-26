@@ -55,6 +55,7 @@ async function findUser(user_data, success, failure) {
             if (users.length !== 1) {
                 failure("no email " + user_data.email + " found.");
             } else {
+                console.log("found user:", JSON.stringify(users[0]))
                 success(users[0]);
             }
         },
