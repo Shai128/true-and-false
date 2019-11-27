@@ -5,7 +5,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import {
       Link,
   } from "react-router-dom";
-
+//import {isUndefined} from './Utils.js';
 
   import Grid from '@material-ui/core/Grid';
 
@@ -43,10 +43,10 @@ export function PrintGames(props){
 
 
 
-export function PrintJoinGameDialog(props){
-  const {handleCloseWindow,  WindowOpen, nickName} = props;
+export function PrintJoinGameDialog(props){  
+  const {handleCloseWindow,  WindowOpen, currentUser} = props;
   const [gameID, setGameID] = React.useState("");
-  const [currentGameNickName, setCurrentGameNickName] = React.useState(nickName);
+  const [currentGameNickName, setCurrentGameNickName] = React.useState(currentUser.nickName);
   const [validGameID, setValidGameID] = React.useState(true);
   const [validNickName, setvalidNickName] = React.useState(true);
   const [nickNameHelperText, setNickNameHelperText] = React.useState('');
@@ -143,7 +143,7 @@ export function PrintJoinGameDialog(props){
           margin="dense"
           id="nickName"
           label="Nick Name"
-          value={currentGameNickName}
+          defaultValue={currentUser.nickName}
           onChange={(event)=>{
               setCurrentGameNickName(event.target.value);
           }}

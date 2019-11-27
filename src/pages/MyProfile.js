@@ -15,8 +15,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
 import {useStyles as AppUseStyles} from './../App.js';
-import {getCurrentUser} from './../user.js'
-
+import {getCurrentUserFromSession as getCurrentUser, updateUserToDB, getUserFromProps} from './../user.js'
 const useButtonStyles = makeStyles({
     root: {
       background: props =>
@@ -37,11 +36,13 @@ const useButtonStyles = makeStyles({
 
 
 
-export function MyProfile(){
+export function MyProfile(props){
+    let init_user = getUserFromProps(props);
     const classes = AppUseStyles();
     const buttonClasses = useButtonStyles();
-    const [user, setUser] = React.useState(getCurrentUser());
-    const [oldUser, setOldUser] = React.useState(getCurrentUser());
+    const [user, setUser] = React.useState(init_user);
+    getCurrentUser(user, setUser);
+    const [oldUser, setOldUser] = React.useState(user);
 
     const [changePasswordWindowOpen, setchangePasswordWindowOpen] = React.useState(false);
 
@@ -55,6 +56,12 @@ export function MyProfile(){
     };
     const handleClickChangePasswordWindow = () => {
       setchangePasswordWindowOpen(true);
+    };
+    const updateField = e => {
+      setUser({
+        ...user,
+        [e.target.name]: e.target.value
+      });
     };
     return (
         <Container component="main" maxWidth="xs">
@@ -83,12 +90,8 @@ export function MyProfile(){
                 label="First Name"
                 name="firstName"
                 autoComplete="firstName"
-                defaultValue={user.firstName}
-                onChange={(e)=>{
-                  let new_user = user;
-                  new_user.firstName = e.target.value
-                  setUser(new_user)}
-                  }
+                value={user.firstName}
+                onChange={updateField}                
               />
               </Grid>
 
@@ -100,12 +103,8 @@ export function MyProfile(){
                 label="Nick Name"
                 name="nickName"
                 autoComplete="nickName"
-                defaultValue={user.nickName}
-                onChange={(e)=>{
-                  let new_user = user;
-                  new_user.nickName = e.target.value
-                  setUser(new_user)}
-                  }
+                value={user.nickName}
+                onChange={updateField}
               />
               </Grid>
             <Grid item xs={12}>
@@ -117,12 +116,8 @@ export function MyProfile(){
                 label="Email Address"
                 name="email"
                 autoComplete="email"
-                defaultValue={user.email}
-                onChange={(e)=>{
-                  let new_user = user;
-                  new_user.email = e.target.value
-                  setUser(new_user)}
-                  }                
+                value={user.email}
+                onChange={updateField}                
               />
             </Grid>
             <Grid container  justify='center'  >
@@ -146,7 +141,7 @@ export function MyProfile(){
             <Grid item xs={12} >
               <Button className={buttonClasses.root} fullWidth
               onClick={()=>{
-                    saveUserInDataBase(user);
+                    updateUserToDB(user);
                     setOldUser(user);
                 }
             }>
@@ -219,7 +214,7 @@ function PrintChangePassword(props){
       let user_to_save =  oldUser;
       user_to_save.password = passwords.enteredNewPassword;
       setOldUser(user_to_save);
-      saveUserInDataBase(user_to_save);
+      updateUserToDB(user_to_save);
       displayPasswordSuccessfullyChanged();
     }
     const displayWrongOldPassword = ()=>{
@@ -337,17 +332,4 @@ function passwordIsStrongEnough(password){
 }
 
 
-function saveUserInDataBase(user){
-        console.log("updated user: ", user);
 
-        // let data = new FormData();
-        // data.append( "json", JSON.stringify( user ) );
-        fetch('http://localhost:8000/user', {
-        method: 'POST', // *GET, POST, PUT, DELETE, etc.
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        credentials: 'include',
-        body: 'json='+JSON.stringify( user )
-      });
-}

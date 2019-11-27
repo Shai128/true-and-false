@@ -38,6 +38,7 @@ import {LoginScreenHome as Home} from './LoginScreenHome.js';
 
 import {MyProfile} from './MyProfile.js';
 import {MySentences} from './MySentences.js';
+import {getCurrentUserFromSession as getCurrentUser} from './../user';
 
 
 const drawerWidth = 240;
@@ -120,13 +121,7 @@ const useStyles = makeStyles(theme => ({
     },
   }));
 
-/**
- *  <Switch>
-  <Route exact path={'/Home'}>  
-          <App/>
-          </Route>
-  </Switch>
- */
+
 
 export function LoginScreenRouter(){
 
@@ -150,7 +145,8 @@ export function LoginScreenRouter(){
   );
 }
 function LoginScreen(props){
-
+  const [currentUser, setCurrentUser] = React.useState({});
+    getCurrentUser(currentUser, setCurrentUser);
     const [open, setOpen] = React.useState(false);
     const handleDrawerOpen = () => {
       setOpen(true);
@@ -169,9 +165,11 @@ function LoginScreen(props){
 
 
     const listItems=(
-        <div>
-
-    <Link to={`${url}/Home`}> 
+        <div>              
+    <Link to={{
+      pathname:`${url}/Home`,
+      user: currentUser
+      }}> 
     <ListItem button>
      <ListItemIcon> 
          <HomeIcon /> 
@@ -180,7 +178,10 @@ function LoginScreen(props){
           </ListItem> 
           </Link>
 
-        <Link to={`${url}/MyProfile`}>      
+        <Link to={{
+          pathname: `${url}/MyProfile`,
+          user: currentUser
+        }}>      
             <ListItem button>
               <ListItemIcon>
                   <AccountCircleIcon />
@@ -189,7 +190,10 @@ function LoginScreen(props){
             </ListItem>
             </Link>
 
-            <Link to={`${url}/MySentences`}>      
+            <Link to={{
+              pathname: `${url}/MySentences`,
+              user: currentUser
+            }}>      
             <ListItem button>
               <ListItemIcon>
                   <ListIcon />
@@ -199,7 +203,10 @@ function LoginScreen(props){
             </Link>
 
 
-        <Link to={`${url}/GamesList`}>      
+        <Link to={{
+          pathname:`${url}/GamesList`,
+          user: currentUser
+        }}>      
           <ListItem button>
               <ListItemIcon>
                   <GamesIcon />
@@ -284,9 +291,7 @@ function LoginScreen(props){
           </Route>
 
 
-          <Route path={`${path}/MyProfile`}>
-            <MyProfile />
-          </Route>
+          <Route path={`${path}/MyProfile`} component ={MyProfile} />
 
 
           <Route path={`${path}/MySentences`}>

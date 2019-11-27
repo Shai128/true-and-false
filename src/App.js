@@ -317,7 +317,7 @@ const handleCloseGuestLoginWindow = () => {
             <PrintJoinGameDialog
             handleCloseWindow= {handleCloseGuestLoginWindow}
             WindowOpen= {guestLoginWindowOpen}
-            nickName = ''/>
+            currentUser = {{}}/>
           </Grid>
 
 

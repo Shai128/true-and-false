@@ -1,4 +1,7 @@
 
+import {okStatus, isUndefined} from './Utils.js'
+import { reject } from 'q';
+
 const  players= [{firstName: 'alon', nickName: 'alon', email:'123@gmail.com'}, {firstName: 'km', nickName: 'debil', email:'k@gmai.com',}, {firstName: 'Dan', nickName: 'Halif', email: 'halifadan@gmail.com'}];
 export function getCreatedGames(){
     var arr = [];
@@ -47,10 +50,72 @@ export const socket = io('http://localhost:8000');
 
 export function getCurrentUser(){
     return {
-        email: "email@gmail.com",
-        nickName: 'my special nickname',
-        password: 'password',
-        truths: [{id: 0, value:"My name is Alon"}, {id: 1,value:"I have Pizza"}],
-        lies: [{id:0, value:"I love computer science"}, {id:1, value:"this is a lie"}]
+        firstName: '',
+        email: "",
+        nickName: '',
+        password: '',
+        truths: [],
+        lies: []
     }
+}
+
+export function getCurrentUserFromSession(user, setUser){
+    if(userIsUpdated(user))
+        return;
+    
+    fetch('http://localhost:8000/getUserFromSession', {
+    method: 'GET', // *GET, POST, PUT, DELETE, etc.
+    headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    credentials: 'include'
+    }).then(response => {
+    console.log("response status:", response.status)
+    if (response.status !== okStatus) {
+        reject(response.status);
+    } else {
+        return new Promise(function(resolve, reject) {
+        resolve(response.json());
+        })
+    }
+    }).then(user => {
+        console.log('frontend got data: ', user);
+        setUser(user);
+        console.log("updated user", JSON.stringify(user))
+    }, fail_status => {
+    console.log("failed, status:", fail_status)
+    });
+}
+
+function userIsUpdated(user){
+    
+    return !isUndefined(user) && !isUndefined(user.email) && user.email !== '';
+}
+
+export function updateUserToDB(user){
+    fetch('http://localhost:8000/userupdate/'+user._id, {
+                method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                credentials: 'include',
+                body: 'json=' + JSON.stringify(user)
+              });
+}
+
+export function emptyUser(){
+    return {
+        firstName: '',
+        nickName: '',
+        email: '',
+        password: '',
+
+    }
+}
+
+export function getUserFromProps(props){
+    if(!isUndefined(props) &&!isUndefined(props.location) && !isUndefined(props.location.user))
+        return props.location.user;
+    return emptyUser();
+
 }

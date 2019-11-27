@@ -19,23 +19,21 @@ import {
     Route,
   } from "react-router-dom";
 import {GamePage} from './GamePage.js';
-import {getCreatedGames, getParticipatedGames, getCurrentUser} from './../user';
+import {getCreatedGames, getParticipatedGames, getCurrentUserFromSession as getCurrentUser, getUserFromProps} from './../user';
 import {PrintGames, PrintJoinGameDialog} from './../PagesUtils';
-import {okStatus} from './../Utils.js'
-import { reject } from 'q';
-import { resolve } from 'dns';
 
 
-export function LoginScreenHome(){
+export function LoginScreenHome(props){
     let { path, url } = useRouteMatch();
+    let user = getUserFromProps(props);
     return(
         <Switch>
 
         <Route exact path={path}>
-        <Home path = {path} url = {url}/>
+        <Home path = {path} url = {url} user={user}/>
         </Route>
 
-        <Route path={`${path}/GamePage/:id`} exact component={GamePage} />
+        <Route path={`${path}/GamePage/:id`} exact component={GamePage} user={user} />
 
         </Switch>
 
@@ -95,30 +93,8 @@ const handleCloseJoinGameWindow = () => {
 
     const classes = useStyles();
     const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
-    const [currentUser, setCurrentUser] = React.useState(getCurrentUser());
-
-    fetch('http://localhost:8000/getUserFromSession', {
-      method: 'GET', // *GET, POST, PUT, DELETE, etc.
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      credentials: 'include'
-    }).then(response => {
-      console.log("response status:", response.status)
-      if (response.status !== okStatus) {
-        reject(response.status);
-      } else {
-        return new Promise(function(resolve, reject) {
-          resolve(response.json());
-        })
-      }
-    }).then(user => {
-      console.log('frontend got data: ', user);
-        setCurrentUser(user);
-        console.log("updated user", JSON.stringify(currentUser))
-    }, fail_status => {
-      console.log("failed, status:", fail_status)
-    });
+    const [currentUser, setCurrentUser] = React.useState(props.user);
+    getCurrentUser(currentUser, setCurrentUser);
 
     return (
 
@@ -130,7 +106,7 @@ const handleCloseJoinGameWindow = () => {
             <Grid item xs={12}>
 
             <Typography component="h1" variant="h2" justify="center">
-              Welcome {currentUser.email} 
+              Welcome {currentUser.email}!
         </Typography>
             </Grid>
         <Grid item xs={12} sm={6}>
@@ -141,7 +117,8 @@ const handleCloseJoinGameWindow = () => {
 
         <PrintCreateGameDialog
             handleCloseCreateGameWindow= {handleCloseCreateGameWindow}
-            createGameWindowOpen= {createGameWindowOpen}/>
+            createGameWindowOpen= {createGameWindowOpen}
+            currentUser={currentUser}/>
         </Grid>
 
         <Grid item xs={12} sm={6}>
@@ -152,7 +129,7 @@ const handleCloseJoinGameWindow = () => {
         <PrintJoinGameDialog
         handleCloseWindow= {handleCloseJoinGameWindow}
         WindowOpen= {joinGameWindowOpen}
-        nickName = {getCurrentUser().nickName}/>
+        currentUser = {currentUser}/>
         </Grid>
 
         </Grid>
@@ -238,9 +215,9 @@ const usegameListItemsStyles = makeStyles(theme=>({
 
 
 function PrintCreateGameDialog(props){
-    const {handleCloseCreateGameWindow,  createGameWindowOpen} = props;
+    const {handleCloseCreateGameWindow,  createGameWindowOpen, currentUser} = props;
     const [gameName, setGameName] = React.useState("");
-    const [currentGameNickName, setCurrentGameNickName] = React.useState(getCurrentUser().nickName);
+    const [currentGameNickName, setCurrentGameNickName] = React.useState(currentUser.nickName);
 
     const startGame = ()=>{
 /*
@@ -288,7 +265,7 @@ function PrintCreateGameDialog(props){
             margin="dense"
             id="nickName"
             label="Nick Name"
-            defaultValue={getCurrentUser().nickName}
+            defaultValue={currentUser.nickName}
             onChange={(event)=>{
                 setCurrentGameNickName(event.target.value);
             }}
