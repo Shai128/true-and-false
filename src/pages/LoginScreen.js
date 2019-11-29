@@ -38,7 +38,7 @@ import {LoginScreenHome as Home} from './LoginScreenHome.js';
 
 import {MyProfile} from './MyProfile.js';
 import {MySentences} from './MySentences.js';
-import {getCurrentUserFromSession as getCurrentUser} from './../user';
+import {getCurrentUserFromSession as getCurrentUser, emptyUser} from './../user';
 
 
 const drawerWidth = 240;
@@ -145,7 +145,7 @@ export function LoginScreenRouter(){
   );
 }
 function LoginScreen(props){
-  const [currentUser, setCurrentUser] = React.useState({});
+  const [currentUser, setCurrentUser] = React.useState(emptyUser);
     getCurrentUser(currentUser, setCurrentUser);
     const [open, setOpen] = React.useState(false);
     const handleDrawerOpen = () => {

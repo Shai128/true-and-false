@@ -16,6 +16,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 
 import {useStyles as AppUseStyles} from './../App.js';
 import {getCurrentUserFromSession as getCurrentUser, updateUserToDB, getUserFromProps} from './../user.js'
+import {passwordIsStrongEnough } from './../Utils.js'
 const useButtonStyles = makeStyles({
     root: {
       background: props =>
@@ -139,7 +140,10 @@ export function MyProfile(props){
             
 
             <Grid item xs={12} >
-              <Button className={buttonClasses.root} fullWidth
+              <Button 
+              className={buttonClasses.root} 
+              fullWidth
+              type="submit"
               onClick={()=>{
                     updateUserToDB(user);
                     setOldUser(user);
@@ -308,7 +312,7 @@ function PrintChangePassword(props){
         <Button onClick={onCloseWindow} color="primary">
           Cancel
         </Button>
-        <Button onClick={onClickSave} color="primary">
+        <Button type="submit" onClick={onClickSave} color="primary">
               Save
         </Button>
 
@@ -327,9 +331,6 @@ function validOldPassword(oldPassword, enteredOldPassword){
   return oldPassword === enteredOldPassword // todo: hash the entered old password
 }
 
-function passwordIsStrongEnough(password){
-  return password.length >= 6; // todo: hash the entered old password
-}
 
 
 

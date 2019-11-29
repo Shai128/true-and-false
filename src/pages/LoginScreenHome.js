@@ -93,7 +93,7 @@ const handleCloseJoinGameWindow = () => {
 
     const classes = useStyles();
     const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
-    const [currentUser, setCurrentUser] = React.useState(props.user);
+    const [currentUser, setCurrentUser] = React.useState(getUserFromProps(props));
     getCurrentUser(currentUser, setCurrentUser);
 
     return (
@@ -243,7 +243,7 @@ function PrintCreateGameDialog(props){
     }
     return(
         <Dialog open={createGameWindowOpen} onClose={handleCloseCreateGameWindow} aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title">Select Room Name</DialogTitle>
+        <DialogTitle id="form-dialog-title">Create a Room</DialogTitle>
         <DialogContent>
           <DialogContentText>
           </DialogContentText>

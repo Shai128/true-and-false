@@ -14,6 +14,7 @@ import IconButton from '@material-ui/core/IconButton';
 import {useStyles as AppUseStyles} from './../App.js';
 import DeleteTwoToneIcon from '@material-ui/icons/DeleteTwoTone';
 
+import {emptyUser, getUserFromPropsOrFromSession, updateUserToDB} from './../user.js'
 
 const useButtonStyles = makeStyles({
     root: {
@@ -31,12 +32,12 @@ const useButtonStyles = makeStyles({
     },
   });
 
-export function MySentences(){
+export function MySentences(props){
 
     const classes = AppUseStyles();
     const buttonClasses = useButtonStyles();
-    let user = getUser();
-
+    const [user, setUser] = useState(emptyUser);
+    getUserFromPropsOrFromSession(props, setUser);
     const [truths, setTruths] = useState(user.truths);
     const [lies, setLies] = useState(user.lies);
 
@@ -78,26 +79,12 @@ export function MySentences(){
 
             <Grid item xs={12} >
 
-              <Button className={buttonClasses.root} fullWidth
+              <Button 
+              className={buttonClasses.root} 
+              fullWidth
+              type="submit"
               onClick={()=>{
-               let new_user = user;
-               new_user.truths = truths;
-               new_user.lies = lies;
-                    let data = new FormData();
-                    data.append( "json", JSON.stringify( user ) );
-                    fetch('http://localhost:8000/user', {
-                    method: 'POST', // *GET, POST, PUT, DELETE, etc.
-                    headers: {
-                      'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    credentials: 'include',
-                    body: 'json='+JSON.stringify( user )
-                  });
-
-                //todo: save truths and lies in the user.
-                  console.log('truths: ', truths); //to delete
-                  console.log('lies: ', lies);// to delete
-
+               updateUserToDB(user);
                 }
             }>
               Save
@@ -114,7 +101,7 @@ export function MySentences(){
     );
 
 }
-
+/*
 function getUser(){
     return {
         email: "email@gmail.com",
@@ -124,7 +111,7 @@ function getUser(){
         lies: [{id:0, value:"I love computer science"}, {id:1, value:"this is a lie"}]
     }
 }
-
+*/
 function GetSentencesComponentsByList(props){
     const listStyles = makeStyles(theme=>({
         listItem:{

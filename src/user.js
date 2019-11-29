@@ -1,7 +1,7 @@
 
 import {okStatus, isUndefined} from './Utils.js'
 import { reject } from 'q';
-
+const server = 'http://localhost:8000';
 const  players= [{firstName: 'alon', nickName: 'alon', email:'123@gmail.com'}, {firstName: 'km', nickName: 'debil', email:'k@gmai.com',}, {firstName: 'Dan', nickName: 'Halif', email: 'halifadan@gmail.com'}];
 export function getCreatedGames(){
     var arr = [];
@@ -44,7 +44,7 @@ export function getParticipatedGames(){
 
 
 const io = require('socket.io-client');
-export const socket = io('http://localhost:8000');
+export const socket = io('server');
 
 
 
@@ -63,7 +63,7 @@ export function getCurrentUserFromSession(user, setUser){
     if(userIsUpdated(user))
         return;
     
-    fetch('http://localhost:8000/getUserFromSession', {
+    fetch(server+'/getUserFromSession', {
     method: 'GET', // *GET, POST, PUT, DELETE, etc.
     headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -88,12 +88,11 @@ export function getCurrentUserFromSession(user, setUser){
 }
 
 function userIsUpdated(user){
-    
     return !isUndefined(user) && !isUndefined(user.email) && user.email !== '';
 }
 
 export function updateUserToDB(user){
-    fetch('http://localhost:8000/userupdate/'+user._id, {
+    fetch(server+'/userupdate/'+user._id, {
                 method: 'POST', // *GET, POST, PUT, DELETE, etc.
                 headers: {
                   'Content-Type': 'application/x-www-form-urlencoded'
@@ -109,13 +108,37 @@ export function emptyUser(){
         nickName: '',
         email: '',
         password: '',
-
+        truths: [],
+        lies: [],
+        createdGames: [],
+        participatedGames: []
     }
 }
 
 export function getUserFromProps(props){
     if(!isUndefined(props) &&!isUndefined(props.location) && !isUndefined(props.location.user))
         return props.location.user;
+    if(!isUndefined(props) &&!isUndefined(props.user))
+        return props.user;
     return emptyUser();
+}
 
+export function getUserFromPropsOrFromSession(props, setUser){
+    var user = getUserFromProps(props);
+    if(userIsUpdated(user)){
+        setUser(user)
+        return user;
+    }
+    getCurrentUserFromSession(user, setUser)
+}
+
+export function logIn(user, func){
+    fetch(server+'/user/'+user.email+'/'+user.password, {
+        method: 'GET', // *GET, POST, PUT, DELETE, etc.
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        params: user,
+        credentials: 'include'
+        }).then(func);   
 }

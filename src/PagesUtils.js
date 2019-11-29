@@ -116,7 +116,7 @@ export function PrintJoinGameDialog(props){
   }
   return(
       <Dialog open={WindowOpen} onClose={onCloseWindow} aria-labelledby="form-dialog-title">
-      <DialogTitle id="form-dialog-title">Select Room</DialogTitle>
+      <DialogTitle id="form-dialog-title">Join a Room</DialogTitle>
       <DialogContent>
         <DialogContentText>
         </DialogContentText>

@@ -22,8 +22,8 @@ import {
 import {LoginScreenRouter as LoginScreen} from './pages/LoginScreen.js';
 import {Chat as ChatRoom} from './pages/Chat.js';
 import {PrintJoinGameDialog} from './PagesUtils.js';
-import {okStatus} from './Utils.js'
-
+import {okStatus, validEmail, passwordIsStrongEnough, isUndefined} from './Utils.js'
+import {emptyUser, logIn} from './user.js'
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
@@ -102,7 +102,68 @@ export const useStyles = makeStyles(theme => ({
 
 function SignUp() {
   const classes = useStyles();
-  const [user, setUser] = useState({});
+  const [user, setUser] = useState(emptyUser);
+  const initMessages = {
+    errorPassword: false,
+    errorFirstName: false,
+    errorEmail: false,
+    passwordHelperText: '',
+    firstNameHelperText: '',
+    emailHelperText: ''
+  }
+  const [textsMessages, setTextsMessages] = React.useState(initMessages);
+  const updateField = e => {
+    setUser({
+      ...user,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  /*const errorEmail = 'errorEmail', emailHelperText= 'emailHelperText',
+   errorPassword='errorPassword', passwordHelperText='passwordHelperText',
+   firstNameHelperText='firstNameHelperText', errorFirstName='errorFirstName';
+  const changeTextMessage = (error, errorName, helperText, helperTextName) =>{
+    setTextsMessages({
+      ...textsMessages,
+      [errorName]: error,
+      [helperTextName]: helperText
+    });
+  }
+*/
+
+  /**
+   * returns true is the user is valid or false if it is not.
+   * prints error messages accordingly
+   */
+  const validUser = ()=>{
+
+    var newTextsMessages = initMessages;
+
+    var isValid = true;
+      if(!validEmail(user.email)){
+        newTextsMessages.errorEmail = true;
+        newTextsMessages.emailHelperText = "please provide a valid email address"
+        //changeTextMessage(true,errorEmail, "please provide a valid email address", emailHelperText);
+        isValid= false;
+      }
+      
+      if(!passwordIsStrongEnough(user.password)){
+        newTextsMessages.errorPassword = true;
+        newTextsMessages.passwordHelperText = "please provide a strong password"
+        //changeTextMessage(true,errorPassword, "please provide a strong password", passwordHelperText);
+        isValid= false;
+      }
+      if(isUndefined(user.firstName) || user.firstName  === ''){
+        newTextsMessages.errorFirstName = true;
+        newTextsMessages.firstNameHelperText = "please provide a firstName"
+        //changeTextMessage(true, errorFirstName, "please provide a firstName", firstNameHelperText);
+        isValid= false;
+      }
+      setTextsMessages(newTextsMessages);
+      return isValid;
+  }
+
+  let history = useHistory();
 
   return (
     <Container component="main" maxWidth="xs">
@@ -119,6 +180,8 @@ function SignUp() {
            
           <Grid item xs={12}>
               <TextField
+                error={textsMessages.errorFirstName}
+                helperText = {textsMessages.firstNameHelperText}
                 variant="outlined"
                 required
                 fullWidth
@@ -126,10 +189,7 @@ function SignUp() {
                 label="First Name"
                 name="firstName"
                 autoComplete="firstName"
-                onChange = {(event)=>{
-                  let new_user = user;
-                  new_user.firstName = event.target.value;
-                  setUser(new_user)}}
+                onChange = {updateField}
               />
               </Grid>
               <Grid item xs={12}>
@@ -140,15 +200,13 @@ function SignUp() {
                 label="Nick Name"
                 name="nickName"
                 autoComplete="nickName"
-                onChange={(event) => {
-                  let new_user = user;
-                  new_user.nickName = event.target.value;
-                  setUser(new_user)
-                }}
+                onChange={updateField}
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
+                error={textsMessages.errorEmail}
+                helperText = {textsMessages.emailHelperText}
                 variant="outlined"
                 required
                 fullWidth
@@ -156,15 +214,13 @@ function SignUp() {
                 label="Email Address"
                 name="email"
                 autoComplete="email"
-                onChange={(event) => {
-                  let new_user = user;
-                  new_user.email = event.target.value;
-                  setUser(new_user)
-                }}
+                onChange={updateField}
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
+                error={textsMessages.errorPassword}
+                helperText = {textsMessages.passwordHelperText}
                 variant="outlined"
                 required
                 fullWidth
@@ -173,24 +229,23 @@ function SignUp() {
                 type="password"
                 id="password"
                 autoComplete="current-password"
-                onChange={(event) => {
-                  let new_user = user;
-                  new_user.password = event.target.value;
-                  setUser(new_user)
-                }}
+                onChange={updateField}
               />
             </Grid>
 
           </Grid>
           <Button
-            type="submit"
+            //type="submit"
             fullWidth
             variant="contained"
             color="primary"
             className={classes.submit}
             onClick={()=>{
+              if(!validUser())
+                return;
               // let data = new FormData();
               // data.append( "json", JSON.stringify(user));
+              
               fetch('http://localhost:8000/user', {
                 method: 'POST', // *GET, POST, PUT, DELETE, etc.
                 headers: {
@@ -198,7 +253,15 @@ function SignUp() {
                 },
                 credentials: 'include',
                 body: 'json=' + JSON.stringify(user)
-              });
+              }).then( (data) =>{
+                logIn(user, (data)=>{
+                  console.log('frontend got data: ', data);
+                  if(data.status === okStatus ){
+                    history.push("/LoginScreen/MySentences");
+                  }
+                });
+              })
+
             }}>
 
             Sign Up
@@ -407,7 +470,13 @@ function SignIn() {
   const classes = useStyles();
   let history = useHistory();
 
-
+  const [user, setUser] = useState(emptyUser());
+  const updateField = e => {
+    setUser({
+      ...user,
+      [e.target.name]: e.target.value
+    });
+  };
   return (
     <div className="App" >
       <header className="App-header" >
@@ -431,6 +500,9 @@ function SignIn() {
                     margin="normal"
                     variant="filled"
                     fullWidth
+                    name = 'email'
+                    value = {user.email}
+                    onChange = {updateField}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -444,6 +516,9 @@ function SignIn() {
                     margin="normal"
                     variant="filled"
                     fullWidth
+                    name = 'password'
+                    value = {user.password}
+                    onChange = {updateField}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -455,21 +530,14 @@ function SignIn() {
                         email: document.getElementById('EmailInput').value,
                         password: document.getElementById('PasswordInput').value
                       }
-              
-                      fetch('http://localhost:8000/user/'+user.email+'/'+user.password, {
-                        method: 'GET', // *GET, POST, PUT, DELETE, etc.
-                        headers: {
-                          'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        params: user,
-                        credentials: 'include'
-                      }).then(function(data){
-                        
+                      
+                      logIn(user, (data)=>{
                         console.log('frontend got data: ', data);
                         if(data.status === okStatus ){
-                          history.push("/LoginScreen");
+                            history.push("/LoginScreen");
                         }
                       });
+
                     }}>
                     Sign In
       </Button>
