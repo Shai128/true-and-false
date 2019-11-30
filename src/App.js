@@ -18,6 +18,8 @@ import {
 } from "react-router-dom";
 
 import {LoginScreen} from './pages/LoginScreen.js';
+import {JoinGame} from './pages/JoinGame.js';
+
 
 function Copyright() {
   return (
@@ -215,6 +217,10 @@ function LinksPage(){
             <LoginScreen />
           </Route>
 
+          <Route exact path="/JoinGame">
+            <JoinGame />
+          </Route>
+
           
 
         </Switch>
@@ -269,6 +275,15 @@ function Home(){
             <Link to="/LoginScreen">
             <Button variant="contained" color="primary" fullWidth  className={classes.button}>
             LoginScreen
+          </Button>
+          </Link>
+            </Grid>
+
+
+            <Grid item xs={12} sm={6}>
+            <Link to="/JoinGame">
+            <Button variant="contained" color="primary" fullWidth  className={classes.button}>
+            Join A Game
           </Button>
           </Link>
             </Grid>
