@@ -83,7 +83,7 @@ function endSession(req, res) {
 
 function getIdentifierFromSession(req, success, failure) {
   const id = req.session.email;
-  if (!id) { failure() } else { 
+  if (!id) { failure("session does not exist") } else { 
     console.log("id from session:", id)
     success(id) 
   }

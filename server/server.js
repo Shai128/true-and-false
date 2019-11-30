@@ -4,7 +4,13 @@ const {
   findUser,
   updateUser,
   findUserByField
-} = require("../db/user") //imports create user
+} = require("../db/user") // imports all user functions
+
+const {
+  createRoom,
+  addUserToRoom
+} = require("../db/rooms") //imports all room functions
+
 const {
   getRandomSentence,
   standardErrorHandling,
@@ -165,7 +171,7 @@ app.get('/getSessionIdentifier', (req, res) => {
   getIdentifierFromSession(
     req,
     (id) => {res.status(200).send(id)},
-    () => {standardErrorHandling(res, "session does not exist")}
+    (err) => {standardErrorHandling(res, err)}
   )
 })
 
@@ -193,8 +199,37 @@ app.get('/getUserFromSession', (req, res) => {
         (user_data) => {res.status(200).send(JSON.stringify(user_data))},
         (err) => standardErrorHandling(res, err))
     },
-    () => {standardErrorHandling(res, "session does not exist")}
+    (err) => {standardErrorHandling(res, err)}
   )
+})
+
+app.post('/createRoom',(req,res)=> {
+  let data = JSON.parse(req.body.json)
+  console.log('trying to create room with data: ' + JSON.stringify(data));
+  createRoom(data,
+  ()=>{res.status(200).send("success")},(err)=>{standardErrorHandling(res, err)});
+})
+
+app.get('/joinRoom/:roomId', (req, res) => {
+  getIdentifierFromSession(
+    req,
+    (userId) => {
+      addUserToRoom(
+        userId, 
+        req.params.roomId,
+        () => {res.status(200).send("successfuly joined room")},
+        (err) => standardErrorHandling(res, err)
+      )
+    },
+    (err) => {standardErrorHandling(res, err)}
+  )
+})
+
+app.get('/userList/:roomId', (req, res) => {
+  res.status(200).send(JSON.stringify({
+    PlayersAvailable: ["Dan", "Ron", "Alon"],
+    PlayersUnAvailable: ["Sagi", "Siraj", "Nadav"]
+  }))
 })
 
 const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`))
