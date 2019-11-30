@@ -2,17 +2,24 @@ const {mongoose} = require("./config")
 const salt = '' //todo: change to a real good salt
 const iterations = 1000;
 
-const userSchema = new mongoose.Schema(
+const userSchema= new mongoose.Schema(
     { 
-        password: {type: String, required: true},
-        email: {type: String, unique: true, required: true},
+        email:String,
+        password:String,
         salt: String,
         iterations: Number,
-        nickName: {type: String, required: true},
-        //games: {} //todo
+        nickName: String,
+        current_room: Number,
+        score: Number,
+        pic_url: String,
+        true_sentences:[{type:String}],
+        false_sentences:[{type:String}],
+        socket: Number
         });
 const userModel = mongoose.model('user',userSchema) //creating the class userModel. a class of types
                                                     // that comply the conditions of {userSchema and document}
+    
+
 
 /**
  * creates a new userModel object with the given user and saves it in the db
@@ -31,16 +38,10 @@ function createUser(user,success,failure){
         //games: {} // creating a user with no games
                                  });
     //saves the user in the db
+    console.log("entered");
     newUser.save((err)=>{
-        if(err) {
-            switch(err.code) {
-                case 11000:
-                    failure("email already taken");
-                    break;
-                default:
-                    failure(err)
-            }
-        }
+        if(err)
+            failure(err)
         else 
             success()
     })
@@ -49,18 +50,29 @@ function createUser(user,success,failure){
 
 async function findUser(user_data, success, failure) {
     findUserByField(
-        'email', 
-        user_data.email,
+        'username', 
+        user_data.username,
         (users) => {
             if (users.length !== 1) {
-                failure("no email " + user_data.email + " found.");
+                failure("no username " + user_data.username + " found.");
             } else {
-                console.log("found user:", JSON.stringify(users[0]))
                 success(users[0]);
             }
         },
         failure)
 }
+//I added
+async function deleteUser(data,success,failure){
+    //console.log("entered delete user");
+    const docs = await userModel.deleteOne({email: data.email});
+    console.log("docs:"+docs);
+    if(!docs){
+        failure("no user with mail "+data.email +" found");
+    } else {
+        success("user with mail "+data.email+"was deleted successfuly" );
+    }
+
+} 
 
 async function findUserByField(field, value, success, failure) {
     var query = {};
@@ -85,5 +97,6 @@ async function updateUser(data, success, failure) {
 exports.createUser = createUser
 exports.findUser = findUser
 exports.updateUser = updateUser
+exports.deleteUser=deleteUser
 exports.findUserByField = findUserByField
-
+exports.userModel = userModel   
