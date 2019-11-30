@@ -47,18 +47,18 @@ const io = require('socket.io-client');
 export const socket = io('server');
 
 
-
+/**
+ * a dummy function that returns an empty user;
+ */
 export function getCurrentUser(){
-    return {
-        firstName: '',
-        email: "",
-        nickName: '',
-        password: '',
-        truths: [],
-        lies: []
-    }
+    return emptyUser();
 }
 
+/**
+ * note- this function does nothing if the user contains an email that is not ''
+ * @param {the user that will be assigned with the user from the session} user 
+ * @param {a function that sets the user from the session to the user variable} setUser 
+ */
 export function getCurrentUserFromSession(user, setUser){
     if(userIsUpdated(user))
         return;
@@ -87,10 +87,20 @@ export function getCurrentUserFromSession(user, setUser){
     });
 }
 
+/**
+ * 
+ * @param {the user that is checked if updated} user 
+ * returns true if the user has an email.
+ */
 function userIsUpdated(user){
     return !isUndefined(user) && !isUndefined(user.email) && user.email !== '';
 }
 
+/**
+ * 
+ * @param {the user to be updated to the DB} user 
+ * edits the user with the same user_.id and puts instead the given user
+ */
 export function updateUserToDB(user){
     fetch(server+'/userupdate/'+user._id, {
                 method: 'POST', // *GET, POST, PUT, DELETE, etc.
@@ -102,6 +112,9 @@ export function updateUserToDB(user){
               });
 }
 
+/**
+ * returns a user with no content. can be used as an initial value for a user.
+ */
 export function emptyUser(){
     return {
         firstName: '',
@@ -115,6 +128,11 @@ export function emptyUser(){
     }
 }
 
+/**
+ * 
+ * @param {the props that contains the user} props 
+ * returns the user from the props. if the props doesn't contain a user, it returns an empty user.
+ */
 export function getUserFromProps(props){
     if(!isUndefined(props) &&!isUndefined(props.location) && !isUndefined(props.location.user))
         return props.location.user;
@@ -123,6 +141,12 @@ export function getUserFromProps(props){
     return emptyUser();
 }
 
+/**
+ * 
+ * @param {the props we use to read the user} props 
+ * @param {used to set the user from the session if it is not in the props} setUser 
+ * sets the user from props, if exists in props, or reads the user from the db and sets with setUser.
+ */
 export function getUserFromPropsOrFromSession(props, setUser){
     var user = getUserFromProps(props);
     if(userIsUpdated(user)){
@@ -132,6 +156,14 @@ export function getUserFromPropsOrFromSession(props, setUser){
     getCurrentUserFromSession(user, setUser)
 }
 
+
+// this function will be changed because func is not supposed to access STATUS.
+/**
+ * 
+ * @param {contains the email and password of the user that is willing to log in} user 
+ * @param {a function that will be executed after a successful login} func 
+ * tries to log in with the given user. saves the user in the session in case of successful login.
+ */
 export function logIn(user, func){
     fetch(server+'/user/'+user.email+'/'+user.password, {
         method: 'GET', // *GET, POST, PUT, DELETE, etc.
