@@ -8,7 +8,8 @@ const {
 
 /*const {
   createRoom,
-  addUserToRoom
+  addUserToRoom,
+  findRoomById
 } = require("../db/rooms") //imports all room functions*/
 
 const {
@@ -239,18 +240,34 @@ app.get('/userList/:roomId', (req, res) => {
 
 /**
  * uses the sockets of everyone in the room to send information about new user joined
- */
+ *//*
 function notifyRoomAboutNewUser(roomId, newUserId) {
-  
+  findUser(
+    {email: newUserId},
+    (newUserObject) => {
+      findRoomById(
+        roomId,
+        (roomObject) => {
+          roomObject.user_in_room.forEach(userObject => {
+            if (userSockets[userObject.email] !== undefined) {
+              userSockets[userObject.email].emit('userJoined', JSON.stringify(newUserObject))
+            }
+          });
+        },
+        (err) => console.log(err)
+      )
+    },
+    (err) => console.log(err)
+  )
 }
-
+*/
 const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 const io = socket(server);
 io.use(sharedsession(session, {
   autoSave: true
 }));
 
-
+var userSockets = {}
 
 io.on('connection', function (socket) {
   logDiv("new connection")
@@ -265,12 +282,17 @@ io.on('connection', function (socket) {
     console.log(userdata.user.nickName + " has logged in");
     console.log(socket.handshake.session.userdata);
     socket.handshake.session.userdata = userdata;
+    userSockets.push({
+      key: userdata.user.email,
+      value: socket
+    })
     socket.handshake.session.save();
   });
 
   socket.on("logout", function(userdata) {
     if (socket.handshake.session.userdata) {
       delete socket.handshake.session.userdata;
+      delete userSockets.container[socket.handshake.session.userdata.user.email]
       socket.handshake.session.save();
     }
   });
