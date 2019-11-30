@@ -98,6 +98,62 @@ const classes = useStylesRoomName();
 }
 
 
+
+const PlayersAvailable = [
+  createData('Shai'),
+  createData('Sagi'),
+  createData('Dan'),
+  createData('Ron'),
+  createData('Alon'),
+  createData('Siraj'),
+];
+
+const PlayersUnAvailable = [
+  createData('Nadav'),
+];
+
+  // ---------------- someone join the room -----------------------
+
+  export function InitTheRoom(){
+    fetch('http://localhost:8000/userList/' + 3, { //Room id!!!! need to change!
+      method: 'GET', // *GET, POST, PUT, DELETE, etc.
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      credentials: 'include',
+    }).then((response) =>{
+      if (response.status !== okStatus) {
+        reject(response.status)
+      } else {
+        return new Promise(function(resolve, reject) {
+          resolve(response.json());
+        })
+      }}).then(data => {
+
+        PlayersAvailable = [...data.PlayersAvailable];
+        PlayersUnAvailable = [...data.PlayersUnAvailable];
+
+      }, fail_status => {
+        console.log("failed. status: ", fail_status)
+      })
+  }
+
+
+  export function UserJoinTheRoom(){
+
+
+  }
+
+
+  // socket.on('userJoin', function(data){
+  //   console.log(data);
+  //   data.emit('playerList', new Date());
+  // })
+
+
+  // ------------------ end of function --------------------------
+
+
 // ------------------------------------------------------------------------------------------------------
 
 function HomepageImage() {
