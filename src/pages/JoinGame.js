@@ -47,15 +47,14 @@ const io = require('socket.io-client');
 const socket = io('http://localhost:8000');
 const okStatus = 200;
 
-const PlayersAvailable = [];
-const PlayersUnAvailable = [];
-
-//var setPlayersUnAvailable, setPlayersAvailable;
+//const PlayersAvailable = [];
+//const PlayersUnAvailable = [];
 
 export function JoinGame(){  
 
   const [PlayersAvailable, setPlayersAvailable] = useState([]);
   const [PlayersUnAvailable, setPlayersUnAvailable] = useState([]);
+
 
 const useStylesRoomName = makeStyles(theme => ({
   title: {
@@ -65,8 +64,9 @@ const useStylesRoomName = makeStyles(theme => ({
 
 const classes = useStylesRoomName();
 
-InitTheRoom();
-console.log("arr2: ", PlayersAvailable)
+InitTheRoom(PlayersAvailable,setPlayersAvailable,PlayersUnAvailable,setPlayersUnAvailable);
+
+//console.log("players -->", PlayersAvailable, PlayersUnAvailable);
 
   return (
     <div>
@@ -104,16 +104,16 @@ console.log("arr2: ", PlayersAvailable)
    </Grid>
    </Grid> */}
 
-   <PlayerListAvailable/>
-   <PlayerListUnavailable/>
+   <PlayerListAvailable PlayersAvailable = {PlayersAvailable}/>
+   <PlayerListUnavailable PlayersUnAvailable = {PlayersUnAvailable}/>
 
   </div>
   );
 
 
  function InitTheRoom(){   
-    console.log("fetching user list")
-    fetch('http://localhost:8000/userList/' + 3, { //Room id!!!! need to change!
+  ///  console.log("fetching user list")
+    fetch('http://localhost:8000/userList/' + '3', { //Room id!!!! need to change!
       method: 'GET', // *GET, POST, PUT, DELETE, etc.
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -127,11 +127,20 @@ console.log("arr2: ", PlayersAvailable)
           resolve(response.json());
         })
       }}).then(data => {
-        console.log("got data", data.PlayersAvailable)
-        console.log("arr1: ", PlayersAvailable, PlayersAvailable === [], typeof(PlayersAvailable))
-        if (PlayersAvailable === [] && data.PlayersAvailable !== undefined) {
+       // console.log("got data", data.PlayersAvailable, data.PlayersUnAvailable);
+       // console.log("playersAvail 1111 -->", PlayersAvailable);
+      //  setPlayersAvailable(data.PlayersAvailable);
+       // console.log("players -->", PlayersAvailable);
+       // console.log("arr1: ", PlayersAvailable, PlayersAvailable === [], typeof(PlayersAvailable))
+
+        if (PlayersAvailable.length === 0 && data.PlayersAvailable !== undefined &&
+          PlayersUnAvailable.length === 0 && data.PlayersUnAvailable !== undefined) {
+       //   console.log("got here");
+       //   console.log(data);
           setPlayersAvailable(data.PlayersAvailable);
-          setPlayersUnAvailable(data.PlayersUnavailable);
+          setPlayersUnAvailable(data.PlayersUnAvailable);
+       //   console.log("playersAvail -->", PlayersAvailable);
+       //   console.log("playersUnAvail -->", PlayersUnAvailable);
         }
       }, fail_status => {
         console.log("failed. status: ", fail_status)
@@ -157,11 +166,7 @@ console.log("arr2: ", PlayersAvailable)
 
   // ---------------- someone join the room -----------------------
 
- 
-
   export function UserJoinTheRoom(){
-
-
   }
 
 
@@ -402,7 +407,7 @@ const useStyles = makeStyles({
 
 // ------------------------------------------------------------------------------------- //
 
-export function PlayerListUnavailable() {
+export function PlayerListUnavailable(props) {
   const classes = useStyles();
 
   const [page, setPage] = React.useState(0);
@@ -416,6 +421,8 @@ export function PlayerListUnavailable() {
     setRowsPerPage(+event.target.value);
     setPage(0);
   };
+
+  const PlayersUnAvailable = props.PlayersUnAvailable;
 
   return (
     <Paper className={classes.root}>
@@ -547,7 +554,11 @@ export function SwitchListSecondary() {
 // ----------------------------------------------------------------------------------------------------------------------- //
 
 
-export function PlayerListAvailable() {
+export function PlayerListAvailable(props) {
+
+  //console.log("ron -->", props.PlayersAvailable);
+
+
   const classes = useStyles();
 
   const [page, setPage] = React.useState(0);
@@ -561,6 +572,10 @@ export function PlayerListAvailable() {
     setRowsPerPage(+event.target.value);
     setPage(0);
   };
+
+  const {PlayersAvailable} = props;
+  //console.log("data-->", props.PlayersAvailable)
+
 
   return (
     <Paper className={classes.root}>
@@ -585,7 +600,7 @@ export function PlayerListAvailable() {
                 <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
                   {columnsForAvailable.map(column => {
                     const value = row[column.id];
-
+                   // console.log("data",PlayersAvailable);
                     return (
                       <TableCell key={column.id} align={column.align}>
                         {column.format && typeof value === 'number' ? column.format(value) : value}
