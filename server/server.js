@@ -5,12 +5,12 @@ const {
   updateUser,
   findUserByField
 } = require("../db/user") // imports all user functions
-
+/*
 const {
   createRoom,
   addUserToRoom
 } = require("../db/rooms") //imports all room functions
-
+*/
 const {
   getRandomSentence,
   standardErrorHandling,
