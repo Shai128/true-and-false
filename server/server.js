@@ -5,12 +5,12 @@ const {
   updateUser,
   findUserByField
 } = require("../db/user") // imports all user functions
-/*
-const {
+
+/*const {
   createRoom,
   addUserToRoom
-} = require("../db/rooms") //imports all room functions
-*/
+} = require("../db/rooms") //imports all room functions*/
+
 const {
   getRandomSentence,
   standardErrorHandling,
@@ -202,35 +202,47 @@ app.get('/getUserFromSession', (req, res) => {
     (err) => {standardErrorHandling(res, err)}
   )
 })
-
+/*
 app.post('/createRoom',(req,res)=> {
   let data = JSON.parse(req.body.json)
   console.log('trying to create room with data: ' + JSON.stringify(data));
   createRoom(data,
   ()=>{res.status(200).send("success")},(err)=>{standardErrorHandling(res, err)});
-})
-
+})*/
+ /*
 app.get('/joinRoom/:roomId', (req, res) => {
   getIdentifierFromSession(
     req,
     (userId) => {
       addUserToRoom(
-        userId, 
         req.params.roomId,
-        () => {res.status(200).send("successfuly joined room")},
+        userId, 
+        (succ) => {
+          res.status(200).send(succ);
+          // notify all other users in the room
+          notifyRoomAboutNewUser(roomId, newUserId);
+        },
         (err) => standardErrorHandling(res, err)
       )
     },
     (err) => {standardErrorHandling(res, err)}
   )
 })
-
+*/
 app.get('/userList/:roomId', (req, res) => {
+  console.log("user list");
   res.status(200).send(JSON.stringify({
     PlayersAvailable: ["Dan", "Ron", "Alon"],
     PlayersUnAvailable: ["Sagi", "Siraj", "Nadav"]
   }))
 })
+
+/**
+ * uses the sockets of everyone in the room to send information about new user joined
+ */
+function notifyRoomAboutNewUser(roomId, newUserId) {
+  
+}
 
 const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 const io = socket(server);

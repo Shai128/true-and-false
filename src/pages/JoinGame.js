@@ -1,4 +1,5 @@
 import React from 'react';
+import { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -46,7 +47,15 @@ const io = require('socket.io-client');
 const socket = io('http://localhost:8000');
 const okStatus = 200;
 
+const PlayersAvailable = [];
+const PlayersUnAvailable = [];
+
+//var setPlayersUnAvailable, setPlayersAvailable;
+
 export function JoinGame(){  
+
+  const [PlayersAvailable, setPlayersAvailable] = useState([]);
+  const [PlayersUnAvailable, setPlayersUnAvailable] = useState([]);
 
 const useStylesRoomName = makeStyles(theme => ({
   title: {
@@ -57,6 +66,7 @@ const useStylesRoomName = makeStyles(theme => ({
 const classes = useStylesRoomName();
 
 InitTheRoom();
+console.log("arr2: ", PlayersAvailable)
 
   return (
     <div>
@@ -99,11 +109,37 @@ InitTheRoom();
 
   </div>
   );
+
+
+ function InitTheRoom(){   
+    console.log("fetching user list")
+    fetch('http://localhost:8000/userList/' + 3, { //Room id!!!! need to change!
+      method: 'GET', // *GET, POST, PUT, DELETE, etc.
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      credentials: 'include',
+    }).then((response) =>{
+      if (response.status !== okStatus) {
+        reject(response.status)
+      } else {
+        return new Promise(function(resolve, reject) {
+          resolve(response.json());
+        })
+      }}).then(data => {
+        console.log("got data", data.PlayersAvailable)
+        console.log("arr1: ", PlayersAvailable, PlayersAvailable === [], typeof(PlayersAvailable))
+        if (PlayersAvailable === [] && data.PlayersAvailable !== undefined) {
+          setPlayersAvailable(data.PlayersAvailable);
+          setPlayersUnAvailable(data.PlayersUnavailable);
+        }
+      }, fail_status => {
+        console.log("failed. status: ", fail_status)
+      })
+  }
+
 }
 // ------------------------------------------------------------------------------------------------------
-
-var PlayersAvailable = new Array(10);
-var PlayersUnAvailable = new Array(10);
 
 
 // const PlayersAvailable = [
@@ -121,31 +157,7 @@ var PlayersUnAvailable = new Array(10);
 
   // ---------------- someone join the room -----------------------
 
-  export function InitTheRoom(){   
-    console.log("fetching user list")
-    fetch('http://localhost:8000/userList/' + 3, { //Room id!!!! need to change!
-      method: 'GET', // *GET, POST, PUT, DELETE, etc.
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      credentials: 'include',
-    }).then((response) =>{
-      if (response.status !== okStatus) {
-        reject(response.status)
-      } else {
-        return new Promise(function(resolve, reject) {
-          resolve(response.json());
-        })
-      }}).then(data => {
-
-       PlayersAvailable = [...data.PlayersAvailable];
-       PlayersUnAvailable = [...data.PlayersUnAvailable];
-
-      }, fail_status => {
-        console.log("failed. status: ", fail_status)
-      })
-  }
-
+ 
 
   export function UserJoinTheRoom(){
 
