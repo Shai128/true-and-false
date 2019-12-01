@@ -42,10 +42,12 @@ const roomModel = mongoose.model('rooms',roomSchema)
 async function deleteRoomById(roomId){
     await roomModel.deleteOne({room_id: roomId}, ()=>{});
 }
-function createRoom(data){
+function createRoom(data, success, failure){
+    console.log("creating new room:", JSON.stringify(data))
     const newRoom = new roomModel(data);
     //saves the room in the db
-    newRoom.save((err)=>{});    
+    newRoom.save((err)=>{failure(err)});    
+    success("successfuly created room")
 }
 
 async function updateRoom(data){
@@ -79,13 +81,13 @@ async function findUserByEmailInRoomByRoomID(room_id,email,success,fail){ //room
     roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
         if(err) fail('Room with id'+room_id+'does not exist');
         else{
-                arr_users=room.users_in_room;
+                var arr_users=room.users_in_room;
                // console.log('got here: '+arr_users[0].email);
                var i; 
                var flag_not_found=1;
                for( i=0; i<arr_users.length; i++){
 
-                    if(arr_users[i]!=undefined && arr_users[i].email==email){flag_not_found=0; success(arr_users[i])}
+                    if(arr_users[i]!==undefined && arr_users[i].email===email){flag_not_found=0; success(arr_users[i])}
                 }
                 if(flag_not_found){fail('User with email ' +email+ ' was not found in room with id '+room_id)}
         }
@@ -99,15 +101,15 @@ async function deleteUserByEmailInRoomByRoomID(room_id,email,success,fail){ //ro
     roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
         if(err) fail('Room with id'+room_id+'does not exist');
         else{
-                arr_users=room.users_in_room;
+                var arr_users=room.users_in_room;
                var i,j;
                var flag_not_found=1;
                var arr_res=[];
                for( i=0; i<arr_users.length; i++){
 
-                    if(arr_users[i]!=undefined && arr_users[i].email != email){arr_res[i]=arr_users[i];}
+                    if(arr_users[i]!==undefined && arr_users[i].email !== email){arr_res[i]=arr_users[i];}
                     else{
-                        if(arr_users[i]!=undefined && arr_users[i].email == email){  j=i;}
+                        if(arr_users[i]!==undefined && arr_users[i].email === email){  j=i;}
                         arr_res[i]=undefined;}
                 }
                 if(flag_not_found){fail('User with email ' +email+ ' was not found in room with id '+room_id)}
@@ -127,7 +129,7 @@ async function addUserObjectToRoom(room_id,user,success,fail){
         if(err) fail('Room with id'+room_id+'does not exist');
         else{
             console.log('got here 4');
-            orig_sentences_array_length=room.all_sentences.length;
+            var orig_sentences_array_length=room.all_sentences.length;
             var i;
             for(i=0;i<user.true_sentences.length;i++){
                 room.all_sentences[orig_sentences_array_length+i]=user.true_sentences[i];

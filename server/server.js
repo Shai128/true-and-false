@@ -6,11 +6,11 @@ const {
   findUserByField
 } = require("../db/user") // imports all user functions
 
-/*const {
+const {
   createRoom,
   addUserToRoom,
   findRoomById
-} = require("../db/rooms") //imports all room functions*/
+} = require("../db/rooms") //imports all room functions
 
 const {
   getRandomSentence,
@@ -203,14 +203,16 @@ app.get('/getUserFromSession', (req, res) => {
     (err) => {standardErrorHandling(res, err)}
   )
 })
-/*
+
+// change implementation to construct a proper room object
+// success is called with the new room id and you send is to server
 app.post('/createRoom',(req,res)=> {
   let data = JSON.parse(req.body.json)
   console.log('trying to create room with data: ' + JSON.stringify(data));
   createRoom(data,
   ()=>{res.status(200).send("success")},(err)=>{standardErrorHandling(res, err)});
-})*/
- /*
+})
+ 
 app.get('/joinRoom/:roomId', (req, res) => {
   getIdentifierFromSession(
     req,
@@ -221,7 +223,7 @@ app.get('/joinRoom/:roomId', (req, res) => {
         (succ) => {
           res.status(200).send(succ);
           // notify all other users in the room
-          notifyRoomAboutNewUser(roomId, newUserId);
+          notifyRoomAboutNewUser(req.params.roomId, userId);
         },
         (err) => standardErrorHandling(res, err)
       )
@@ -229,7 +231,7 @@ app.get('/joinRoom/:roomId', (req, res) => {
     (err) => {standardErrorHandling(res, err)}
   )
 })
-*/
+
 app.get('/userList/:roomId', (req, res) => {
   console.log("user list");
   res.status(200).send(JSON.stringify({
@@ -240,7 +242,7 @@ app.get('/userList/:roomId', (req, res) => {
 
 /**
  * uses the sockets of everyone in the room to send information about new user joined
- *//*
+ */
 function notifyRoomAboutNewUser(roomId, newUserId) {
   findUser(
     {email: newUserId},
@@ -260,7 +262,7 @@ function notifyRoomAboutNewUser(roomId, newUserId) {
     (err) => console.log(err)
   )
 }
-*/
+
 const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 const io = socket(server);
 io.use(sharedsession(session, {
