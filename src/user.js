@@ -147,12 +147,11 @@ export function getUserFromProps(props){
  * @param {used to set the user from the session if it is not in the props} setUser 
  * sets the user from props, if exists in props, or reads the user from the db and sets with setUser.
  */
-export function getUserFromPropsOrFromSession(props, setUser){
-    var user = getUserFromProps(props);
+export function getUserFromPropsOrFromSession(props,user, setUser){
     if(userIsUpdated(user)){
-        setUser(user)
-        return user;
+        return;
     }
+    setUser(getUserFromProps(props))    
     getCurrentUserFromSession(user, setUser)
 }
 
