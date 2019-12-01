@@ -9,7 +9,10 @@ const {
 const {
   createRoom,
   addUserToRoom,
-  findRoomById
+  findRoomById,
+  getAvailableUsers,
+  getUnAvailableUsers,
+  removeUserFromRoom,
 } = require("../db/rooms") //imports all room functions
 
 const {
@@ -17,7 +20,9 @@ const {
   standardErrorHandling,
   getRandomSentenceForDuel,
   getIdentifierFromSession,
-  logDiv
+  logDiv,
+  getUserInfoFromSession,
+  convertUserListFormat
 } = require("./server_util")
 
 const mongoose = require("../db/config")
@@ -57,11 +62,6 @@ app.use(function (req, res, next) {
 
   next();
 });
-
-/*
-const {
-  findGame,
-} = require("../db/game")*/
 
 function findGame(game, success, failure) {
   success({
@@ -105,7 +105,9 @@ app.get('/user/:email/:password', (req, res) => {
   findUser(data,
     (found_user)=>{
       if (found_user.password === data.password) { // TODO: should later change to hash(password)
-        req.session.email = data['email']
+        if (req.session.userInfo === undefined) {req.session.userInfo = {}}
+        req.session.userInfo.email = data["email"]
+        req.session.userInfo.nickName = found_user["nickName"]
         console.log('saved email:', data['email'])
         console.log("successfuly returned user: " + found_user.get('email'));
         res.status(200).send("successfuly logged in");
@@ -204,26 +206,40 @@ app.get('/getUserFromSession', (req, res) => {
   )
 })
 
-// change implementation to construct a proper room object
-// success is called with the new room id and you send is to server
-app.post('/createRoom',(req,res)=> {
-  let data = JSON.parse(req.body.json)
-  console.log('trying to create room with data: ' + JSON.stringify(data));
-  createRoom(data,
-  ()=>{res.status(200).send("success")},(err)=>{standardErrorHandling(res, err)});
+/**
+ * Creates a new room with a given name.
+ * On success, returns the unique "random" id of the new room.
+ */
+app.get('/createRoom/:newRoomName',(req,res)=> {
+  var newRoomName = req.params.newRoomName;
+  console.log('trying to create room with name: ' + newRoomName);
+  createRoom(
+    newRoomName,
+    (newRoomId) => {res.status(200).send(newRoomId)},
+    (err) => standardErrorHandling(res, err)
+  )
 })
  
+/**
+ * Adds a given user to a given room.
+ * User id is inferred from the session.
+ */
 app.get('/joinRoom/:roomId', (req, res) => {
-  getIdentifierFromSession(
+  var roomId = req.params.roomId
+  console.log("adding user to room:", roomId)
+  getUserInfoFromSession(
     req,
-    (userId) => {
+    (userInfo) => {
       addUserToRoom(
-        req.params.roomId,
-        userId, 
+        roomId,
+        userInfo.email, 
         (succ) => {
           res.status(200).send(succ);
+          // add the user's socket to the room
+          var userSocket = findSocketByUserId(userInfo.email)
+          if (userSocket !== undefined) {userSocket.join(roomId.toString())}
           // notify all other users in the room
-          notifyRoomAboutNewUser(req.params.roomId, userId);
+          io.to(roomId).emit('userJoined', userInfo)
         },
         (err) => standardErrorHandling(res, err)
       )
@@ -232,36 +248,61 @@ app.get('/joinRoom/:roomId', (req, res) => {
   )
 })
 
-app.get('/userList/:roomId', (req, res) => {
-  console.log("user list");
-  res.status(200).send(JSON.stringify({
-    PlayersAvailable: ["Dan", "Ron", "Alon"],
-    PlayersUnAvailable: ["Sagi", "Siraj", "Nadav"]
-  }))
+/**
+ * Removes a user from a given room.
+ * User id is inferred from the session.
+ */
+app.get('/leaveRoom/:roomId', (req, res) => {
+  var roomId = req.params.roomId
+  console.log("adding user to room:", roomId)
+  getUserInfoFromSession(
+    req,
+    (userInfo) => {
+      removeUserFromRoom(
+        roomId,
+        userInfo.email, 
+        (succ) => {
+          res.status(200).send(succ);
+          // notify all other users in the room
+          io.to(roomId).emit('userJoined', userInfo)
+          // TODO: delete room if no users left?
+        },
+        (err) => standardErrorHandling(res, err)
+      )
+    },
+    (err) => {standardErrorHandling(res, err)}
+  )
 })
 
 /**
- * uses the sockets of everyone in the room to send information about new user joined
+ * Returns an object containing the lists of available
+ * and unavailable users in a given room.
  */
-function notifyRoomAboutNewUser(roomId, newUserId) {
-  findUser(
-    {email: newUserId},
-    (newUserObject) => {
-      findRoomById(
+app.get('/userList/:roomId', (req, res) => {
+  var roomId = req.params.roomId
+  console.log("getting user list of room:", roomId);
+  getAvailableUsers(
+    roomId,
+    (availableUsers) => {
+      getUnAvailableUsers(
         roomId,
-        (roomObject) => {
-          roomObject.user_in_room.forEach(userObject => {
-            if (userSockets[userObject.email] !== undefined) {
-              userSockets[userObject.email].emit('userJoined', JSON.stringify(newUserObject))
-            }
-          });
+        (unavailableUsers) => {
+          res.status(200).send(JSON.stringify({
+            PlayersAvailable: convertUserListFormat(availableUsers),
+            PlayersUnAvailable: convertUserListFormat(unavailableUsers)
+          }))
         },
-        (err) => console.log(err)
+        (err) => standardErrorHandling(res, err)
       )
     },
-    (err) => console.log(err)
+    (err) => standardErrorHandling(res, err)
   )
-}
+})
+
+/**
+ * socket io stuff from here on
+ */
+
 
 const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 const io = socket(server);
@@ -269,32 +310,36 @@ io.use(sharedsession(session, {
   autoSave: true
 }));
 
-var userSockets = {}
+function findSocketByUserId(userId) {
+  for (let [socketId, socketObject] of Object.entries(io.sockets.sockets)) {
+    if (socketObject.handshake.session.userInfo.userId === userId) {
+      return socketObject;
+    }
+  }
+  return undefined;
+}
 
 io.on('connection', function (socket) {
   logDiv("new connection")
   console.log('socket connection ' + socket.id)
 
   console.log("user_id that logged in: ", socket.request._query['user_id'])
+  console.log("all sockets so far:", Object.keys(io.sockets.sockets))
   logDiv()
 
-  socket.handshake.session.user_id = socket.request._query['user_id']
+  socket.handshake.session.userInfo = {userId: socket.request._query['user_id']}
 
   socket.on("login", function(userdata) {
-    console.log(userdata.user.nickName + " has logged in");
-    console.log(socket.handshake.session.userdata);
-    socket.handshake.session.userdata = userdata;
-    userSockets.push({
-      key: userdata.user.email,
-      value: socket
-    })
+    var userInfo = userdata.user;
+    console.log(userInfo.nickName + " has logged in");
+    console.log("full info:", userInfo)
+   // socket.handshake.session.userInfo = userInfo;
     socket.handshake.session.save();
   });
 
   socket.on("logout", function(userdata) {
-    if (socket.handshake.session.userdata) {
-      delete socket.handshake.session.userdata;
-      delete userSockets.container[socket.handshake.session.userdata.user.email]
+    if (socket.handshake.session.userInfo) {
+      delete socket.handshake.session.userInfo;
       socket.handshake.session.save();
     }
   });
