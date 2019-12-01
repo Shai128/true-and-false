@@ -403,6 +403,18 @@ const useStyles = makeStyles({
     maxHeight: 440,
     overflow: 'auto',
   },
+  button: {
+    background: props =>
+    props.color ='linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+    border: 0,
+    borderRadius: 3,
+    paddingLeft: '0pt',
+    boxShadow: props =>
+    props.color = '0 3px 5px 2px rgba(33, 203, 243, .3)',
+    color: 'white',
+    height: 48,
+    },
+
 });
 
 // ------------------------------------------------------------------------------------- //
@@ -446,7 +458,7 @@ export function PlayerListUnavailable(props) {
               return (
                 <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
                   {columnsForUnAvailable.map(column => {
-                    const value = row[column.id];
+                    const value = row;
                     return (
                       <TableCell key={column.id} align={column.align}>
                         {column.format && typeof value === 'number' ? column.format(value) : value}
@@ -598,17 +610,37 @@ export function PlayerListAvailable(props) {
             {PlayersAvailable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => {
               return (
                 <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
-                  {columnsForAvailable.map(column => {
-                    const value = row[column.id];
-                   // console.log("data",PlayersAvailable);
+                  {columnsForAvailable.map(column => {       
+                    const value = row;
                     return (
+
                       <TableCell key={column.id} align={column.align}>
-                        {column.format && typeof value === 'number' ? column.format(value) : value}
-                  
+
+                 <Grid container justify="center" alignItems="center">
+                      
+                  <Grid item xs = {5} >
                   <Grid container justify="center" alignItems="center">
+                  <Grid item xs = {1}>
+
                   <Avatar src = {avatarPicAvailable[0]}>
                   </Avatar>
                   </Grid>
+                  <Grid item xs = {1}>
+
+                  {column.format && typeof value === 'number' ? column.format(value) : value}
+                  </Grid>
+                  </Grid>
+
+                  </Grid>
+
+              
+                  <Grid item xs = {3}>
+                  <Button variant="contained" color="primary" fullWidth className={classes.button}>
+                      Invite to Game
+                    </Button>
+                    </Grid>
+                  </Grid>
+                
 
                     {/* -------------------------------------------------- */}
 
