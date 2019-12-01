@@ -81,20 +81,52 @@ function findGame(game, success, failure) {
 
 app.get('/', (req, res) => res.send("request for / recieved"))
 
-app.get('/welcome',(req,res)=> res.send(`hello ${req.body.shalom.bla}`))
-
-app.post('/user',(req,res)=> {
-    let data = JSON.parse(req.body.json)
-    console.log('trying to create user with data: ' + JSON.stringify(data));
-    createUser(data,
-    ()=>{res.status(200).send("success")},(err)=>{standardErrorHandling(res, err)});
-})
+/**
+ * Registers a new user, according to data passed in requrest body.
+ */
+app.post('/user', serverCreateUser)
 
 /**
- * a simple login function
- * TODO: should create a session and save it on the database
+ * Logs in to user according to email and password credentials.
+ * Adds user info to session after logging in.
  */
-app.get('/user/:email/:password', (req, res) => {
+app.get('/user/:email/:password', serverLoginUser)
+
+/**
+ * Randomizes a sentence for a duel between two users.
+ */
+app.get('/randomSentence/:game/:subject/:receiver', serverRandomSentence)
+/**
+ * Checks whether a user exists with field == value.
+ * (For example, field can be 'username' or 'email')
+ */
+app.get('/userExists/:field/:value', serverUserExists)
+
+/**
+ * Universal function for updating any kind of information on existing user.
+ */
+app.post('/userupdate/:id', serverUserUpdate)
+
+app.get('/logout', (req, res) => {
+  getUserInfoFromSession(
+    req,
+    (userInfo) => {
+      console.log("user:", userInfo.email, "is logging out")
+      req.session.userInfo = {}
+      res.status(200).send("successfuly logged out")
+    },
+    (err) => standardErrorHandling(res, err)
+  )
+})
+
+function serverCreateUser(req, res) {
+  let data = JSON.parse(req.body.json)
+  console.log('trying to create user with data: ' + JSON.stringify(data));
+  createUser(data,
+  ()=>{res.status(200).send("success")},(err)=>{standardErrorHandling(res, err)});
+}
+
+function serverLoginUser(req, res) {
   logDiv('user login')
 
   let data = {
@@ -105,9 +137,10 @@ app.get('/user/:email/:password', (req, res) => {
   findUser(data,
     (found_user)=>{
       if (found_user.password === data.password) { // TODO: should later change to hash(password)
-        if (req.session.userInfo === undefined) {req.session.userInfo = {}}
-        req.session.userInfo.email = data["email"]
-        req.session.userInfo.nickName = found_user["nickName"]
+        req.session.userInfo = {
+          email: data["email"],
+          nickName: data["nickName"]
+        }
         console.log('saved email:', data['email'])
         console.log("successfuly returned user: " + found_user.get('email'));
         res.status(200).send("successfuly logged in");
@@ -119,9 +152,10 @@ app.get('/user/:email/:password', (req, res) => {
         standardErrorHandling(res, "password does not match");
       }
     },(err)=>{standardErrorHandling(res, err)});
-})
+}
 
-app.get('/randomSentence/:game/:subject/:receiver', (req, res) => {
+
+function serverRandomSentence(req, res) {
   console.log('random sentence 2');
 
   findGame(
@@ -134,13 +168,9 @@ app.get('/randomSentence/:game/:subject/:receiver', (req, res) => {
       (err) => standardErrorHandling(res, err))
     ,
     (err) => standardErrorHandling(res, err));
-})
+}
 
-/**
- * Checks whether a user exists with field == value.
- * (For example, field can be 'username' or 'email')
- */
-app.get('/userExists/:field/:value', (req, res) => {
+function serverUserExists(req, res) {
   console.log('user exists');
   findUserByField(
     req.params.field, 
@@ -151,12 +181,9 @@ app.get('/userExists/:field/:value', (req, res) => {
     },
     (err) => standardErrorHandling(res, err)
   );
-})
+}
 
-/**
- * Universal function for updating any kind of information on existing user.
- */
-app.post('/userupdate/:id', (req, res) => {
+function serverUserUpdate(req, res) {
   console.log('update user');
   let data = JSON.parse(req.body.json)
   updateUser(req.params.id, data,
@@ -165,7 +192,7 @@ app.post('/userupdate/:id', (req, res) => {
       res.status(200).send("success");
     }
     ,(err)=>{standardErrorHandling(res, err)});
-})
+}
 
 /**
  * Returns the session id (currently email) to the frontend
