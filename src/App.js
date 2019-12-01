@@ -21,6 +21,7 @@ import {
 
 import {LoginScreenRouter as LoginScreen} from './pages/LoginScreen.js';
 import {Chat as ChatRoom} from './pages/Chat.js';
+import {JoinGame} from './pages/JoinGame.js';
 import {PrintJoinGameDialog} from './PagesUtils.js';
 import {okStatus, validEmail, passwordIsStrongEnough, isUndefined} from './Utils.js'
 import {emptyUser, logIn} from './user.js'
@@ -303,10 +304,11 @@ function LinksPage() {
           <Route path="/ChatRoom">
             <ChatRoom />
           </Route>
-          
 
-          
 
+          <Route path="/JoinGame">
+            <JoinGame />
+          </Route>
 
 
       </Switch>
@@ -388,6 +390,15 @@ const handleCloseGuestLoginWindow = () => {
             <Link to="/ChatRoom">
             <Button variant="contained" color="primary" fullWidth  className={classes.button}>
               Chat
+          </Button>
+          </Link>
+            </Grid>
+
+            
+          <Grid item xs={12} sm={6}>
+            <Link to="/JoinGame">
+            <Button variant="contained" color="primary" fullWidth  className={classes.button}>
+              Join A Game
           </Button>
           </Link>
             </Grid>
