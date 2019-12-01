@@ -13,6 +13,8 @@ const {
   getAvailableUsers,
   getUnAvailableUsers,
   removeUserFromRoom,
+  getRoomSize,
+  deleteRoomById
 } = require("../db/rooms") //imports all room functions
 
 const {
@@ -290,9 +292,22 @@ app.get('/leaveRoom/:roomId', (req, res) => {
         userInfo.email, 
         (succ) => {
           res.status(200).send(succ);
-          // notify all other users in the room
-          io.to(roomId).emit('userJoined', userInfo)
-          // TODO: delete room if no users left?
+          // remove the user's socket from room
+          var userSocket = findSocketByUserId(userInfo.email)
+          if (userSocket !== undefined) {userSocket.leave(roomId.toString())}
+
+          getRoomSize(
+            roomId, 
+            (size) => {
+              if (size === 0) {
+                deleteRoomById(roomId, () => {}, (err) => console.log(err))
+              } else {
+                // notify users in room about leaving
+                io.to(roomId).emit('userJoined', userInfo)
+              }
+            },
+            (err) => console.log("failed to delete room")
+          )
         },
         (err) => standardErrorHandling(res, err)
       )

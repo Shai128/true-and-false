@@ -193,6 +193,12 @@ async function createRoom(room_name,success,failure){
     });
 }
 
+async function getRoomSize(room_id, success, failure) {
+    roomModel.find({room_id: room_id}, (err, docs) => {
+        if (err) {failure(err)} else {success(docs[0].users_in_room.length)}
+    });
+}
+
 async function get_available_users(room_id,success,failure){
     roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
         if(err) failure('Room with id'+room_id+'does not exist');
@@ -256,3 +262,4 @@ exports.createRoom=createRoom
 exports.getAvailableUsers=get_available_users
 exports.getUnAvailableUsers=get_unavailable_users
 exports.getAllSentencesArray=getAllSentencesArray
+exports.getRoomSize = getRoomSize
