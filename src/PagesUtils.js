@@ -5,18 +5,17 @@ import ListItemText from '@material-ui/core/ListItemText';
 import {
       Link,
   } from "react-router-dom";
-//import {isUndefined} from './Utils.js';
+import {isUndefined} from './Utils.js';
+import {joinRoom} from './room.js';
+import Grid from '@material-ui/core/Grid';
 
-  import Grid from '@material-ui/core/Grid';
-
-  import Button from '@material-ui/core/Button';
-  import TextField from '@material-ui/core/TextField';
-  import Dialog from '@material-ui/core/Dialog';
-  import DialogActions from '@material-ui/core/DialogActions';
-  import DialogContent from '@material-ui/core/DialogContent';
-  import DialogContentText from '@material-ui/core/DialogContentText';
-  import DialogTitle from '@material-ui/core/DialogTitle';
-  import {socket} from './user.js';
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
 export function PrintGames(props){
     const games =props.games;
@@ -47,26 +46,19 @@ export function PrintJoinGameDialog(props){
   const {handleCloseWindow,  WindowOpen, currentUser} = props;
   const [gameID, setGameID] = React.useState("");
   const [currentGameNickName, setCurrentGameNickName] = React.useState(currentUser.nickName);
+  const [nick_updated, setNick_updated]=  React.useState(false);
   const [validGameID, setValidGameID] = React.useState(true);
   const [validNickName, setvalidNickName] = React.useState(true);
   const [nickNameHelperText, setNickNameHelperText] = React.useState('');
   const [gameIDHelperText, setGameIDHelperText] = React.useState('');
-
+  
 
   const onCloseWindow = ()=>{
     resetDisplaysContent();
     handleCloseWindow();
   }
 
-  const displayNickNameTaken = ()=>{
-    setNickNameHelperText('This nick name is taken');
-    setvalidNickName(false);
-  }
-
-  const displayWrongGameID = ()=>{
-    setGameIDHelperText('Wrong game ID');
-    setValidGameID(false);
-  }
+  
 
   const resetDisplaysContent = ()=>{
     setGameIDHelperText('');
@@ -74,6 +66,7 @@ export function PrintJoinGameDialog(props){
     setvalidNickName(true);
     setValidGameID(true);
   }
+  /*
   socket.on('joinedRoom', function(roomID){
     //todo- redirect to room page (dan't page)
   });
@@ -87,8 +80,30 @@ export function PrintJoinGameDialog(props){
     displayWrongGameID();
 
   });
+  */
   
   const joinGame = ()=>{
+    resetDisplaysContent();
+    var validData = true;
+
+    var bad_nick = isUndefined(currentGameNickName) || currentGameNickName==='';
+    var bad_user = isUndefined(currentUser.nickName) || currentUser.nickName==='';
+    if(bad_nick && !nick_updated){
+        setCurrentGameNickName(currentUser.nickName);
+    }
+    if((bad_nick && nick_updated) || bad_user){
+        setvalidNickName(false);
+        setNickNameHelperText('Please provide a nick name');
+        validData = false
+    }
+    if(isUndefined(gameID) || gameID === ''){
+      setGameIDHelperText('Please provide a game ID');
+      setValidGameID(false);
+      validData = false;
+    }
+    if(!validData)
+      return;
+
 /*
     //var user = //todo- get user from session
     var roomData = {
@@ -113,6 +128,19 @@ export function PrintJoinGameDialog(props){
       console.log("starting game!");
       console.log("game ID:", gameID);
       console.log('user nickname: ', currentGameNickName);
+      joinRoom(gameID, currentUser, currentGameNickName);
+      //todo: handle taken nick name and wrong ID
+      /**
+      * const displayNickNameTaken = ()=>{
+        setNickNameHelperText('This nick name is taken');
+        setvalidNickName(false);
+      }
+
+        const displayWrongGameID = ()=>{
+        setGameIDHelperText('Wrong game ID');
+        setValidGameID(false);
+      }
+       */
   }
   return(
       <Dialog open={WindowOpen} onClose={onCloseWindow} aria-labelledby="form-dialog-title">
@@ -145,6 +173,7 @@ export function PrintJoinGameDialog(props){
           label="Nick Name"
           defaultValue={currentUser.nickName}
           onChange={(event)=>{
+            setNick_updated(true);
               setCurrentGameNickName(event.target.value);
           }}
         />
