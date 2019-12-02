@@ -371,6 +371,15 @@ io.on('connection', function (socket) {
 
   socket.handshake.session.userInfo = {userId: socket.request._query['user_id']}
 
+  // If the user is already in a room - subscribe to that room with his new socket
+  findUser(
+    {email: socket.handshake.session.userInfo.userId},
+    (found_user) => {
+      socket.join(toString(found_user.current_room))
+    },
+    (err) => console.log(err)
+  )
+
   socket.on("login", function(userdata) {
     var userInfo = userdata.user;
     console.log(userInfo.nickName + " has logged in");
