@@ -233,7 +233,6 @@ function PrintCreateGameDialog(props){
 
         socket.emit('openRoom', roomData)
 */
-        
 
         console.log("starting game!");
         console.log("game name:", gameName);
