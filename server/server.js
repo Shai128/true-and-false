@@ -333,8 +333,13 @@ app.get('/userList/:roomId', (req, res) => {
         roomId,
         (unavailableUsers) => {
           res.status(200).send(JSON.stringify({
+             //PlayersAvailable: [{name:'Jhon', age:28, city:'HO'}]
             PlayersAvailable: convertUserListFormat(availableUsers),
             PlayersUnAvailable: convertUserListFormat(unavailableUsers)
+        //    PlayersAvailable: [{email: "Dan@gmail.com", nickName: "Dan"},],
+         //   PlayersUnAvailable: [{email: "Ron@gmail.com", nickName: "Ron"}]
+          //  PlayersAvailable: ["Ron","dan"],
+          //  PlayersUnAvailable: [ "Ron"]
           }))
         },
         (err) => standardErrorHandling(res, err)

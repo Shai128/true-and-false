@@ -30,8 +30,9 @@ import { reject } from 'q';
   import DialogContent from '@material-ui/core/DialogContent';
   import DialogContentText from '@material-ui/core/DialogContentText';
   import DialogTitle from '@material-ui/core/DialogTitle';
-  //import {socket} from '../user.js';
+  import {socket} from '../user.js';
 
+  const okStatus = 200;
 
 // import WifiIcon from '@material-ui/icons/Wifi';
 // import BluetoothIcon from '@material-ui/icons/Bluetooth';
@@ -52,14 +53,9 @@ import { reject } from 'q';
 // }
 
 
-const io = require('socket.io-client');
-const socket = io('http://localhost:8000');
-const okStatus = 200;
-
-//const PlayersAvailable = [];
-//const PlayersUnAvailable = [];
-
 export function JoinGame(){  
+
+  console.log("dan")
 
   const [PlayersAvailable, setPlayersAvailable] = useState([]);
   const [PlayersUnAvailable, setPlayersUnAvailable] = useState([]);
@@ -75,6 +71,28 @@ const classes = useStylesRoomName();
 
 InitTheRoom(PlayersAvailable,setPlayersAvailable,PlayersUnAvailable,setPlayersUnAvailable);
 
+
+socket.on("userJoined", function(userInfo) {
+ /*
+    userInfo: {email: ..., nickName:...}
+ */
+    var newPlayersAvailable = [...PlayersAvailable]
+    newPlayersAvailable.push(userInfo.nickName)
+    setPlayersAvailable(newPlayersAvailable)
+  });
+
+  
+socket.on("userLeft", function(userInfo) {
+    /*
+       userInfo: {email: ..., nickName:...}
+    */
+       var newPlayersAvailable = [...PlayersAvailable]
+       var index = newPlayersAvailable.indexOf(userInfo.nickName)
+       newPlayersAvailable.splice(index)
+       setPlayersAvailable(newPlayersAvailable)
+     });
+
+
 //console.log("players -->", PlayersAvailable, PlayersUnAvailable);
 
   return (
@@ -89,7 +107,6 @@ InitTheRoom(PlayersAvailable,setPlayersAvailable,PlayersUnAvailable,setPlayersUn
 <Grid container spacing={3} justify="center">
       <HomepageImage/> 
       </Grid>
-    
 
 <Grid container spacing={1} justify="center">
 
@@ -103,16 +120,6 @@ InitTheRoom(PlayersAvailable,setPlayersAvailable,PlayersUnAvailable,setPlayersUn
           </Grid>
           </Grid>
 
-
-    {/* <Grid container spacing={1} justify="center">
-    <Grid item xs={6}>
-   <PlayerList/>
-   </Grid>
-   <Grid item xs={6}>
-   <PlayerList/>
-   </Grid>
-   </Grid> */}
-
    <PlayerListAvailable PlayersAvailable = {PlayersAvailable}/>
    {/* <PlayerListUnavailable PlayersUnAvailable = {PlayersUnAvailable}/> */}
 
@@ -121,7 +128,7 @@ InitTheRoom(PlayersAvailable,setPlayersAvailable,PlayersUnAvailable,setPlayersUn
 
 
  function InitTheRoom(){   
-  ///  console.log("fetching user list")
+  console.log("fetching user list")
     fetch('http://localhost:8000/userList/' + '3', { //Room id!!!! need to change!
       method: 'GET', // *GET, POST, PUT, DELETE, etc.
       headers: {
@@ -136,20 +143,12 @@ InitTheRoom(PlayersAvailable,setPlayersAvailable,PlayersUnAvailable,setPlayersUn
           resolve(response.json());
         })
       }}).then(data => {
-       // console.log("got data", data.PlayersAvailable, data.PlayersUnAvailable);
-       // console.log("playersAvail 1111 -->", PlayersAvailable);
-      //  setPlayersAvailable(data.PlayersAvailable);
-       // console.log("players -->", PlayersAvailable);
-       // console.log("arr1: ", PlayersAvailable, PlayersAvailable === [], typeof(PlayersAvailable))
-
+        console.log("players -->");
         if (PlayersAvailable.length === 0 && data.PlayersAvailable !== undefined &&
           PlayersUnAvailable.length === 0 && data.PlayersUnAvailable !== undefined) {
-       //   console.log("got here");
-       //   console.log(data);
+            console.log("please get here -->");
           setPlayersAvailable(data.PlayersAvailable);
           setPlayersUnAvailable(data.PlayersUnAvailable);
-       //   console.log("playersAvail -->", PlayersAvailable);
-       //   console.log("playersUnAvail -->", PlayersUnAvailable);
         }
       }, fail_status => {
         console.log("failed. status: ", fail_status)
@@ -158,36 +157,6 @@ InitTheRoom(PlayersAvailable,setPlayersAvailable,PlayersUnAvailable,setPlayersUn
 
 }
 // ------------------------------------------------------------------------------------------------------
-
-
-// const PlayersAvailable = [
-//   createData('Shai'),
-//   createData('Sagi'),
-//   createData('Dan'),
-//   createData('Ron'),
-//   createData('Alon'),
-//   createData('Siraj'),
-// ];
-
-// const PlayersUnAvailable = [
-//   createData('Nadav'),
-// ];
-
-  // ---------------- someone join the room -----------------------
-
-  export function UserJoinTheRoom(){
-  }
-
-
-  // socket.on('userJoin', function(data){
-  //   console.log(data);
-  //   data.emit('playerList', new Date());
-  // })
-
-
-  // ------------------ end of function --------------------------
-
-
 // ------------------------------------------------------------------------------------------------------
 
 function HomepageImage() {
@@ -595,10 +564,6 @@ const handleCloseInvitePlayer = () => {
 
 const [InvitePlayerWindowOpen, setInvitePlayerWindowOpen] = React.useState(false);
 
-
-  //console.log("ron -->", props.PlayersAvailable);
-
-
   const classes = useStyles();
 
   const [page, setPage] = React.useState(0);
@@ -614,8 +579,6 @@ const [InvitePlayerWindowOpen, setInvitePlayerWindowOpen] = React.useState(false
   };
 
   const {PlayersAvailable} = props;
-  //console.log("data-->", props.PlayersAvailable)
-
 
   return (
     <Paper className={classes.root}>
@@ -635,13 +598,14 @@ const [InvitePlayerWindowOpen, setInvitePlayerWindowOpen] = React.useState(false
             </TableRow>
           </TableHead>
           <TableBody>
+            
             {PlayersAvailable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => {
               return (
                 <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
                   {columnsForAvailable.map(column => {       
-                    const value = row;
+                    const value = row.nickName;
+                    console.log("ROW ->",row)
                     return (
-
                       <TableCell key={column.id} align={column.align}>
 
                  <Grid container justify="center" alignItems="center">
@@ -705,8 +669,6 @@ const [InvitePlayerWindowOpen, setInvitePlayerWindowOpen] = React.useState(false
     </Paper>
   );
 }
-
-
 
 
 

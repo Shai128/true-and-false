@@ -75,9 +75,8 @@ function getUserInfoFromSession(req, success, failure) {
 }
 
 function convertUserListFormat(fullUserList) { 
-  return fullUserList.map(userObject => {
-    return {email: userObject.email, nickName: userObject.nickName}
-  })
+  console.log("converted",Object.values(fullUserList))
+  return Object.values(fullUserList)
 }
 
 function logDiv(header='') {

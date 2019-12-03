@@ -212,7 +212,7 @@ async function get_available_users(room_id,success,failure){
                     }
 
                 }
-                console.log(res);
+               // console.log(res);
                 success(res);
         }
 });
@@ -231,7 +231,7 @@ async function get_unavailable_users(room_id,success,failure){
                     }
 
                 }
-                console.log(res);
+              //  console.log(res);
                 success(res);
         }
 });
