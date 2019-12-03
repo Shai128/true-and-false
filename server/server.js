@@ -306,7 +306,7 @@ app.get('/leaveRoom/:roomId', (req, res) => {
                 deleteRoomById(roomId, () => {}, (err) => console.log(err))
               } else {
                 // notify users in room about leaving
-                io.to(roomId).emit('userJoined', userInfo)
+                io.to(roomId).emit('userLeft', userInfo)
               }
             },
             (err) => console.log("failed to delete room")
@@ -407,6 +407,34 @@ io.on('connection', function (socket) {
     io.sockets.connected[data.receiverUser.socketID].emit('C_chat', data);
   })
 
+  socket.on('S_passSentence', function(data){
+    var userSocket = findSocketByUserId(data.user_id)
+    userSocket.emit('C_displaySentence', data.sentence);  })
+
+  socket.on('S_passAnswer', function(data){
+    var userSocket = findSocketByUserId(data.user_id)
+    userSocket.emit('C_displayAnswer', data);  })
+  
+  socket.on('S_continueMatch', function(data){
+    var userSocket = findSocketByUserId(data.user_id)
+    userSocket.emit('C_continueMatch');  })
+
+  socket.on('S_endMatch', function(data){
+    var userSocket = findSocketByUserId(data.user_id)
+    userSocket.emit('C_endMatch')
+    socket.emit('C_endMatch');  })
+  
+    /* data has:
+    room_id - players' room id
+    user_id - opponent's id
+    seenSentences - the sentences array that the player seen so far during all of his games
+    pointsToAdd - points achieved during this match
+    */
+  socket.on('S_updateAfterMatchData', function(data){ 
+    //UPDATE THE USER'S SEEN_ARRAYS AND TOTAL_POINTS IN THE DATABASE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! i love ron <3
+    //god knows how i get this userInfo
+    io.to(data.room_id).emit('C_returnedToRoom', userInfo); })
+  
 
 /*
   socket.on('S_openRoom', function (data) {
