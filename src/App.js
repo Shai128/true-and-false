@@ -382,7 +382,7 @@ const handleCloseGuestLoginWindow = () => {
             <PrintJoinGameDialog
             handleCloseWindow= {handleCloseGuestLoginWindow}
             WindowOpen= {guestLoginWindowOpen}
-            currentUser = {{}}/>
+            currentUser = {emptyUser()}/>
           </Grid>
 
 

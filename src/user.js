@@ -80,7 +80,8 @@ export function getCurrentUserFromSession(user, setUser){
     }
     }).then(user => {
         console.log('frontend got data: ', user);
-        setUser(user);
+        if(!isUndefined(user))
+            setUser(user);
         console.log("updated user", JSON.stringify(user))
     }, fail_status => {
     console.log("failed, status:", fail_status)
@@ -147,6 +148,7 @@ export function getUserFromProps(props){
  * @param {used to set the user from the session if it is not in the props} setUser 
  * sets the user from props, if exists in props, or reads the user from the db and sets with setUser.
  */
+/*
 export function getUserFromPropsOrFromSession(props, setUser){
     var user = getUserFromProps(props);
     if(userIsUpdated(user)){
@@ -155,6 +157,7 @@ export function getUserFromPropsOrFromSession(props, setUser){
     }
     getCurrentUserFromSession(user, setUser)
 }
+*/
 
 
 // this function will be changed because func is not supposed to access STATUS.

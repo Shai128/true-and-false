@@ -14,7 +14,7 @@ import IconButton from '@material-ui/core/IconButton';
 import {useStyles as AppUseStyles} from './../App.js';
 import DeleteTwoToneIcon from '@material-ui/icons/DeleteTwoTone';
 
-import {emptyUser, getUserFromPropsOrFromSession, updateUserToDB} from './../user.js'
+import {getCurrentUserFromSession, updateUserToDB, getUserFromProps} from './../user.js'
 
 const useButtonStyles = makeStyles({
     root: {
@@ -36,8 +36,8 @@ export function MySentences(props){
 
     const classes = AppUseStyles();
     const buttonClasses = useButtonStyles();
-    const [user, setUser] = useState(emptyUser);
-    getUserFromPropsOrFromSession(props, setUser);
+    const [user, setUser] = useState(getUserFromProps(props));
+    getCurrentUserFromSession(user, setUser);
     const [truths, setTruths] = useState(user.truths);
     const [lies, setLies] = useState(user.lies);
 

@@ -21,8 +21,8 @@ import {
 import {GamePage} from './GamePage.js';
 import {getCreatedGames, getParticipatedGames, getCurrentUserFromSession as getCurrentUser, getUserFromProps} from './../user';
 import {PrintGames, PrintJoinGameDialog} from './../PagesUtils';
-
-
+import {createRoom} from './../room.js'
+import {isUndefined} from './../Utils.js'
 export function LoginScreenHome(props){
     let { path, url } = useRouteMatch();
     let user = getUserFromProps(props);
@@ -216,10 +216,47 @@ const usegameListItemsStyles = makeStyles(theme=>({
 
 function PrintCreateGameDialog(props){
     const {handleCloseCreateGameWindow,  createGameWindowOpen, currentUser} = props;
-    const [gameName, setGameName] = React.useState("");
+    const [roomName, setRoomName] = React.useState("");
+    const [nick_updated, setNick_updated] = React.useState(false);
     const [currentGameNickName, setCurrentGameNickName] = React.useState(currentUser.nickName);
+    const initMessages = {
+      erroNickName: false,
+      errorRoomName: false,
+      nickNameHelperText: '',
+      roomNameHelperText: '',
+    }
+    
+    const [textsMessages, setTextsMessages] = React.useState(initMessages);
+    
+    const onCloseWindow = ()=>{
+      resetDisplaysContent();
+      handleCloseCreateGameWindow();
+    }
+    const resetDisplaysContent = ()=>{
+      setTextsMessages(initMessages);
+    };
 
     const startGame = ()=>{
+      let validData = true;
+      let messages = initMessages;
+      if(isUndefined(roomName) || roomName === ''){
+        messages.errorRoomName = true;
+        messages.roomNameHelperText = 'Please provide a room name'
+        validData = false
+      }
+      var bad_nick = isUndefined(currentGameNickName) || currentGameNickName==='';
+      var bad_user = isUndefined(currentUser.nickName) || currentUser.nickName==='';
+      if(bad_nick && !nick_updated){
+          setCurrentGameNickName(currentUser.nickName);
+      }
+      if((bad_nick && nick_updated) || bad_user){
+          messages.errorNickName = true;
+          messages.nickNameHelperText = 'Please provide a nick name'
+          validData = false
+      }
+      setTextsMessages(messages);
+      if(!validData)
+        return;
 /*
         //var user = //todo- get user from session
         var roomData = {
@@ -235,13 +272,12 @@ function PrintCreateGameDialog(props){
 */
 
         console.log("starting game!");
-        console.log("game name:", gameName);
+        console.log("game name:", roomName);
         console.log('user nickname: ', currentGameNickName);
-        //handleCloseCreateGameWindow();
-        //todo: redirect to room page
+        createRoom(roomName, currentUser, currentGameNickName);
     }
     return(
-        <Dialog open={createGameWindowOpen} onClose={handleCloseCreateGameWindow} aria-labelledby="form-dialog-title">
+        <Dialog open={createGameWindowOpen} onClose={onCloseWindow} aria-labelledby="form-dialog-title">
         <DialogTitle id="form-dialog-title">Create a Room</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -250,22 +286,27 @@ function PrintCreateGameDialog(props){
           <Grid item xs={12}>
           <TextField
             autoFocus
+            error = {textsMessages.errorRoomName}
+            helperText = {textsMessages.roomNameHelperText}
             margin="dense"
             id="roomName"
             label="Room Name"
             onChange={(event)=>{
-                setGameName(event.target.value);
+                setRoomName(event.target.value);
             }}
           />
           </Grid>
           <Grid item xs={12}>
           <TextField
             autoFocus
+            helperText = {textsMessages.nickNameHelperText}
+            error = {textsMessages.errorNickName}
             margin="dense"
             id="nickName"
             label="Nick Name"
             defaultValue={currentUser.nickName}
             onChange={(event)=>{
+                setNick_updated(true);
                 setCurrentGameNickName(event.target.value);
             }}
           />
@@ -273,7 +314,7 @@ function PrintCreateGameDialog(props){
           </Grid>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseCreateGameWindow} color="primary">
+          <Button onClick={onCloseWindow} color="primary">
             Cancel
           </Button>
           <Button onClick={startGame} color="primary">
