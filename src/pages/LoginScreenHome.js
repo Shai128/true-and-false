@@ -17,12 +17,15 @@ import {
     useRouteMatch,
     Switch,
     Route,
+    useHistory,
   } from "react-router-dom";
 import {GamePage} from './GamePage.js';
 import {getCreatedGames, getParticipatedGames, getCurrentUserFromSession as getCurrentUser, getUserFromProps} from './../user';
 import {PrintGames, PrintJoinGameDialog} from './../PagesUtils';
 import {createRoom} from './../room.js'
 import {isUndefined} from './../Utils.js'
+import { JoinGame } from './JoinGame.js';
+import { Link } from '@material-ui/core';
 export function LoginScreenHome(props){
     let { path, url } = useRouteMatch();
     let user = getUserFromProps(props);
@@ -34,6 +37,7 @@ export function LoginScreenHome(props){
         </Route>
 
         <Route path={`${path}/GamePage/:id`} exact component={GamePage} user={user} />
+        <Route path={`/JoinGame`} exact component={JoinGame} user={user} />
 
         </Switch>
 
@@ -215,6 +219,7 @@ const usegameListItemsStyles = makeStyles(theme=>({
 
 
 function PrintCreateGameDialog(props){
+    let history = useHistory();
     const {handleCloseCreateGameWindow,  createGameWindowOpen, currentUser} = props;
     const [roomName, setRoomName] = React.useState("");
     const [nick_updated, setNick_updated] = React.useState(false);
@@ -274,7 +279,9 @@ function PrintCreateGameDialog(props){
         console.log("starting game!");
         console.log("game name:", roomName);
         console.log('user nickname: ', currentGameNickName);
-        createRoom(roomName, currentUser, currentGameNickName);
+
+
+        createRoom(roomName, currentUser, currentGameNickName, history);
     }
     return(
         <Dialog open={createGameWindowOpen} onClose={onCloseWindow} aria-labelledby="form-dialog-title">
@@ -317,9 +324,15 @@ function PrintCreateGameDialog(props){
           <Button onClick={onCloseWindow} color="primary">
             Cancel
           </Button>
-          <Button onClick={startGame} color="primary">
+          <Link to={{
+          pathname: `/JoinGame`,
+          user: currentUser
+            }}>
+              <Button onClick={startGame} color="primary">
                 Start
           </Button>
+          </Link>
+
         </DialogActions>
       </Dialog>
 

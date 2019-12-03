@@ -147,7 +147,7 @@ console.log("room name -->", RoomName);
 
  function InitTheRoom(){   
   console.log("fetching user list")
-    fetch('http://localhost:8000/userList/' + '3', { //Room id!!!! need to change!
+    fetch('http://localhost:8000/userList/' + '0', { //Room id!!!! need to change!
       method: 'GET', // *GET, POST, PUT, DELETE, etc.
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -327,12 +327,12 @@ export function HorizontalLinearStepper() {
       <div>
         {activeStep === steps.length ? (
           <div>
-            <Typography className={classes.instructions}>
+            {/* <Typography className={classes.instructions}>
               All steps completed - you&apos;re finished
-            </Typography>
-            <Button onClick={handleReset} className={classes.button}>
+            </Typography> */}
+            {/* <Button onClick={handleReset} className={classes.button}>
               Reset
-            </Button>
+            </Button> */}
           </div>
         ) : (
           <div>
@@ -341,7 +341,7 @@ export function HorizontalLinearStepper() {
               <Button disabled={activeStep === 0} onClick={handleBack} className={classes.button}>
                 Back
               </Button>
-              {isStepOptional(activeStep) && (
+              {/* {isStepOptional(activeStep) && (
                 <Button
                   variant="contained"
                   color="primary"
@@ -350,7 +350,7 @@ export function HorizontalLinearStepper() {
                 >
                   Skip
                 </Button>
-              )}
+              )} */}
 
               <Button
                 variant="contained"

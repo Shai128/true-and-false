@@ -8,7 +8,8 @@ const server = 'http://localhost:8000';
  * @param {the current user} currentuser 
  * @param {the nick name the user chose for this room} currentGameNickName 
  */
-export function createRoom(roomName, currentuser, currentGameNickName){
+export function createRoom(roomName, currentuser, currentGameNickName, history){
+
     fetch(server + '/createRoom/' + roomName, {
         method: 'GET', // *GET, POST, PUT, DELETE, etc.
         headers: {
@@ -24,11 +25,14 @@ export function createRoom(roomName, currentuser, currentGameNickName){
             resolve(response.json());
             })
         }
-        }).then(roomID => {
-            console.log('createRoom frontend got data: ', roomID);
-            //todo: redirect to Dan's page with the given roomID and the user! H-A-L-I-F!
-        }, fail_status => {
-        console.log("failed, status:", fail_status)
+        }).then(room => {
+            console.log('createRoom frontend got data: ', room);
+            history.push({
+                pathname: "JoinGame",
+                user: currentuser, 
+                RoomId: room.ID,
+            }); // moves to main page (localhost:3000)
+
         });
 }
 

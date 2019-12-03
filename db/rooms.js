@@ -127,16 +127,16 @@ async function addUserObjectToRoom(room_id,user,success,fail){
 }
 
 async function addUserToRoom(room_id,email,success,fail){
-//console.log('got here 1.5');
+console.log('got here 1.5');
 roomModel.findOne({ room_id: room_id }).exec(function (err1, room) {
-    //console.log('got here 1');
+    console.log('got here 1');
         if(err1) fail('Room with id'+room_id+'does not exist');
         else{
-           // console.log('got here 1');
+            console.log('got here 1');
             userModel.findOne({ email: email }).exec(function (err2, user) {
                 if(err2) fail('User with email'+email+'does not exist');
                 else{
-                   // console.log('got here 2');
+                    console.log('got here 2');
                     var false_array = new Array(PLAYERS_AMOUNT).fill(false);
                     var user={
                         user_id_in_room:room.available_id,
@@ -151,7 +151,7 @@ roomModel.findOne({ room_id: room_id }).exec(function (err1, room) {
                     }
                
                 addUserObjectToRoom(room_id,user,success,fail);
-                success('Success');
+               // success('Success'); -- never ever try to uncomment this for thou shall bring hell upon yourselves
         }
     })
 }});

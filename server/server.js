@@ -245,6 +245,7 @@ app.get('/createRoom/:newRoomName',(req,res)=> {
   createRoom(
     newRoomName,
     (newRoomId) => {
+      console.log("new room id", newRoomId);
       serverAddUserToRoom(req, res, newRoomId)
     },
     (err) => standardErrorHandling(res, err)
@@ -255,18 +256,23 @@ app.get('/createRoom/:newRoomName',(req,res)=> {
  * Adds a given user to a given room.
  * User id is inferred from the session.
  */
-app.get('/joinRoom/:roomId', (req, res) => serverAddUserToRoom(req, res, req.params.roomId))
+app.get('/joinRoom/:roomId', (req, res) => {
+  serverAddUserToRoom(req, res, req.params.roomId)
+})
 
 function  serverAddUserToRoom(req, res, roomId) {
   console.log("adding user to room:", roomId)
   getUserInfoFromSession(
     req,
     (userInfo) => {
+      console.log("user info", userInfo);
       addUserToRoom(
         roomId,
         userInfo.email, 
         (succ) => {
-          res.status(200).send(roomId);
+          console.log("sending the status now")
+          res.status(200).send({ID: toString(roomId)});
+          console.log("sent")
           // add the user's socket to the room
           var userSocket = findSocketByUserId(userInfo.email)
           if (userSocket !== undefined) {userSocket.join(roomId.toString())}
