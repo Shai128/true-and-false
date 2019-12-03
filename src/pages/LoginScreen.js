@@ -15,33 +15,29 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListIcon from '@material-ui/icons/List';
+
 import GamesIcon from '@material-ui/icons/Games';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import HomeIcon from '@material-ui/icons/Home';
-import Button from '@material-ui/core/Button';
-import App from './../App.js'
 import {
     BrowserRouter as Router,
     Switch,
     Route,
     Link,
     useRouteMatch,
-    Redirect,
-    useHistory,
+    Redirect
   } from "react-router-dom";
   import { createBrowserHistory } from "history";
 
-  import {GamesListPage as GamesList} from './GamesList.js';
+import {GamesListPage as GamesList} from './GamesList.js';
 
 import {LoginScreenHome as Home} from './LoginScreenHome.js';
 
 import {MyProfile} from './MyProfile.js';
-import {MySentences} from './MySentences.js';
-import {getCurrentUserFromSession as getCurrentUser, emptyUser} from './../user';
 
 
 const drawerWidth = 240;
+
 const useStyles = makeStyles(theme => ({
     root: {
       display: 'flex',
@@ -123,30 +119,8 @@ const useStyles = makeStyles(theme => ({
 
 
 
-export function LoginScreenRouter(){
+export function LoginScreen(){
 
-  return(
-  <Router>
-  <Switch>
-    
-  
-        
-  <Route exact path={`/`}>
-            <App />
-          </Route>
-
-  <Route path={'/LoginScreen'}>  
-  <LoginScreen />
-  </Route>
-  </Switch>
-
-
-  </Router>
-  );
-}
-function LoginScreen(props){
-  const [currentUser, setCurrentUser] = React.useState(emptyUser);
-    getCurrentUser(currentUser, setCurrentUser);
     const [open, setOpen] = React.useState(false);
     const handleDrawerOpen = () => {
       setOpen(true);
@@ -155,21 +129,15 @@ function LoginScreen(props){
       setOpen(false);
     };
     const classes = useStyles();
-    let history = useHistory();
 
-    const logout = ()=>{
-      history.push("/"); // moves to main page (localhost:3000)
-      //todo: implement logout
-    }
+
     let { path, url } = useRouteMatch();
 
 
     const listItems=(
-        <div>              
-    <Link to={{
-      pathname:`${url}/Home`,
-      user: currentUser
-      }}> 
+        <div>
+
+    <Link to={`${url}/Home`}> 
     <ListItem button>
      <ListItemIcon> 
          <HomeIcon /> 
@@ -178,10 +146,7 @@ function LoginScreen(props){
           </ListItem> 
           </Link>
 
-        <Link to={{
-          pathname: `${url}/MyProfile`,
-          user: currentUser
-        }}>      
+        <Link to={`${url}/MyProfile`}>      
             <ListItem button>
               <ListItemIcon>
                   <AccountCircleIcon />
@@ -190,23 +155,8 @@ function LoginScreen(props){
             </ListItem>
             </Link>
 
-            <Link to={{
-              pathname: `${url}/MySentences`,
-              user: currentUser
-            }}>      
-            <ListItem button>
-              <ListItemIcon>
-                  <ListIcon />
-              </ListItemIcon>
-            <ListItemText primary="My Sentences" />
-            </ListItem>
-            </Link>
 
-
-        <Link to={{
-          pathname:`${url}/GamesList`,
-          user: currentUser
-        }}>      
+        <Link to={`${url}/GamesList`}>      
           <ListItem button>
               <ListItemIcon>
                   <GamesIcon />
@@ -220,7 +170,6 @@ function LoginScreen(props){
 
 
     return(
-      <div>
         <Router>
  <div className={classes.root}>
       <CssBaseline />
@@ -238,18 +187,8 @@ function LoginScreen(props){
     <Typography variant="h6" className={classes.title}>
     Two Truths and One Lie
    </Typography>
-   <Switch>
-     
-   </Switch>
-   <Route exact path={'/'} component = {App}/>  
-
-    <Button color="inherit"
-    onClick={logout}>
-      Log Out
-      </Button>
-
+      
   </Toolbar>
-  
 </AppBar>
 
 <Drawer
@@ -274,28 +213,20 @@ function LoginScreen(props){
 
         
         <RedirectToHomeIfNeeded url={url} />
-        <Switch>  
-          
-        
-        <Route exact path={`/`}>
-            <App />
-          </Route>
-
-         
-          <Route path={`${path}/Home`}>
-            <Home />
+        <Switch>
+        <Route exact path={path}>  
           </Route>
 
           <Route path={`${path}/GamesList`}>
             <GamesList />
           </Route>
 
+          <Route path={`${path}/Home`}>
+            <Home />
+          </Route>
 
-          <Route path={`${path}/MyProfile`} component ={MyProfile} />
-
-
-          <Route path={`${path}/MySentences`}>
-            <MySentences />
+          <Route path={`${path}/MyProfile`}>
+            <MyProfile />
           </Route>
 
         </Switch>
@@ -303,7 +234,6 @@ function LoginScreen(props){
 
         </div>
       </Router>
-      </div>
     );
     
 }

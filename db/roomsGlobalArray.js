@@ -6,10 +6,10 @@ const roomsGlobalArraySchema = new mongoose.Schema(
         array_id:{type: Number},
         array: {type:[Boolean]}
        });
-const roomsGlobalArray = mongoose.model('roomsglobalarray',roomsGlobalArraySchema)
+const roomsGlobalArrayModel = mongoose.model('roomsglobalarrays',roomsGlobalArraySchema)
 
 
-
+/*
 async function updateRoomsGlobalArray(data){
 
     //const newRoom = new roomsGlobalArray({array_id:2,array: data});
@@ -50,6 +50,7 @@ async function help2(field, value, success, failure) {
  * @param  {function: (arr)=>{extract array by: arr.array} } success  
  * @param {function: what to do if the operation failed} failure 
  */
+/*
   function getRoomsGlobalArray(success) {
      
     help1(
@@ -66,3 +67,5 @@ async function help2(field, value, success, failure) {
 
 exports.getRoomsGlobalArray = getRoomsGlobalArray
 exports.updateRoomsGlobalArray=updateRoomsGlobalArray
+*/
+exports.roomsGlobalArrayModel=roomsGlobalArrayModel

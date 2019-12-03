@@ -19,11 +19,11 @@ import {
   useHistory
 } from "react-router-dom";
 
-import {LoginScreenRouter as LoginScreen} from './pages/LoginScreen.js';
-import {Chat as ChatRoom} from './pages/Chat.js';
-import {JoinGame} from './pages/JoinGame.js';
-import {PrintJoinGameDialog} from './PagesUtils.js';
-import {okStatus, validEmail, passwordIsStrongEnough, isUndefined} from './Utils.js'
+//import {LoginScreenRouter as LoginScreen} from './pages/LoginScreen.js';
+//import {Chat as ChatRoom} from './pages/Chat.js';
+//import {JoinGame} from './pages/JoinGame.js';
+//import {PrintJoinGameDialog} from './PagesUtils.js';
+//import {okStatus, validEmail, passwordIsStrongEnough, isUndefined} from './Utils.js'
 import {emptyUser, logIn} from './user.js'
 function Copyright() {
   return (
@@ -79,90 +79,10 @@ export const useStyles = makeStyles(theme => ({
   input: {
     display: 'none',
   },
-  root: {
-    width: '100%',
-    maxWidth: 500,
-    color: '#000000'
-  },
-  gamesListItems: {
-    background: 'linear-gradient(to right, #4ecdc4, #556270)', /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-    border: '0',
-    borderRadius: 3,
-    color: 'white',
-    height: 48,
-    padding: '0 30px',
-    margin: '5px'
-  },
-  list: {
-    marginBottom: theme.spacing(2),
-    margin: '5px'
-  }
-}));
-
-
-
-function SignUp() {
-  const classes = useStyles();
-  const [user, setUser] = useState(emptyUser);
-  const initMessages = {
-    errorPassword: false,
-    errorFirstName: false,
-    errorEmail: false,
-    passwordHelperText: '',
-    firstNameHelperText: '',
-    emailHelperText: ''
-  }
-  const [textsMessages, setTextsMessages] = React.useState(initMessages);
-  const updateField = e => {
-    setUser({
-      ...user,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  /*const errorEmail = 'errorEmail', emailHelperText= 'emailHelperText',
-   errorPassword='errorPassword', passwordHelperText='passwordHelperText',
-   firstNameHelperText='firstNameHelperText', errorFirstName='errorFirstName';
-  const changeTextMessage = (error, errorName, helperText, helperTextName) =>{
-    setTextsMessages({
-      ...textsMessages,
-      [errorName]: error,
-      [helperTextName]: helperText
-    });
-  }
-*/
-
-  /**
-   * returns true is the user is valid or false if it is not.
+npm
    * prints error messages accordingly
    */
-  const validUser = ()=>{
-
-    var newTextsMessages = initMessages;
-
-    var isValid = true;
-      if(!validEmail(user.email)){
-        newTextsMessages.errorEmail = true;
-        newTextsMessages.emailHelperText = "please provide a valid email address"
-        //changeTextMessage(true,errorEmail, "please provide a valid email address", emailHelperText);
-        isValid= false;
-      }
-      
-      if(!passwordIsStrongEnough(user.password)){
-        newTextsMessages.errorPassword = true;
-        newTextsMessages.passwordHelperText = "please provide a strong password"
-        //changeTextMessage(true,errorPassword, "please provide a strong password", passwordHelperText);
-        isValid= false;
-      }
-      if(isUndefined(user.firstName) || user.firstName  === ''){
-        newTextsMessages.errorFirstName = true;
-        newTextsMessages.firstNameHelperText = "please provide a firstName"
-        //changeTextMessage(true, errorFirstName, "please provide a firstName", firstNameHelperText);
-        isValid= false;
-      }
-      setTextsMessages(newTextsMessages);
-      return isValid;
-  }
+  
 
   let history = useHistory();
 
@@ -282,28 +202,9 @@ function SignUp() {
   );
 }
 
-function LinksPage() {
-  return (
-    <div>
-      <Switch>
-        <Route exact path="/">
-          <Home />
-        </Route>
 
-        <Route exact path="/SignIn">
-          <SignIn />
-        </Route>
-        <Route exact path="/SignUp">
-          <SignUp />
-        </Route>
       
-          <Route path="/LoginScreen">
-            <LoginScreen />
-          </Route>
-
-          <Route path="/ChatRoom">
-            <ChatRoom />
-          </Route>
+     
 
 
           <Route path="/JoinGame">
