@@ -47,29 +47,6 @@ function addSeenTruth(game, user_id, sentence, success, failure) {
   updateGame(game, success, failure);
 }
 
-/**
- * Adds a new user to an existing game.
- * @param {*} user
- * @param {*} game 
- * @param {*} truths the list of truths the user would like to use in this game
- * @param {*} lies the list of lies the user would like to use in this game
- */
-function addUserToGame(user, game, success, failure, truths=user.truths, lies = user.lies) {
-  if (game.players.includes(user._id)) { failure("user already in game"); return}
-  game.players.push({
-    _id: user._id,
-    truths: truths,
-    lies: lies,
-    seen: [...truths].concat([...lies]),
-    score: 0
-  })
-
-  game.all_sentences.concat(truths)
-  game.all_sentences.concat(lies)
-
-  updateGame(game, () => {}, (err) => failure(err)); // Should be implemented by someone, updates the database
-} 
-
 function standardErrorHandling(res, err) {
     console.log(err)
     res.status(500).send(err)
@@ -82,11 +59,24 @@ function endSession(req, res) {
 }
 
 function getIdentifierFromSession(req, success, failure) {
-  const id = req.session.email;
+  const id = req.session.userInfo.email;
   if (!id) { failure("session does not exist") } else { 
     console.log("id from session:", id)
     success(id) 
   }
+}
+
+function getUserInfoFromSession(req, success, failure) {
+  const info = req.session.userInfo;
+  if (!info) { failure("session does not exist") } else { 
+    console.log("info from session:", info)
+    success(info)
+  }
+}
+
+function convertUserListFormat(fullUserList) { 
+  console.log("converted",Object.values(fullUserList))
+  return Object.values(fullUserList)
 }
 
 function logDiv(header='') {
@@ -102,3 +92,5 @@ exports.endSession = endSession
 exports.getRandomSentenceForDuel = getRandomSentenceForDuel
 exports.getIdentifierFromSession = getIdentifierFromSession
 exports.logDiv = logDiv
+exports.getUserInfoFromSession = getUserInfoFromSession
+exports.convertUserListFormat = convertUserListFormat

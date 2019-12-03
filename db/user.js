@@ -50,11 +50,11 @@ function createUser(user,success,failure){
 
 async function findUser(user_data, success, failure) {
     findUserByField(
-        'username', 
-        user_data.username,
+        'email', 
+        user_data.email,
         (users) => {
             if (users.length !== 1) {
-                failure("no username " + user_data.username + " found.");
+                failure("no email " + user_data.email + " found.");
             } else {
                 success(users[0]);
             }

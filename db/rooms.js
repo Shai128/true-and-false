@@ -67,7 +67,7 @@ async function findUserByEmailInRoomByRoomID(room_id,email,success,fail){ //room
     roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
         if(err) fail('Room with id'+room_id+'does not exist');
         else{
-                arr_users=room.users_in_room;
+                var arr_users=room.users_in_room;
                // console.log('got here: '+arr_users[0].email);
                var i; 
                var flag_not_found=1;
@@ -113,7 +113,11 @@ async function addUserObjectToRoom(room_id,user,success,fail){
         if(err) fail('Room with id'+room_id+'does not exist');
         else{
             //console.log('got here 4');
+<<<<<<< HEAD
             orig_sentences_array_length=room.all_sentences.length;
+=======
+            var orig_sentences_array_length=room.all_sentences.length;
+>>>>>>> 2b024973b27d3b699a63a403458312439646d5b8
             var i;
             for(i=0;i<user.true_sentences.length;i++){
                 room.all_sentences[orig_sentences_array_length+i]=user.true_sentences[i];
@@ -159,8 +163,13 @@ roomModel.findOne({ room_id: room_id }).exec(function (err1, room) {
 }
 async function createRoom(room_name,success,failure){
     roomsGlobalArrayModel.findOne({ array_id: 1 }).exec(function (err, global_array) {
+<<<<<<< HEAD
         if(err) fail('unexpected error occured during fetching the rooms global array');
         else{
+=======
+        if (err) {failure('unexpected error occured during fetching the rooms global array')}
+        else {
+>>>>>>> 2b024973b27d3b699a63a403458312439646d5b8
             var room_id,i;
             for(i=0;i<global_array.array.length;i++){
                 if(!global_array.array[i]){
@@ -181,7 +190,11 @@ async function createRoom(room_name,success,failure){
 
             });
             //saves the room in the db
+<<<<<<< HEAD
             newRoom.save((err)=>{if(err){fail('failed creating a room')} else{
+=======
+            newRoom.save((err)=>{if(err){failure('failed creating a room')} else{
+>>>>>>> 2b024973b27d3b699a63a403458312439646d5b8
                 roomsGlobalArrayModel.findOneAndUpdate({array_id: global_array.array_id}, { $set:{array:global_array.array}},()=>
                 
                 
@@ -190,6 +203,28 @@ async function createRoom(room_name,success,failure){
         }
     })
 }
+    });
+}
+
+<<<<<<< HEAD
+async function get_available_users(room_id,success,failure){
+    roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
+        if(err) failure('Room with id'+room_id+'does not exist');
+        else{
+                var res=[];
+                var i,j;
+                for(i=0;i<room.state_array.length; i++){
+                    if(room.state_array[i]==AVAILABLE_STATE && room.users_in_room[i]!=undefined){
+                        res[j]=room.users_in_room[i];
+                        j++;
+                    }
+
+                }
+                console.log(res);
+=======
+async function getRoomSize(room_id, success, failure) {
+    roomModel.find({room_id: room_id}, (err, docs) => {
+        if (err) {failure(err)} else {success(docs[0].users_in_room.length)}
     });
 }
 
@@ -206,7 +241,8 @@ async function get_available_users(room_id,success,failure){
                     }
 
                 }
-                console.log(res);
+               // console.log(res);
+>>>>>>> 2b024973b27d3b699a63a403458312439646d5b8
                 success(res);
         }
 });
@@ -225,7 +261,11 @@ async function get_unavailable_users(room_id,success,failure){
                     }
 
                 }
+<<<<<<< HEAD
                 console.log(res);
+=======
+              //  console.log(res);
+>>>>>>> 2b024973b27d3b699a63a403458312439646d5b8
                 success(res);
         }
 });
@@ -253,6 +293,13 @@ exports.deleteUserByEmailInRoomByRoomID=deleteUserByEmailInRoomByRoomID
 exports.addUserObjectToRoom=addUserObjectToRoom
 exports.addUserToRoom=addUserToRoom
 exports.createRoom=createRoom
+<<<<<<< HEAD
 exports.get_available_users=get_available_users
 exports.get_unavailable_users=get_unavailable_users
 exports.getAllSentencesArray=getAllSentencesArray
+=======
+exports.getAvailableUsers=get_available_users
+exports.getUnAvailableUsers=get_unavailable_users
+exports.getAllSentencesArray=getAllSentencesArray
+exports.getRoomSize = getRoomSize
+>>>>>>> 2b024973b27d3b699a63a403458312439646d5b8
