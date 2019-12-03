@@ -332,15 +332,18 @@ app.get('/userList/:roomId', (req, res) => {
       getUnAvailableUsers(
         roomId,
         (unavailableUsers) => {
-          res.status(200).send(JSON.stringify({
-             //PlayersAvailable: [{name:'Jhon', age:28, city:'HO'}]
-            PlayersAvailable: convertUserListFormat(availableUsers),
-            PlayersUnAvailable: convertUserListFormat(unavailableUsers)
-        //    PlayersAvailable: [{email: "Dan@gmail.com", nickName: "Dan"},],
-         //   PlayersUnAvailable: [{email: "Ron@gmail.com", nickName: "Ron"}]
-          //  PlayersAvailable: ["Ron","dan"],
-          //  PlayersUnAvailable: [ "Ron"]
-          }))
+          findRoomById(
+            roomId, 
+            (roomObject) => {
+              res.status(200).send(JSON.stringify({
+                PlayersAvailable: convertUserListFormat(availableUsers),
+                PlayersUnAvailable: convertUserListFormat(unavailableUsers),
+                RoomName: roomObject.room_name,
+                RoomId: roomObject.room_id
+              }))
+            }, 
+            (err) => standardErrorHandling(res, err)
+          )
         },
         (err) => standardErrorHandling(res, err)
       )
@@ -352,7 +355,6 @@ app.get('/userList/:roomId', (req, res) => {
 /**
  * socket io stuff from here on
  */
-
 
 const server = app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 const io = socket(server);

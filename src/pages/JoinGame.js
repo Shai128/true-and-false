@@ -55,15 +55,21 @@ import { reject } from 'q';
 
 export function JoinGame(){  
 
-  console.log("dan")
-
   const [PlayersAvailable, setPlayersAvailable] = useState([]);
   const [PlayersUnAvailable, setPlayersUnAvailable] = useState([]);
+  const [RoomName, setRoomName] = useState("");
+  const [RoomId, setRoomId] = useState(-1);
+
 
 
 const useStylesRoomName = makeStyles(theme => ({
   title: {
     flexGrow: 1,
+    fontFamily: 'sans-serif',
+  },
+  roomNumber: {
+    flexGrow: 1,
+    fontFamily: '"Segoe UI"',
   },
 }));
 
@@ -92,16 +98,27 @@ socket.on("userLeft", function(userInfo) {
        setPlayersAvailable(newPlayersAvailable)
      });
 
+     
 
-//console.log("players -->", PlayersAvailable, PlayersUnAvailable);
+console.log("room name -->", RoomName);
 
   return (
     <div>
    <HorizontalLinearStepper/>
 
+
+  <Grid item xs={6}>
    <Typography variant="h2" className={classes.title}>
-    Room Name
+    {RoomName}
    </Typography>
+   </Grid>
+
+  <Grid item xs={4}>
+   <Typography variant="h2" className={classes.roomNumber}>
+   Room Number: 
+  {RoomId}
+   </Typography>
+   </Grid>
 
 
 <Grid container spacing={3} justify="center">
@@ -111,7 +128,7 @@ socket.on("userLeft", function(userInfo) {
 <Grid container spacing={1} justify="center">
 
       <Grid item xs={4}>
-         <Typography variant="h4">
+         <Typography variant="h4" className={classes.roomNumber}>
          Chose a player and start to play!
           </Typography>
           </Grid>
@@ -125,6 +142,7 @@ socket.on("userLeft", function(userInfo) {
 
   </div>
   );
+
 
 
  function InitTheRoom(){   
@@ -143,12 +161,12 @@ socket.on("userLeft", function(userInfo) {
           resolve(response.json());
         })
       }}).then(data => {
-        console.log("players -->");
         if (PlayersAvailable.length === 0 && data.PlayersAvailable !== undefined &&
           PlayersUnAvailable.length === 0 && data.PlayersUnAvailable !== undefined) {
-            console.log("please get here -->");
           setPlayersAvailable(data.PlayersAvailable);
           setPlayersUnAvailable(data.PlayersUnAvailable);
+          setRoomName(data.RoomName);
+          setRoomId(data.RoomId);
         }
       }, fail_status => {
         console.log("failed. status: ", fail_status)
