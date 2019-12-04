@@ -24,13 +24,13 @@ import {getCreatedGames, getParticipatedGames, getCurrentUserFromSession as getC
 import {PrintGames, PrintJoinGameDialog} from './../PagesUtils';
 import {createRoom} from './../room.js'
 import {isUndefined} from './../Utils.js'
-import { JoinGame } from './JoinGame.js';
-import { Link } from '@material-ui/core';
+import {JoinGame} from './JoinGame.js';
 export function LoginScreenHome(props){
     let { path, url } = useRouteMatch();
     let user = getUserFromProps(props);
     return(
         <Switch>
+        <Route path={`/JoinGame`} exact component={JoinGame} />
 
         <Route exact path={path}>
         <Home path = {path} url = {url} user={user}/>
@@ -279,8 +279,6 @@ function PrintCreateGameDialog(props){
         console.log("starting game!");
         console.log("game name:", roomName);
         console.log('user nickname: ', currentGameNickName);
-
-
         createRoom(roomName, currentUser, currentGameNickName, history);
     }
     return(
@@ -324,14 +322,10 @@ function PrintCreateGameDialog(props){
           <Button onClick={onCloseWindow} color="primary">
             Cancel
           </Button>
-          <Link to={{
-          pathname: `/JoinGame`,
-          user: currentUser
-            }}>
+          
               <Button onClick={startGame} color="primary">
                 Start
           </Button>
-          </Link>
 
         </DialogActions>
       </Dialog>

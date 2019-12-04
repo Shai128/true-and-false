@@ -160,7 +160,7 @@ console.log("room name -->", RoomName);
         return new Promise(function(resolve, reject) {
           resolve(response.json());
         })
-      }}).then(data => {
+      }}).then(data => {        
         if (PlayersAvailable.length === 0 && data.PlayersAvailable !== undefined &&
           PlayersUnAvailable.length === 0 && data.PlayersUnAvailable !== undefined) {
           setPlayersAvailable(data.PlayersAvailable);
@@ -621,8 +621,9 @@ const [InvitePlayerWindowOpen, setInvitePlayerWindowOpen] = React.useState(false
               return (
                 <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
                   {columnsForAvailable.map(column => {       
-                    const value = row.nickName;
-                    console.log("ROW ->",row)
+                   // const value = row.nickName;
+                   const value = 'Ron';
+                    console.log("ROW ->",value)
                     return (
                       <TableCell key={column.id} align={column.align}>
 

@@ -39,7 +39,7 @@ import {LoginScreenHome as Home} from './LoginScreenHome.js';
 import {MyProfile} from './MyProfile.js';
 import {MySentences} from './MySentences.js';
 import {getCurrentUserFromSession as getCurrentUser, emptyUser} from './../user';
-
+import {JoinGame} from './JoinGame.js';
 
 const drawerWidth = 240;
 const useStyles = makeStyles(theme => ({
@@ -129,7 +129,8 @@ export function LoginScreenRouter(){
   <Router>
   <Switch>
     
-  
+  <Route path={`/JoinGame`} exact component={JoinGame} />
+
         
   <Route exact path={`/`}>
             <App />
@@ -221,7 +222,7 @@ function LoginScreen(props){
 
     return(
       <div>
-        <Router>
+        {/*<Router>*/}
  <div className={classes.root}>
       <CssBaseline />
       <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
@@ -238,10 +239,7 @@ function LoginScreen(props){
     <Typography variant="h6" className={classes.title}>
     Two Truths and One Lie
    </Typography>
-   <Switch>
-     
-   </Switch>
-   <Route exact path={'/'} component = {App}/>  
+   
 
     <Button color="inherit"
     onClick={logout}>
@@ -275,7 +273,8 @@ function LoginScreen(props){
         
         <RedirectToHomeIfNeeded url={url} />
         <Switch>  
-          
+        <Route path={`/JoinGame`} exact component={JoinGame} />
+
         
         <Route exact path={`/`}>
             <App />
@@ -302,8 +301,8 @@ function LoginScreen(props){
         </main>
 
         </div>
-      </Router>
-      </div>
+        {/*<Router/>*/}
+        </div>
     );
     
 }

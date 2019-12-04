@@ -4,6 +4,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import {
       Link,
+      useHistory,
   } from "react-router-dom";
 import {isUndefined} from './Utils.js';
 import {joinRoom} from './room.js';
@@ -81,7 +82,7 @@ export function PrintJoinGameDialog(props){
 
   });
   */
-  
+  let history = useHistory();
   const joinGame = ()=>{
     resetDisplaysContent();
     var validData = true;
@@ -128,7 +129,7 @@ export function PrintJoinGameDialog(props){
       console.log("starting game!");
       console.log("game ID:", gameID);
       console.log('user nickname: ', currentGameNickName);
-      joinRoom(gameID, currentUser, currentGameNickName);
+      joinRoom(gameID, currentUser, currentGameNickName, history);
       //todo: handle taken nick name and wrong ID
       /**
       * const displayNickNameTaken = ()=>{
