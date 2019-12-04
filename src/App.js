@@ -286,6 +286,7 @@ function LinksPage() {
   return (
     <div>
       <Switch>
+
         <Route exact path="/">
           <Home />
         </Route>

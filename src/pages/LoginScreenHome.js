@@ -17,17 +17,20 @@ import {
     useRouteMatch,
     Switch,
     Route,
+    useHistory,
   } from "react-router-dom";
 import {GamePage} from './GamePage.js';
 import {getCreatedGames, getParticipatedGames, getCurrentUserFromSession as getCurrentUser, getUserFromProps} from './../user';
 import {PrintGames, PrintJoinGameDialog} from './../PagesUtils';
 import {createRoom} from './../room.js'
 import {isUndefined} from './../Utils.js'
+import {JoinGame} from './JoinGame.js';
 export function LoginScreenHome(props){
     let { path, url } = useRouteMatch();
     let user = getUserFromProps(props);
     return(
         <Switch>
+        <Route path={`/JoinGame`} exact component={JoinGame} />
 
         <Route exact path={path}>
         <Home path = {path} url = {url} user={user}/>
@@ -215,6 +218,7 @@ const usegameListItemsStyles = makeStyles(theme=>({
 
 
 function PrintCreateGameDialog(props){
+    let history = useHistory();
     const {handleCloseCreateGameWindow,  createGameWindowOpen, currentUser} = props;
     const [roomName, setRoomName] = React.useState("");
     const [nick_updated, setNick_updated] = React.useState(false);
@@ -274,7 +278,7 @@ function PrintCreateGameDialog(props){
         console.log("starting game!");
         console.log("game name:", roomName);
         console.log('user nickname: ', currentGameNickName);
-        createRoom(roomName, currentUser, currentGameNickName);
+        createRoom(roomName, currentUser, currentGameNickName, history);
     }
     return(
         <Dialog open={createGameWindowOpen} onClose={onCloseWindow} aria-labelledby="form-dialog-title">

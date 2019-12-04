@@ -8,7 +8,7 @@ const server = 'http://localhost:8000';
  * @param {the current user} currentuser 
  * @param {the nick name the user chose for this room} currentGameNickName 
  */
-export function createRoom(roomName, currentuser, currentGameNickName){
+export function createRoom(roomName, currentuser, currentGameNickName, history){
     fetch(server + '/createRoom/' + roomName, {
         method: 'GET', // *GET, POST, PUT, DELETE, etc.
         headers: {
@@ -24,8 +24,14 @@ export function createRoom(roomName, currentuser, currentGameNickName){
             resolve(response.json());
             })
         }
-        }).then(roomID => {
-            console.log('createRoom frontend got data: ', roomID);
+        }).then(room => {
+            console.log('createRoom frontend got data: ', room);
+            history.push({
+                pathname: '/JoinGame',
+                user: currentuser,
+                //roomId: room.ID,
+                currentGameNickName: currentGameNickName,
+            });
             //todo: redirect to Dan's page with the given roomID and the user! H-A-L-I-F!
         }, fail_status => {
         console.log("failed, status:", fail_status)
@@ -38,7 +44,7 @@ export function createRoom(roomName, currentuser, currentGameNickName){
  * @param {the current user} user 
  * @param {the nickname the user chose for this room} currentGameNickName 
  */
-export function joinRoom(roomID, user, currentGameNickName){
+export function joinRoom(roomID, user, currentGameNickName, history){
     fetch(server + '/joinRoom/' + roomID, {
         method: 'GET', // *GET, POST, PUT, DELETE, etc.
         headers: {
@@ -56,6 +62,12 @@ export function joinRoom(roomID, user, currentGameNickName){
         }
         }).then(succ => {
             console.log('frontend got data: ', user);
+            history.push({
+                pathname: '/JoinGame',
+                user: user,
+                //roomId: room.ID,
+                currentGameNickName: currentGameNickName
+            });
             //todo: redirect to Dan's page with the roomID and the user! H-A-L-I-F!
         }, fail_status => {
         console.log("failed, status:", fail_status)
