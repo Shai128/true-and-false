@@ -286,6 +286,7 @@ function LinksPage() {
   return (
     <div>
       <Switch>
+
         <Route exact path="/">
           <Home />
         </Route>
@@ -365,16 +366,16 @@ const handleCloseGuestLoginWindow = () => {
       </Button>
               </Link>
             </Grid>
-
+{/* 
             <Grid item xs={12} sm={6}>
               <Link to="/LoginScreen">
                 <Button variant="contained" color="primary" fullWidth className={classes.button}>
                   LoginScreen
           </Button>
               </Link>
-            </Grid>
+            </Grid> */}
 
-            <Grid item xs={12} sm={6}>
+            {/* <Grid item xs={12} sm={6}> */}
             <Button variant="contained" color="primary" fullWidth onClick={handleClickGuestLogin} className={classes.button}>
             Guest Login
             </Button>
@@ -382,26 +383,26 @@ const handleCloseGuestLoginWindow = () => {
             <PrintJoinGameDialog
             handleCloseWindow= {handleCloseGuestLoginWindow}
             WindowOpen= {guestLoginWindowOpen}
-            currentUser = {{}}/>
-          </Grid>
+            currentUser = {emptyUser()}/>
+          {/* </Grid> */}
 
-
+{/* 
           <Grid item xs={12} sm={6}>
             <Link to="/ChatRoom">
             <Button variant="contained" color="primary" fullWidth  className={classes.button}>
               Chat
           </Button>
           </Link>
-            </Grid>
+            </Grid> */}
 
             
-          <Grid item xs={12} sm={6}>
+          {/* <Grid item xs={12} sm={6}>
             <Link to="/JoinGame">
             <Button variant="contained" color="primary" fullWidth  className={classes.button}>
               Join A Game
           </Button>
           </Link>
-            </Grid>
+            </Grid> */}
 
         </form>
         <Box mt={5}>

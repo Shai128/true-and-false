@@ -46,7 +46,7 @@ function Home(props){
               Games List
             </Typography>
         
-          <GetGamesComponents url={url}/>
+          <GetGamesComponents user={user} url={url}/>
                     
           </div>
 
@@ -61,19 +61,17 @@ function GetGamesComponents(props){
   let url = props.url;
     return (
 
-     
-
     <Box mt={5} m={1}>
     <Typography variant="h5" component="h3" justify="center">
         Games I Created
     </Typography>
-<GetCreatedGamesComponents url={url}/>
+<GetCreatedGamesComponents user={props.user} url={url}/>
 
 <Typography variant="h5" component="h3">
         Games I Was Participated In
     </Typography>
 
-    <GetParticipatedGamesComponents url={url}/>
+    <GetParticipatedGamesComponents user={props.user} url={url}/>
     </Box>
     
         );

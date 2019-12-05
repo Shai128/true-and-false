@@ -1,4 +1,6 @@
 import React from 'react';
+import ReactLoading from "react-loading";
+
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -16,11 +18,12 @@ import {
   import DialogContent from '@material-ui/core/DialogContent';
   import DialogContentText from '@material-ui/core/DialogContentText';
   import DialogTitle from '@material-ui/core/DialogTitle';
-  import {socket} from './user.js';
+  import {socket, getUserFromProps} from './user.js';
 
 export function PrintGames(props){
     const games =props.games;
     const classes = props.classes;
+    const user = getUserFromProps(props);
     let url = props.url;
     return (<List className={classes.list}>
           {games.map(({ name, id, date, playersNum }) => (
@@ -28,7 +31,8 @@ export function PrintGames(props){
               <Link to={
                 {
                   pathname: `${url}/GamePage/`+id,
-                  game: games[id]
+                  game: games[id],
+                  user: user,
                 }
               }
               >
@@ -41,7 +45,18 @@ export function PrintGames(props){
         </List>);
 }
 
+export function DisplayLoading(){
+  return (
+    <div
+     style={{
+        position: 'absolute', left: '50%', top: '50%',
+        transform: 'translate(-50%, -50%)'
+    }}>
 
+  <ReactLoading type={"bars"} color={"#000"} height={667} width={375} />
+    </div>
+  );
+}
 
 export function PrintJoinGameDialog(props){  
   const {handleCloseWindow,  WindowOpen, currentUser} = props;
@@ -162,4 +177,28 @@ export function PrintJoinGameDialog(props){
     </Dialog>
 
   );
+}
+
+export function PrintMessages(props){
+    const messages =props.messages;
+    const user = getUserFromProps(props);
+    var index =0;
+    return (<List>
+          {messages.map((message) => (
+            <React.Fragment key={index++}>
+              <Link to={
+                {
+                  pathname: `/ChatRoom/`+message.writerEmail,
+                  user: user,
+                }
+              }
+              >
+              <ListItem button>
+                <ListItemText primary={message.author + ": "+message.content} /*secondary={date}*/ />
+              </ListItem>
+              </Link>
+            </React.Fragment>
+          ))}
+        </List>);
+
 }

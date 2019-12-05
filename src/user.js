@@ -2,6 +2,7 @@
 import {okStatus, isUndefined} from './Utils.js'
 import { reject } from 'q';
 const server = 'http://localhost:8000';
+const user_in_session_key = 'user in session key'
 const  players= [{firstName: 'alon', nickName: 'alon', email:'123@gmail.com'}, {firstName: 'km', nickName: 'debil', email:'k@gmai.com',}, {firstName: 'Dan', nickName: 'Halif', email: 'halifadan@gmail.com'}];
 export function getCreatedGames(){
     var arr = [];
@@ -44,7 +45,7 @@ export function getParticipatedGames(){
 
 
 const io = require('socket.io-client');
-export const socket = io('server');
+export const socket = io(server);
 
 
 /**
@@ -60,9 +61,20 @@ export function getCurrentUser(){
  * @param {a function that sets the user from the session to the user variable} setUser 
  */
 export function getCurrentUserFromSession(user, setUser){
+    
     if(userIsUpdated(user))
         return;
-    
+    /** getting the current user from the local storage, if exists */
+    var storage_user = (localStorage.getItem(user_in_session_key));
+    if(storage_user != null ){
+        var parsed_storage_user = JSON.parse(storage_user);
+        if(userIsUpdated(parsed_storage_user)){
+            console.log('used local storage to get: ', parsed_storage_user)
+            setUser(parsed_storage_user);
+            return;
+        }
+    }
+
     fetch(server+'/getUserFromSession', {
     method: 'GET', // *GET, POST, PUT, DELETE, etc.
     headers: {
@@ -81,10 +93,20 @@ export function getCurrentUserFromSession(user, setUser){
     }).then(user => {
         console.log('frontend got data: ', user);
         setUser(user);
+        /** saving the user we just got to local storage, so next time we will access the user from local storage */
+        localStorage.setItem(user_in_session_key, JSON.stringify(user));
+        console.log('saved in local storage: ', user)
+        console.log('now we have in local storage: ',  JSON.parse(localStorage.getItem(user_in_session_key)));
+
         console.log("updated user", JSON.stringify(user))
     }, fail_status => {
     console.log("failed, status:", fail_status)
     });
+}
+
+export function logOut(){
+    //todo: http request to logout from session. still don't have the code for that.....
+    localStorage.removeItem(user_in_session_key);
 }
 
 /**
@@ -92,7 +114,7 @@ export function getCurrentUserFromSession(user, setUser){
  * @param {the user that is checked if updated} user 
  * returns true if the user has an email.
  */
-function userIsUpdated(user){
+export function userIsUpdated(user){
     return !isUndefined(user) && !isUndefined(user.email) && user.email !== '';
 }
 
@@ -102,6 +124,7 @@ function userIsUpdated(user){
  * edits the user with the same user_.id and puts instead the given user
  */
 export function updateUserToDB(user){
+    localStorage.setItem(user_in_session_key, JSON.stringify(user))
     fetch(server+'/userupdate/'+user._id, {
                 method: 'POST', // *GET, POST, PUT, DELETE, etc.
                 headers: {
@@ -134,9 +157,11 @@ export function emptyUser(){
  * returns the user from the props. if the props doesn't contain a user, it returns an empty user.
  */
 export function getUserFromProps(props){
-    if(!isUndefined(props) &&!isUndefined(props.location) && !isUndefined(props.location.user))
+    if(!isUndefined(props) &&!isUndefined(props.location) && !isUndefined(props.location.user)
+     && userIsUpdated(props.location.user))
         return props.location.user;
-    if(!isUndefined(props) &&!isUndefined(props.user))
+        
+    if(!isUndefined(props) &&!isUndefined(props.user) && userIsUpdated(props.user))
         return props.user;
     return emptyUser();
 }
@@ -147,11 +172,12 @@ export function getUserFromProps(props){
  * @param {used to set the user from the session if it is not in the props} setUser 
  * sets the user from props, if exists in props, or reads the user from the db and sets with setUser.
  */
-export function getUserFromPropsOrFromSession(props,user, setUser){
+export function getUserFromPropsOrFromSession(props, setUser){
+    var user = getUserFromProps(props);
     if(userIsUpdated(user)){
-        return;
+        setUser(user)
+        return user;
     }
-    setUser(getUserFromProps(props))    
     getCurrentUserFromSession(user, setUser)
 }
 

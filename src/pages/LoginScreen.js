@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import clsx from 'clsx';
 
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -20,6 +20,11 @@ import GamesIcon from '@material-ui/icons/Games';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import HomeIcon from '@material-ui/icons/Home';
 import Button from '@material-ui/core/Button';
+import NotificationsIcon from '@material-ui/icons/Notifications';
+import Badge from '@material-ui/core/Badge';
+import Popup from "reactjs-popup";
+import Container from '@material-ui/core/Container';
+
 import App from './../App.js'
 import {
     BrowserRouter as Router,
@@ -29,17 +34,17 @@ import {
     useRouteMatch,
     Redirect,
     useHistory,
-  } from "react-router-dom";
-  import { createBrowserHistory } from "history";
-
-  import {GamesListPage as GamesList} from './GamesList.js';
+} from "react-router-dom";
+import { createBrowserHistory } from "history";
+import {GamesListPage as GamesList} from './GamesList.js';
 
 import {LoginScreenHome as Home} from './LoginScreenHome.js';
 
 import {MyProfile} from './MyProfile.js';
 import {MySentences} from './MySentences.js';
-import {getCurrentUserFromSession as getCurrentUser, emptyUser} from './../user';
-
+import {getCurrentUserFromSession as getCurrentUser, userIsUpdated, getUserFromProps, logOut, socket} from './../user';
+import {DisplayLoading, PrintMessages} from './../PagesUtils';
+import { Chat } from './Chat.js';
 
 const drawerWidth = 240;
 const useStyles = makeStyles(theme => ({
@@ -145,23 +150,40 @@ export function LoginScreenRouter(){
   );
 }
 function LoginScreen(props){
-  const [currentUser, setCurrentUser] = React.useState(emptyUser);
-    getCurrentUser(currentUser, setCurrentUser);
-    const [open, setOpen] = React.useState(false);
-    const handleDrawerOpen = () => {
-      setOpen(true);
-    };
-    const handleDrawerClose = () => {
-      setOpen(false);
-    };
-    const classes = useStyles();
-    let history = useHistory();
+  const [currentUser, setCurrentUser] = React.useState(getUserFromProps(props));
+  const [unreadMessages, setUnreadMessages] = React.useState([]);
+  
+  getCurrentUser(currentUser, setCurrentUser);
+  useEffect(() => {
+    if(!userIsUpdated(currentUser))
+      return;
+    socket.off(currentUser.email+'_chat_notification');
 
-    const logout = ()=>{
-      history.push("/"); // moves to main page (localhost:3000)
-      //todo: implement logout
-    }
-    let { path, url } = useRouteMatch();
+    socket.on(currentUser.email+'_chat_notification', function(data){
+      var new_message = {
+        writerEmail: data.user.email,
+        author: data.author,
+        content: data.messageContent
+      };
+      
+      setUnreadMessages(unreadMessages.concat(new_message));
+  })
+});
+  const [open, setOpen] = React.useState(false);
+  const handleDrawerOpen = () => {
+    setOpen(true);
+  };
+  const handleDrawerClose = () => {
+    setOpen(false);
+  };
+  const classes = useStyles();
+  let history = useHistory();
+
+  const logout = ()=>{
+    history.push("/"); // moves to main page (localhost:3000)
+    logOut();
+  }
+  let { path, url } = useRouteMatch();
 
 
     const listItems=(
@@ -218,6 +240,10 @@ function LoginScreen(props){
         </div>
       );
 
+    
+      if(!userIsUpdated(currentUser)){
+        return (<DisplayLoading/>);
+      }
 
     return(
       <div>
@@ -231,17 +257,38 @@ function LoginScreen(props){
             color="inherit"
             aria-label="open drawer"
             onClick={handleDrawerOpen}
-            className={clsx(classes.menuButton, open && classes.menuButtonHidden)}
+            className={clsx( classes.menuButton, open && classes.menuButtonHidden)}
           >
             <MenuIcon />
           </IconButton>
+  <Popup
+    onClose={()=>{setUnreadMessages([])}}
+    trigger={
+      <IconButton  edge="start" color="inherit" className={classes.menuButton}>
+      <Badge badgeContent={unreadMessages.length} color="secondary">
+        <NotificationsIcon/>
+      </Badge>
+    </IconButton>}
+    
+    position="bottom center"
+    closeOnDocumentClick>
+      <div className={classes.root}
+      style={{ height: '200px',  overflow: "auto",} }>
+      <Container component="main" maxWidth="xs">
+
+        <Typography variant="h6" style={{color:'black'}} >
+          <PrintMessages messages={unreadMessages} user={currentUser} />
+        </Typography>
+
+        </Container>
+      </div>
+    </Popup>
+  
+
     <Typography variant="h6" className={classes.title}>
     Two Truths and One Lie
    </Typography>
-   <Switch>
-     
-   </Switch>
-   <Route exact path={'/'} component = {App}/>  
+
 
     <Button color="inherit"
     onClick={logout}>
@@ -275,7 +322,9 @@ function LoginScreen(props){
         
         <RedirectToHomeIfNeeded url={url} />
         <Switch>  
-          
+
+        <Route path={'/ChatRoom/:email'} component = {Chat}/>  
+
         
         <Route exact path={`/`}>
             <App />

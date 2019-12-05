@@ -14,8 +14,8 @@ import IconButton from '@material-ui/core/IconButton';
 import {useStyles as AppUseStyles} from './../App.js';
 import DeleteTwoToneIcon from '@material-ui/icons/DeleteTwoTone';
 
-import {updateUserToDB, getUserFromProps, getCurrentUserFromSession} from './../user.js'
-
+import {updateUserToDB, getCurrentUserFromSession, userIsUpdated, getUserFromProps} from './../user.js'
+import {DisplayLoading} from './../PagesUtils';
 const useButtonStyles = makeStyles({
     root: {
       background: props =>
@@ -36,11 +36,15 @@ export function MySentences(props){
 
     const classes = AppUseStyles();
     const buttonClasses = useButtonStyles();
+    console.log('props: ', props);
     const [user, setUser] = useState(getUserFromProps(props));
-    getCurrentUserFromSession(user, setUser);
     const [truths, setTruths] = useState(user.truths);
-    const [lies, setLies] = useState(user.lies);
+    const [lies, setLies] =  useState(user.lies);
+    getCurrentUserFromSession(user, setUser);
 
+    if(!userIsUpdated(user)){
+      return (<DisplayLoading/>);
+    }
     
     return (
         <Container component="main" maxWidth="xs">

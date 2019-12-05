@@ -1,7 +1,7 @@
 export const okStatus = 200;
 
 export function isUndefined(val){
-    return typeof val === 'undefined';
+    return typeof val === 'undefined' || val == null;
 }
 
 

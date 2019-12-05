@@ -23,7 +23,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 
 import Button from '@material-ui/core/Button';
 
-import {getCreatedGames, getParticipatedGames} from './../user.js';
+import {getCreatedGames, getParticipatedGames,getUserFromProps, getCurrentUserFromSession } from './../user.js';
 import {
   //BrowserRouter as Router,
   //Switch,
@@ -63,9 +63,11 @@ export function GamePage(props){
     }));
     const classes = useStyles();
     var game = props.location.game;
+    const [user, setUser] = getUserFromProps(props);
+    getCurrentUserFromSession(user, setUser);
     let { url } = useRouteMatch();
     const path_array = url.split("/");
-    let index =path_array[path_array.length-1]; //todo: find the real index
+    let index = path_array[path_array.length-1]; //todo: find the real index
     if(typeof game === 'undefined'){
       let createdGame = getCreatedGames()[index];
       if(typeof createdGame === 'undefined')
@@ -93,7 +95,7 @@ export function GamePage(props){
             </Paper>
              
             <Paper className={classes.paper}>
-            <PrintPlayers players = {game.players}/>
+            <PrintPlayers players = {game.players} user={user}/>
             </Paper>
 
         </Container>
@@ -121,7 +123,7 @@ const useStyles = makeStyles(theme => ({
   initial_open.fill(false);
   const [open, setOpen] = React.useState(initial_open); 
   const [playerInfoDialogOpen, setPlayerInfoDialogOpen] = React.useState(initial_open); 
-
+  const user = props.user;
   const openPlayerWindow = (index) => {
     let new_arr = playerInfoDialogOpen.slice();
     new_arr[index] = true;
@@ -158,7 +160,8 @@ const useStyles = makeStyles(theme => ({
                   <ListItem button>
                       <Link to={
                       {
-                        pathname: `/Chat/`+player.email,
+                        pathname: `/ChatRoom/`+player.email,
+                        user: user
                       }
                     }>
                   <Grid container alignContent='center' direction='column' alignItems='center' justify='center'>

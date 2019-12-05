@@ -19,8 +19,8 @@ import {
     Route,
   } from "react-router-dom";
 import {GamePage} from './GamePage.js';
-import {getCreatedGames, getParticipatedGames, getCurrentUserFromSession as getCurrentUser, getUserFromProps} from './../user';
-import {PrintGames, PrintJoinGameDialog} from './../PagesUtils';
+import {userIsUpdated, getCreatedGames, getParticipatedGames, getCurrentUserFromSession as getCurrentUser, getUserFromProps} from './../user';
+import {PrintGames, PrintJoinGameDialog, DisplayLoading} from './../PagesUtils';
 
 
 export function LoginScreenHome(props){
@@ -95,6 +95,10 @@ const handleCloseJoinGameWindow = () => {
     const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
     const [currentUser, setCurrentUser] = React.useState(getUserFromProps(props));
     getCurrentUser(currentUser, setCurrentUser);
+    
+    if(!userIsUpdated(currentUser)){
+      return (<DisplayLoading/>);
+    }
 
     return (
 
