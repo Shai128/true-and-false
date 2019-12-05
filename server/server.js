@@ -411,15 +411,18 @@ io.on('connection', function (socket) {
     }
   });
 
-  socket.on('S_chat', function (data) {
+  socket.on('chat', function(data){
     console.log(data.messageContent + " was written");
     console.log(socket.handshake.session.userdata);
     socket.handshake.session.userdata = data;
     socket.handshake.session.save();
-    io.sockets.connected[data.user.socketID].emit('C_chat', data);
-    io.sockets.connected[data.receiverUser.socketID].emit('C_chat', data);
-  })
 
+    io.sockets.emit(data.user.email+'_chat', data);
+    io.sockets.emit(data.receiverUserEmail+'_chat', data);
+    io.sockets.emit(data.receiverUserEmail+'_chat_notification', data);
+    // io.sockets.connected[data.user.socketID].emit('C_chat', data);
+    // io.sockets.connected[data.receiverUser.socketID].emit('C_chat', data);
+  })
 
 /*
   socket.on('S_openRoom', function (data) {

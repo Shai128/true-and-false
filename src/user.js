@@ -105,7 +105,25 @@ export function getCurrentUserFromSession(user, setUser){
 }
 
 export function logOut(){
-    //todo: http request to logout from session. still don't have the code for that.....
+    fetch(server + '/logout', {
+        method: 'GET', // *GET, POST, PUT, DELETE, etc.
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        credentials: 'include'
+        })
+    .then(response => {
+        console.log("response status:", response.status)
+        if (response.status !== okStatus) {
+            reject(response.status);
+        } else {
+            return new Promise(function(resolve, reject) {
+            resolve(response.json());
+            })
+        }
+    }, fail_status => {
+        console.log("failed, status:", fail_status);
+    });
     localStorage.removeItem(user_in_session_key);
 }
 

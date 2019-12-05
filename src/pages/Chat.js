@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
@@ -12,10 +12,21 @@ import JsxParser from 'react-jsx-parser'
 
 import Paper from '@material-ui/core/Paper';
 import {useStyles as AppUseStyles} from './../App.js';
-
+/*
 const io = require('socket.io-client');
 const socket = io('http://localhost:8000');
-
+*/
+import {
+  //BrowserRouter as Router,
+  //Switch,
+  //Route,
+  //Link,
+  // useRouteMatch,
+  
+} from "react-router-dom";
+import {createBrowserHistory} from 'history'
+import {socket, getCurrentUserFromSession, getUserFromProps, userIsUpdated} from './../user.js'
+import {DisplayLoading} from './../PagesUtils.js'
 const useButtonStyles = makeStyles({
     root: {
       background: props =>
@@ -33,12 +44,20 @@ const useButtonStyles = makeStyles({
   });
 
   const useChatStyles = makeStyles(theme => ({
-    paper: {
+    this_user_paper: {
       color: 'blue',
-      padding: theme.spacing(2),
+      //padding: theme.spacing(2),
       display: 'flex',
       overflow: 'auto',
       flexDirection: 'column',
+    },
+    another_user_paper: {
+      color: 'green',
+      //padding: theme.spacing(2),
+      display: 'flex',
+      overflow: 'auto',
+      flexDirection: 'column',
+      textAlign: 'right',
     },
     fixedHeight: {
       height: 60,
@@ -77,7 +96,7 @@ const useButtonStyles = makeStyles({
 
 
 
-export function Chat(){
+export function Chat(props){
     
     const paperClasses = useStyles();
     const fixedHeightPaper = clsx(paperClasses.paper, paperClasses.fixedHeight);
@@ -86,33 +105,63 @@ export function Chat(){
 
     const classes = AppUseStyles();
     const buttonClasses = useButtonStyles();
- 
-    let this_user = getCurrentUser();
-    let other_user = getOtherUser();
+    const [user, setUser] = useState(getUserFromProps(props))
+    getCurrentUserFromSession(user, setUser);
+    let history = createBrowserHistory();
+    const path_array = history.location.pathname.split("/");
+    var other_user_email = path_array[path_array.length-1];
+    
     const [chatContent, setChatContent] = React.useState('');
     const [currentMessage, setCurrentMessage] = React.useState('');
-    socket.on('chat', function(data){
-        console.log(data);
-        let new_message =  '<Paper className={style}>'
+    const scrollToBottom = () => {
+      let node = document.getElementById('endOfChat');
+      node.scrollIntoView();
+    };
+    useEffect(() => {
+      if(!userIsUpdated(user))
+        return;
+      socket.off(user.email+'_chat');
+      socket.on(user.email+'_chat', function(data){
+        //console.log(data);
+        let message_arr = data.messageContent.split("");
+        let message = "";
+        for(const char of message_arr)
+          if(char === "<" || char === ">")
+            message += "{'"+char+"'}"
+          else
+            message +=char;
+        console.log('message: ', message);
+        let className = data.user.email === user.email? 'this_user_style': 'another_user_style';
+        let new_message =  `<div className={${className}}>`   //todo: should I make it paper instead of div?
         +'<Typography component="h5" variant="h6" justify="flex-end">'+
-         data.author + ": " + data.messageContent + 
+         data.author + ": " + message  + 
          '</Typography>'+
-         '</Paper>'
-        setChatContent(data.chatContent + "\n" + new_message);
+         '</div>'
+        setChatContent(chatContent + "\n" + new_message);
+        scrollToBottom();
     })
+  });
+    
+    
     
     const sendMessage = ()=>{
-        this_user.socketID = socket.id;
-        other_user.socketID = socket.id;//todo: edit....
+        // this_user.socketID = socket.id;
+        // other_user.socketID = socket.id;//todo: edit....
         socket.emit('chat',{
-            author: this_user.nickName,
+            author: user.nickName, //todo: change to firstName
             messageContent: currentMessage,
-            chatContent: chatContent,
-            user: this_user,
-            receiverUser: other_user,
+            //chatContent: chatContent,
+            user: user,
+            receiverUserEmail: other_user_email,
         });
         setCurrentMessage('');
     };
+    if(!userIsUpdated(user)){
+        return (
+          <DisplayLoading/>
+      );
+    }
+   
     return (
         <Container component="main" maxWidth="xs">
         <CssBaseline />
@@ -123,25 +172,29 @@ export function Chat(){
         <Grid item xs={12} >
         <Paper>
         <Typography component="h4" variant="h4" justify="flex-end">
-            {other_user.nickName}
-          </Typography>
+            {other_user_email}
+            
+        </Typography>
         </Paper> 
 
         </Grid>
         <Grid item xs={12} >
 
         {/**chat window */}
-        <Paper className={fixedHeightPaper}>
+        <Paper  className={fixedHeightPaper}>
         
           <pre style={{ fontFamily: "inherit" }}>
           <JsxParser 
           bindings ={{
-            style: chatClasses.paper,
+            this_user_style: chatClasses.this_user_paper,
+            another_user_style: chatClasses.another_user_paper,
+
           }}
           components={{ Paper, Typography }}
           jsx={chatContent}
           />
           </pre>
+          <div id='endOfChat' />
         
      
          
@@ -186,6 +239,7 @@ export function Chat(){
 
 }
 
+/*
 function getCurrentUser(){
     return {
         socketID: socket.id,
@@ -207,3 +261,4 @@ function getOtherUser(){
         lies: [{id:0, value:"I love computer science"}, {id:1, value:"this is a lie"}]
     }
 }
+*/
