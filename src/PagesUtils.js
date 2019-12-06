@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactLoading from "react-loading";
-
+import { makeStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -9,16 +9,15 @@ import {
   } from "react-router-dom";
 //import {isUndefined} from './Utils.js';
 
-  import Grid from '@material-ui/core/Grid';
-
-  import Button from '@material-ui/core/Button';
-  import TextField from '@material-ui/core/TextField';
-  import Dialog from '@material-ui/core/Dialog';
-  import DialogActions from '@material-ui/core/DialogActions';
-  import DialogContent from '@material-ui/core/DialogContent';
-  import DialogContentText from '@material-ui/core/DialogContentText';
-  import DialogTitle from '@material-ui/core/DialogTitle';
-  import {socket, getUserFromProps} from './user.js';
+import Grid from '@material-ui/core/Grid';
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import {socket, getUserFromProps} from './user.js';
 
 export function PrintGames(props){
     const games =props.games;
@@ -180,25 +179,47 @@ export function PrintJoinGameDialog(props){
 }
 
 export function PrintMessages(props){
+  
+    const useStyles = makeStyles(theme => ({
+      root: {
+        width: '100%',
+        maxWidth: 360,
+        overflowX: 'hidden', overflowY: "auto",
+        backgroundColor: theme.palette.background.paper,
+        overflowWrap: 'break-word',
+      },
+    }));
+    const classes = useStyles();
+    const url = props.url;
     const messages =props.messages;
+    const onPageChange = props.onPageChange;
     const user = getUserFromProps(props);
     var index =0;
-    return (<List>
+    const shortMessage = (message) =>{
+      if(message.length >10)
+        return message.slice(10)+'...';
+      return message;
+    }
+    return (
+      <div className={classes.root}>
+        <List >
           {messages.map((message) => (
             <React.Fragment key={index++}>
-              <Link to={
+              <Link className={classes.root} to={
                 {
-                  pathname: `/ChatRoom/`+message.writerEmail,
+                  pathname: `${url}/ChatRoom/`+message.writerEmail,
                   user: user,
                 }
               }
               >
-              <ListItem button>
-                <ListItemText primary={message.author + ": "+message.content} /*secondary={date}*/ />
+              <ListItem className={classes.root} button onClick={onPageChange}>
+                <ListItemText primary={message.author + ": "+shortMessage(message.content)} /*secondary={date}*/ />
               </ListItem>
               </Link>
             </React.Fragment>
           ))}
-        </List>);
+        </List>
+      </div>
+        );
 
 }

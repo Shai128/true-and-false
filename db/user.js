@@ -4,6 +4,7 @@ const iterations = 1000;
 
 const userSchema= new mongoose.Schema(
     { 
+        firstName: String, // added by Shai because Alon counldn't add this line by himself
         email:String,
         password:String,
         salt: String,
@@ -35,6 +36,8 @@ function createUser(user,success,failure){
         salt: salt,
         iterations: iterations,
         nickName: user.nickName,
+        firstName: user.firstName, // added by Shai because Alon counldn't add this line by himself
+
         //games: {} // creating a user with no games
                                  });
     //saves the user in the db

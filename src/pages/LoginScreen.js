@@ -45,7 +45,7 @@ import {MySentences} from './MySentences.js';
 import {getCurrentUserFromSession as getCurrentUser, userIsUpdated, getUserFromProps, logOut, socket} from './../user';
 import {DisplayLoading, PrintMessages} from './../PagesUtils';
 import { Chat } from './Chat.js';
-
+import {SignIn} from './../App.js'
 const drawerWidth = 240;
 const useStyles = makeStyles(theme => ({
     root: {
@@ -134,8 +134,8 @@ export function LoginScreenRouter(){
   <Router>
   <Switch>
     
+  <Route path ={'/SignIn'} component={SignIn} />
   
-        
   <Route exact path={`/`}>
             <App />
           </Route>
@@ -152,22 +152,41 @@ export function LoginScreenRouter(){
 function LoginScreen(props){
   const [currentUser, setCurrentUser] = React.useState(getUserFromProps(props));
   const [unreadMessages, setUnreadMessages] = React.useState([]);
+  const [unRegisteredUser, setUnRegisteredUser] = React.useState(false);
+  getCurrentUser(currentUser, setCurrentUser,(u)=>{} , ()=>{setUnRegisteredUser(true)});
+  const [pageChange, setPageChange] = React.useState(false);
+
+  let browserHistory = createBrowserHistory();
+
   
-  getCurrentUser(currentUser, setCurrentUser);
+  let history = useHistory();
+
   useEffect(() => {
     if(!userIsUpdated(currentUser))
       return;
+    let isCancelled = false;
     socket.off(currentUser.email+'_chat_notification');
-
     socket.on(currentUser.email+'_chat_notification', function(data){
+      const path_array = browserHistory.location.pathname.split("/");
+      console.log('browserHistory: ', browserHistory);
+      console.log('history: ', history);
+
+      
+      var other_user_email = path_array[path_array.length-1];
+      if(path_array.length>1 && data.user.email === other_user_email && path_array[path_array.length-2] === 'ChatRoom')
+        return;
       var new_message = {
         writerEmail: data.user.email,
         author: data.author,
         content: data.messageContent
       };
-      
-      setUnreadMessages(unreadMessages.concat(new_message));
+      if(!isCancelled){
+        setUnreadMessages(unreadMessages.concat(new_message));
+      }
   })
+    return ()=>{
+      isCancelled = true;
+    }
 });
   const [open, setOpen] = React.useState(false);
   const handleDrawerOpen = () => {
@@ -177,14 +196,13 @@ function LoginScreen(props){
     setOpen(false);
   };
   const classes = useStyles();
-  let history = useHistory();
 
   const logout = ()=>{
     history.push("/"); // moves to main page (localhost:3000)
     logOut();
   }
   let { path, url } = useRouteMatch();
-
+  const onPageChange = ()=>{setPageChange(!pageChange)}
 
     const listItems=(
         <div>              
@@ -192,8 +210,8 @@ function LoginScreen(props){
       pathname:`${url}/Home`,
       user: currentUser
       }}> 
-    <ListItem button>
-     <ListItemIcon> 
+    <ListItem button onClick={onPageChange}>
+     <ListItemIcon > 
          <HomeIcon /> 
          </ListItemIcon> 
          <ListItemText primary="Home" />
@@ -204,7 +222,7 @@ function LoginScreen(props){
           pathname: `${url}/MyProfile`,
           user: currentUser
         }}>      
-            <ListItem button>
+            <ListItem button onClick={onPageChange}>
               <ListItemIcon>
                   <AccountCircleIcon />
               </ListItemIcon>
@@ -216,7 +234,7 @@ function LoginScreen(props){
               pathname: `${url}/MySentences`,
               user: currentUser
             }}>      
-            <ListItem button>
+            <ListItem button onClick={onPageChange}>
               <ListItemIcon>
                   <ListIcon />
               </ListItemIcon>
@@ -229,7 +247,7 @@ function LoginScreen(props){
           pathname:`${url}/GamesList`,
           user: currentUser
         }}>      
-          <ListItem button>
+          <ListItem button onClick={onPageChange}>
               <ListItemIcon>
                   <GamesIcon />
               </ListItemIcon>
@@ -240,6 +258,29 @@ function LoginScreen(props){
         </div>
       );
 
+      if(unRegisteredUser){
+        return (
+          <div className="App" >
+          <header className="App-header" >
+          <Container component="main" maxWidth="xs">
+            <CssBaseline />
+
+              <Typography variant="h4" style={{color:'black', marginBottom: '30px', width:'100%'}}>
+                You are unregistered. Please sign in first.
+              </Typography>
+
+              <Link to="/SignIn">
+                <Button variant="contained" color="primary" fullWidth className={classes.button}>
+                  Sign In
+            </Button>
+              </Link> 
+
+          </Container>
+          </header>
+          
+          </div>
+        );
+      }
     
       if(!userIsUpdated(currentUser)){
         return (<DisplayLoading/>);
@@ -268,16 +309,17 @@ function LoginScreen(props){
       <Badge badgeContent={unreadMessages.length} color="secondary">
         <NotificationsIcon/>
       </Badge>
-    </IconButton>}
+    </IconButton>
+    }
     
     position="bottom center"
     closeOnDocumentClick>
       <div className={classes.root}
-      style={{ height: '200px',  overflow: "auto",} }>
+      style={{ height: '200px', overflowX: 'hidden', overflowY: "auto",} }>
       <Container component="main" maxWidth="xs">
 
         <Typography variant="h6" style={{color:'black'}} >
-          <PrintMessages messages={unreadMessages} user={currentUser} />
+          <PrintMessages url={url} messages={unreadMessages} user={currentUser} onPageChange={onPageChange} />
         </Typography>
 
         </Container>
@@ -323,9 +365,13 @@ function LoginScreen(props){
         <RedirectToHomeIfNeeded url={url} />
         <Switch>  
 
-        <Route path={'/ChatRoom/:email'} component = {Chat}/>  
+        <Route path={`${path}/ChatRoom/:email`} component = {Chat}/>  
 
         
+        <Route path="/SignIn">
+          <SignIn />
+        </Route>
+
         <Route exact path={`/`}>
             <App />
           </Route>

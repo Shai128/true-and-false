@@ -3,7 +3,7 @@ import {okStatus, isUndefined} from './Utils.js'
 import { reject } from 'q';
 const server = 'http://localhost:8000';
 const user_in_session_key = 'user in session key'
-const  players= [{firstName: 'alon', nickName: 'alon', email:'123@gmail.com'}, {firstName: 'km', nickName: 'debil', email:'k@gmai.com',}, {firstName: 'Dan', nickName: 'Halif', email: 'halifadan@gmail.com'}];
+const  players= [{firstName: 'alon', nickName: 'alon', email:'123@gmail.com'}, {firstName: 'km', nickName: 'debil', email:'k@gmai.com',}, {firstName: 'Dan', nickName: 'Halif', email: 'dan@gmail.com'}];
 export function getCreatedGames(){
     var arr = [];
     arr[3] =  {
@@ -55,22 +55,33 @@ export function getCurrentUser(){
     return emptyUser();
 }
 
+
+
 /**
  * note- this function does nothing if the user contains an email that is not ''
  * @param {the user that will be assigned with the user from the session} user 
  * @param {a function that sets the user from the session to the user variable} setUser 
+ * @param {function that activates in case of failure} onFailure
+ * @param {function that activates in case of success} onSuccess
  */
-export function getCurrentUserFromSession(user, setUser){
+export function getCurrentUserFromSession(user, setUser, onSuccess , onFailure){
     
-    if(userIsUpdated(user))
+    if(userIsUpdated(user)){
+        if(!isUndefined(onSuccess))
+            onSuccess(user);
         return;
+    }
     /** getting the current user from the local storage, if exists */
     var storage_user = (localStorage.getItem(user_in_session_key));
-    if(storage_user != null ){
+    if(!isUndefined(storage_user)){
+        console.log('storage user: ', storage_user)
         var parsed_storage_user = JSON.parse(storage_user);
+        console.log('parsed_storage_user: ', parsed_storage_user)
         if(userIsUpdated(parsed_storage_user)){
             console.log('used local storage to get: ', parsed_storage_user)
             setUser(parsed_storage_user);
+            if(!isUndefined(onSuccess))
+                onSuccess(parsed_storage_user);
             return;
         }
     }
@@ -82,6 +93,7 @@ export function getCurrentUserFromSession(user, setUser){
     },
     credentials: 'include'
     }).then(response => {
+    console.log("response:", response)
     console.log("response status:", response.status)
     if (response.status !== okStatus) {
         reject(response.status);
@@ -91,6 +103,13 @@ export function getCurrentUserFromSession(user, setUser){
         })
     }
     }).then(user => {
+        if(!userIsUpdated(user)){
+            if(!isUndefined(onFailure))
+            onFailure();
+            return;
+        }
+        if(!isUndefined(onSuccess))
+            onSuccess(user);
         console.log('frontend got data: ', user);
         setUser(user);
         /** saving the user we just got to local storage, so next time we will access the user from local storage */
@@ -98,7 +117,6 @@ export function getCurrentUserFromSession(user, setUser){
         console.log('saved in local storage: ', user)
         console.log('now we have in local storage: ',  JSON.parse(localStorage.getItem(user_in_session_key)));
 
-        console.log("updated user", JSON.stringify(user))
     }, fail_status => {
     console.log("failed, status:", fail_status)
     });
@@ -118,7 +136,7 @@ export function logOut(){
             reject(response.status);
         } else {
             return new Promise(function(resolve, reject) {
-            resolve(response.json());
+            resolve(response);
             })
         }
     }, fail_status => {

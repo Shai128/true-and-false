@@ -22,7 +22,7 @@ import {
 import {LoginScreenRouter as LoginScreen} from './pages/LoginScreen.js';
 import {Chat as ChatRoom} from './pages/Chat.js';
 import {JoinGame} from './pages/JoinGame.js';
-import {PrintJoinGameDialog} from './PagesUtils.js';
+import {PrintJoinGameDialog, DisplayLoading} from './PagesUtils.js';
 import {okStatus, validEmail, passwordIsStrongEnough, isUndefined} from './Utils.js'
 import {emptyUser, logIn} from './user.js'
 function Copyright() {
@@ -476,19 +476,22 @@ function PrintGuestLoginDialog(props){
 }
 */
 
-function SignIn() {
-
+export function SignIn() {
 
   const classes = useStyles();
   let history = useHistory();
 
   const [user, setUser] = useState(emptyUser());
+  const [isLoading, setIsLoading] = useState(false);
+
   const updateField = e => {
     setUser({
       ...user,
       [e.target.name]: e.target.value
     });
   };
+  if(isLoading)
+    return (<DisplayLoading/>);
   return (
     <div className="App" >
       <header className="App-header" >
@@ -537,6 +540,7 @@ function SignIn() {
 
                   <Button variant="contained" color="primary" fullWidth className={classes.button}
                     onClick={() => {
+                      setIsLoading(true);
                       console.log("sending sign in");
                       let user = {
                         email: document.getElementById('EmailInput').value,
@@ -544,6 +548,7 @@ function SignIn() {
                       }
                       
                       logIn(user, (data)=>{
+                        setIsLoading(false);
                         console.log('frontend got data: ', data);
                         if(data.status === okStatus ){
                             history.push("/LoginScreen");

@@ -27,6 +27,7 @@ import {
 import {createBrowserHistory} from 'history'
 import {socket, getCurrentUserFromSession, getUserFromProps, userIsUpdated} from './../user.js'
 import {DisplayLoading} from './../PagesUtils.js'
+import {isUndefined} from './../Utils.js'
 const useButtonStyles = makeStyles({
     root: {
       background: props =>
@@ -47,20 +48,26 @@ const useButtonStyles = makeStyles({
     this_user_paper: {
       color: 'blue',
       //padding: theme.spacing(2),
-      display: 'flex',
-      overflow: 'auto',
-      flexDirection: 'column',
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      overflowWrap: 'break-word',
+      wordWrap: 'break-word',
+      hyphens: "auto",
+      width: '90%',
+      marginBottom: 5
     },
     another_user_paper: {
       color: 'green',
       //padding: theme.spacing(2),
-      display: 'flex',
-      overflow: 'auto',
-      flexDirection: 'column',
-      textAlign: 'right',
-    },
-    fixedHeight: {
-      height: 60,
+      overflowY: 'auto',
+      overflowX: 'hidden',
+      overflowWrap: 'break-word',
+      wordWrap: 'break-word',
+      hyphens: "auto",
+      width: '90%',
+      marginBottom: 5,
+      //textAlign: 'right',
+      marginLeft: 'auto'
     },
 }));
 
@@ -101,49 +108,83 @@ export function Chat(props){
     const paperClasses = useStyles();
     const fixedHeightPaper = clsx(paperClasses.paper, paperClasses.fixedHeight);
     const chatClasses =useChatStyles();
-
-
-    const classes = AppUseStyles();
-    const buttonClasses = useButtonStyles();
-    const [user, setUser] = useState(getUserFromProps(props))
-    getCurrentUserFromSession(user, setUser);
     let history = createBrowserHistory();
     const path_array = history.location.pathname.split("/");
     var other_user_email = path_array[path_array.length-1];
-    
+    const classes = AppUseStyles();
+    const buttonClasses = useButtonStyles();
+    const [user, setUser] = useState(getUserFromProps(props))  
     const [chatContent, setChatContent] = React.useState('');
+
+    const new_message = (authorEmail, thisUserEmail, author, messageContent)=>{
+      let className = authorEmail === thisUserEmail? 'this_user_style': 'another_user_style';
+      let new_message =  `<Paper className={${className}}>`   //todo: should I make it paper instead of div?
+      +`<Typography component="h5" variant="h6">`
+      + author + ": " + messageContent 
+      +'</Typography>'
+      +'</Paper>'
+       return new_message;
+    }
+
+    const loadMessagesFromUserHistory = (user)=>{
+      let chats = user.chats
+      if(isUndefined(chats))
+        return;
+      var chat;
+      var found = false
+      for(chat of chats){
+        if(chat.userEmail === other_user_email){
+            found=true;
+            break;
+        }
+      }
+      if(!found)
+        return;
+      let historyChatContent = "";
+      for(let message of chat.messages){
+         historyChatContent+= '\n'+ new_message(message.authorEmail, user.email, message.author, message.content);
+      }
+      setChatContent(historyChatContent);
+    }
+    getCurrentUserFromSession(user, setUser, loadMessagesFromUserHistory, ()=>{});
+    
+    
     const [currentMessage, setCurrentMessage] = React.useState('');
     const scrollToBottom = () => {
       let node = document.getElementById('endOfChat');
-      node.scrollIntoView();
+      if(node != null)
+        node.scrollIntoView();
     };
     useEffect(() => {
       if(!userIsUpdated(user))
         return;
+        let isCancelled = false;
+
       socket.off(user.email+'_chat');
       socket.on(user.email+'_chat', function(data){
         //console.log(data);
         let message_arr = data.messageContent.split("");
         let message = "";
         for(const char of message_arr)
-          if(char === "<" || char === ">")
+          if(char === "<" || char === ">" || char ==='{' || char ==='}')
             message += "{'"+char+"'}"
           else
             message +=char;
         console.log('message: ', message);
-        let className = data.user.email === user.email? 'this_user_style': 'another_user_style';
-        let new_message =  `<div className={${className}}>`   //todo: should I make it paper instead of div?
-        +'<Typography component="h5" variant="h6" justify="flex-end">'+
-         data.author + ": " + message  + 
-         '</Typography>'+
-         '</div>'
-        setChatContent(chatContent + "\n" + new_message);
-        scrollToBottom();
+        let to_append = new_message(data.user.email, user.email, data.author, message);
+
+        if(!isCancelled){
+          setChatContent(chatContent + "\n" + to_append);
+          scrollToBottom();
+        }
     })
+    return ()=>{
+      isCancelled = true;
+    }
   });
     
-    
-    
+  
+  
     const sendMessage = ()=>{
         // this_user.socketID = socket.id;
         // other_user.socketID = socket.id;//todo: edit....
@@ -165,7 +206,7 @@ export function Chat(props){
     return (
         <Container component="main" maxWidth="xs">
         <CssBaseline />
-
+        
         <div className={classes.paper}>
         <Grid container spacing={2}>  
 
@@ -173,7 +214,6 @@ export function Chat(props){
         <Paper>
         <Typography component="h4" variant="h4" justify="flex-end">
             {other_user_email}
-            
         </Typography>
         </Paper> 
 
@@ -183,17 +223,20 @@ export function Chat(props){
         {/**chat window */}
         <Paper  className={fixedHeightPaper}>
         
-          <pre style={{ fontFamily: "inherit" }}>
+          <div style={{ fontFamily: "inherit",width: '100%',
+                        maxWidth: 360,
+                        overflowX: 'hidden', overflowY: "auto",
+                        }}>
           <JsxParser 
           bindings ={{
             this_user_style: chatClasses.this_user_paper,
             another_user_style: chatClasses.another_user_paper,
 
           }}
-          components={{ Paper, Typography }}
+          components={{ Paper, Typography, Button }}
           jsx={chatContent}
           />
-          </pre>
+          </div>
           <div id='endOfChat' />
         
      

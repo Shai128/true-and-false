@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
@@ -63,7 +63,7 @@ export function GamePage(props){
     }));
     const classes = useStyles();
     var game = props.location.game;
-    const [user, setUser] = getUserFromProps(props);
+    const [user, setUser] = useState(getUserFromProps(props));
     getCurrentUserFromSession(user, setUser);
     let { url } = useRouteMatch();
     const path_array = url.split("/");
@@ -136,7 +136,6 @@ const useStyles = makeStyles(theme => ({
     new_arr[index] = false;
     setPlayerInfoDialogOpen(new_arr);
   }
-
   return (<List className={classes.root}>
         {players.map((player) => {
           var index = players.indexOf(player);
@@ -160,7 +159,7 @@ const useStyles = makeStyles(theme => ({
                   <ListItem button>
                       <Link to={
                       {
-                        pathname: `/ChatRoom/`+player.email,
+                        pathname: `/LoginScreen/ChatRoom/`+player.email,
                         user: user
                       }
                     }>

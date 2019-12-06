@@ -416,6 +416,17 @@ io.on('connection', function (socket) {
     console.log(socket.handshake.session.userdata);
     socket.handshake.session.userdata = data;
     socket.handshake.session.save();
+    
+    let message = data;
+    message.date = Date();
+    console.log('Date.now(): ', Date.now());
+    console.log('Date(): ', Date());
+
+    saveMessageInDB(data.user.email, message)
+    addMessageToRecentMessageceInDB(data.user.email, message);
+
+    saveMessageInDB(data.receiverUserEmail, message)
+    addMessageToRecentMessageceInDB(data.receiverUserEmail, message);
 
     io.sockets.emit(data.user.email+'_chat', data);
     io.sockets.emit(data.receiverUserEmail+'_chat', data);
@@ -423,6 +434,28 @@ io.on('connection', function (socket) {
     // io.sockets.connected[data.user.socketID].emit('C_chat', data);
     // io.sockets.connected[data.receiverUser.socketID].emit('C_chat', data);
   })
+
+/**
+ * adding the message to the specific chat list between the two users
+ * @param {the user that we add the message to his document} userEmail 
+ * @param {includes the message content, author, receiver, time} message 
+ */
+function saveMessageInDB(userEmail, message){
+
+
+//todo: call db function to save it in the db
+}
+
+/**
+ * adding the message to the recent messages list
+ * @param {the user that we add the message to his document} userEmail 
+ * @param {includes the message content, author, receiver, time} message 
+ */
+function addMessageToRecentMessageceInDB(userEmail, message){
+
+}
+
+
 
 /*
   socket.on('S_openRoom', function (data) {
