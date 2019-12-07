@@ -236,6 +236,7 @@ export function logIn(user, func){
         }).then(response => {
             console.log("response:", response)
             console.log("response status:", response.status)
+            func(response);
             if (response.status !== okStatus) {
                 reject(response.status);
             } else {
@@ -247,8 +248,7 @@ export function logIn(user, func){
                 if(!userIsUpdated(user)){
                     return;
                 }
-                if(!isUndefined(func))
-                    func(user);
+                
                 socket.emit('login', {email: user.email, nickName: user.nickName});
                 console.log('frontend got data: ', user);
                 /** saving the user we just got to local storage, so next time we will access the user from local storage */
