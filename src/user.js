@@ -233,5 +233,8 @@ export function logIn(user, func){
         },
         params: user,
         credentials: 'include'
-        }).then(func);   
+        }).then(user=>{
+            socket.emit('login', user);
+            func();
+        });   
 }
