@@ -263,3 +263,4 @@ exports.getAvailableUsers=get_available_users
 exports.getUnAvailableUsers=get_unavailable_users
 exports.getAllSentencesArray=getAllSentencesArray
 exports.getRoomSize = getRoomSize
+exports.roomModel = roomModel
