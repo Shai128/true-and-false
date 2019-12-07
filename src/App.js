@@ -310,7 +310,11 @@ const handleCloseGuestLoginWindow = () => {
                 {
                   pathname: `/TheGame`,
                   player1: 5,
-                  player2: 6
+                  player2: 6,
+                  turn: true,
+                  trues: ["A true sentence 1", "A true sentence 2", "A true sentence 3"],
+                  falses: ["A false sentence 1", "A false sentence 2", "A false sentence 3"],
+                  seen: ["A true sentence 1", "A false sentence 2"]
                 }
               }
             >
