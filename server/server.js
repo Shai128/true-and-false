@@ -5,7 +5,7 @@ const {
   updateUser,
   findUserByField
 } = require("../db/user") // imports all user functions
-
+const{resetDatabase}=require("../db/general") // imports all generel databse menagement functions
 const {
   createRoom,
   addUserToRoom,
@@ -80,7 +80,10 @@ function findGame(game, success, failure) {
     }
   })
 }
-
+function tryout(){
+resetDatabase(15,(fg)=>{},(fg)=>{});
+}
+tryout();
 app.get('/', (req, res) => res.send("request for / recieved"))
 
 /**
