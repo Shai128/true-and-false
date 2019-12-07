@@ -271,7 +271,8 @@ function  serverAddUserToRoom(req, res, roomId) {
         userInfo.email, 
         (succ) => {
           console.log("sending the status now")
-          res.status(200).send({ID: toString(roomId)});
+          console.log("created room with id", roomId)
+          res.status(200).send({ID: roomId});
           console.log("sent")
           // add the user's socket to the room
           var userSocket = findSocketByUserId(userInfo.email)

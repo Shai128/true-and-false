@@ -25,12 +25,20 @@ export function createRoom(roomName, currentuser, currentGameNickName, history){
             })
         }
         }).then(room => {
+            
+            console.log("room ron!",room);
+
+            console.log("user",currentuser);
+            console.log("name of room",roomName);
+            console.log("id",currentGameNickName);
+
             console.log('createRoom frontend got data: ', room);
             history.push({
                 pathname: '/JoinGame',
                 user: currentuser,
-                //roomId: room.ID,
-                currentGameNickName: currentGameNickName,
+                RoomId: room.ID,
+                currentNickName: currentGameNickName,
+                currentRoomName: roomName,
             });
             //todo: redirect to Dan's page with the given roomID and the user! H-A-L-I-F!
         }, fail_status => {
@@ -62,11 +70,17 @@ export function joinRoom(roomID, user, currentGameNickName, history){
         }
         }).then(succ => {
             console.log('frontend got data: ', user);
+
+          //  console.log("user",currentuser);
+          //  console.log("name of room",room.ID);
+          //  console.log("id",currentGameNickName);
+          
+
             history.push({
                 pathname: '/JoinGame',
                 user: user,
-                //roomId: room.ID,
-                currentGameNickName: currentGameNickName
+                RoomId: roomID,
+                currentGameNickName: currentGameNickName,
             });
             //todo: redirect to Dan's page with the roomID and the user! H-A-L-I-F!
         }, fail_status => {
