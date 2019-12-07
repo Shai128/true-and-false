@@ -48,7 +48,7 @@ import {DisplayLoading, PrintMessages} from './../PagesUtils';
 import { Chat } from './Chat.js';
 import {SignIn} from './../App.js'
 import {ChatLobby} from './ChatLobby.js';
-
+import {JoinGame} from './JoinGame.js'
 const drawerWidth = 240;
 const useStyles = makeStyles(theme => ({
     root: {
@@ -146,6 +146,8 @@ export function LoginScreenRouter(){
   <Route path={'/LoginScreen'}>  
   <LoginScreen />
   </Route>
+  <Route path={`/JoinGame`} exact component={JoinGame} />
+
   </Switch>
 
 
@@ -385,6 +387,7 @@ function LoginScreen(props){
         <Switch>  
 
         <Route path={`${path}/ChatRoom/:email`} component = {Chat}/>  
+        <Route path={`/JoinGame`} exact component={JoinGame} user={currentUser} />
 
         
         <Route path="/SignIn">

@@ -10,6 +10,9 @@ import {
   } from "react-router-dom";
 //import {isUndefined} from './Utils.js';
 
+import ChatIcon from '@material-ui/icons/Chat';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -264,4 +267,30 @@ export function PrintChats(props){
           </React.Fragment>
         ))}
       </List>);
+}
+
+export function ChatButton(props){
+
+  return (
+      <ListItem button>
+          <Link to={
+          {
+            pathname: `/LoginScreen/ChatRoom/`+props.email,
+            user: props.user
+          }
+        }>
+      <Grid container alignContent='center' direction='column' alignItems='center' justify='center'>
+      <Grid item xs={5}>
+        <ListItemIcon >
+          <ChatIcon />
+        </ListItemIcon>
+        </Grid>
+        <Grid item xs={7}>
+        <ListItemText primary="Chat"/>
+        </Grid>
+        </Grid>
+        </Link>
+        </ListItem>
+      
+  );
 }

@@ -7,10 +7,10 @@ import Paper from '@material-ui/core/Paper';
 import Grid from '@material-ui/core/Grid';
 import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import ChatIcon from '@material-ui/icons/Chat';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Collapse from '@material-ui/core/Collapse';
 import PersonIcon from '@material-ui/icons/Person';
@@ -28,9 +28,10 @@ import {
   //BrowserRouter as Router,
   //Switch,
   //Route,
-  Link,
+  //Link,
   useRouteMatch,
 } from "react-router-dom";
+import {ChatButton} from './../PagesUtils.js';
 
 export function GamePage(props){
   const useStyles = makeStyles(theme => ({
@@ -157,25 +158,7 @@ const useStyles = makeStyles(theme => ({
                   <ListItem className={classes.nested}  >
                   <Grid container spacing={5}>
                   <Grid item xs={5}>
-                  <ListItem button>
-                      <Link to={
-                      {
-                        pathname: `/LoginScreen/ChatRoom/`+player.email,
-                        user: user
-                      }
-                    }>
-                  <Grid container alignContent='center' direction='column' alignItems='center' justify='center'>
-                  <Grid item xs={5}>
-                    <ListItemIcon >
-                      <ChatIcon />
-                    </ListItemIcon>
-                    </Grid>
-                    <Grid item xs={7}>
-                    <ListItemText primary="Chat"/>
-                    </Grid>
-                    </Grid>
-                    </Link>
-                    </ListItem>
+                      <ChatButton email = {player.email} user = {user} />
                     </Grid>
                     <Grid item xs={5}>
                     <ListItem button onClick ={openThisPlayerWindow}>
