@@ -83,7 +83,8 @@ function findGame(game, success, failure) {
 function tryout(){
 resetDatabase(15,(fg)=>{},(fg)=>{});
 }
-tryout();
+//tryout();
+// uncomment this to reset server
 app.get('/', (req, res) => res.send("request for / recieved"))
 
 /**
@@ -274,11 +275,13 @@ function  serverAddUserToRoom(req, res, roomId) {
         userInfo.email, 
         (succ) => {
           console.log("sending the status now")
-          console.log("created room with id", roomId)
+         // console.log("created room with id", roomId)
+         console.log("added user",userInfo.email, "to room", roomId)
           res.status(200).send({ID: roomId});
           console.log("sent")
           // add the user's socket to the room
           var userSocket = findSocketByUserId(userInfo.email)
+          console.log("user socket found of user:", userInfo.email)
           if (userSocket !== undefined) {userSocket.join(roomId.toString())}
           // notify all other users in the room
           io.to(roomId).emit('userJoined', userInfo)
@@ -296,7 +299,7 @@ function  serverAddUserToRoom(req, res, roomId) {
  */
 app.get('/leaveRoom/:roomId', (req, res) => {
   var roomId = req.params.roomId
-  console.log("adding user to room:", roomId)
+  console.log("removing user from room room:", roomId)
   getUserInfoFromSession(
     req,
     (userInfo) => {
@@ -345,6 +348,7 @@ app.get('/userList/:roomId', (req, res) => {
           findRoomById(
             roomId, 
             (roomObject) => {
+              console.log("Players available" ,availableUsers)
               res.status(200).send(JSON.stringify({
                 PlayersAvailable: convertUserListFormat(availableUsers),
                 PlayersUnAvailable: convertUserListFormat(unavailableUsers),

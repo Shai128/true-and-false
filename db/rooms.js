@@ -88,7 +88,7 @@ async function deleteUserByEmailInRoomByRoomID(room_id,email,success,fail){ //ro
         if(err) fail('Room with id'+room_id+'does not exist');
         else{   console.log('got here');
                 var arr_users=room.users_in_room;
-               var i,j;
+               var i,j = 0;
                var flag_not_found=1;
                for( i=0; i<arr_users.length; i++){
                         if(arr_users[i]!=undefined && arr_users[i].email == email){ j=i;flag_not_found=0;}
@@ -128,10 +128,11 @@ async function addUserObjectToRoom(room_id,user,success,fail){
 
 async function addUserToRoom(room_id,email,success,fail){
 console.log('got here 1.5');
-roomModel.findOne({ room_id: room_id }).exec(function (err1, room) {
-    console.log('got here 1');
-        if(err1) fail('Room with id'+room_id+'does not exist');
-        else{
+roomModel.find({ room_id: room_id }, (err, docs) => {
+    var room = docs[0]
+    if (room === undefined) {fail("room does not exist"); return}
+    if (err) {fail(err)} else {
+        console.log('got here 1');
             console.log('got here 1');
             userModel.findOne({ email: email }).exec(function (err2, user) {
                 if(err2) fail('User with email'+email+'does not exist');
@@ -152,11 +153,8 @@ roomModel.findOne({ room_id: room_id }).exec(function (err1, room) {
                
                 addUserObjectToRoom(room_id,user,success,fail);
                // success('Success'); -- never ever try to uncomment this for thou shall bring hell upon yourselves
-        }
-    })
-}});
-           
-}
+                }})}})}
+    
 async function createRoom(room_name,success,failure){
     roomsGlobalArrayModel.findOne({ array_id: 1 }).exec(function (err, global_array) {
         if (err) {failure('unexpected error occured during fetching the rooms global array')}
@@ -204,10 +202,11 @@ async function get_available_users(room_id,success,failure){
         if(err) failure('Room with id'+room_id+'does not exist');
         else{
                 var res=[];
-                var i,j;
+                var i = 0,j = 0;
                 for(i=0;i<room.state_array.length; i++){
-                    if(room.state_array[i]==AVAILABLE_STATE && room.users_in_room[i]!=undefined){
+                    if(room.state_array[i]===AVAILABLE_STATE && room.users_in_room[i]!==undefined){
                         res[j]=room.users_in_room[i];
+                        console.log("new user added to list:", i, j)
                         j++;
                     }
 
@@ -223,9 +222,9 @@ async function get_unavailable_users(room_id,success,failure){
         if(err) failure('Room with id'+room_id+'does not exist');
         else{
                 var res=[];
-                var i,j;
+                var i,j = 0;
                 for(i=0;i<room.state_array.length; i++){
-                    if(room.state_array[i]!=AVAILABLE_STATE && room.users_in_room[i]!=undefined){
+                    if(room.state_array[i]!==AVAILABLE_STATE && room.users_in_room[i]!==undefined){
                         res[j]=room.users_in_room[i];
                         j++;
                     }

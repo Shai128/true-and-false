@@ -11,7 +11,7 @@ async function resetDatabase(room_num_limit,success,fail){ //room_id: int, email
     userModel.deleteMany({},function (err){if(err)fail('Failed to delete users')});
     var arr = new Array(room_num_limit).fill(false);
    // roomsGlobalArrayModel.findOneAndUpdate({array_id:1}, {$set:{array:arr}},function (err){if(err) fail('Failed to reset rooms global array')});
-   
+    roomsGlobalArrayModel.collection.drop();
     const newGlobalArray = new roomsGlobalArrayModel({
         array_id: 1,
         array: arr
