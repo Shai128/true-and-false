@@ -123,7 +123,8 @@ const useStyles = makeStyles(theme => ({
   initial_open.fill(false);
   const [open, setOpen] = React.useState(initial_open); 
   const [playerInfoDialogOpen, setPlayerInfoDialogOpen] = React.useState(initial_open); 
-  const user = props.user;
+  const [user, setUser] = React.useState(getUserFromProps(props));
+  getCurrentUserFromSession(user, setUser);
   const openPlayerWindow = (index) => {
     let new_arr = playerInfoDialogOpen.slice();
     new_arr[index] = true;

@@ -6,6 +6,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import {
       Link,
+      useHistory,
   } from "react-router-dom";
 //import {isUndefined} from './Utils.js';
 
@@ -18,7 +19,8 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import {socket, getUserFromProps} from './user.js';
-
+import {useStyles} from './App.js';
+import {joinRoom} from './room.js';
 export function PrintGames(props){
     const games =props.games;
     const classes = props.classes;
@@ -101,7 +103,7 @@ export function PrintJoinGameDialog(props){
     displayWrongGameID();
 
   });
-  
+  let history = useHistory();
   const joinGame = ()=>{
 /*
     //var user = //todo- get user from session
@@ -127,6 +129,7 @@ export function PrintJoinGameDialog(props){
       console.log("starting game!");
       console.log("game ID:", gameID);
       console.log('user nickname: ', currentGameNickName);
+      joinRoom(gameID, currentUser, currentGameNickName, history )
   }
   return(
       <Dialog open={WindowOpen} onClose={onCloseWindow} aria-labelledby="form-dialog-title">
@@ -197,7 +200,7 @@ export function PrintMessages(props){
     var index =0;
     const shortMessage = (message) =>{
       if(message.length >10)
-        return message.slice(10)+'...';
+        return message.slice(0,10)+'...';
       return message;
     }
     return (
@@ -222,4 +225,43 @@ export function PrintMessages(props){
       </div>
         );
 
+}
+
+
+
+export function PrintChats(props){
+  var chats =props.chats;
+  const classes = useStyles();
+  const user = getUserFromProps(props);
+  let index =0;
+  var obj = {};
+
+  for ( let i=0, len=chats.length; i < len; i++ )
+      obj[chats[i].otherUserEmail] = chats[i];
+  chats=[];
+  for ( let key in obj )
+    chats.push(obj[key]);
+
+  return (<List className={classes.list}>
+        {chats.map((chat) => (
+          
+          <React.Fragment key={index++}>
+            <Link to={
+              {
+                pathname: `/LoginScreen/ChatRoom/`+chat.otherUserEmail,
+                user: user,
+              }
+            }
+            >
+            <ListItem button >
+              <ListItemText primary={chat.otherUserName} secondary={
+                
+                (chat.authorEmail === user.email? 'You: ' : (chat.authorName +": ")) +
+                  chat.messageContent
+                } />
+            </ListItem>
+            </Link>
+          </React.Fragment>
+        ))}
+      </List>);
 }

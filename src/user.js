@@ -97,6 +97,7 @@ export function getCurrentUserFromSession(user, setUser, onSuccess , onFailure){
     console.log("response status:", response.status)
     if (response.status !== okStatus) {
         reject(response.status);
+        onFailure();
     } else {
         return new Promise(function(resolve, reject) {
         resolve(response.json());
@@ -105,7 +106,6 @@ export function getCurrentUserFromSession(user, setUser, onSuccess , onFailure){
     }).then(user => {
         if(!userIsUpdated(user)){
             if(!isUndefined(onFailure))
-            onFailure();
             return;
         }
         if(!isUndefined(onSuccess))
@@ -207,7 +207,7 @@ export function getUserFromProps(props){
  * @param {the props we use to read the user} props 
  * @param {used to set the user from the session if it is not in the props} setUser 
  * sets the user from props, if exists in props, or reads the user from the db and sets with setUser.
- */
+
 export function getUserFromPropsOrFromSession(props, setUser){
     var user = getUserFromProps(props);
     if(userIsUpdated(user)){
@@ -216,7 +216,7 @@ export function getUserFromPropsOrFromSession(props, setUser){
     }
     getCurrentUserFromSession(user, setUser)
 }
-
+ */
 
 // this function will be changed because func is not supposed to access STATUS.
 /**

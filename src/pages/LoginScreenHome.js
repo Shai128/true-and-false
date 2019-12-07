@@ -13,7 +13,10 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import clsx from 'clsx';
+import Divider from '@material-ui/core/Divider';
+
 import {
+    useHistory,
     useRouteMatch,
     Switch,
     Route,
@@ -21,7 +24,7 @@ import {
 import {GamePage} from './GamePage.js';
 import {userIsUpdated, getCreatedGames, getParticipatedGames, getCurrentUserFromSession as getCurrentUser, getUserFromProps} from './../user';
 import {PrintGames, PrintJoinGameDialog, DisplayLoading} from './../PagesUtils';
-
+import {createRoom} from './../room.js'
 
 export function LoginScreenHome(props){
     let { path, url } = useRouteMatch();
@@ -148,6 +151,7 @@ const handleCloseJoinGameWindow = () => {
             <Typography component="h4" variant="h4" justify="center">
             Recent Games
         </Typography>
+          <Divider/>
             </Grid>
 
             <Grid item xs={12}>
@@ -222,7 +226,7 @@ function PrintCreateGameDialog(props){
     const {handleCloseCreateGameWindow,  createGameWindowOpen, currentUser} = props;
     const [gameName, setGameName] = React.useState("");
     const [currentGameNickName, setCurrentGameNickName] = React.useState(currentUser.nickName);
-
+    let history = useHistory();
     const startGame = ()=>{
 /*
         //var user = //todo- get user from session
@@ -242,6 +246,7 @@ function PrintCreateGameDialog(props){
         console.log("starting game!");
         console.log("game name:", gameName);
         console.log('user nickname: ', currentGameNickName);
+        createRoom(gameName, currentUser, currentGameNickName, history);
         //handleCloseCreateGameWindow();
         //todo: redirect to room page
     }

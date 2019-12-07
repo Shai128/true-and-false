@@ -24,6 +24,7 @@ import NotificationsIcon from '@material-ui/icons/Notifications';
 import Badge from '@material-ui/core/Badge';
 import Popup from "reactjs-popup";
 import Container from '@material-ui/core/Container';
+import ChatIcon from '@material-ui/icons/Chat';
 
 import App from './../App.js'
 import {
@@ -46,6 +47,8 @@ import {getCurrentUserFromSession as getCurrentUser, userIsUpdated, getUserFromP
 import {DisplayLoading, PrintMessages} from './../PagesUtils';
 import { Chat } from './Chat.js';
 import {SignIn} from './../App.js'
+import {ChatLobby} from './ChatLobby.js';
+
 const drawerWidth = 240;
 const useStyles = makeStyles(theme => ({
     root: {
@@ -218,6 +221,8 @@ function LoginScreen(props){
           </ListItem> 
           </Link>
 
+
+
         <Link to={{
           pathname: `${url}/MyProfile`,
           user: currentUser
@@ -255,6 +260,20 @@ function LoginScreen(props){
             <ListItemText primary="Games List" />
             </ListItem>
             </Link>
+
+        
+            <Link to={{
+            pathname:`${url}/ChatLobby`,
+            user: currentUser
+            }}> 
+    <ListItem button onClick={onPageChange}>
+     <ListItemIcon > 
+         <ChatIcon /> 
+         </ListItemIcon> 
+         <ListItemText primary="Chat" />
+          </ListItem> 
+          </Link>
+
         </div>
       );
 
@@ -383,6 +402,10 @@ function LoginScreen(props){
 
           <Route path={`${path}/GamesList`}>
             <GamesList />
+          </Route>
+
+          <Route path={`${path}/ChatLobby`}>
+            <ChatLobby />
           </Route>
 
 
