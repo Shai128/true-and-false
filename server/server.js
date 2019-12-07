@@ -400,7 +400,7 @@ io.on('connection', function (socket) {
     var userInfo = userdata.user;
     console.log(userInfo.nickName + " has logged in");
     console.log("full info:", userInfo)
-   // socket.handshake.session.userInfo = userInfo;
+    socket.handshake.session.userInfo = userInfo;
     socket.handshake.session.save();
   });
 
@@ -434,6 +434,45 @@ io.on('connection', function (socket) {
     // io.sockets.connected[data.user.socketID].emit('C_chat', data);
     // io.sockets.connected[data.receiverUser.socketID].emit('C_chat', data);
   })
+
+
+  /**
+   * Passes a message from one user to another.
+   * 
+   * usage format is:
+   * serverSocket.emit('deliverMessage', {
+   * message: 'letsPlay'
+   * args: {}
+   * receiverId: 'email@gmail.com'
+   * })
+   */
+  socket.on('deliverMessage', function(data) {
+    logDiv('delivering message')
+    if (data.receiverId === undefined || data.message === undefined) {
+      // handle error
+      console.log("bad parameters");
+      return;
+    }
+    var receiverSocket = findSocketByUserId(data.receiverId)
+    if (receiverSocket === undefined) {
+      // handle error
+      console.log("receiver socket not found")
+      return;
+    }
+
+    console.log(
+      "sending message",
+       data.message, 
+       "from ", 
+       socket.handshake.session.userInfo.userId, 
+       "to", 
+       data.receiverId
+      );
+
+    receiverSocket.emit(data.message, data.args)
+    logDiv()
+  });
+
 
 /**
  * adding the message to the specific chat list between the two users
