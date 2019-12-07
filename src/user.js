@@ -233,5 +233,30 @@ export function logIn(user, func){
         },
         params: user,
         credentials: 'include'
-        }).then(func);   
+        }).then(response => {
+            console.log("response:", response)
+            console.log("response status:", response.status)
+            func(response);
+            if (response.status !== okStatus) {
+                reject(response.status);
+            } else {
+                return new Promise(function(resolve, reject) {
+                resolve(response.json());
+                })
+            }
+            }).then(user => {
+                if(!userIsUpdated(user)){
+                    return;
+                }
+                
+                socket.emit('login', {email: user.email, nickName: user.nickName});
+                console.log('frontend got data: ', user);
+                /** saving the user we just got to local storage, so next time we will access the user from local storage */
+                localStorage.setItem(user_in_session_key, JSON.stringify(user));
+                console.log('saved in local storage: ', user)
+                console.log('now we have in local storage: ',  JSON.parse(localStorage.getItem(user_in_session_key)));
+        
+            }, fail_status => {
+            console.log("failed, status:", fail_status)
+            });   
 }

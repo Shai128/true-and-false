@@ -551,6 +551,7 @@ export function SignIn() {
                         setIsLoading(false);
                         console.log('frontend got data: ', data);
                         if(data.status === okStatus ){
+                            console.log("data:", data)
                             history.push("/LoginScreen");
                         }
                       });

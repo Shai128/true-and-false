@@ -206,7 +206,7 @@ async function get_available_users(room_id,success,failure){
                 for(i=0;i<room.state_array.length; i++){
                     if(room.state_array[i]===AVAILABLE_STATE && room.users_in_room[i]!==undefined){
                         res[j]=room.users_in_room[i];
-                        console.log("new user added to list:", i, j)
+                        //console.log("new user added to list:", i, j)
                         j++;
                     }
 

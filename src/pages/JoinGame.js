@@ -62,6 +62,7 @@ socket.on("userJoined", function(userInfo) {
  /*
     userInfo: {email: ..., nickName:...}
  */
+    console.log("received userJoin with userInfo:", userInfo);
     var newPlayersAvailable = [...PlayersAvailable]
     newPlayersAvailable.push(userInfo.nickName)
     setPlayersAvailable(newPlayersAvailable)

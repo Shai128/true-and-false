@@ -147,9 +147,10 @@ function serverLoginUser(req, res) {
           email: data["email"],
           nickName: data["nickName"]
         }
+      
         console.log('saved email:', data['email'])
         console.log("successfuly returned user: " + found_user.get('email'));
-        res.status(200).send("successfuly logged in");
+        res.status(200).send(JSON.stringify(found_user));
       } else {
         console.log("the password: " 
           + data.password 
@@ -281,8 +282,11 @@ function  serverAddUserToRoom(req, res, roomId) {
           console.log("sent")
           // add the user's socket to the room
           var userSocket = findSocketByUserId(userInfo.email)
-          console.log("user socket found of user:", userInfo.email)
-          if (userSocket !== undefined) {userSocket.join(roomId.toString())}
+   // console.log("user socket", userSocket, "found of user:", userInfo.email)
+          if (userSocket !== undefined) {
+            userSocket.join(roomId.toString())
+            console.log("added the user's", userInfo.email, "socket to room", roomId.toString())
+          }
           // notify all other users in the room
           io.to(roomId).emit('userJoined', userInfo)
         },
@@ -319,7 +323,7 @@ app.get('/leaveRoom/:roomId', (req, res) => {
                 deleteRoomById(roomId, () => {}, (err) => console.log(err))
               } else {
                 // notify users in room about leaving
-                io.to(roomId).emit('userJoined', userInfo)
+                io.to(roomId).emit('userLeft', userInfo)
               }
             },
             (err) => console.log("failed to delete room")
@@ -348,7 +352,7 @@ app.get('/userList/:roomId', (req, res) => {
           findRoomById(
             roomId, 
             (roomObject) => {
-              console.log("Players available" ,availableUsers)
+              //console.log("Players available" ,availableUsers)
               res.status(200).send(JSON.stringify({
                 PlayersAvailable: convertUserListFormat(availableUsers),
                 PlayersUnAvailable: convertUserListFormat(unavailableUsers),
@@ -377,11 +381,15 @@ io.use(sharedsession(session, {
 }));
 
 function findSocketByUserId(userId) {
+  logDiv("findSocketByUserId")
   for (let [socketId, socketObject] of Object.entries(io.sockets.sockets)) {
-    if (socketObject.handshake.session.userInfo.userId === userId) {
+  //  console.log("socket:", socketId, "with obj:", JSON.stringify(socketObject.handshake.session.userInfo))
+    if (socketObject.handshake.session.userInfo.email === userId) {
+      logDiv();
       return socketObject;
     }
   }
+  logDiv();
   return undefined;
 }
 
@@ -393,23 +401,26 @@ io.on('connection', function (socket) {
   console.log("all sockets so far:", Object.keys(io.sockets.sockets))
   logDiv()
 
-  socket.handshake.session.userInfo = {userId: socket.request._query['user_id']}
+  socket.handshake.session.userInfo = {email: socket.request._query['user_id']}
+  socket.handshake.session.save();
 
+  console.log("after socket update:", socket.handshake.session.userInfo)
   // If the user is already in a room - subscribe to that room with his new socket
   findUser(
-    {email: socket.handshake.session.userInfo.userId},
+    {email: socket.handshake.session.userInfo.email},
     (found_user) => {
       socket.join(toString(found_user.current_room))
     },
     (err) => console.log(err)
   )
 
-  socket.on("login", function(userdata) {
-    var userInfo = userdata.user;
-    console.log(userInfo.nickName + " has logged in");
+  socket.on("login", function(userInfo) {
+    logDiv("socket login")
+    console.log(userInfo.email + " has logged in");
     console.log("full info:", userInfo)
     socket.handshake.session.userInfo = userInfo;
     socket.handshake.session.save();
+    logDiv();
   });
 
   socket.on("logout", function(userdata) {
@@ -472,7 +483,7 @@ io.on('connection', function (socket) {
       "sending message",
        data.message, 
        "from ", 
-       socket.handshake.session.userInfo.userId, 
+       socket.handshake.session.userInfo.email, 
        "to", 
        data.receiverId
       );
