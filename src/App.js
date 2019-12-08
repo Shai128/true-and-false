@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import './App.css';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
@@ -15,15 +15,19 @@ import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Link
+  Link,
+  useHistory
 } from "react-router-dom";
 
 import {LoginScreenRouter as LoginScreen} from './pages/LoginScreen.js';
 import {Chat as ChatRoom} from './pages/Chat.js';
-import {PrintJoinGameDialog} from './PagesUtils.js';
+import {JoinGame} from './pages/JoinGame.js';
+import {PrintJoinGameDialog, DisplayLoading} from './PagesUtils.js';
+import {okStatus, validEmail, passwordIsStrongEnough, isUndefined} from './Utils.js'
+import {emptyUser, logIn} from './user.js'
 function Copyright() {
   return (
- <Typography variant="body2" color="textSecondary" align="center">
+    <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
       <Link to='/' color="inherit">
         True and False
@@ -31,9 +35,11 @@ function Copyright() {
       {new Date().getFullYear()}
       {'.'}
     </Typography>
-   
+
   );
 }
+
+
 
 export const useStyles = makeStyles(theme => ({
   '@global': {
@@ -78,7 +84,7 @@ export const useStyles = makeStyles(theme => ({
     maxWidth: 500,
     color: '#000000'
   },
-  gamesListItems:{
+  gamesListItems: {
     background: 'linear-gradient(to right, #4ecdc4, #556270)', /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
     border: '0',
     borderRadius: 3,
@@ -97,7 +103,68 @@ export const useStyles = makeStyles(theme => ({
 
 function SignUp() {
   const classes = useStyles();
-  const [user, setUser] = useState({});
+  const [user, setUser] = useState(emptyUser);
+  const initMessages = {
+    errorPassword: false,
+    errorFirstName: false,
+    errorEmail: false,
+    passwordHelperText: '',
+    firstNameHelperText: '',
+    emailHelperText: ''
+  }
+  const [textsMessages, setTextsMessages] = React.useState(initMessages);
+  const updateField = e => {
+    setUser({
+      ...user,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  /*const errorEmail = 'errorEmail', emailHelperText= 'emailHelperText',
+   errorPassword='errorPassword', passwordHelperText='passwordHelperText',
+   firstNameHelperText='firstNameHelperText', errorFirstName='errorFirstName';
+  const changeTextMessage = (error, errorName, helperText, helperTextName) =>{
+    setTextsMessages({
+      ...textsMessages,
+      [errorName]: error,
+      [helperTextName]: helperText
+    });
+  }
+*/
+
+  /**
+   * returns true is the user is valid or false if it is not.
+   * prints error messages accordingly
+   */
+  const validUser = ()=>{
+
+    var newTextsMessages = initMessages;
+
+    var isValid = true;
+      if(!validEmail(user.email)){
+        newTextsMessages.errorEmail = true;
+        newTextsMessages.emailHelperText = "please provide a valid email address"
+        //changeTextMessage(true,errorEmail, "please provide a valid email address", emailHelperText);
+        isValid= false;
+      }
+      
+      if(!passwordIsStrongEnough(user.password)){
+        newTextsMessages.errorPassword = true;
+        newTextsMessages.passwordHelperText = "please provide a strong password"
+        //changeTextMessage(true,errorPassword, "please provide a strong password", passwordHelperText);
+        isValid= false;
+      }
+      if(isUndefined(user.firstName) || user.firstName  === ''){
+        newTextsMessages.errorFirstName = true;
+        newTextsMessages.firstNameHelperText = "please provide a firstName"
+        //changeTextMessage(true, errorFirstName, "please provide a firstName", firstNameHelperText);
+        isValid= false;
+      }
+      setTextsMessages(newTextsMessages);
+      return isValid;
+  }
+
+  let history = useHistory();
 
   return (
     <Container component="main" maxWidth="xs">
@@ -114,6 +181,8 @@ function SignUp() {
            
           <Grid item xs={12}>
               <TextField
+                error={textsMessages.errorFirstName}
+                helperText = {textsMessages.firstNameHelperText}
                 variant="outlined"
                 required
                 fullWidth
@@ -121,10 +190,7 @@ function SignUp() {
                 label="First Name"
                 name="firstName"
                 autoComplete="firstName"
-                onChange = {(event)=>{
-                  let new_user = user;
-                  new_user.firstName = event.target.value;
-                  setUser(new_user)}}
+                onChange = {updateField}
               />
               </Grid>
               <Grid item xs={12}>
@@ -135,14 +201,13 @@ function SignUp() {
                 label="Nick Name"
                 name="nickName"
                 autoComplete="nickName"
-                onChange = {(event)=>{
-                  let new_user = user;
-                  new_user.nickName = event.target.value;
-                  setUser(new_user)}}
+                onChange={updateField}
               />
-              </Grid>
+            </Grid>
             <Grid item xs={12}>
               <TextField
+                error={textsMessages.errorEmail}
+                helperText = {textsMessages.emailHelperText}
                 variant="outlined"
                 required
                 fullWidth
@@ -150,14 +215,13 @@ function SignUp() {
                 label="Email Address"
                 name="email"
                 autoComplete="email"
-                onChange = {(event)=>{
-                  let new_user = user;
-                  new_user.email = event.target.value;
-                  setUser(new_user)}}
+                onChange={updateField}
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
+                error={textsMessages.errorPassword}
+                helperText = {textsMessages.passwordHelperText}
                 variant="outlined"
                 required
                 fullWidth
@@ -166,33 +230,41 @@ function SignUp() {
                 type="password"
                 id="password"
                 autoComplete="current-password"
-                onChange = {(event)=>{
-                  let new_user = user;
-                  new_user.password = event.target.value;
-                  setUser(new_user)}}
+                onChange={updateField}
               />
             </Grid>
-           
+
           </Grid>
           <Button
-            type="submit"
+            //type="submit"
             fullWidth
             variant="contained"
             color="primary"
             className={classes.submit}
             onClick={()=>{
+              if(!validUser())
+                return;
               // let data = new FormData();
               // data.append( "json", JSON.stringify(user));
+              
               fetch('http://localhost:8000/user', {
-              method: 'POST', // *GET, POST, PUT, DELETE, etc.
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-              },
-              credentials: 'include',
-              body: 'json='+JSON.stringify( user )
-            });
-          }}>   
-          
+                method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                credentials: 'include',
+                body: 'json=' + JSON.stringify(user)
+              }).then( (data) =>{
+                logIn(user, (data)=>{
+                  console.log('frontend got data: ', data);
+                  if(data.status === okStatus ){
+                    history.push("/LoginScreen/MySentences");
+                  }
+                });
+              })
+
+            }}>
+
             Sign Up
           </Button>
           <Grid container justify="center">
@@ -204,30 +276,28 @@ function SignUp() {
           </Grid>
         </form>
       </div>
-      
+
     </Container>
-    
+
   );
 }
 
-function LinksPage(){
+function LinksPage() {
   return (
     <div>
       <Switch>
-      <Route exact path="/">
-            <Home />
-          </Route>
-          
-         <Route exact path="/SignIn">
-            <SignIn />
-          </Route>
-          <Route exact path="/SignUp">
-            <SignUp />
-          </Route>
-          {/*<Route exact path="/Home">
-            <Home />
-          </Route>
-  */}
+
+        <Route exact path="/">
+          <Home />
+        </Route>
+
+        <Route exact path="/SignIn">
+          <SignIn />
+        </Route>
+        <Route exact path="/SignUp">
+          <SignUp />
+        </Route>
+      
           <Route path="/LoginScreen">
             <LoginScreen />
           </Route>
@@ -235,29 +305,32 @@ function LinksPage(){
           <Route path="/ChatRoom">
             <ChatRoom />
           </Route>
-          
 
-          
 
-        </Switch>
-        </div>
+          <Route path="/JoinGame">
+            <JoinGame />
+          </Route>
+
+
+      </Switch>
+    </div>
   );
 }
 
 export default function App() {
-  
+
   return (
     <Router>
-  
-    <LinksPage />
-  </Router>
-        
-         
+
+      <LinksPage />
+    </Router>
+
+
   );
 
 }
 
-function Home(){
+function Home() {
   const classes = useStyles();
 
   const [guestLoginWindowOpen, setguestLoginWindowOpen] = React.useState(false);
@@ -279,30 +352,30 @@ const handleCloseGuestLoginWindow = () => {
         <form className={classes.form} noValidate>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
-            <Link to="/SignIn">
-            <Button variant="contained" color="primary" fullWidth  className={classes.button}>
-            Sign In
+              <Link to="/SignIn">
+                <Button variant="contained" color="primary" fullWidth className={classes.button}>
+                  Sign In
             </Button>
-            </Link>
+              </Link>
 
             </Grid>
             <Grid item xs={12} sm={6}>
-            <Link to="/SignUp">
-            <Button variant="contained" color="primary" fullWidth  className={classes.button}>
-      Sign Up
+              <Link to="/SignUp">
+                <Button variant="contained" color="primary" fullWidth className={classes.button}>
+                  Sign Up
       </Button>
-      </Link>
+              </Link>
             </Grid>
-        
+{/* 
             <Grid item xs={12} sm={6}>
-            <Link to="/LoginScreen">
-            <Button variant="contained" color="primary" fullWidth  className={classes.button}>
-            LoginScreen
+              <Link to="/LoginScreen">
+                <Button variant="contained" color="primary" fullWidth className={classes.button}>
+                  LoginScreen
           </Button>
-          </Link>
-            </Grid>
+              </Link>
+            </Grid> */}
 
-            <Grid item xs={12} sm={6}>
+            {/* <Grid item xs={12} sm={6}> */}
             <Button variant="contained" color="primary" fullWidth onClick={handleClickGuestLogin} className={classes.button}>
             Guest Login
             </Button>
@@ -310,27 +383,36 @@ const handleCloseGuestLoginWindow = () => {
             <PrintJoinGameDialog
             handleCloseWindow= {handleCloseGuestLoginWindow}
             WindowOpen= {guestLoginWindowOpen}
-            nickName = ''/>
-          </Grid>
+            currentUser = {emptyUser()}/>
+          {/* </Grid> */}
 
-
+{/* 
           <Grid item xs={12} sm={6}>
             <Link to="/ChatRoom">
             <Button variant="contained" color="primary" fullWidth  className={classes.button}>
               Chat
           </Button>
           </Link>
-            </Grid>
+            </Grid> */}
+
+            
+          {/* <Grid item xs={12} sm={6}>
+            <Link to="/JoinGame">
+            <Button variant="contained" color="primary" fullWidth  className={classes.button}>
+              Join A Game
+          </Button>
+          </Link>
+            </Grid> */}
 
         </form>
         <Box mt={5}>
-        <Copyright />
-      </Box>
+          <Copyright />
+        </Box>
       </div>
-      
+
 
     </Container>
-    
+
   );
 
 }
@@ -394,97 +476,105 @@ function PrintGuestLoginDialog(props){
 }
 */
 
-function SignIn() {
-
+export function SignIn() {
 
   const classes = useStyles();
+  let history = useHistory();
 
+  const [user, setUser] = useState(emptyUser());
+  const [isLoading, setIsLoading] = useState(false);
 
+  const updateField = e => {
+    setUser({
+      ...user,
+      [e.target.name]: e.target.value
+    });
+  };
+  if(isLoading)
+    return (<DisplayLoading/>);
   return (
     <div className="App" >
       <header className="App-header" >
+     
+        <Container component="main" maxWidth="xs">
+          <CssBaseline />
+          <div className={classes.paper}>
+            <form className={classes.form} noValidate>
 
-{/* 
-       { <Grid container spacing={2}>
-             <Grid item xs={3} sm={6}>
-       <Link to="/Home" variant="body2">
-                <Button variant="contained" color="secondary" className={classes.button}>
-                  Home Page
-                </Button>
-                </Link>
-        </Grid>
-   </Grid> 
-  } */}
-
-       
-      <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <div className={classes.paper}>
-        <form className={classes.form} noValidate>
-          
-      <Grid container spacing={5}>
-      <Grid item xs={12}>
-      <Typography variant="h1" component="h2" gutterBottom className={classes.root}>
-        Sign In
+              <Grid container spacing={5}>
+                <Grid item xs={12}>
+                  <Typography variant="h1" component="h2" gutterBottom className={classes.root}>
+                    Sign In
       </Typography>
-      </Grid>
-            <Grid item xs={12} sm={6}>
-        <TextField
-          id="UserNameInput"
-          className={classes.textField}
-          label="Username"
-          margin="normal"
-          variant="filled" 
-          fullWidth
-        />
-        </Grid>
-        <Grid item xs={12} sm={6}>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    id="EmailInput"
+                    className={classes.textField}
+                    label="Email"
+                    margin="normal"
+                    variant="filled"
+                    fullWidth
+                    name = 'email'
+                    value = {user.email}
+                    onChange = {updateField}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
 
-        <TextField
-          id="PasswordInput"
-          label="Password"
-          className={classes.textField}
-          type="password"
-          autoComplete="current-password"
-          margin="normal"
-          variant="filled"
-          fullWidth
-        />
-     </Grid>
-     <Grid item xs={12}>
+                  <TextField
+                    id="PasswordInput"
+                    label="Password"
+                    className={classes.textField}
+                    type="password"
+                    autoComplete="current-password"
+                    margin="normal"
+                    variant="filled"
+                    fullWidth
+                    name = 'password'
+                    value = {user.password}
+                    onChange = {updateField}
+                  />
+                </Grid>
+                <Grid item xs={12}>
 
-        <Button variant="contained" color="primary" fullWidth className={classes.button}
-        onClick={()=>{
-          console.log("sending sign in");
-          let user = {username :document.getElementById('UserNameInput').value,
-                      password : document.getElementById('PasswordInput').value }
-          fetch('http://localhost:8000/user/' + user.username + '/' + user.password, {
-          method: 'GET', // *GET, POST, PUT, DELETE, etc.
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-          },
-          credentials: 'include'
-        });
-      }}>   
-        Sign In
+                  <Button variant="contained" color="primary" fullWidth className={classes.button}
+                    onClick={() => {
+                      setIsLoading(true);
+                      console.log("sending sign in");
+                      let user = {
+                        email: document.getElementById('EmailInput').value,
+                        password: document.getElementById('PasswordInput').value
+                      }
+                      
+                      logIn(user, (data)=>{
+                        setIsLoading(false);
+                        console.log('frontend got data: ', data);
+                        if(data.status === okStatus ){
+                            history.push("/LoginScreen");
+                        }
+                      });
+
+                    }}>
+                    Sign In
       </Button>
-      </Grid>
-     </Grid>
-     </form>
+                </Grid>
+              </Grid>
+            </form>
           </div>
           </Container>
               <Link to="/SignUp" variant="body2">
               <Typography variant="h6" component="h3" gutterBottom className={classes.root}>
                 Don't have an account? Sign Up
                 </Typography>
-               </Link>
+        </Link>
 
-               
 
-           
+
+
 
       </header>
-      
+
     </div>
   );
 }
