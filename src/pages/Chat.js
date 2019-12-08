@@ -167,6 +167,7 @@ export function Chat(props){
     const [currentMessage, setCurrentMessage] = React.useState('');
     const scrollToBottom = () => {
       let node = document.getElementById('endOfChat');
+      console.log('node: ', node);
       if(node != null)
         node.scrollIntoView();
     };
@@ -196,7 +197,12 @@ export function Chat(props){
           
           user.all_last_messages.unshift(new_message);
           user.all_last_messages= user.all_last_messages.slice(0,1000);
-          user.messeges_by_addressee[chatIndex].messages.push(new_message)
+          let index = chatIndex
+          if(chatIndex ==-1){
+            setChatIndex(0);
+            index =0;
+          }
+          user.messeges_by_addressee[index].messages.push(new_message)
           console.log('new user is: ', user);
           updateUserInLocalStorage(user);
           scrollToBottom();

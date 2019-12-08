@@ -2,7 +2,7 @@ const {mongoose} = require("./config")
 const{isUndefined}=require("../src/Utils")
 const salt = '' //todo: change to a real good salt
 const iterations = 1000;
-const LAST_MESSAGES_LIMIT=2
+const LAST_MESSAGES_LIMIT=100
 const userSchema= new mongoose.Schema(
     { 
         email:String,
@@ -109,7 +109,6 @@ async function addLastMessage(email,message_data,success,fail){
             else{
                 res.unshift(extract_data);
                 res=res.slice(0,LAST_MESSAGES_LIMIT);
-                
             }
             userModel.findOneAndUpdate({email: email}, { $set:{all_last_messages:res}},
             ()=>{success('Successfully added last message to user with email '+email)}) }
