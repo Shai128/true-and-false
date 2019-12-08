@@ -2,7 +2,7 @@ const express  = require("express") //express contains functions including app, 
 const {
   createUser,
   findUser,
-  //updateUser,
+  updateUser,
   findUserByField,
   updateLastActiveAt,
   addLastMessage,
@@ -418,8 +418,8 @@ io.on('connection', function (socket) {
 
   socket.on('chat', function(data){
     console.log(data.messageContent + " was written");
-    console.log(socket.handshake.session.userdata);
-    socket.handshake.session.userdata = data;
+  //  console.log(socket.handshake.session.userInfo);
+    socket.handshake.session.userInfo = data.user;
     socket.handshake.session.save();
     
     let message = data;

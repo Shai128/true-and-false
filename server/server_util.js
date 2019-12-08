@@ -59,17 +59,23 @@ function endSession(req, res) {
 }
 
 function getIdentifierFromSession(req, success, failure) {
+  logDiv("getIdentifierFromsEssion");
+  console.log("session:",req.session)
   const id = req.session.userInfo.email;
-  if (!id) { failure("session does not exist") } else { 
+  if (!id) {  failure("session does not exist") ;logDiv();} else { 
     console.log("id from session:", id)
+    logDiv();
     success(id) 
   }
 }
 
 function getUserInfoFromSession(req, success, failure) {
+  logDiv("getUserINFOFromSession")
+  console.log("session:", req.session);
   const info = req.session.userInfo;
-  if (!info) { failure("session does not exist") } else { 
+  if (!info) { logDiv(); failure("session does not exist") } else { 
     console.log("info from session:", info)
+    logDiv()
     success(info)
   }
 }
