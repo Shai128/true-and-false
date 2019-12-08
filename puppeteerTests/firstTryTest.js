@@ -1,31 +1,37 @@
 const puppeteer = require('puppeteer');
+//const iPhone = puppeteer.devices['iPhone 6'];
 
 (async () => {
-    const browser = await puppeteer.launch({headless: true});
+    const browser = await puppeteer.launch({headless: true, product: "chrome", defaultViewport:{width:800, height:600, hasTouch: true}});
   const page = await browser.newPage();
-  console.log('pls!')
-  await page.goto('http://localhost:3000/');
+  //await page.emulate(iPhone);
+  page.on('load', () => console.log('Page loaded!'));
+  page.on('close', () => console.log('Page closed!'));
+
+  it('Loads the app', async function() {
+    await page.goto('http://localhost:3000/');
+
+    await page.goto(TEST_URL)
+    const mainContainer = await page.$('section.todoapp')
+    should.exist(mainContainer)
+  })
+
+  try{
+    await page.goto('http://localhost:3000/');
+    
+  }catch(e){
+     console.log("could not connect to site");
+     await browser.close();
+     return;
+  }
+  
     await Promise.all([
         page.waitForNavigation(),
-        page.click('#please')
+        page.click('#signInBTN')
     ]);
+
   
   await page.screenshot({path: 'puppeteerTests/example.png'});
-    console.log('pls')
   await browser.close();
-
 })();
 
-// (async function main() {
-//     try {
-//         const browser = await puppeteer.launch({headless: true});
-//         const page = await browser.newPage();
-//         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3419.0 Safari/537.36');
-//         await page.goto('http://example.com');
-//          //your code
-//          await browser.close();
-//     }
-//     catch(e){
-//         console.log(e);
-//     }
-// })();
