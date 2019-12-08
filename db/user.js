@@ -98,7 +98,8 @@ async function addLastMessage(email,message_data,success,fail){
                 delivery_timestamp:message_data.delivery_timestamp
                 
                }
-               
+            if(user == null)
+               return;
             var res=user.all_last_messages;
             if(isUndefined(user.all_last_messages)||user.all_last_messages.length==0){
                 res=[];
@@ -143,6 +144,8 @@ async function addMessegesByAddressee(user_email,message_data,otherUserEmail,suc
                 delivery_timestamp:message_data.delivery_timestamp
                 
                }
+            if(user == null)
+               return;
             var res=user.messeges_by_addressee;
             if(isUndefined(user.messeges_by_addressee)){
                 res=[];

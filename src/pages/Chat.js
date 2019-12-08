@@ -197,7 +197,7 @@ export function Chat(props){
           
           user.all_last_messages.unshift(new_message);
           user.all_last_messages= user.all_last_messages.slice(0,1000);
-          let index = chatIndex
+          let index = chatIndex;
           if(chatIndex ==-1){
             setChatIndex(0);
             index =0;
