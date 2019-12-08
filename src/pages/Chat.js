@@ -25,7 +25,7 @@ import {
   
 } from "react-router-dom";
 import {createBrowserHistory} from 'history'
-import {socket, getCurrentUserFromSession, getUserFromProps, userIsUpdated} from './../user.js'
+import {socket, getCurrentUserFromDB, userIsUpdated, emptyUser, updateUserInLocalStorage} from './../user.js'
 import {DisplayLoading} from './../PagesUtils.js'
 import {isUndefined} from './../Utils.js'
 const useButtonStyles = makeStyles({
@@ -113,41 +113,56 @@ export function Chat(props){
     var other_user_email = path_array[path_array.length-1];
     const classes = AppUseStyles();
     const buttonClasses = useButtonStyles();
-    const [user, setUser] = useState(getUserFromProps(props))  
+    const [user, setUser] = useState(emptyUser())  
     const [chatContent, setChatContent] = React.useState('');
+    const [chatIndex, setChatIndex] = React.useState(-1);
 
-    const new_message = (authorEmail, thisUserEmail, author, messageContent)=>{
+    const createNewMessageContent = (authorEmail, thisUserEmail, author, messageContent)=>{
       let className = authorEmail === thisUserEmail? 'this_user_style': 'another_user_style';
       let new_message =  `<Paper className={${className}}>`   //todo: should I make it paper instead of div?
       +`<Typography component="h5" variant="h6">`
-      + author + ": " + messageContent 
+      + author + ": " + getMessageFromInput(messageContent)
       +'</Typography>'
       +'</Paper>'
        return new_message;
     }
 
+    const getMessageFromInput = (input) =>{
+      let message_arr = input.slice().split("");
+      let message = "";
+      for(const char of message_arr)
+        if(char === "<" || char === ">" || char ==='{' || char ==='}')
+          message += "{'"+char+"'}"
+        else
+          message +=char;
+        return message;
+    }
+
     const loadMessagesFromUserHistory = (user)=>{
-      let chats = user.chats
-      if(isUndefined(chats))
+      let chats = user.messeges_by_addressee
+      if(isUndefined(chats) || chats.length === 0)
         return;
       var chat;
       var found = false
+      let i=0;
       for(chat of chats){
-        if(chat.userEmail === other_user_email){
+        if(chat.email_of_addressee === other_user_email){
             found=true;
             break;
         }
+        i++;
       }
       if(!found)
         return;
+      setChatIndex(i);
       let historyChatContent = "";
       for(let message of chat.messages){
-         historyChatContent+= '\n'+ new_message(message.authorEmail, user.email, message.author, message.content);
+         historyChatContent+= '\n'+ createNewMessageContent(message.authorEmail, user.email, message.authorName, message.messageContent);
       }
       setChatContent(historyChatContent);
     }
-    getCurrentUserFromSession(user, setUser, loadMessagesFromUserHistory, ()=>{});
-    
+    if(!userIsUpdated(user))
+      getCurrentUserFromDB(setUser, loadMessagesFromUserHistory, ()=>{});
     
     const [currentMessage, setCurrentMessage] = React.useState('');
     const scrollToBottom = () => {
@@ -155,6 +170,7 @@ export function Chat(props){
       if(node != null)
         node.scrollIntoView();
     };
+
     useEffect(() => {
       if(!userIsUpdated(user))
         return;
@@ -162,19 +178,27 @@ export function Chat(props){
 
       socket.off(user.email+'_chat');
       socket.on(user.email+'_chat', function(data){
-        //console.log(data);
-        let message_arr = data.messageContent.split("");
-        let message = "";
-        for(const char of message_arr)
-          if(char === "<" || char === ">" || char ==='{' || char ==='}')
-            message += "{'"+char+"'}"
-          else
-            message +=char;
+        let message = getMessageFromInput(data.messageContent);
+        
         console.log('message: ', message);
-        let to_append = new_message(data.user.email, user.email, data.author, message);
+        let to_append = createNewMessageContent(data.user.email, user.email, data.authorName, message);
+        let new_message ={
+            delivery_timestamp: Date(),
+            authorEmail: data.user.email,
+            messageContent: data.messageContent,
+            authorName: data.authorName,
+            otherUserEmail: other_user_email
+        }
+        
 
         if(!isCancelled){
           setChatContent(chatContent + "\n" + to_append);
+          
+          user.all_last_messages.unshift(new_message);
+          user.all_last_messages= user.all_last_messages.slice(0,1000);
+          user.messeges_by_addressee[chatIndex].messages.push(new_message)
+          console.log('new user is: ', user);
+          updateUserInLocalStorage(user);
           scrollToBottom();
         }
     })
@@ -189,10 +213,11 @@ export function Chat(props){
         // this_user.socketID = socket.id;
         // other_user.socketID = socket.id;//todo: edit....
         socket.emit('chat',{
-            author: user.nickName, //todo: change to firstName
+            authorName: user.nickName, //todo: change to firstName
             messageContent: currentMessage,
             //chatContent: chatContent,
             user: user,
+            authorEmail: user.email,
             receiverUserEmail: other_user_email,
         });
         setCurrentMessage('');
@@ -237,6 +262,7 @@ export function Chat(props){
           jsx={chatContent}
           />
           </div>
+
           <div id='endOfChat' />
         
      

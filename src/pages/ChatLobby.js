@@ -67,7 +67,7 @@ export function ChatLobby(props){
     const [inputEmail, setInputEmail] = React.useState('');
     const [error, setError] = React.useState(false);
     const [helperText, setHelperText] = React.useState(''); 
-    const [recentChats, setRecentChats] = React.useState(getRecentChats(user));
+    const [recentChats, setRecentChats] = React.useState(undefined);
     const handleClickSearch = (event)=>{
         event.preventDefault();
         setError(false);
@@ -83,8 +83,9 @@ export function ChatLobby(props){
                 user: user,
                 })
     }
-    /**()=>{setRecentChats(user.recentChats)} */
-    getCurrentUserFromSession(user, setUser);
+    
+    getCurrentUserFromSession(user, setUser, (user)=>{setRecentChats(user.all_last_messages)},()=>{});
+    
     return (
         
         <Container maxWidth="lg" className={classes.container}>          
@@ -150,35 +151,3 @@ export function ChatLobby(props){
     );
 }
 
-function getRecentChats(user){
-    return [
-        {
-            otherUserEmail: 'dan@gmail.com',
-            authorEmail: 'dan@gmail.com',
-            authorName: 'Dan',
-            messageContent: "what's up?",
-            otherUserName: 'Dan',
-        },
-        {
-            authorEmail: 'shai120899@gmail.com',
-            otherUserEmail: 'or@gmail.com',
-            authorName: 'Shai',
-            otherUserName: 'Or',
-            messageContent: "Mekvuzar",
-        },
-        {
-            otherUserEmail: 'koby@gmail.com',
-            authorEmail: 'koby@gmail.com',
-            authorName: 'Koby',
-            otherUserName: 'Koby',
-            messageContent: "Continous Integration",
-        },
-        {
-            otherUserEmail: 'koby@gmail.com',
-            authorEmail: 'shai120899@gmail.com',
-            authorName: 'Shai',
-            otherUserName: 'Koby',
-            messageContent: "Chrome Autometation?",
-        }
-    ]
-}

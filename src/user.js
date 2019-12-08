@@ -67,16 +67,16 @@ export function getCurrentUser(){
 export function getCurrentUserFromSession(user, setUser, onSuccess , onFailure){
     
     if(userIsUpdated(user)){
+        /*
         if(!isUndefined(onSuccess))
             onSuccess(user);
+            */
         return;
     }
     /** getting the current user from the local storage, if exists */
     var storage_user = (localStorage.getItem(user_in_session_key));
     if(!isUndefined(storage_user)){
-        console.log('storage user: ', storage_user)
         var parsed_storage_user = JSON.parse(storage_user);
-        console.log('parsed_storage_user: ', parsed_storage_user)
         if(userIsUpdated(parsed_storage_user)){
             console.log('used local storage to get: ', parsed_storage_user)
             setUser(parsed_storage_user);
@@ -85,6 +85,22 @@ export function getCurrentUserFromSession(user, setUser, onSuccess , onFailure){
             return;
         }
     }
+
+    getCurrentUserFromDB(setUser, onSuccess, onFailure);
+}
+
+
+
+
+/**
+ * reads the user from the db, even if he is in localStorage
+ * @param {the user that will be assigned with the user from the session} user 
+ * @param {a function that sets the user from the session to the user variable} setUser 
+ * @param {function that activates in case of failure} onFailure
+ * @param {function that activates in case of success} onSuccess
+ */
+export function getCurrentUserFromDB(setUser, onSuccess , onFailure){
+    
 
     fetch(server+'/getUserFromSession', {
     method: 'GET', // *GET, POST, PUT, DELETE, etc.
@@ -105,7 +121,6 @@ export function getCurrentUserFromSession(user, setUser, onSuccess , onFailure){
     }
     }).then(user => {
         if(!userIsUpdated(user)){
-            if(!isUndefined(onFailure))
             return;
         }
         if(!isUndefined(onSuccess))
@@ -113,13 +128,19 @@ export function getCurrentUserFromSession(user, setUser, onSuccess , onFailure){
         console.log('frontend got data: ', user);
         setUser(user);
         /** saving the user we just got to local storage, so next time we will access the user from local storage */
-        localStorage.setItem(user_in_session_key, JSON.stringify(user));
-        console.log('saved in local storage: ', user)
-        console.log('now we have in local storage: ',  JSON.parse(localStorage.getItem(user_in_session_key)));
+        updateUserInLocalStorage(user);
+        
 
     }, fail_status => {
     console.log("failed, status:", fail_status)
     });
+}
+
+
+export function updateUserInLocalStorage(user){
+    localStorage.setItem(user_in_session_key, JSON.stringify(user))
+    console.log('saved in local storage: ', user)
+    console.log('now we have in local storage: ',  JSON.parse(localStorage.getItem(user_in_session_key)));
 }
 
 export function logOut(){
@@ -160,7 +181,7 @@ export function userIsUpdated(user){
  * edits the user with the same user_.id and puts instead the given user
  */
 export function updateUserToDB(user){
-    localStorage.setItem(user_in_session_key, JSON.stringify(user))
+    updateUserInLocalStorage(user);
     fetch(server+'/userupdate/'+user._id, {
                 method: 'POST', // *GET, POST, PUT, DELETE, etc.
                 headers: {

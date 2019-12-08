@@ -238,13 +238,14 @@ export function PrintChats(props){
   const user = getUserFromProps(props);
   let index =0;
   var obj = {};
+  chats.reverse();
 
   for ( let i=0, len=chats.length; i < len; i++ )
       obj[chats[i].otherUserEmail] = chats[i];
   chats=[];
   for ( let key in obj )
     chats.push(obj[key]);
-
+  chats.reverse();
   return (<List className={classes.list}>
         {chats.map((chat) => (
           
@@ -257,7 +258,7 @@ export function PrintChats(props){
             }
             >
             <ListItem button >
-              <ListItemText primary={chat.otherUserName} secondary={
+              <ListItemText primary={chat.otherUserEmail} secondary={
                 
                 (chat.authorEmail === user.email? 'You: ' : (chat.authorName +": ")) +
                   chat.messageContent

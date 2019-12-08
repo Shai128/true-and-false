@@ -85,16 +85,6 @@ function findGame(game, success, failure) {
     }
   })
 }
-function tryout(){
-  addLastMessage("alon@gmail.com",{
-    otherUserEmail: 'koby@gmail.com',
-    authorEmail: 'alon@gmail.com',
-    authorName: 'Alon',
-    messageContent: "Chrome Autometation?3",
-    delivery_timestamp:Date()
-},(fg)=>{},(fg)=>{});
-}
-tryout();
 app.get('/', (req, res) => res.send("request for / recieved"))
 
 /**
@@ -240,6 +230,7 @@ app.get('/getUserFromSession', (req, res) => {
   getIdentifierFromSession(
     req,
     (id) => {
+      console.log('getUserFromSession id:', id);
       findUser(
         {email: id},
         (user_data) => {res.status(200).send(JSON.stringify(user_data))},
@@ -432,19 +423,20 @@ io.on('connection', function (socket) {
     socket.handshake.session.save();
     
     let message = data;
-    message.date = Date();
-    console.log('Date.now(): ', Date.now());
-    console.log('Date(): ', Date());
+    message.delivery_timestamp = Date();
 
-    saveMessageInDB(data.user.email, message);
-    addMessageToRecentMessagesInDB(data.user.email, message);
-
-    saveMessageInDB(data.receiverUserEmail, message);
-    addMessageToRecentMessagesInDB(data.receiverUserEmail, message);
+   
 
     io.sockets.emit(data.user.email+'_chat', data);
     io.sockets.emit(data.receiverUserEmail+'_chat', data);
     io.sockets.emit(data.receiverUserEmail+'_chat_notification', data);
+
+    saveMessageInDB(data.user.email, message, data.receiverUserEmail);
+    addMessageToRecentMessagesInDB(data.user.email, message, data.receiverUserEmail);
+
+    saveMessageInDB(data.receiverUserEmail, message, data.user.email);
+    addMessageToRecentMessagesInDB(data.receiverUserEmail, message, data.user.email);
+
     // io.sockets.connected[data.user.socketID].emit('C_chat', data);
     // io.sockets.connected[data.receiverUser.socketID].emit('C_chat', data);
   })
@@ -454,10 +446,11 @@ io.on('connection', function (socket) {
  * @param {the user that we add the message to his document} userEmail 
  * @param {includes the message content, author, receiver, time} message 
  */
-function saveMessageInDB(userEmail, message){
-
-
+function saveMessageInDB(userEmail, message, otherUserEmail){
 //todo: call db function to save it in the db
+  var message_copy = JSON.parse(JSON.stringify(message));
+  message_copy.otherUserEmail = otherUserEmail;
+  addMessegesByAddressee(userEmail, message_copy,  otherUserEmail,()=>{}, (err)=>{console.log(err)});
 }
 
 /**
@@ -465,8 +458,10 @@ function saveMessageInDB(userEmail, message){
  * @param {the user that we add the message to his document} userEmail 
  * @param {includes the message content, author, receiver, time} message 
  */
-function addMessageToRecentMessagesInDB(userEmail, message){
-
+function addMessageToRecentMessagesInDB(userEmail, message, otherUserEmail){
+  var message_copy = JSON.parse(JSON.stringify(message));
+  message_copy.otherUserEmail = otherUserEmail;
+  addLastMessage(userEmail, message_copy, ()=>{}, (err)=>{console.log(err)});
 }
 
 

@@ -49,6 +49,7 @@ const userModel = mongoose.model('users',userSchema) //creating the class userMo
  * @param {function: what to do if the operation failed} failure 
  */
 function createUser(user,success,failure){
+    let hashedPassword = user.password;
     const newUser = new userModel({
         password: hashedPassword,
         email: user.email,
@@ -75,7 +76,7 @@ async function updateLastActiveAt(email,date,success,fail){
 }
 
 async function addLastMessage(email,message_data,success,fail){
-    
+
     userModel.findOne({ email: email }).exec(function (err, user) {
    
         if(err) fail('User with email'+email+'does not exist');
@@ -100,7 +101,6 @@ async function addLastMessage(email,message_data,success,fail){
                
             var res=user.all_last_messages;
             if(isUndefined(user.all_last_messages)||user.all_last_messages.length==0){
-                console.log('got here');
                 res=[];
                res[0]=extract_data;
             }
@@ -122,7 +122,7 @@ async function addLastMessage(email,message_data,success,fail){
 
 
 
-async function addMessegesByAddressee(user_email,message_data,otherUserEmail,otherUserName,success,fail){
+async function addMessegesByAddressee(user_email,message_data,otherUserEmail,success,fail){
 
     userModel.findOne({ email: user_email }).exec(function (err, user) {
    
@@ -160,13 +160,12 @@ async function addMessegesByAddressee(user_email,message_data,otherUserEmail,oth
            }
            if(not_found){
                res[res.length]={email_of_addressee:otherUserEmail,
-                nickname_of_addressee:otherUserName,
                 messages:[extract_data]
                 }
            }
             
             userModel.findOneAndUpdate({email: user_email}, { $set:{messeges_by_addressee:res}},
-            ()=>{success('Successfully added  message by addressee to user with email '+email)}) }
+            ()=>{success('Successfully added  message by addressee to user with email '+user_email)}) }
             
             
         });

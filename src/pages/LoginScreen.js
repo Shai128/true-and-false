@@ -182,7 +182,7 @@ function LoginScreen(props){
         return;
       var new_message = {
         writerEmail: data.user.email,
-        author: data.author,
+        author: data.authorName,
         content: data.messageContent
       };
       if(!isCancelled){
@@ -387,7 +387,6 @@ function LoginScreen(props){
         <Switch>  
 
         <Route path={`${path}/ChatRoom/:email`} component = {Chat}/>  
-        <Route path={`/JoinGame`} exact component={JoinGame} user={currentUser} />
 
         
         <Route path="/SignIn">
