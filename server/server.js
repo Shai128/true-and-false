@@ -2,10 +2,14 @@ const express  = require("express") //express contains functions including app, 
 const {
   createUser,
   findUser,
-  updateUser,
-  findUserByField
-} = require("../db/user") // imports all user functions
+  //updateUser,
+  findUserByField,
+  updateLastActiveAt,
+  addLastMessage,
+  addMessegesByAddressee,
 
+} = require("../db/user") // imports all user functions
+const{resetDatabase}=require("../db/general") // imports all generel databse menagement functions
 const {
   createRoom,
   addUserToRoom,
@@ -14,7 +18,8 @@ const {
   getUnAvailableUsers,
   removeUserFromRoom,
   getRoomSize,
-  deleteRoomById
+  deleteRoomById,
+  changeUserAvailability
 } = require("../db/rooms") //imports all room functions
 
 const {
@@ -80,7 +85,16 @@ function findGame(game, success, failure) {
     }
   })
 }
-
+function tryout(){
+  addLastMessage("alon@gmail.com",{
+    otherUserEmail: 'koby@gmail.com',
+    authorEmail: 'alon@gmail.com',
+    authorName: 'Alon',
+    messageContent: "Chrome Autometation?3",
+    delivery_timestamp:Date()
+},(fg)=>{},(fg)=>{});
+}
+tryout();
 app.get('/', (req, res) => res.send("request for / recieved"))
 
 /**
