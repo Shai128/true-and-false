@@ -309,7 +309,6 @@ browserHistory.listen((location, action) => {
 
     return(
       <div>
-        <Router>
  <div className={classes.root}>
       <CssBaseline />
       <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
@@ -422,7 +421,6 @@ browserHistory.listen((location, action) => {
         </main>
 
         </div>
-      </Router>
       </div>
     );
     

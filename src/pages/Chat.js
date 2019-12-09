@@ -208,7 +208,8 @@ export function Chat(props){
 
         if(!isCancelled){
           setChatContent(chatContent + "\n" + to_append);
-          
+          if(isUndefined(user.all_last_messages))
+            user.all_last_messages = [];
           user.all_last_messages.unshift(new_message);
           user.all_last_messages= user.all_last_messages.slice(0,1000);
           let index = chatIndex;

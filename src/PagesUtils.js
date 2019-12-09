@@ -8,7 +8,7 @@ import {
       Link,
       useHistory,
   } from "react-router-dom";
-//import {isUndefined} from './Utils.js';
+import {isUndefined} from './Utils.js';
 
 import ChatIcon from '@material-ui/icons/Chat';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -231,7 +231,11 @@ export function PrintMessages(props){
 
 export function PrintChats(props){
   var messeges_by_addressee  = JSON.parse(JSON.stringify(props.chats));
+  
   const classes = useStyles();
+  let history = useHistory();
+  if(isUndefined(messeges_by_addressee) || messeges_by_addressee.length ===0)
+    return;
   const user = getUserFromProps(props);
   let index =0;
   var chats = [];
@@ -241,7 +245,6 @@ export function PrintChats(props){
     chats.push(last_message);
     console.log(last_message);
   }
-  let history = useHistory();
   chats.sort((message1, message2)=>{return message1.delivery_timestamp<message2.delivery_timestamp? 1: -1});
   return (<List className={classes.list}>
         {chats.map((chat) => (
