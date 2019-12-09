@@ -34,7 +34,6 @@ import { reject } from 'q';
 
   const okStatus = 200;
 
-
 export function JoinGame(props){ 
   
   console.log ("props",props);
@@ -118,9 +117,9 @@ socket.on("userLeft", function(userInfo) {
          Choose a player and start to play!
           </Typography>
           </Grid>
-          <Grid item xs={8}>
+          {/* <Grid item xs={8}>
           <BasicTextFields/>
-          </Grid>
+          </Grid> */}
           </Grid>
 
    <PlayerListAvailable PlayersAvailable = {PlayersAvailable}/>
@@ -159,11 +158,13 @@ socket.on("userLeft", function(userInfo) {
 // ------------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------------
 
+
 function HomepageImage() {
   // const url = 'https://6sense.com/wp-content/uploads/2018/10/2-truths_Canva-011.png';
   const url = 'https://3.bp.blogspot.com/-dPiQYG83TVM/Tom3QSzuYpI/AAAAAAAACcM/3qlVVHdjtT4/s1600/Truth_or_Lie_.png';
+  //const url = 'https://www.google.com/url?sa=i&url=https%3A%2F%2Fsteemkr.com%2Fnewbieresteemday%2F%40grandam%2Fis-the-truth-actually-a-lie&psig=https://steemitimages.com/p/D5zH9SyxCKd9GJ4T6rkBdeqZw1coQAaQyCUzUF4FozBvW77pHd44QbfXeeya4Ah28LcdgWFSabaBmuZJgxUXrgCTAr69vWz41v4bEikrEuR2G48JcWt62S4JH37qmY3Vi9qfie?format=match&mode=fit-4HgX-lXOkyW2oCcaGJ-&ust=1575830750779000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCPCO3JOZpOYCFQAAAAAdAAAAABAt';
   return (
-    <img src={url} style={{width: 300}} alt='true or lie'/>
+    <img src={url} style={{width: 700}} alt='true or lie'/>
   );
 }
 
@@ -578,12 +579,7 @@ const [InvitePlayerWindowOpen, setInvitePlayerWindowOpen] = React.useState(false
     setPage(0);
   };
 
-  console.log("dann 1 ", props);
-
   const {PlayersAvailable} = props;
-
-  console.log("dann 1 ", PlayersAvailable);
-
 
   return (
     <Paper className={classes.root}>
@@ -610,6 +606,7 @@ const [InvitePlayerWindowOpen, setInvitePlayerWindowOpen] = React.useState(false
                   {columnsForAvailable.map(column => { 
                                         
                     const value = row.nickname;
+                    console.log("row 1 ", row.nickname);
 
                     return (
                       <TableCell key={row.email} align={column.align}>
@@ -677,6 +674,10 @@ const [InvitePlayerWindowOpen, setInvitePlayerWindowOpen] = React.useState(false
 }
 
 
+// function PlayerInvitation(props){   
+ 
+// }
+
 
 function PrintInvitePlayerDialog(props){  
   const {handleCloseWindow,  WindowOpen, currentUser} = props;
@@ -724,7 +725,7 @@ function PrintInvitePlayerDialog(props){
   // });
   
   const joinGame = ()=>{
-      // console.log("Invite a player!");
+       console.log("Invite a player!");
   }
   return(
       <Dialog open={WindowOpen} onClose={onCloseWindow} aria-labelledby="form-dialog-title">
