@@ -215,7 +215,7 @@ function LoginScreen(props){
       pathname:`${url}/Home`,
       user: currentUser
       }}> 
-    <ListItem button onClick={onPageChange}>
+    <ListItem id="homeBTN" button onClick={onPageChange}>
      <ListItemIcon > 
          <HomeIcon /> 
          </ListItemIcon> 

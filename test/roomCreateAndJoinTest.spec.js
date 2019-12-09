@@ -100,7 +100,7 @@ describe("roomCreateAndJoinTest", () => {
         await page.click("#nickName");
         await page.type("#nickName", room.nickname);
         
-        //await page.click("#startBTN");
+        await page.click("#startBTN");
 
     }, 30000);
 

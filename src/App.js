@@ -167,6 +167,7 @@ function SignUp() {
   let history = useHistory();
 
   return (
+    <div className="SignUpPage">
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper}>
@@ -238,6 +239,7 @@ function SignUp() {
           <Button
             //type="submit"
             fullWidth
+            id="submit"
             variant="contained"
             color="primary"
             className={classes.submit}
@@ -278,7 +280,7 @@ function SignUp() {
       </div>
 
     </Container>
-
+    </div>
   );
 }
 
@@ -353,7 +355,7 @@ const handleCloseGuestLoginWindow = () => {
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <Link to="/SignIn">
-                <Button variant="contained" color="primary" fullWidth className={classes.button}>
+                <Button id="signInBTN" variant="contained" color="primary" fullWidth className={classes.button}>
                   Sign In
             </Button>
               </Link>
@@ -361,7 +363,7 @@ const handleCloseGuestLoginWindow = () => {
             </Grid>
             <Grid item xs={12} sm={6}>
               <Link to="/SignUp">
-                <Button variant="contained" color="primary" fullWidth className={classes.button}>
+                <Button id="signUpBTN" variant="contained" color="primary" fullWidth className={classes.button}>
                   Sign Up
       </Button>
               </Link>
@@ -493,7 +495,7 @@ export function SignIn() {
   if(isLoading)
     return (<DisplayLoading/>);
   return (
-    <div className="App" >
+    <div className="SignUpPage">
       <header className="App-header" >
      
         <Container component="main" maxWidth="xs">
@@ -538,7 +540,7 @@ export function SignIn() {
                 </Grid>
                 <Grid item xs={12}>
 
-                  <Button variant="contained" color="primary" fullWidth className={classes.button}
+                  <Button id="submit" variant="contained" color="primary" fullWidth className={classes.button}
                     onClick={() => {
                       setIsLoading(true);
                       console.log("sending sign in");
