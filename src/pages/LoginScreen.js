@@ -181,7 +181,7 @@ function LoginScreen(props){
         content: data.messageContent
       };
       setUnreadMessages(unreadMessages.concat(new_message));
-  })
+  })  
 }
 browserHistory.listen((location, action) => {
   // location is an object like window.location

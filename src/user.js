@@ -89,6 +89,23 @@ export function getCurrentUserFromSession(user, setUser, onSuccess , onFailure){
     getCurrentUserFromDB(setUser, onSuccess, onFailure);
 }
 
+/**
+ * read the user that was saved in the local storage and calls setUser with the user we found.
+ * the function will do nothing if local storage does not contain a valid user.
+ * @param {setter for the user} setUser 
+ */
+export function getUserFromLocalStorage(setUser){
+    var storage_user = (localStorage.getItem(user_in_session_key));
+    if(!isUndefined(storage_user)){
+        var parsed_storage_user = JSON.parse(storage_user);
+        if(userIsUpdated(parsed_storage_user)){
+            console.log('used local storage to get: ', parsed_storage_user)
+            setUser(parsed_storage_user);
+            return;
+        }
+    }
+}
+
 
 
 
