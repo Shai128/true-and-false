@@ -343,8 +343,8 @@ function Home() {
   const handleCloseGuestLoginWindow = () => {
     setguestLoginWindowOpen(false);
   };
-  return (
-    <div className="HomePage" >
+  return (    <div className="HomePage" >
+
       <Container component="main" maxWidth="md">
         <CssBaseline />
         <div className={classes.paper}>

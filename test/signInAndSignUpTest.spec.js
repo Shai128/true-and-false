@@ -36,7 +36,7 @@ afterAll(() => {
     browser.close();
 });
 
-describe("myFirstTest!", () => {
+describe("signInAndSignUp", () => {
 
     test("succesful sign up", async () => {
         var HTMLelement;

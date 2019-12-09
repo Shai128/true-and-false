@@ -121,7 +121,7 @@ function Home(props) {
                 </Grid>
                 <Grid item xs={12} sm={6}>
 
-                  <Button variant="contained" color="primary" fullWidth className={classes.button} onClick={handleClickCreateGameWindow}>
+                  <Button id="createNewRoomBTN" variant="contained" color="primary" fullWidth className={classes.button} onClick={handleClickCreateGameWindow}>
                     Create a New Game
         </Button>
 
@@ -254,47 +254,48 @@ function PrintCreateGameDialog(props) {
     //todo: redirect to room page
   }
   return (
-    <Dialog open={createGameWindowOpen} onClose={handleCloseCreateGameWindow} aria-labelledby="form-dialog-title">
-      <DialogTitle id="form-dialog-title">Create a Room</DialogTitle>
-      <DialogContent>
-        <DialogContentText>
-        </DialogContentText>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <TextField
-              autoFocus
-              margin="dense"
-              id="roomName"
-              label="Room Name"
-              onChange={(event) => {
-                setGameName(event.target.value);
-              }}
-            />
+    <div id="popUp">
+      <Dialog  open={createGameWindowOpen} onClose={handleCloseCreateGameWindow} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">Create a Room</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+          </DialogContentText>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                autoFocus
+                margin="dense"
+                id="roomName"
+                label="Room Name"
+                onChange={(event) => {
+                  setGameName(event.target.value);
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                autoFocus
+                margin="dense"
+                id="nickName"
+                label="Nick Name"
+                defaultValue={currentUser.nickName}
+                onChange={(event) => {
+                  setCurrentGameNickName(event.target.value);
+                }}
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <TextField
-              autoFocus
-              margin="dense"
-              id="nickName"
-              label="Nick Name"
-              defaultValue={currentUser.nickName}
-              onChange={(event) => {
-                setCurrentGameNickName(event.target.value);
-              }}
-            />
-          </Grid>
-        </Grid>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleCloseCreateGameWindow} color="primary">
-          Cancel
+        </DialogContent>
+        <DialogActions>
+          <Button id="cancelBTN" onClick={handleCloseCreateGameWindow} color="primary">
+            Cancel
           </Button>
-        <Button onClick={startGame} color="primary">
-          Start
+          <Button id="startBTN" onClick={startGame} color="primary">
+            Start
           </Button>
-      </DialogActions>
-    </Dialog>
-
+        </DialogActions>
+      </Dialog>
+      </div>
   );
 }
 
