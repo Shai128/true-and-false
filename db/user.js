@@ -78,7 +78,6 @@ async function updateLastActiveAt(email,date,success,fail){
 async function addLastMessage(email,message_data,success,fail){
 
     userModel.findOne({ email: email }).exec(function (err, user) {
-   
         if(err) fail('User with email'+email+'does not exist');
         else{
             

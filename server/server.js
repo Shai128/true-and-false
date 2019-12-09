@@ -423,10 +423,7 @@ io.on('connection', function (socket) {
     socket.handshake.session.save();
     
     let message = data;
-    message.delivery_timestamp = Date();
-
    
-
     io.sockets.emit(data.user.email+'_chat', data);
     io.sockets.emit(data.receiverUserEmail+'_chat', data);
     io.sockets.emit(data.receiverUserEmail+'_chat_notification', data);
@@ -450,6 +447,7 @@ function saveMessageInDB(userEmail, message, otherUserEmail){
 //todo: call db function to save it in the db
   var message_copy = JSON.parse(JSON.stringify(message));
   message_copy.otherUserEmail = otherUserEmail;
+  message_copy.delivery_timestamp = new Date();
   addMessegesByAddressee(userEmail, message_copy,  otherUserEmail,()=>{}, (err)=>{console.log(err)});
 }
 
@@ -461,6 +459,7 @@ function saveMessageInDB(userEmail, message, otherUserEmail){
 function addMessageToRecentMessagesInDB(userEmail, message, otherUserEmail){
   var message_copy = JSON.parse(JSON.stringify(message));
   message_copy.otherUserEmail = otherUserEmail;
+  message_copy.delivery_timestamp = new Date();
   addLastMessage(userEmail, message_copy, ()=>{}, (err)=>{console.log(err)});
 }
 

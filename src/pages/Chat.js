@@ -113,7 +113,9 @@ export function Chat(props){
     var other_user_email = path_array[path_array.length-1];
     const classes = AppUseStyles();
     const buttonClasses = useButtonStyles();
-    const [user, setUser] = useState(emptyUser())  
+    const [user, setUser] = useState(emptyUser());
+    const [lastOtherUserEmail, setLastOtherUserEmail] = useState(other_user_email);  
+ 
     const [chatContent, setChatContent] = React.useState('');
     const [chatIndex, setChatIndex] = React.useState(-1);
 
@@ -161,15 +163,27 @@ export function Chat(props){
       }
       setChatContent(historyChatContent);
     }
-    if(!userIsUpdated(user))
-      getCurrentUserFromDB(setUser, loadMessagesFromUserHistory, ()=>{});
+    if(!userIsUpdated(user)){
+      getCurrentUserFromDB(setUser, (user)=>{loadMessagesFromUserHistory(user); scrollToBottomInstantly();}, ()=>{});
+    }
+    if(lastOtherUserEmail !== other_user_email){
+      setUser(emptyUser());
+      getCurrentUserFromDB(setUser, (user)=>{loadMessagesFromUserHistory(user); scrollToBottomInstantly();}, ()=>{});
+      setLastOtherUserEmail(other_user_email);
+    }
     
     const [currentMessage, setCurrentMessage] = React.useState('');
     const scrollToBottom = () => {
       let node = document.getElementById('endOfChat');
-      console.log('node: ', node);
-      if(node != null)
+      if(node != null){
+        node.scrollIntoView({behavior: "smooth", block: "end", inline: "nearest"});
+      }
+    };
+    const scrollToBottomInstantly = () => {
+      let node = document.getElementById('endOfChat');
+      if(node != null){
         node.scrollIntoView();
+      }
     };
 
     useEffect(() => {
@@ -180,8 +194,8 @@ export function Chat(props){
       socket.off(user.email+'_chat');
       socket.on(user.email+'_chat', function(data){
         let message = getMessageFromInput(data.messageContent);
-        
-        console.log('message: ', message);
+        if(data.authorEmail !== other_user_email && data.authorEmail !== user.email)
+          return;
         let to_append = createNewMessageContent(data.user.email, user.email, data.authorName, message);
         let new_message ={
             delivery_timestamp: Date(),
@@ -198,12 +212,11 @@ export function Chat(props){
           user.all_last_messages.unshift(new_message);
           user.all_last_messages= user.all_last_messages.slice(0,1000);
           let index = chatIndex;
-          if(chatIndex ==-1){
+          if(chatIndex ===-1){
             setChatIndex(0);
             index =0;
           }
           user.messeges_by_addressee[index].messages.push(new_message)
-          console.log('new user is: ', user);
           updateUserInLocalStorage(user);
           scrollToBottom();
         }
@@ -267,9 +280,9 @@ export function Chat(props){
           components={{ Paper, Typography, Button }}
           jsx={chatContent}
           />
-          </div>
-
           <div id='endOfChat' />
+
+          </div>
         
      
          

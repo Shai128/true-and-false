@@ -67,7 +67,6 @@ export function ChatLobby(props){
     const [inputEmail, setInputEmail] = React.useState('');
     const [error, setError] = React.useState(false);
     const [helperText, setHelperText] = React.useState(''); 
-    const [recentChats, setRecentChats] = React.useState(undefined);
     const handleClickSearch = (event)=>{
         event.preventDefault();
         setError(false);
@@ -84,7 +83,7 @@ export function ChatLobby(props){
                 })
     }
     
-    getCurrentUserFromSession(user, setUser, (user)=>{setRecentChats(user.all_last_messages)},()=>{});
+    getCurrentUserFromSession(user, setUser, ()=>{},()=>{});
     
     return (
         
@@ -139,7 +138,7 @@ export function ChatLobby(props){
 
                 </Grid>
                 <Grid item xs={12}>
-                    <PrintChats chats={recentChats} user={user}/>
+                    <PrintChats chats={user.messeges_by_addressee} user={user}/>
                 </Grid>
             </Grid>
         </Paper>

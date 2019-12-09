@@ -161,22 +161,17 @@ function LoginScreen(props){
   getCurrentUser(currentUser, setCurrentUser,(u)=>{} , ()=>{setUnRegisteredUser(true)});
   const [pageChange, setPageChange] = React.useState(false);
 
-  let browserHistory = createBrowserHistory();
 
+  let browserHistory = createBrowserHistory();
   
   let history = useHistory();
 
-  useEffect(() => {
-    if(!userIsUpdated(currentUser))
-      return;
-    let isCancelled = false;
+  const setSockets = (location)=>{
     socket.off(currentUser.email+'_chat_notification');
     socket.on(currentUser.email+'_chat_notification', function(data){
-      const path_array = browserHistory.location.pathname.split("/");
-      console.log('browserHistory: ', browserHistory);
-      console.log('history: ', history);
+      const path_array = location.pathname.split("/");
+      console.log('current location: ', location);
 
-      
       var other_user_email = path_array[path_array.length-1];
       if(path_array.length>1 && data.user.email === other_user_email && path_array[path_array.length-2] === 'ChatRoom')
         return;
@@ -185,14 +180,19 @@ function LoginScreen(props){
         author: data.authorName,
         content: data.messageContent
       };
-      if(!isCancelled){
-        setUnreadMessages(unreadMessages.concat(new_message));
-      }
+      setUnreadMessages(unreadMessages.concat(new_message));
   })
-    return ()=>{
-      isCancelled = true;
-    }
-});
+}
+browserHistory.listen((location, action) => {
+  // location is an object like window.location
+  setSockets(location);
+  });
+
+  useEffect(() => {
+    if(!userIsUpdated(currentUser))
+      return;
+    setSockets(browserHistory.location);   
+    });
   const [open, setOpen] = React.useState(false);
   const handleDrawerOpen = () => {
     setOpen(true);
