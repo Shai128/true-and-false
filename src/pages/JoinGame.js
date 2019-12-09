@@ -81,11 +81,11 @@ socket.on("userLeft", function(userInfo) {
 
     
   return (
-    <div>
+    <div id="joinGamePage">
    {/* <HorizontalLinearStepper/> */}
   
   <Grid item xs={6}>
-   <Typography variant="h2" className={classes.title}>
+   <Typography id="roomNameHeader" variant="h2" className={classes.title}>
    Room Name: 
     {props.location.currentRoomName}
    </Typography>
@@ -93,7 +93,7 @@ socket.on("userLeft", function(userInfo) {
 
 
    <Grid item xs={4}>
-   <Typography variant="h2" className={classes.roomNumber}>
+   <Typography id="userNameHeader" variant="h2" className={classes.roomNumber}>
    User Name: 
   {props.location.currentNickName}
    </Typography>
@@ -101,7 +101,7 @@ socket.on("userLeft", function(userInfo) {
 
 
   <Grid item xs={4}>
-   <Typography variant="h2" className={classes.roomNumber}>
+   <Typography id="roomNumberHeader" variant="h2" className={classes.roomNumber}>
    Room Number: 
   {props.location.RoomId}
    </Typography>

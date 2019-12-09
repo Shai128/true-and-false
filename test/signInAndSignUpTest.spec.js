@@ -75,7 +75,6 @@ describe("signInAndSignUp", () => {
         await page.type("#PasswordInput", lead.password);
         await page.click("#submit");
 
-        await page.screenshot({path: 'puppeteerTests/example.png'});
         HTMLelement = await page.$('div.LoginScreenHomePage')
         expect(HTMLelement).not.toBeNull;//redirect to home page
 

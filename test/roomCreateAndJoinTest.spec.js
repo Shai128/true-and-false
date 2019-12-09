@@ -19,11 +19,29 @@ const lead = {
     password: faker.random.alphaNumeric(10)
 };
 
+beforeEach(async () => {
+    var HTMLelement;
+        await page.goto(APP);
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#signInBTN')
+        ]);
+        HTMLelement = await page.$('div.SignInPage')
+        expect(HTMLelement).not.toBeNull;//redirect to signIn page
+        await page.click("#EmailInput");
+        await page.type("#EmailInput", lead.email);
+        await page.click("#PasswordInput");
+        await page.type("#PasswordInput", lead.password);
+        await page.click("#submit");
+
+        HTMLelement = await page.$('div.LoginScreenHomePage')
+        expect(HTMLelement).not.toBeNull;//redirect to home page
+}, 700000);
 
 beforeAll(async () => {
     browser = await puppeteer.launch({
         headless: false,
-        slowMo: 40,
+        slowMo: 50,
         args: [`--window-size=${width},${height}`]
     });
     page = await browser.newPage();
@@ -52,14 +70,6 @@ beforeAll(async () => {
 
         HTMLelement = await page.$('div.MySentencesPage')
         expect(HTMLelement).not.toBeNull;//redirect to personal info page
-
-        await Promise.all([
-            page.waitForNavigation(),
-            page.click('#homeBTN')
-        ]);
-
-        HTMLelement = await page.$('div.LoginScreenHomePage')
-        expect(HTMLelement).not.toBeNull;//redirect to home page
 }, 700000);
 
 afterAll(() => {
@@ -100,7 +110,29 @@ describe("roomCreateAndJoinTest", () => {
         await page.click("#nickName");
         await page.type("#nickName", room.nickname);
         
-        await page.click("#startBTN");
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#startBTN')
+        ]);
+
+        await page.waitForSelector('#joinGamePage')
+
+        var someText = await page.evaluate(() => document.getElementById('roomNameHeader').textContent)
+        expect(someText).toEqual(`Room Name:${room.name}`);//correct room name
+        someText = await page.evaluate(() => document.getElementById('userNameHeader').textContent)
+        expect(someText).toEqual(`User Name:${room.nickname}`);//correct nickname
+    }, 30000);
+
+    test("failed roomCreation", async () => {
+        await page.screenshot({path: 'puppeteerTests/example.png'});
+
+        await Promise.all([
+            page.waitForSelector('#form-dialog-title'),
+            page.click('#createNewRoomBTN')
+        ]);
+                
+        await page.click('#startBTN')
+        await page.waitForSelector('#form-dialog-title')//stay in same page
 
     }, 30000);
 
