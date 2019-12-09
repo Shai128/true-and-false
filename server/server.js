@@ -5,8 +5,9 @@ const {
   updateUser,
   findUserByField,
   updateLastActiveAt,
-  addLastMessage,
+  addUnReadMessage,
   addMessegesByAddressee,
+  resetUnReadMessage,
 
 } = require("../db/user") // imports all user functions
 const{resetDatabase}=require("../db/general") // imports all generel databse menagement functions
@@ -377,6 +378,11 @@ app.get('/userList/:roomId', (req, res) => {
 })
 
 /**
+ * Resets the unReadMessages array
+ */
+app.post('/user/resetUnReadMessages/:email', (req, res)=>{resetUnReadMessage(email, ()=>{})})
+
+/**
  * socket io stuff from here on
  */
 
@@ -429,7 +435,7 @@ io.on('connection', function (socket) {
     logDiv();
   });
 
-  socket.on("logout", function(userdata) {
+  socket.on("logout", function(userInfo) {
     if (socket.handshake.session.userInfo) {
       delete socket.handshake.session.userInfo;
       socket.handshake.session.save();
@@ -439,8 +445,8 @@ io.on('connection', function (socket) {
   socket.on('chat', function(data){
     console.log(data.messageContent + " was written");
   //  console.log(socket.handshake.session.userInfo);
-    socket.handshake.session.userInfo = data.user;
-    socket.handshake.session.save();
+    //socket.handshake.session.userInfo = data.user;
+    //socket.handshake.session.save();
     
     let message = data;
    
@@ -519,7 +525,7 @@ function addMessageToRecentMessagesInDB(userEmail, message, otherUserEmail){
   var message_copy = JSON.parse(JSON.stringify(message));
   message_copy.otherUserEmail = otherUserEmail;
   message_copy.delivery_timestamp = new Date();
-  addLastMessage(userEmail, message_copy, ()=>{}, (err)=>{console.log(err)});
+  addUnReadMessage(userEmail, message_copy, ()=>{}, (err)=>{console.log(err)});
 }
 
 
@@ -661,3 +667,5 @@ function addMessageToRecentMessagesInDB(userEmail, message, otherUserEmail){
     logDiv()
   })
 })
+
+

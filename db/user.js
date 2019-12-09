@@ -19,7 +19,7 @@ const userSchema= new mongoose.Schema(
         socket: Number,
         last_active_at:Date,
         games: {},
-        all_last_messages:[{authorEmail: String,
+        unReadMessages:[{authorEmail: String,
                             otherUserEmail:String,
                             messageContent:String,
                             authorName: String,
@@ -75,7 +75,14 @@ async function updateLastActiveAt(email,date,success,fail){
         else success('Successfully updated the last_active_at field of user with email '+email);   });
 }
 
-async function addLastMessage(email,message_data,success,fail){
+/**
+ * author: Shai
+ * @param {the user's email} email 
+ * @param {the message that will be inserted} message_data 
+ * @param {funciton to be executed in case of success} success 
+ * @param {function to be executed in case of failure} fail 
+ */
+async function addUnReadMessage(email,message_data,success,fail){
 
     userModel.findOne({ email: email }).exec(function (err, user) {
         if(err) fail('User with email'+email+'does not exist');
@@ -99,22 +106,31 @@ async function addLastMessage(email,message_data,success,fail){
                }
             if(user == null)
                return;
-            var res=user.all_last_messages;
-            if(isUndefined(user.all_last_messages)||user.all_last_messages.length==0){
+            var res=user.unReadMessages;
+            if(isUndefined(user.unReadMessages)||user.unReadMessages.length==0){
                 res=[];
                res[0]=extract_data;
             }
-            else if(user.all_last_messages.length<LAST_MESSAGES_LIMIT)
+            else if(user.unReadMessages.length<LAST_MESSAGES_LIMIT)
             res.unshift(extract_data);
             else{
                 res.unshift(extract_data);
                 res=res.slice(0,LAST_MESSAGES_LIMIT);
             }
-            userModel.findOneAndUpdate({email: email}, { $set:{all_last_messages:res}},
-            ()=>{success('Successfully added last message to user with email '+email)}) }
+            userModel.findOneAndUpdate({email: email}, { $set:{unReadMessages:res}},
+            ()=>{success('Successfully added unread message to user with email '+email)}) }
             
             
         });
+
+}
+
+/** author: Shai
+ * resets unread messages array
+ */
+async function resetUnReadMessage(email,success){
+    userModel.findOneAndUpdate({email: email}, { $set:{unReadMessages:[]}},
+        ()=>{success('Successfully added unread message to user with email '+email)});
 
 }
 
@@ -230,5 +246,6 @@ exports.deleteUser=deleteUser
 exports.findUserByField = findUserByField
 exports.userModel = userModel   
 exports.updateLastActiveAt=updateLastActiveAt
-exports.addLastMessage=addLastMessage
+exports.addUnReadMessage=addUnReadMessage
+exports.resetUnReadMessage=resetUnReadMessage
 exports.addMessegesByAddressee=addMessegesByAddressee
