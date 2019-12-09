@@ -19,12 +19,12 @@ import {
   useHistory
 } from "react-router-dom";
 
-import {LoginScreenRouter as LoginScreen} from './pages/LoginScreen.js';
-import {Chat as ChatRoom} from './pages/Chat.js';
-import {JoinGame} from './pages/JoinGame.js';
-import {PrintJoinGameDialog, DisplayLoading} from './PagesUtils.js';
-import {okStatus, validEmail, passwordIsStrongEnough, isUndefined} from './Utils.js'
-import {emptyUser, logIn} from './user.js'
+import { LoginScreenRouter as LoginScreen } from './pages/LoginScreen.js';
+import { Chat as ChatRoom } from './pages/Chat.js';
+import { JoinGame } from './pages/JoinGame.js';
+import { PrintJoinGameDialog, DisplayLoading } from './PagesUtils.js';
+import { okStatus, validEmail, passwordIsStrongEnough, isUndefined } from './Utils.js'
+import { emptyUser, logIn } from './user.js'
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
@@ -136,150 +136,151 @@ function SignUp() {
    * returns true is the user is valid or false if it is not.
    * prints error messages accordingly
    */
-  const validUser = ()=>{
+  const validUser = () => {
 
     var newTextsMessages = initMessages;
 
     var isValid = true;
-      if(!validEmail(user.email)){
-        newTextsMessages.errorEmail = true;
-        newTextsMessages.emailHelperText = "please provide a valid email address"
-        //changeTextMessage(true,errorEmail, "please provide a valid email address", emailHelperText);
-        isValid= false;
-      }
-      
-      if(!passwordIsStrongEnough(user.password)){
-        newTextsMessages.errorPassword = true;
-        newTextsMessages.passwordHelperText = "please provide a strong password"
-        //changeTextMessage(true,errorPassword, "please provide a strong password", passwordHelperText);
-        isValid= false;
-      }
-      if(isUndefined(user.firstName) || user.firstName  === ''){
-        newTextsMessages.errorFirstName = true;
-        newTextsMessages.firstNameHelperText = "please provide a firstName"
-        //changeTextMessage(true, errorFirstName, "please provide a firstName", firstNameHelperText);
-        isValid= false;
-      }
-      setTextsMessages(newTextsMessages);
-      return isValid;
+    if (!validEmail(user.email)) {
+      newTextsMessages.errorEmail = true;
+      newTextsMessages.emailHelperText = "please provide a valid email address"
+      //changeTextMessage(true,errorEmail, "please provide a valid email address", emailHelperText);
+      isValid = false;
+    }
+
+    if (!passwordIsStrongEnough(user.password)) {
+      newTextsMessages.errorPassword = true;
+      newTextsMessages.passwordHelperText = "please provide a strong password"
+      //changeTextMessage(true,errorPassword, "please provide a strong password", passwordHelperText);
+      isValid = false;
+    }
+    if (isUndefined(user.firstName) || user.firstName === '') {
+      newTextsMessages.errorFirstName = true;
+      newTextsMessages.firstNameHelperText = "please provide a firstName"
+      //changeTextMessage(true, errorFirstName, "please provide a firstName", firstNameHelperText);
+      isValid = false;
+    }
+    setTextsMessages(newTextsMessages);
+    return isValid;
   }
 
   let history = useHistory();
 
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
-          <LockOutlinedIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Sign up
+    <div className="SignUpPage" >
+      <Container component="main" maxWidth="xs">
+        <CssBaseline />
+        <div className={classes.paper}>
+          <Avatar className={classes.avatar}>
+            <LockOutlinedIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5">
+            Sign up
         </Typography>
-        <form className={classes.form} noValidate>
-          <Grid container spacing={2}>
-           
-          <Grid item xs={12}>
-              <TextField
-                error={textsMessages.errorFirstName}
-                helperText = {textsMessages.firstNameHelperText}
-                variant="outlined"
-                required
-                fullWidth
-                id="firstName"
-                label="First Name"
-                name="firstName"
-                autoComplete="firstName"
-                onChange = {updateField}
-              />
+          <form className={classes.form} noValidate>
+            <Grid container spacing={2}>
+
+              <Grid item xs={12}>
+                <TextField
+                  error={textsMessages.errorFirstName}
+                  helperText={textsMessages.firstNameHelperText}
+                  variant="outlined"
+                  required
+                  fullWidth
+                  id="firstName"
+                  label="First Name"
+                  name="firstName"
+                  autoComplete="firstName"
+                  onChange={updateField}
+                />
               </Grid>
               <Grid item xs={12}>
-              <TextField
-                variant="outlined"
-                fullWidth
-                id="nickName"
-                label="Nick Name"
-                name="nickName"
-                autoComplete="nickName"
-                onChange={updateField}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                error={textsMessages.errorEmail}
-                helperText = {textsMessages.emailHelperText}
-                variant="outlined"
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
-                onChange={updateField}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                error={textsMessages.errorPassword}
-                helperText = {textsMessages.passwordHelperText}
-                variant="outlined"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="password"
-                autoComplete="current-password"
-                onChange={updateField}
-              />
-            </Grid>
+                <TextField
+                  variant="outlined"
+                  fullWidth
+                  id="nickName"
+                  label="Nick Name"
+                  name="nickName"
+                  autoComplete="nickName"
+                  onChange={updateField}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  error={textsMessages.errorEmail}
+                  helperText={textsMessages.emailHelperText}
+                  variant="outlined"
+                  required
+                  fullWidth
+                  id="email"
+                  label="Email Address"
+                  name="email"
+                  autoComplete="email"
+                  onChange={updateField}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  error={textsMessages.errorPassword}
+                  helperText={textsMessages.passwordHelperText}
+                  variant="outlined"
+                  required
+                  fullWidth
+                  name="password"
+                  label="Password"
+                  type="password"
+                  id="password"
+                  autoComplete="current-password"
+                  onChange={updateField}
+                />
+              </Grid>
 
-          </Grid>
-          <Button
-            //type="submit"
-            fullWidth
-            id="submit"
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-            onClick={()=>{
-              if(!validUser())
-                return;
-              // let data = new FormData();
-              // data.append( "json", JSON.stringify(user));
-              
-              fetch('http://localhost:8000/user', {
-                method: 'POST', // *GET, POST, PUT, DELETE, etc.
-                headers: {
-                  'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                credentials: 'include',
-                body: 'json=' + JSON.stringify(user)
-              }).then( (data) =>{
-                logIn(user, (data)=>{
-                  console.log('frontend got data: ', data);
-                  if(data.status === okStatus ){
-                    history.push("/LoginScreen/MySentences");
-                  }
-                });
-              })
+            </Grid>
+            <Button
+              //type="submit"
+              fullWidth
+              id="submit"
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+              onClick={() => {
+                if (!validUser())
+                  return;
+                // let data = new FormData();
+                // data.append( "json", JSON.stringify(user));
 
-            }}>
+                fetch('http://localhost:8000/user', {
+                  method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                  headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                  },
+                  credentials: 'include',
+                  body: 'json=' + JSON.stringify(user)
+                }).then((data) => {
+                  logIn(user, (data) => {
+                    console.log('frontend got data: ', data);
+                    if (data.status === okStatus) {
+                      history.push("/LoginScreen/MySentences");
+                    }
+                  });
+                })
 
-            Sign Up
+              }}>
+
+              Sign Up
           </Button>
-          <Grid container justify="center">
-            <Grid item>
-              <Link to="/SignIn" variant="body2">
-                Already have an account? Sign In
+            <Grid container justify="center">
+              <Grid item>
+                <Link to="/SignIn" variant="body2">
+                  Already have an account? Sign In
               </Link>
+              </Grid>
             </Grid>
-          </Grid>
-        </form>
-      </div>
+          </form>
+        </div>
 
-    </Container>
-
+      </Container>
+    </div>
   );
 }
 
@@ -298,19 +299,19 @@ function LinksPage() {
         <Route exact path="/SignUp">
           <SignUp />
         </Route>
-      
-          <Route path="/LoginScreen">
-            <LoginScreen />
-          </Route>
 
-          <Route path="/ChatRoom">
-            <ChatRoom />
-          </Route>
+        <Route path="/LoginScreen">
+          <LoginScreen />
+        </Route>
+
+        <Route path="/ChatRoom">
+          <ChatRoom />
+        </Route>
 
 
-          <Route path="/JoinGame">
-            <JoinGame />
-          </Route>
+        <Route path="/JoinGame">
+          <JoinGame />
+        </Route>
 
 
       </Switch>
@@ -337,37 +338,37 @@ function Home() {
   const [guestLoginWindowOpen, setguestLoginWindowOpen] = React.useState(false);
   const handleClickGuestLogin = () => {
     setguestLoginWindowOpen(true);
-};
+  };
 
-const handleCloseGuestLoginWindow = () => {
-  setguestLoginWindowOpen(false);
-};
+  const handleCloseGuestLoginWindow = () => {
+    setguestLoginWindowOpen(false);
+  };
   return (
-
-    <Container component="main" maxWidth="md">
-      <CssBaseline />
-      <div className={classes.paper}>
-        <Typography component="h1" variant="h2">
-          True and False Home Page
+    <div className="HomePage" >
+      <Container component="main" maxWidth="md">
+        <CssBaseline />
+        <div className={classes.paper}>
+          <Typography component="h1" variant="h2">
+            True and False Home Page
         </Typography>
-        <form className={classes.form} noValidate>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <Link to="/SignIn">
-                <Button id = "signInBTN" variant="contained" color="primary" fullWidth className={classes.button}>
-                  Sign In
+          <form className={classes.form} noValidate>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6}>
+                <Link to="/SignIn">
+                  <Button id="signInBTN" variant="contained" color="primary" fullWidth className={classes.button}>
+                    Sign In
             </Button>
-              </Link>
+                </Link>
 
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Link to="/SignUp">
-                <Button id = "signUpBTN" variant="contained" color="primary" fullWidth className={classes.button}>
-                  Sign Up
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Link to="/SignUp">
+                  <Button id="signUpBTN" variant="contained" color="primary" fullWidth className={classes.button}>
+                    Sign Up
       </Button>
-              </Link>
-            </Grid>
-{/* 
+                </Link>
+              </Grid>
+              {/* 
             <Grid item xs={12} sm={6}>
               <Link to="/LoginScreen">
                 <Button variant="contained" color="primary" fullWidth className={classes.button}>
@@ -376,18 +377,18 @@ const handleCloseGuestLoginWindow = () => {
               </Link>
             </Grid> */}
 
-            {/* <Grid item xs={12} sm={6}> */}
-            <Button variant="contained" color="primary" fullWidth onClick={handleClickGuestLogin} className={classes.button}>
-            Guest Login
+              {/* <Grid item xs={12} sm={6}> */}
+              <Button variant="contained" color="primary" fullWidth onClick={handleClickGuestLogin} className={classes.button}>
+                Guest Login
             </Button>
             </Grid>
             <PrintJoinGameDialog
-            handleCloseWindow= {handleCloseGuestLoginWindow}
-            WindowOpen= {guestLoginWindowOpen}
-            currentUser = {emptyUser()}/>
-          {/* </Grid> */}
+              handleCloseWindow={handleCloseGuestLoginWindow}
+              WindowOpen={guestLoginWindowOpen}
+              currentUser={emptyUser()} />
+            {/* </Grid> */}
 
-{/* 
+            {/* 
           <Grid item xs={12} sm={6}>
             <Link to="/ChatRoom">
             <Button variant="contained" color="primary" fullWidth  className={classes.button}>
@@ -396,8 +397,8 @@ const handleCloseGuestLoginWindow = () => {
           </Link>
             </Grid> */}
 
-            
-          {/* <Grid item xs={12} sm={6}>
+
+            {/* <Grid item xs={12} sm={6}>
             <Link to="/JoinGame">
             <Button variant="contained" color="primary" fullWidth  className={classes.button}>
               Join A Game
@@ -405,15 +406,15 @@ const handleCloseGuestLoginWindow = () => {
           </Link>
             </Grid> */}
 
-        </form>
-        <Box mt={5}>
-          <Copyright />
-        </Box>
-      </div>
+          </form>
+          <Box mt={5}>
+            <Copyright />
+          </Box>
+        </div>
 
 
-    </Container>
-
+      </Container>
+    </div>
   );
 
 }
@@ -491,12 +492,12 @@ export function SignIn() {
       [e.target.name]: e.target.value
     });
   };
-  if(isLoading)
-    return (<DisplayLoading/>);
+  if (isLoading)
+    return (<DisplayLoading />);
   return (
-    <div className="App" >
+    <div className="SignInPage" >
       <header className="App-header" >
-     
+
         <Container component="main" maxWidth="xs">
           <CssBaseline />
           <div className={classes.paper}>
@@ -516,9 +517,9 @@ export function SignIn() {
                     margin="normal"
                     variant="filled"
                     fullWidth
-                    name = 'email'
-                    value = {user.email}
-                    onChange = {updateField}
+                    name='email'
+                    value={user.email}
+                    onChange={updateField}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -532,9 +533,9 @@ export function SignIn() {
                     margin="normal"
                     variant="filled"
                     fullWidth
-                    name = 'password'
-                    value = {user.password}
-                    onChange = {updateField}
+                    name='password'
+                    value={user.password}
+                    onChange={updateField}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -547,12 +548,12 @@ export function SignIn() {
                         email: document.getElementById('EmailInput').value,
                         password: document.getElementById('PasswordInput').value
                       }
-                      
-                      logIn(user, (data)=>{
+
+                      logIn(user, (data) => {
                         setIsLoading(false);
                         console.log('frontend got data: ', data);
-                        if(data.status === okStatus ){
-                            history.push("/LoginScreen");
+                        if (data.status === okStatus) {
+                          history.push("/LoginScreen");
                         }
                       });
 
@@ -563,10 +564,10 @@ export function SignIn() {
               </Grid>
             </form>
           </div>
-          </Container>
-              <Link to="/SignUp" variant="body2">
-              <Typography variant="h6" component="h3" gutterBottom className={classes.root}>
-                Don't have an account? Sign Up
+        </Container>
+        <Link to="/SignUp" variant="body2">
+          <Typography variant="h6" component="h3" gutterBottom className={classes.root}>
+            Don't have an account? Sign Up
                 </Typography>
         </Link>
 

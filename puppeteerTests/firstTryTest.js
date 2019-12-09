@@ -7,15 +7,6 @@ const puppeteer = require('puppeteer');
   //await page.emulate(iPhone);
   page.on('load', () => console.log('Page loaded!'));
   page.on('close', () => console.log('Page closed!'));
-
-  it('Loads the app', async function() {
-    await page.goto('http://localhost:3000/');
-
-    await page.goto(TEST_URL)
-    const mainContainer = await page.$('section.todoapp')
-    should.exist(mainContainer)
-  })
-
   try{
     await page.goto('http://localhost:3000/');
     
