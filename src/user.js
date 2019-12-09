@@ -45,7 +45,7 @@ export function getParticipatedGames(){
 
 
 const io = require('socket.io-client');
-export const socket = io(server);
+export const socket = io.connect(server, {query: "user_id="+getUserFromLocalStorage().email});
 
 
 /**
@@ -89,24 +89,21 @@ export function getCurrentUserFromSession(user, setUser, onSuccess , onFailure){
     getCurrentUserFromDB(setUser, onSuccess, onFailure);
 }
 
+
 /**
  * read the user that was saved in the local storage and calls setUser with the user we found.
- * the function will do nothing if local storage does not contain a valid user.
- * @param {setter for the user} setUser 
  */
-export function getUserFromLocalStorage(setUser){
+export function getUserFromLocalStorage(){
+    console.log('entered getUserFromLocalStorage function');
     var storage_user = (localStorage.getItem(user_in_session_key));
     if(!isUndefined(storage_user)){
         var parsed_storage_user = JSON.parse(storage_user);
         if(userIsUpdated(parsed_storage_user)){
             console.log('used local storage to get: ', parsed_storage_user)
-            setUser(parsed_storage_user);
-            return;
+            return parsed_storage_user;
         }
     }
 }
-
-
 
 
 /**
@@ -287,7 +284,7 @@ export function logIn(user, func){
                     return;
                 }
                 
-                socket.emit('login', {email: user.email, nickName: user.nickName});
+                socket.emit('login', {email: user.email,user_id: user.email, nickName: user.nickName});
                 console.log('frontend got data: ', user);
                 /** saving the user we just got to local storage, so next time we will access the user from local storage */
                 localStorage.setItem(user_in_session_key, JSON.stringify(user));

@@ -445,8 +445,8 @@ io.on('connection', function (socket) {
   socket.on('chat', function(data){
     console.log(data.messageContent + " was written");
   //  console.log(socket.handshake.session.userInfo);
-    //socket.handshake.session.userInfo = data.user;
-    //socket.handshake.session.save();
+    socket.handshake.session.userInfo = data.user;
+    socket.handshake.session.save();
     
     let message = data;
    
@@ -455,10 +455,10 @@ io.on('connection', function (socket) {
     io.sockets.emit(data.receiverUserEmail+'_chat_notification', data);
 
     saveMessageInDB(data.user.email, message, data.receiverUserEmail);
-    addMessageToRecentMessagesInDB(data.user.email, message, data.receiverUserEmail);
+    //addMessageToRecentMessagesInDB(data.user.email, message, data.receiverUserEmail);
 
     saveMessageInDB(data.receiverUserEmail, message, data.user.email);
-    addMessageToRecentMessagesInDB(data.receiverUserEmail, message, data.user.email);
+    //addMessageToRecentMessagesInDB(data.receiverUserEmail, message, data.user.email);
 
     // io.sockets.connected[data.user.socketID].emit('C_chat', data);
     // io.sockets.connected[data.receiverUser.socketID].emit('C_chat', data);
