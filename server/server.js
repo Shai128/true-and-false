@@ -85,6 +85,11 @@ function findGame(game, success, failure) {
     }
   })
 }
+function tryout(){
+resetDatabase(15,(fg)=>{},(fg)=>{});
+}
+//tryout();
+// uncomment this to reset server
 app.get('/', (req, res) => res.send("request for / recieved"))
 
 /**
@@ -147,9 +152,10 @@ function serverLoginUser(req, res) {
           email: data["email"],
           nickName: data["nickName"]
         }
+      
         console.log('saved email:', data['email'])
         console.log("successfuly returned user: " + found_user.get('email'));
-        res.status(200).send("successfuly logged in");
+        res.status(200).send(JSON.stringify(found_user));
       } else {
         console.log("the password: " 
           + data.password 
@@ -276,11 +282,17 @@ function  serverAddUserToRoom(req, res, roomId) {
         userInfo.email, 
         (succ) => {
           console.log("sending the status now")
-          res.status(200).send({ID: toString(roomId)});
+         // console.log("created room with id", roomId)
+         console.log("added user",userInfo.email, "to room", roomId)
+          res.status(200).send({ID: roomId});
           console.log("sent")
           // add the user's socket to the room
           var userSocket = findSocketByUserId(userInfo.email)
-          if (userSocket !== undefined) {userSocket.join(roomId.toString())}
+   // console.log("user socket", userSocket, "found of user:", userInfo.email)
+          if (userSocket !== undefined) {
+            userSocket.join(roomId.toString())
+            console.log("added the user's", userInfo.email, "socket to room", roomId.toString())
+          }
           // notify all other users in the room
           io.to(roomId).emit('userJoined', userInfo)
         },
@@ -297,7 +309,7 @@ function  serverAddUserToRoom(req, res, roomId) {
  */
 app.get('/leaveRoom/:roomId', (req, res) => {
   var roomId = req.params.roomId
-  console.log("adding user to room:", roomId)
+  console.log("removing user from room room:", roomId)
   getUserInfoFromSession(
     req,
     (userInfo) => {
@@ -317,7 +329,7 @@ app.get('/leaveRoom/:roomId', (req, res) => {
                 deleteRoomById(roomId, () => {}, (err) => console.log(err))
               } else {
                 // notify users in room about leaving
-                io.to(roomId).emit('userJoined', userInfo)
+                io.to(roomId).emit('userLeft', userInfo)
               }
             },
             (err) => console.log("failed to delete room")
@@ -346,6 +358,7 @@ app.get('/userList/:roomId', (req, res) => {
           findRoomById(
             roomId, 
             (roomObject) => {
+              //console.log("Players available" ,availableUsers)
               res.status(200).send(JSON.stringify({
                 PlayersAvailable: convertUserListFormat(availableUsers),
                 PlayersUnAvailable: convertUserListFormat(unavailableUsers),
@@ -374,11 +387,15 @@ io.use(sharedsession(session, {
 }));
 
 function findSocketByUserId(userId) {
+  logDiv("findSocketByUserId")
   for (let [socketId, socketObject] of Object.entries(io.sockets.sockets)) {
-    if (socketObject.handshake.session.userInfo.userId === userId) {
+  //  console.log("socket:", socketId, "with obj:", JSON.stringify(socketObject.handshake.session.userInfo))
+    if (socketObject.handshake.session.userInfo.email === userId) {
+      logDiv();
       return socketObject;
     }
   }
+  logDiv();
   return undefined;
 }
 
@@ -390,23 +407,26 @@ io.on('connection', function (socket) {
   console.log("all sockets so far:", Object.keys(io.sockets.sockets))
   logDiv()
 
-  socket.handshake.session.userInfo = {userId: socket.request._query['user_id']}
+  socket.handshake.session.userInfo = {email: socket.request._query['user_id']}
+  socket.handshake.session.save();
 
+  console.log("after socket update:", socket.handshake.session.userInfo)
   // If the user is already in a room - subscribe to that room with his new socket
   findUser(
-    {email: socket.handshake.session.userInfo.userId},
+    {email: socket.handshake.session.userInfo.email},
     (found_user) => {
       socket.join(toString(found_user.current_room))
     },
     (err) => console.log(err)
   )
 
-  socket.on("login", function(userdata) {
-    var userInfo = userdata.user;
-    console.log(userInfo.nickName + " has logged in");
+  socket.on("login", function(userInfo) {
+    logDiv("socket login")
+    console.log(userInfo.email + " has logged in");
     console.log("full info:", userInfo)
-   // socket.handshake.session.userInfo = userInfo;
+    socket.handshake.session.userInfo = userInfo;
     socket.handshake.session.save();
+    logDiv();
   });
 
   socket.on("logout", function(userdata) {
@@ -437,6 +457,45 @@ io.on('connection', function (socket) {
     // io.sockets.connected[data.user.socketID].emit('C_chat', data);
     // io.sockets.connected[data.receiverUser.socketID].emit('C_chat', data);
   })
+
+
+  /**
+   * Passes a message from one user to another.
+   * 
+   * usage format is:
+   * serverSocket.emit('deliverMessage', {
+   * message: 'letsPlay'
+   * args: {}
+   * receiverId: 'email@gmail.com'
+   * })
+   */
+  socket.on('deliverMessage', function(data) {
+    logDiv('delivering message')
+    if (data.receiverId === undefined || data.message === undefined) {
+      // handle error
+      console.log("bad parameters");
+      return;
+    }
+    var receiverSocket = findSocketByUserId(data.receiverId)
+    if (receiverSocket === undefined) {
+      // handle error
+      console.log("receiver socket not found")
+      return;
+    }
+
+    console.log(
+      "sending message",
+       data.message, 
+       "from ", 
+       socket.handshake.session.userInfo.email, 
+       "to", 
+       data.receiverId
+      );
+
+    receiverSocket.emit(data.message, data.args)
+    logDiv()
+  });
+
 
 /**
  * adding the message to the specific chat list between the two users

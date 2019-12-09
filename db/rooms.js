@@ -68,7 +68,7 @@ async function findUserByEmailInRoomByRoomID(room_id,email,success,fail){ //room
     roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
         if(err) fail('Room with id'+room_id+'does not exist');
         else{
-                arr_users=room.users_in_room;
+                var arr_users=room.users_in_room;
                // console.log('got here: '+arr_users[0].email);
                var i; 
                var flag_not_found=1;
@@ -89,7 +89,7 @@ async function deleteUserByEmailInRoomByRoomID(room_id,email,success,fail){ //ro
         if(err) fail('Room with id'+room_id+'does not exist');
         else{   console.log('got here');
                 var arr_users=room.users_in_room;
-               var i,j;
+               var i,j = 0;
                var flag_not_found=1;
                for( i=0; i<arr_users.length; i++){
                         if(arr_users[i]!=undefined && arr_users[i].email == email){ j=i;flag_not_found=0;}
@@ -114,7 +114,7 @@ async function addUserObjectToRoom(room_id,user,success,fail){
         if(err) fail('Room with id'+room_id+'does not exist');
         else{
             //console.log('got here 4');
-            orig_sentences_array_length=room.all_sentences.length;
+            var orig_sentences_array_length=room.all_sentences.length;
             var i;
             for(i=0;i<user.true_sentences.length;i++){
                 room.all_sentences[orig_sentences_array_length+i]=user.true_sentences[i];
@@ -128,16 +128,17 @@ async function addUserObjectToRoom(room_id,user,success,fail){
 }
 
 async function addUserToRoom(room_id,email,success,fail){
-//console.log('got here 1.5');
-roomModel.findOne({ room_id: room_id }).exec(function (err1, room) {
-    //console.log('got here 1');
-        if(err1) fail('Room with id'+room_id+'does not exist');
-        else{
-           // console.log('got here 1');
+console.log('got here 1.5');
+roomModel.find({ room_id: room_id }, (err, docs) => {
+    var room = docs[0]
+    if (room === undefined) {fail("room does not exist"); return}
+    if (err) {fail(err)} else {
+        console.log('got here 1');
+            console.log('got here 1');
             userModel.findOne({ email: email }).exec(function (err2, user) {
                 if(err2) fail('User with email'+email+'does not exist');
                 else{
-                   // console.log('got here 2');
+                    console.log('got here 2');
                     var false_array = new Array(PLAYERS_AMOUNT).fill(false);
                     var user={
                         user_id_in_room:room.available_id,
@@ -152,16 +153,13 @@ roomModel.findOne({ room_id: room_id }).exec(function (err1, room) {
                     }
                
                 addUserObjectToRoom(room_id,user,success,fail);
-                success('Success');
-        }
-    })
-}});
-           
-}
+               // success('Success'); -- never ever try to uncomment this for thou shall bring hell upon yourselves
+                }})}})}
+    
 async function createRoom(room_name,success,failure){
     roomsGlobalArrayModel.findOne({ array_id: 1 }).exec(function (err, global_array) {
-        if(err) fail('unexpected error occured during fetching the rooms global array');
-        else{
+        if (err) {failure('unexpected error occured during fetching the rooms global array')}
+        else {
             var room_id,i;
             for(i=0;i<global_array.array.length;i++){
                 if(!global_array.array[i]){
@@ -183,7 +181,7 @@ async function createRoom(room_name,success,failure){
 
             });
             //saves the room in the db
-            newRoom.save((err)=>{if(err){fail('failed creating a room')} else{
+            newRoom.save((err)=>{if(err){failure('failed creating a room')} else{
                 roomsGlobalArrayModel.findOneAndUpdate({array_id: global_array.array_id}, { $set:{array:global_array.array}},()=>
                 
                 
@@ -195,20 +193,27 @@ async function createRoom(room_name,success,failure){
     });
 }
 
+async function getRoomSize(room_id, success, failure) {
+    roomModel.find({room_id: room_id}, (err, docs) => {
+        if (err) {failure(err)} else {success(docs[0].users_in_room.length)}
+    });
+}
+
 async function get_available_users(room_id,success,failure){
     roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
         if(err) failure('Room with id'+room_id+'does not exist');
         else{
                 var res=[];
-                var i,j;
+                var i = 0,j = 0;
                 for(i=0;i<room.state_array.length; i++){
-                    if(room.state_array[i]==AVAILABLE_STATE && room.users_in_room[i]!=undefined){
+                    if(room.state_array[i]===AVAILABLE_STATE && room.users_in_room[i]!==undefined){
                         res[j]=room.users_in_room[i];
+                        //console.log("new user added to list:", i, j)
                         j++;
                     }
 
                 }
-                console.log(res);
+               // console.log(res);
                 success(res);
         }
 });
@@ -237,15 +242,15 @@ async function get_unavailable_users(room_id,success,failure){
         if(err) failure('Room with id'+room_id+'does not exist');
         else{
                 var res=[];
-                var i,j;
+                var i,j = 0;
                 for(i=0;i<room.state_array.length; i++){
-                    if(room.state_array[i]!=AVAILABLE_STATE && room.users_in_room[i]!=undefined){
+                    if(room.state_array[i]!==AVAILABLE_STATE && room.users_in_room[i]!==undefined){
                         res[j]=room.users_in_room[i];
                         j++;
                     }
 
                 }
-                console.log(res);
+              //  console.log(res);
                 success(res);
         }
 });
@@ -263,7 +268,7 @@ async function updateAllSentencesArray(room_id,all_senteces_array,success,fail){
         success('Successfully updated the sentences array');   
 });}
 
-exports.roomModel=roomModel
+
 exports.findRoomById = findRoomById
 exports.updateRoom=updateRoom
 exports.createRoom=createRoom
@@ -272,7 +277,9 @@ exports.findUserByEmailInRoomByRoomID=findUserByEmailInRoomByRoomID
 exports.deleteUserByEmailInRoomByRoomID=deleteUserByEmailInRoomByRoomID
 exports.addUserObjectToRoom=addUserObjectToRoom
 exports.addUserToRoom=addUserToRoom
-exports.get_available_users=get_available_users
-exports.get_unavailable_users=get_unavailable_users
+exports.createRoom=createRoom
+exports.getAvailableUsers=get_available_users
+exports.getUnAvailableUsers=get_unavailable_users
 exports.getAllSentencesArray=getAllSentencesArray
-exports.changeUserAvailability = changeUserAvailability
+exports.getRoomSize = getRoomSize
+exports.roomModel = roomModel

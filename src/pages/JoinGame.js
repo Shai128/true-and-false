@@ -34,33 +34,14 @@ import { reject } from 'q';
 
   const okStatus = 200;
 
-// import WifiIcon from '@material-ui/icons/Wifi';
-// import BluetoothIcon from '@material-ui/icons/Bluetooth';
 
-//   var bgColors = { "Default": "#81b71a",
-//                     "Blue": "#00B1E1",
-//                     "Cyan": "#37BC9B",
-//                     "Green": "#8CC152",
-//                     "Red": "#E9573F",
-//                     "Yellow": "#F6BB42",
-// };
+export function JoinGame(props){ 
+  
+  console.log ("props",props);
 
-// var rootStyle = { //the color of the page!
-//   backgroundColor : 'white',
-//   color : 'white',
-//   height : '100%'
-
-// }
-
-
-export function JoinGame(){  
-
+  //const [CurrentUser, setCurrentUser] = useState(props.user);
   const [PlayersAvailable, setPlayersAvailable] = useState([]);
   const [PlayersUnAvailable, setPlayersUnAvailable] = useState([]);
-  const [RoomName, setRoomName] = useState("");
-  const [RoomId, setRoomId] = useState(-1);
-
-
 
 const useStylesRoomName = makeStyles(theme => ({
   title: {
@@ -75,13 +56,13 @@ const useStylesRoomName = makeStyles(theme => ({
 
 const classes = useStylesRoomName();
 
-InitTheRoom(PlayersAvailable,setPlayersAvailable,PlayersUnAvailable,setPlayersUnAvailable);
-
+InitTheRoom(props.location.RoomId);
 
 socket.on("userJoined", function(userInfo) {
  /*
     userInfo: {email: ..., nickName:...}
  */
+    console.log("received userJoin with userInfo:", userInfo);
     var newPlayersAvailable = [...PlayersAvailable]
     newPlayersAvailable.push(userInfo.nickName)
     setPlayersAvailable(newPlayersAvailable)
@@ -98,25 +79,31 @@ socket.on("userLeft", function(userInfo) {
        setPlayersAvailable(newPlayersAvailable)
      });
 
-     
-
-console.log("room name -->", RoomName);
-
+    
   return (
     <div>
-   <HorizontalLinearStepper/>
-
-
+   {/* <HorizontalLinearStepper/> */}
+  
   <Grid item xs={6}>
    <Typography variant="h2" className={classes.title}>
-    {RoomName}
+   Room Name: 
+    {props.location.currentRoomName}
    </Typography>
    </Grid>
+
+
+   <Grid item xs={4}>
+   <Typography variant="h2" className={classes.roomNumber}>
+   User Name: 
+  {props.location.currentNickName}
+   </Typography>
+   </Grid>
+
 
   <Grid item xs={4}>
    <Typography variant="h2" className={classes.roomNumber}>
    Room Number: 
-  {RoomId}
+  {props.location.RoomId}
    </Typography>
    </Grid>
 
@@ -128,8 +115,8 @@ console.log("room name -->", RoomName);
 <Grid container spacing={1} justify="center">
 
       <Grid item xs={4}>
-         <Typography variant="h4" className={classes.roomNumber}>
-         Chose a player and start to play!
+         <Typography variant="h6" className={classes.roomNumber}>
+         Choose a player and start to play!
           </Typography>
           </Grid>
           <Grid item xs={8}>
@@ -138,16 +125,14 @@ console.log("room name -->", RoomName);
           </Grid>
 
    <PlayerListAvailable PlayersAvailable = {PlayersAvailable}/>
+  
    {/* <PlayerListUnavailable PlayersUnAvailable = {PlayersUnAvailable}/> */}
 
   </div>
   );
 
-
-
- function InitTheRoom(){   
-  console.log("fetching user list")
-    fetch('http://localhost:8000/userList/' + '0', { //Room id!!!! need to change!
+ function InitTheRoom(props){   
+    fetch('http://localhost:8000/userList/' + props, { 
       method: 'GET', // *GET, POST, PUT, DELETE, etc.
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -160,19 +145,17 @@ console.log("room name -->", RoomName);
         return new Promise(function(resolve, reject) {
           resolve(response.json());
         })
-      }}).then(data => {        
+      }}).then(data => {      
         if (PlayersAvailable.length === 0 && data.PlayersAvailable !== undefined &&
           PlayersUnAvailable.length === 0 && data.PlayersUnAvailable !== undefined) {
           setPlayersAvailable(data.PlayersAvailable);
           setPlayersUnAvailable(data.PlayersUnAvailable);
-          setRoomName(data.RoomName);
-          setRoomId(data.RoomId);
         }
       }, fail_status => {
         console.log("failed. status: ", fail_status)
       })
   }
-
+  
 }
 // ------------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------------
@@ -596,7 +579,12 @@ const [InvitePlayerWindowOpen, setInvitePlayerWindowOpen] = React.useState(false
     setPage(0);
   };
 
+  console.log("dann 1 ", props);
+
   const {PlayersAvailable} = props;
+
+  console.log("dann 1 ", PlayersAvailable);
+
 
   return (
     <Paper className={classes.root}>
@@ -619,13 +607,13 @@ const [InvitePlayerWindowOpen, setInvitePlayerWindowOpen] = React.useState(false
             
             {PlayersAvailable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => {
               return (
-                <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
-                  {columnsForAvailable.map(column => {       
-                   // const value = row.nickName;
-                   const value = 'Ron';
-                    console.log("ROW ->",value)
+                <TableRow hover role="checkbox" tabIndex={-1} key={row.email}>
+                  {columnsForAvailable.map(column => { 
+                                        
+                    const value = row.nickname;
+
                     return (
-                      <TableCell key={column.id} align={column.align}>
+                      <TableCell key={row.email} align={column.align}>
 
                  <Grid container justify="center" alignItems="center">
                       

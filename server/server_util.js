@@ -81,7 +81,6 @@ function getUserInfoFromSession(req, success, failure) {
 }
 
 function convertUserListFormat(fullUserList) { 
-  console.log("converted",Object.values(fullUserList))
   return Object.values(fullUserList)
 }
 
