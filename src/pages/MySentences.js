@@ -16,7 +16,6 @@ import DeleteTwoToneIcon from '@material-ui/icons/DeleteTwoTone';
 
 import {updateUserToDB, getCurrentUserFromSession, userIsUpdated, getUserFromProps} from './../user.js'
 import {DisplayLoading} from './../PagesUtils';
-import {isUndefined} from './../Utils.js';
 const useButtonStyles = makeStyles({
     root: {
       background: props =>

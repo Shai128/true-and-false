@@ -112,7 +112,7 @@ const handleCloseJoinGameWindow = () => {
             <Grid item xs={12}>
 
             <Typography component="h1" variant="h2" justify="center">
-              Welcome {currentUser.email}!
+              Welcome {currentUser.firstName}!
         </Typography>
             </Grid>
         <Grid item xs={12} sm={6}>

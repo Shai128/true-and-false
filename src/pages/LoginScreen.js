@@ -28,7 +28,7 @@ import ChatIcon from '@material-ui/icons/Chat';
 
 import App from './../App.js'
 import {
-    BrowserRouter as Router,
+    //BrowserRouter as Router,
     Switch,
     Route,
     Link,
@@ -134,7 +134,6 @@ const useStyles = makeStyles(theme => ({
 export function LoginScreenRouter(){
 
   return(
-  <Router>
   <Switch>
     
   <Route path ={'/SignIn'} component={SignIn} />
@@ -151,8 +150,7 @@ export function LoginScreenRouter(){
   </Switch>
 
 
-  </Router>
-  );
+);
 }
 function LoginScreen(props){
   const [currentUser, setCurrentUser] = React.useState(getUserFromProps(props));
