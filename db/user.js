@@ -14,8 +14,8 @@ const userSchema= new mongoose.Schema(
         score: Number,
         pic_url: String,
         firstName: String,
-        true_sentences:[{type:String}],
-        false_sentences:[{type:String}],
+        true_sentences:[{id: Number, value:String}],
+        false_sentences:[{id: Number, value:String}],
         socket: Number,
         last_active_at:Date,
         games: {},
@@ -223,25 +223,44 @@ async function findUserByField(field, value, success, failure) {
         if (err) {failure(err)} else {success(docs)}
     });
 }
-/*
-async function updateUser(data, success, failure) {
-    userModel.findOneAndUpdate({email: data.email}, { $set:{array:global_array.array}},()=>
+
+/**
+ * author: Shai
+ * @param {the _id of the user we want to update} userID 
+ * @param {the new user that will be put instead of the existing user} user 
+ * @param {function that will activated in case of success} success 
+ * @param {will be activated in case of failure} failure 
+ */
+async function updateUser(userID, user, success, failure) {
+    const res = await userModel.replaceOne({_id: userID}, user); //res.nModified = # updated documents
+    if(res.n ==1 && res.nModified ==1) {                     //res.n = # of matched documents
+        success();
+        console.log('updated user. new user: ', user)
+    }
+    else if (res.n ==0 && res.nModified ==0){
+        failure('could not find a user to update')
+    }
+    else if (res.n ==1 && res.nModified ==0){
+        failure('user found, could not update')
+    }
+    else{
+        failure('fatal error occured.')
+    }
+    // userModel.findOneAndUpdate({email: data.email}, { $set:{array:global_array.array}},()=>
                 
+    // const doc = await userModel.findOneIdAndUpdate(
+    //     {_id: data._id},
+    //     data
+    // );
 
-    const doc = await userModel.findOneIdAndUpdate(
-        {_id: data._id},
-        data
-    );
-    console.log("updated: " + doc);
-
-}*/
+}
 
 
 
 
 exports.createUser = createUser
 exports.findUser = findUser
-//exports.updateUser = updateUser
+exports.updateUser = updateUser
 exports.deleteUser=deleteUser
 exports.findUserByField = findUserByField
 exports.userModel = userModel   

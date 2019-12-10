@@ -201,7 +201,7 @@ function serverUserUpdate(req, res) {
   let data = JSON.parse(req.body.json)
   updateUser(req.params.id, data,
     ()=>{
-      console.log("succesfully updated user: " + data.username)
+      console.log("succesfully updated user: " + data.email)
       res.status(200).send("success");
     }
     ,(err)=>{standardErrorHandling(res, err)});

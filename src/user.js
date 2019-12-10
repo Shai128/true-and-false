@@ -74,17 +74,14 @@ export function getCurrentUserFromSession(user, setUser, onSuccess , onFailure){
         return;
     }
     /** getting the current user from the local storage, if exists */
-    var storage_user = (localStorage.getItem(user_in_session_key));
+    var storage_user = getUserFromLocalStorage();
     if(!isUndefined(storage_user)){
-        var parsed_storage_user = JSON.parse(storage_user);
-        if(userIsUpdated(parsed_storage_user)){
-            console.log('used local storage to get: ', parsed_storage_user)
-            setUser(parsed_storage_user);
-            if(!isUndefined(onSuccess))
-                onSuccess(parsed_storage_user);
-            return;
-        }
+        setUser(storage_user);
+        if(!isUndefined(onSuccess))
+            onSuccess(storage_user);
+        return;
     }
+    
 
     getCurrentUserFromDB(setUser, onSuccess, onFailure);
 }
@@ -99,10 +96,18 @@ export function getUserFromLocalStorage(){
     if(!isUndefined(storage_user)){
         var parsed_storage_user = JSON.parse(storage_user);
         if(userIsUpdated(parsed_storage_user)){
+            fillUserUndefinedData(parsed_storage_user);
             console.log('used local storage to get: ', parsed_storage_user)
             return parsed_storage_user;
         }
     }
+}
+
+function fillUserUndefinedData(user){
+    if(isUndefined(user.true_sentences))
+        user.true_sentences = [];
+    if(isUndefined(user.false_sentences))
+        user.false_sentences = [];
 }
 
 
@@ -137,6 +142,7 @@ export function getCurrentUserFromDB(setUser, onSuccess , onFailure){
         if(!userIsUpdated(user)){
             return;
         }
+        fillUserUndefinedData(user);
         if(!isUndefined(onSuccess))
             onSuccess(user);
         console.log('frontend got data: ', user);
@@ -215,8 +221,8 @@ export function emptyUser(){
         nickName: '',
         email: '',
         password: '',
-        truths: [],
-        lies: [],
+        true_sentences: [],
+        false_sentences: [],
         createdGames: [],
         participatedGames: []
     }
