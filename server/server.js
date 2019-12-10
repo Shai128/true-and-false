@@ -423,7 +423,7 @@ io.on('connection', function (socket) {
     logDiv();
   });
 
-  socket.on("logout", function(userdata) {
+  socket.on("logout", function(userInfo) {
     if (socket.handshake.session.userInfo) {
       delete socket.handshake.session.userInfo;
       socket.handshake.session.save();
@@ -432,8 +432,8 @@ io.on('connection', function (socket) {
 
   socket.on('chat', function(data){
     console.log(data.messageContent + " was written");
-    console.log(socket.handshake.session.userdata);
-    socket.handshake.session.userdata = data;
+    console.log(socket.handshake.session.userInfo);
+    socket.handshake.session.userInfo = data;
     socket.handshake.session.save();
     
     let message = data;
@@ -487,6 +487,8 @@ io.on('connection', function (socket) {
        "to", 
        data.receiverId
       );
+
+      data.args.senderId = socket.handshake.session.userInfo.email;
 
     receiverSocket.emit(data.message, data.args)
     logDiv()

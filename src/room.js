@@ -52,7 +52,7 @@ export function createRoom(roomName, currentuser, currentGameNickName, history){
  * @param {the current user} user 
  * @param {the nickname the user chose for this room} currentGameNickName 
  */
-export function joinRoom(roomID, user, currentGameNickName, history){
+export function joinRoom(roomID, currentuser, currentGameNickName, history){
     fetch(server + '/joinRoom/' + roomID, {
         method: 'GET', // *GET, POST, PUT, DELETE, etc.
         headers: {
@@ -69,18 +69,16 @@ export function joinRoom(roomID, user, currentGameNickName, history){
             })
         }
         }).then(succ => {
-            console.log('frontend got data: ', user);
-
+           // console.log('frontend got data: ', user);
           //  console.log("user",currentuser);
           //  console.log("name of room",room.ID);
           //  console.log("id",currentGameNickName);
-          
 
             history.push({
                 pathname: '/JoinGame',
-                user: user,
+                user: currentuser,
                 RoomId: roomID,
-                currentGameNickName: currentGameNickName,
+                currentNickName: currentGameNickName,
             });
             //todo: redirect to Dan's page with the roomID and the user! H-A-L-I-F!
         }, fail_status => {
