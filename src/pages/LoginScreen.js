@@ -353,7 +353,7 @@ function LoginScreen(props){
    </Typography>
 
 
-    <Button color="inherit"
+    <Button id="logOutBTN" color="inherit"
     onClick={logout}>
       Log Out
       </Button>

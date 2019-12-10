@@ -1,6 +1,7 @@
 import faker from "faker";
 import puppeteer from "puppeteer";
 const APP = "http://localhost:3000/";
+const homePage = "http://localhost:3000/LoginScreen/Home"
 import 'babel-polyfill';
 const iPhone = puppeteer.devices['iPhone 6'];
 
@@ -22,7 +23,7 @@ const lead = {
 beforeAll(async () => {
     browser = await puppeteer.launch({
         headless: false,
-        slowMo: 20,
+        slowMo: 10,
         args: [`--window-size=${width},${height}`]
     });
     page = await browser.newPage();
@@ -45,8 +46,7 @@ describe("signInAndSignUp", () => {
             page.waitForNavigation(),
             page.click('#signUpBTN')
         ]);
-        HTMLelement = await page.$('div.SignUpPage')
-        expect(HTMLelement).not.toBeNull;//redirect to signUp page
+        expect(page.url()).toEqual(APP + "SignUp");//redirect to signUp page
         await page.click("#firstName");
         await page.type("#firstName", lead.name);
         await page.click("#nickName");
@@ -55,10 +55,18 @@ describe("signInAndSignUp", () => {
         await page.type("#email", lead.email);
         await page.click("#password");
         await page.type("#password", lead.password);
-        await page.click("#submit");
-        HTMLelement = await page.$('div.MySentencesPage')
-        expect(HTMLelement).not.toBeNull;//redirect to personal info page
-    }, 30000);
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#submit')
+        ]);
+        expect(page.url()).toEqual(APP + "LoginScreen/MySentences")//redirect to personal info page
+
+        await page.waitForSelector('#logOutBTN')
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#logOutBTN')
+        ]);
+    }, 300000);
 
     test("succesful sign in", async () => {
         var HTMLelement;
@@ -67,21 +75,28 @@ describe("signInAndSignUp", () => {
             page.waitForNavigation(),
             page.click('#signInBTN')
         ]);
-        HTMLelement = await page.$('div.SignInPage')
-        expect(HTMLelement).not.toBeNull;//redirect to signIn page
+        expect(page.url()).toEqual(APP + "SignIn")//redirect to signIn page
         await page.click("#EmailInput");
         await page.type("#EmailInput", lead.email);
         await page.click("#PasswordInput");
         await page.type("#PasswordInput", lead.password);
-        await page.click("#submit");
-
-        HTMLelement = await page.$('div.LoginScreenHomePage')
-        expect(HTMLelement).not.toBeNull;//redirect to home page
-
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#submit')
+        ]);
+        
+        expect(page.url() === APP + "LoginScreen/Home" || page.url() === APP + "LoginScreen").toBeTruthy();//redirect to home page
+        await page.waitForSelector('#logOutBTN')
         const welcomeMessage = await page.evaluate(() => document.getElementById('welcomeMessage').textContent)
         expect(welcomeMessage).toEqual(`Welcome ${lead.email}!`);//greet by correct name
 
-    }, 30000);
+        
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#logOutBTN')
+        ]);
+
+    }, 300000);
 
     test("failed sign up", async () => {
         var HTMLelement;
@@ -90,12 +105,10 @@ describe("signInAndSignUp", () => {
             page.waitForNavigation(),
             page.click('#signUpBTN')
         ]);
-        HTMLelement = await page.$('div.SignUpPage')
-        expect(HTMLelement).not.toBeNull;//redirect to signUp page
+        expect(page.url()).toEqual(APP + "SignUp")//redirect to signUp page
 
         await page.click("#submit");
-        HTMLelement = await page.$('div.SignUpPage')
-        expect(HTMLelement).not.toBeNull;//stay in signUp page
+        expect(page.url()).toEqual(APP + "SignUp")//stay in signUp page
 
         await page.click("#firstName");
         await page.type("#firstName", lead.name);
@@ -106,10 +119,9 @@ describe("signInAndSignUp", () => {
         await page.click("#password");
         await page.type("#password", lead.password);
         await page.click("#submit");
-        HTMLelement = await page.$('div.SignUpPage')
-        expect(HTMLelement).not.toBeNull;//stay in signUp page
+        expect(page.url()).toEqual(APP + "SignUp")//stay in signUp page
 
-    }, 30000);
+    }, 300000);
 
     test("failed sign in", async () => {
         var HTMLelement;
@@ -118,18 +130,16 @@ describe("signInAndSignUp", () => {
             page.waitForNavigation(),
             page.click('#signInBTN')
         ]);
-        HTMLelement = await page.$('div.SignInPage')
-        expect(HTMLelement).not.toBeNull;//redirect to signIn page
+
+        expect(page.url()).toEqual(APP + "SignIn");//redirect to signIn page
 
         await page.click("#submit");
-        HTMLelement = await page.$('div.SignInPage')
-        expect(HTMLelement).not.toBeNull;//stay in the signIn page
+        expect(page.url()).toEqual(APP + "SignIn")//stay in the signIn page
 
         await page.focus("#EmailInput");
         await page.type("#EmailInput", lead.email);
         await page.click("#submit");
-        HTMLelement = await page.$('div.SignInPage')
-        expect(HTMLelement).not.toBeNull;//stay in the signIn page
+        expect(page.url()).toEqual(APP + "SignIn")//stay in the signIn page
 
         await page.focus("#EmailInput");
         const inputValue = await page.$eval('#EmailInput', el => el.value);
@@ -139,16 +149,14 @@ describe("signInAndSignUp", () => {
         await page.focus("#PasswordInput");
         await page.type("#PasswordInput", lead.password);
         await page.click("#submit");
-        HTMLelement = await page.$('div.SignInPage')
-        expect(HTMLelement).not.toBeNull;//stay in the signIn page
+        expect(page.url()).toEqual(APP + "SignIn")//stay in the signIn page
 
         await page.click("#EmailInput");
         await page.type("#EmailInput", lead.email);
         await page.click("#PasswordInput");
         await page.type("#PasswordInput", "BAD_PASSWORD");
         await page.click("#submit");
-        HTMLelement = await page.$('div.SignInPage')
-        expect(HTMLelement).not.toBeNull;//stay in the signIn page
-    }, 30000);
+        expect(page.url()).toEqual(APP + "SignIn")//stay in the signIn page
+    }, 300000);
 
 });

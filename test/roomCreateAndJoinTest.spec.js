@@ -26,22 +26,30 @@ beforeEach(async () => {
             page.waitForNavigation(),
             page.click('#signInBTN')
         ]);
-        HTMLelement = await page.$('div.SignInPage')
-        expect(HTMLelement).not.toBeNull;//redirect to signIn page
+        expect(page.url()).toEqual(APP + "SignIn")//redirect to signIn page
         await page.click("#EmailInput");
         await page.type("#EmailInput", lead.email);
         await page.click("#PasswordInput");
         await page.type("#PasswordInput", lead.password);
         await page.click("#submit");
 
-        HTMLelement = await page.$('div.LoginScreenHomePage')
-        expect(HTMLelement).not.toBeNull;//redirect to home page
+        expect(page.url() === APP + "LoginScreen/Home" || page.url() === APP + "LoginScreen").toBeTruthy()//redirect to home page
+}, 700000);
+
+afterEach(async () => {
+    var HTMLelement;
+    await page.waitForSelector('#logOutBTN')
+        await page.goto(homePage);
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#logOutBTN')
+        ]);
 }, 700000);
 
 beforeAll(async () => {
     browser = await puppeteer.launch({
         headless: false,
-        slowMo: 50,
+        slowMo: 20,
         args: [`--window-size=${width},${height}`]
     });
     page = await browser.newPage();
@@ -56,8 +64,7 @@ beforeAll(async () => {
             page.waitForNavigation(),
             page.click('#signUpBTN')
         ]);
-        HTMLelement = await page.$('div.SignUpPage')
-        expect(HTMLelement).not.toBeNull;//redirect to signUp page
+        expect(page.url()).toEqual(APP + "SignUp")//redirect to signUp page
         await page.click("#firstName");
         await page.type("#firstName", lead.name);
         await page.click("#nickName");
@@ -68,8 +75,7 @@ beforeAll(async () => {
         await page.type("#password", lead.password);
         await page.click("#submit");
 
-        HTMLelement = await page.$('div.MySentencesPage')
-        expect(HTMLelement).not.toBeNull;//redirect to personal info page
+        expect(page.url()).toEqual(APP + "LoginScreen/MySentences")//redirect to personal info page
 }, 700000);
 
 afterAll(() => {
@@ -116,6 +122,7 @@ describe("roomCreateAndJoinTest", () => {
         ]);
 
         await page.waitForSelector('#joinGamePage')
+        expect(page.url()).toEqual(APP + "JoinGame")
 
         var someText = await page.evaluate(() => document.getElementById('roomNameHeader').textContent)
         expect(someText).toEqual(`Room Name:${room.name}`);//correct room name
@@ -123,17 +130,17 @@ describe("roomCreateAndJoinTest", () => {
         expect(someText).toEqual(`User Name:${room.nickname}`);//correct nickname
     }, 30000);
 
-    test("failed roomCreation", async () => {
-        await page.screenshot({path: 'puppeteerTests/example.png'});
+    // test("failed roomCreation", async () => {
+    //     await page.screenshot({path: 'puppeteerTests/example.png'});
 
-        await Promise.all([
-            page.waitForSelector('#form-dialog-title'),
-            page.click('#createNewRoomBTN')
-        ]);
+    //     await Promise.all([
+    //         page.waitForSelector('#form-dialog-title'),
+    //         page.click('#createNewRoomBTN')
+    //     ]);
                 
-        await page.click('#startBTN')
-        await page.waitForSelector('#form-dialog-title')//stay in same page
+    //     await page.click('#startBTN')
+    //     //await page.waitForSelector('#form-dialog-title')//stay in same page
 
-    }, 30000);
+    // }, 30000);
 
 });
