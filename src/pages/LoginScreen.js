@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import clsx from 'clsx';
 
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -20,26 +20,35 @@ import GamesIcon from '@material-ui/icons/Games';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import HomeIcon from '@material-ui/icons/Home';
 import Button from '@material-ui/core/Button';
+import NotificationsIcon from '@material-ui/icons/Notifications';
+import Badge from '@material-ui/core/Badge';
+import Popup from "reactjs-popup";
+import Container from '@material-ui/core/Container';
+import ChatIcon from '@material-ui/icons/Chat';
+
 import App from './../App.js'
 import {
-    BrowserRouter as Router,
+    //BrowserRouter as Router,
     Switch,
     Route,
     Link,
     useRouteMatch,
     Redirect,
     useHistory,
-  } from "react-router-dom";
-  import { createBrowserHistory } from "history";
-
-  import {GamesListPage as GamesList} from './GamesList.js';
+} from "react-router-dom";
+import { createBrowserHistory } from "history";
+import {GamesListPage as GamesList} from './GamesList.js';
 
 import {LoginScreenHome as Home} from './LoginScreenHome.js';
 
 import {MyProfile} from './MyProfile.js';
 import {MySentences} from './MySentences.js';
-
-
+import {getCurrentUserFromSession as getCurrentUser, userIsUpdated,getCurrentUserFromDB ,getUserFromProps, logOut, socket, resetUnreadMessages, updateUserInLocalStorage} from './../user';
+import {DisplayLoading, PrintMessages} from './../PagesUtils';
+import { Chat } from './Chat.js';
+import {SignIn} from './../App.js'
+import {ChatLobby} from './ChatLobby.js';
+import {JoinGame} from './JoinGame.js'
 const drawerWidth = 240;
 const useStyles = makeStyles(theme => ({
     root: {
@@ -120,22 +129,15 @@ const useStyles = makeStyles(theme => ({
     },
   }));
 
-/**
- *  <Switch>
-  <Route exact path={'/Home'}>  
-          <App/>
-          </Route>
-  </Switch>
- */
+
 
 export function LoginScreenRouter(){
 
   return(
-  <Router>
   <Switch>
     
+  <Route path ={'/SignIn'} component={SignIn} />
   
-        
   <Route exact path={`/`}>
             <App />
           </Route>
@@ -143,45 +145,93 @@ export function LoginScreenRouter(){
   <Route path={'/LoginScreen'}>  
   <LoginScreen />
   </Route>
+  <Route path={`/JoinGame`} exact component={JoinGame} />
+
   </Switch>
 
 
-  </Router>
-  );
+);
 }
 function LoginScreen(props){
+  const [currentUser, setCurrentUser] = React.useState(getUserFromProps(props));
+  const [unreadMessages, setUnreadMessages] = React.useState([]);
+  const [unRegisteredUser, setUnRegisteredUser] = React.useState(false);
+  if(!userIsUpdated(currentUser))
+    getCurrentUserFromDB(setCurrentUser, (u)=>{setUnreadMessages(u.unReadMessages)}, ()=>{setUnRegisteredUser(true)});
+  const [pageChange, setPageChange] = React.useState(false);
 
-    const [open, setOpen] = React.useState(false);
-    const handleDrawerOpen = () => {
-      setOpen(true);
-    };
-    const handleDrawerClose = () => {
-      setOpen(false);
-    };
-    const classes = useStyles();
-    let history = useHistory();
 
-    const logout = ()=>{
-      history.push("/"); // moves to main page (localhost:3000)
-      //todo: implement logout
-    }
-    let { path, url } = useRouteMatch();
+  let browserHistory = createBrowserHistory();
+  
+  let history = useHistory();
 
+  const setSockets = (location)=>{
+    socket.off(currentUser.email+'_chat_notification');
+    socket.on(currentUser.email+'_chat_notification', function(data){
+      const path_array = location.pathname.split("/");
+      console.log('current location: ', location);
+
+      var other_user_email = path_array[path_array.length-1];
+      if(path_array.length>1 && data.user.email === other_user_email && path_array[path_array.length-2] === 'ChatRoom')
+        return;
+      var new_message = {
+        authorEmail: data.user.email,
+        authorName: data.authorName,
+        messageContent: data.messageContent
+      };
+      setUnreadMessages(unreadMessages.concat(new_message));
+      let user_copy = currentUser;
+      user_copy.unReadMessages = unreadMessages.concat(new_message);
+      updateUserInLocalStorage(user_copy);
+  })  
+}
+browserHistory.listen((location, action) => {
+  // location is an object like window.location
+  setSockets(location);
+  });
+
+  useEffect(() => {
+    if(!userIsUpdated(currentUser))
+      return;
+    setSockets(browserHistory.location);   
+    });
+  const [open, setOpen] = React.useState(false);
+  const handleDrawerOpen = () => {
+    setOpen(true);
+  };
+  const handleDrawerClose = () => {
+    setOpen(false);
+  };
+  const classes = useStyles();
+
+  const logout = ()=>{
+    history.push("/"); // moves to main page (localhost:3000)
+    logOut();
+  }
+  let { path, url } = useRouteMatch();
+  const onPageChange = ()=>{setPageChange(!pageChange)}
 
     const listItems=(
-        <div>
-
-    <Link to={`${url}/Home`}> 
-    <ListItem button>
-     <ListItemIcon> 
+        <div>              
+    <Link to={{
+      pathname:`${url}/Home`,
+      user: currentUser
+      }}> 
+    <ListItem button onClick={onPageChange}>
+     <ListItemIcon > 
          <HomeIcon /> 
          </ListItemIcon> 
          <ListItemText primary="Home" />
           </ListItem> 
           </Link>
 
-        <Link to={`${url}/MyProfile`}>      
-            <ListItem button>
+
+
+        <Link to={{
+          pathname: `${url}/MyProfile`,
+          user: currentUser
+        }}>      
+            <ListItem button onClick={onPageChange}>
               <ListItemIcon>
                   <AccountCircleIcon />
               </ListItemIcon>
@@ -189,8 +239,11 @@ function LoginScreen(props){
             </ListItem>
             </Link>
 
-            <Link to={`${url}/MySentences`}>      
-            <ListItem button>
+            <Link to={{
+              pathname: `${url}/MySentences`,
+              user: currentUser
+            }}>      
+            <ListItem button onClick={onPageChange}>
               <ListItemIcon>
                   <ListIcon />
               </ListItemIcon>
@@ -199,8 +252,11 @@ function LoginScreen(props){
             </Link>
 
 
-        <Link to={`${url}/GamesList`}>      
-          <ListItem button>
+        <Link to={{
+          pathname:`${url}/GamesList`,
+          user: currentUser
+        }}>      
+          <ListItem button onClick={onPageChange}>
               <ListItemIcon>
                   <GamesIcon />
               </ListItemIcon>
@@ -208,13 +264,53 @@ function LoginScreen(props){
             <ListItemText primary="Games List" />
             </ListItem>
             </Link>
+
+        
+            <Link to={{
+            pathname:`${url}/ChatLobby`,
+            user: currentUser
+            }}> 
+    <ListItem button onClick={onPageChange}>
+     <ListItemIcon > 
+         <ChatIcon /> 
+         </ListItemIcon> 
+         <ListItemText primary="Chat" />
+          </ListItem> 
+          </Link>
+
         </div>
       );
 
+      if(unRegisteredUser){
+        return (
+          <div className="App" >
+          <header className="App-header" >
+          <Container component="main" maxWidth="xs">
+            <CssBaseline />
+
+              <Typography variant="h4" style={{color:'black', marginBottom: '30px', width:'100%'}}>
+                You are unregistered. Please sign in first.
+              </Typography>
+
+              <Link to="/SignIn">
+                <Button variant="contained" color="primary" fullWidth className={classes.button}>
+                  Sign In
+            </Button>
+              </Link> 
+
+          </Container>
+          </header>
+          
+          </div>
+        );
+      }
+    
+      if(!userIsUpdated(currentUser)){
+        return (<DisplayLoading/>);
+      }
 
     return(
       <div>
-        <Router>
  <div className={classes.root}>
       <CssBaseline />
       <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
@@ -224,17 +320,43 @@ function LoginScreen(props){
             color="inherit"
             aria-label="open drawer"
             onClick={handleDrawerOpen}
-            className={clsx(classes.menuButton, open && classes.menuButtonHidden)}
+            className={clsx( classes.menuButton, open && classes.menuButtonHidden)}
           >
             <MenuIcon />
           </IconButton>
+  <Popup
+    onClose={()=>{
+      setUnreadMessages([]);
+      resetUnreadMessages(currentUser.email); 
+      currentUser.unReadMessages =[];
+    }}
+    trigger={
+      <IconButton  edge="start" color="inherit" className={classes.menuButton}>
+      <Badge badgeContent={unreadMessages.length} color="secondary">
+        <NotificationsIcon/>
+      </Badge>
+    </IconButton>
+    }
+    
+    position="bottom center"
+    closeOnDocumentClick>
+      <div className={classes.root}
+      style={{ height: '200px', overflowX: 'hidden', overflowY: "auto",} }>
+      <Container component="main" maxWidth="xs">
+
+        <Typography variant="h6" style={{color:'black'}} >
+          <PrintMessages url={url} messages={unreadMessages} user={currentUser} onPageChange={onPageChange} />
+        </Typography>
+
+        </Container>
+      </div>
+    </Popup>
+  
+
     <Typography variant="h6" className={classes.title}>
     Two Truths and One Lie
    </Typography>
-   <Switch>
-     
-   </Switch>
-   <Route exact path={'/'} component = {App}/>  
+
 
     <Button color="inherit"
     onClick={logout}>
@@ -268,8 +390,14 @@ function LoginScreen(props){
         
         <RedirectToHomeIfNeeded url={url} />
         <Switch>  
-          
+
+        <Route path={`${path}/ChatRoom/:email`} component = {Chat}/>  
+
         
+        <Route path="/SignIn">
+          <SignIn />
+        </Route>
+
         <Route exact path={`/`}>
             <App />
           </Route>
@@ -283,10 +411,12 @@ function LoginScreen(props){
             <GamesList />
           </Route>
 
-
-          <Route path={`${path}/MyProfile`}>
-            <MyProfile />
+          <Route path={`${path}/ChatLobby`}>
+            <ChatLobby />
           </Route>
+
+
+          <Route path={`${path}/MyProfile`} component ={MyProfile} />
 
 
           <Route path={`${path}/MySentences`}>
@@ -297,7 +427,6 @@ function LoginScreen(props){
         </main>
 
         </div>
-      </Router>
       </div>
     );
     
