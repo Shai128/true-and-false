@@ -21,61 +21,71 @@ const lead = {
 
 beforeEach(async () => {
     var HTMLelement;
-        await page.goto(APP);
-        await Promise.all([
-            page.waitForNavigation(),
-            page.click('#signInBTN')
-        ]);
-        expect(page.url()).toEqual(APP + "SignIn")//redirect to signIn page
-        await page.click("#EmailInput");
-        await page.type("#EmailInput", lead.email);
-        await page.click("#PasswordInput");
-        await page.type("#PasswordInput", lead.password);
-        await page.click("#submit");
+    await page.goto(APP);
+    await Promise.all([
+        page.waitForNavigation(),
+        page.click('#signInBTN')
+    ]);
+    expect(page.url()).toEqual(APP + "SignIn")//redirect to signIn page
+    await page.click("#EmailInput");
+    await page.type("#EmailInput", lead.email);
+    await page.click("#PasswordInput");
+    await page.type("#PasswordInput", lead.password);
+    await Promise.all([
+        page.waitForNavigation(),
+        page.click('#submit')
+    ]);
 
-        expect(page.url() === APP + "LoginScreen/Home" || page.url() === APP + "LoginScreen").toBeTruthy()//redirect to home page
+    expect(page.url() === APP + "LoginScreen/Home" || page.url() === APP + "LoginScreen").toBeTruthy()//redirect to home page
 }, 700000);
 
 afterEach(async () => {
     var HTMLelement;
     await page.waitForSelector('#logOutBTN')
-        await page.goto(homePage);
-        await Promise.all([
-            page.waitForNavigation(),
-            page.click('#logOutBTN')
-        ]);
+    await page.goto(homePage);
+    await Promise.all([
+        page.waitForNavigation(),
+        page.click('#logOutBTN')
+    ]);
 }, 700000);
 
 beforeAll(async () => {
     browser = await puppeteer.launch({
         headless: false,
-        slowMo: 20,
+        slowMo: 10,
         args: [`--window-size=${width},${height}`]
     });
+
+    // Create a new incognito browser context
+    //const context = await browser.createIncognitoBrowserContext();
+    // Create a new page inside context.
     page = await browser.newPage();
-    //page2 = await browser.newPage();
+
+    //page = await browser.newPage();
     //await page.emulate(iPhone);
     await page.setViewport({ width, height });
-    //await page2.setViewport({ width, height });
 
     var HTMLelement;
-        await page.goto(APP);
-        await Promise.all([
-            page.waitForNavigation(),
-            page.click('#signUpBTN')
-        ]);
-        expect(page.url()).toEqual(APP + "SignUp")//redirect to signUp page
-        await page.click("#firstName");
-        await page.type("#firstName", lead.name);
-        await page.click("#nickName");
-        await page.type("#nickName", lead.nickname);
-        await page.click("#email");
-        await page.type("#email", lead.email);
-        await page.click("#password");
-        await page.type("#password", lead.password);
-        await page.click("#submit");
+    await page.goto(APP);
+    await Promise.all([
+        page.waitForNavigation(),
+        page.click('#signUpBTN')
+    ]);
+    expect(page.url()).toEqual(APP + "SignUp")//redirect to signUp page
+    await page.click("#firstName");
+    await page.type("#firstName", lead.name);
+    await page.click("#nickName");
+    await page.type("#nickName", lead.nickname);
+    await page.click("#email");
+    await page.type("#email", lead.email);
+    await page.click("#password");
+    await page.type("#password", lead.password);
+    await Promise.all([
+        page.waitForNavigation(),
+        page.click('#submit')
+    ]);
 
-        expect(page.url()).toEqual(APP + "LoginScreen/MySentences")//redirect to personal info page
+    expect(page.url()).toEqual(APP + "LoginScreen/MySentences")//redirect to personal info page
 }, 700000);
 
 afterAll(() => {
@@ -84,51 +94,52 @@ afterAll(() => {
 
 describe("roomCreateAndJoinTest", () => {
 
-    test("successfull roomCreation", async () => {
-        await Promise.all([
-            page.waitForSelector('#form-dialog-title'),
-            page.click('#createNewRoomBTN')
-        ]);
-                
-        await Promise.all([
-            page.waitFor(() => !document.querySelector("#form-dialog-title")),
-            page.click("#cancelBTN")
-        ]);
-        
-        await Promise.all([
-            page.waitForSelector('#form-dialog-title'),
-            page.click('#createNewRoomBTN')
-        ]);
+    // test("successfull roomCreation", async () => {
+    //     await Promise.all([
+    //         page.waitForSelector('#form-dialog-title'),
+    //         page.click('#createNewRoomBTN')
+    //     ]);
 
-        const room = {
-            name: faker.name.title(),
-            nickname: faker.name.firstName(),
-        };
+    //     await Promise.all([
+    //         page.waitFor(() => !document.querySelector("#form-dialog-title")),
+    //         page.click("#cancelBTN")
+    //     ]);
 
-        await page.click("#roomName");
-        await page.type("#roomName", room.name);
+    //     await Promise.all([
+    //         page.waitForSelector('#form-dialog-title'),
+    //         page.click('#createNewRoomBTN')
+    //     ]);
 
-        await page.focus("#nickName");
-        const inputValue = await page.$eval('#nickName', el => el.value);
-        for (let i = 0; i < inputValue.length; i++) {
-            await page.keyboard.press('Backspace');
-        }
-        await page.click("#nickName");
-        await page.type("#nickName", room.nickname);
-        
-        await Promise.all([
-            page.waitForNavigation(),
-            page.click('#startBTN')
-        ]);
+    //     const room = {
+    //         name: faker.name.title(),
+    //         nickname: faker.name.firstName(),
+    //     };
 
-        await page.waitForSelector('#joinGamePage')
-        expect(page.url()).toEqual(APP + "JoinGame")
+    //     await page.click("#roomName");
+    //     await page.type("#roomName", room.name);
 
-        var someText = await page.evaluate(() => document.getElementById('roomNameHeader').textContent)
-        expect(someText).toEqual(`Room Name:${room.name}`);//correct room name
-        someText = await page.evaluate(() => document.getElementById('userNameHeader').textContent)
-        expect(someText).toEqual(`User Name:${room.nickname}`);//correct nickname
-    }, 30000);
+    //     await page.focus("#nickName");
+    //     const inputValue = await page.$eval('#nickName', el => el.value);
+    //     for (let i = 0; i < inputValue.length; i++) {
+    //         await page.keyboard.press('Backspace');
+    //     }
+    //     await page.click("#nickName");
+    //     await page.type("#nickName", room.nickname);
+
+    //     await Promise.all([
+    //         page.waitForNavigation(),
+    //         page.click('#startBTN')
+    //     ]);
+
+    //     await page.waitForSelector('#joinGamePage')
+    //     expect(page.url()).toEqual(APP + "JoinGame")
+
+    //     await page.waitForSelector('#roomNameHeader')
+    //     var someText = await page.evaluate(() => document.getElementById('roomNameHeader').textContent)
+    //     expect(someText).toEqual(`Room Name:${room.name}`);//correct room name
+    //     someText = await page.evaluate(() => document.getElementById('userNameHeader').textContent)
+    //     expect(someText).toEqual(`User Name:${room.nickname}`);//correct nickname
+    // }, 30000);
 
     // test("failed roomCreation", async () => {
     //     await page.screenshot({path: 'puppeteerTests/example.png'});
@@ -137,10 +148,85 @@ describe("roomCreateAndJoinTest", () => {
     //         page.waitForSelector('#form-dialog-title'),
     //         page.click('#createNewRoomBTN')
     //     ]);
-                
+
     //     await page.click('#startBTN')
     //     //await page.waitForSelector('#form-dialog-title')//stay in same page
 
     // }, 30000);
+
+    test("successful join a room", async () => {
+
+        //open new context and page
+        const context = await browser.createIncognitoBrowserContext();
+        page2 = await context.newPage();
+        //await page2.emulate(iPhone);
+        await page2.setViewport({ width, height });
+
+        //randomize a second player
+        const secondUser = {
+            name: faker.name.firstName(),
+            nickname: faker.name.firstName(),
+            email: faker.internet.email(),
+            password: faker.random.alphaNumeric(10)
+        };
+
+        //sign the new player up
+        await page2.goto(APP);
+        await Promise.all([
+            page2.waitForNavigation(),
+            page2.click('#signUpBTN')
+        ]);
+        expect(page2.url()).toEqual(APP + "SignUp")//redirect to signUp page
+        await page2.click("#firstName");
+        await page2.type("#firstName", secondUser.name);
+        await page2.click("#nickName");
+        await page2.type("#nickName", secondUser.nickname);
+        await page2.click("#email");
+        await page2.type("#email", secondUser.email);
+        await page2.click("#password");
+        await page2.type("#password", secondUser.password);
+        await Promise.all([
+            page2.waitForNavigation(),
+            page2.click('#submit')
+        ]);
+        expect(page2.url()).toEqual(APP + "LoginScreen/MySentences")//redirect to personal info page
+
+        //create a new room with original account and wait for other player (also fetch room number)
+        await Promise.all([
+            page.waitForSelector('#form-dialog-title'),
+            page.click('#createNewRoomBTN')
+        ]);
+        await Promise.all([
+            page.waitFor(() => !document.querySelector("#form-dialog-title")),
+            page.click("#cancelBTN")
+        ]);
+        await Promise.all([
+            page.waitForSelector('#form-dialog-title'),
+            page.click('#createNewRoomBTN')
+        ]);
+        const room = {
+            name: faker.name.title(),
+        };
+        await page.click("#roomName");
+        await page.type("#roomName", room.name);
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#startBTN')
+        ]);
+
+        await page.waitForSelector('#joinGamePage')
+        expect(page.url()).toEqual(APP + "JoinGame")
+
+        await page.waitForSelector('#roomNameHeader')
+        var roomNumber = await page.evaluate(() => document.getElementById('roomNumberHeader').textContent)
+
+        //get the actual number from the string
+        var number = roomNumber.substring(12)
+
+
+        //go with the second account to the home page
+        //join a room
+
+    }, 300000)
 
 });
