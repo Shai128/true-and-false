@@ -115,11 +115,13 @@ socket.on("userLeft", function(userInfo) {
       /*
          userInfo: {email: ..., nickName:...}
       */
+     console.log("currentuser: " + CurrentUser)
      history.push({
       pathname:'/TheGame',
       opponentId: userInfo.senderId,
       user: CurrentUser,
       room: CurrentRoom,
+      turn: false
     })
          
   });
@@ -154,6 +156,7 @@ const onAccept = () => {
         opponentId:SenderInfoID,
         user: CurrentUser,
         room: CurrentRoom,
+        turn: true
       })
 }
 
