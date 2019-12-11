@@ -94,63 +94,63 @@ afterAll(() => {
 
 describe("roomCreateAndJoinTest", () => {
 
-    // test("successfull roomCreation", async () => {
-    //     await Promise.all([
-    //         page.waitForSelector('#form-dialog-title'),
-    //         page.click('#createNewRoomBTN')
-    //     ]);
+    test("successfull roomCreation", async () => {
+        await Promise.all([
+            page.waitForSelector('#openRoomPopUp'),
+            page.click('#createNewRoomBTN')
+        ]);
 
-    //     await Promise.all([
-    //         page.waitFor(() => !document.querySelector("#form-dialog-title")),
-    //         page.click("#cancelBTN")
-    //     ]);
+        await Promise.all([
+            page.waitFor(() => !document.querySelector("#openRoomPopUp")),
+            page.click("#cancelBTN")
+        ]);
 
-    //     await Promise.all([
-    //         page.waitForSelector('#form-dialog-title'),
-    //         page.click('#createNewRoomBTN')
-    //     ]);
+        await Promise.all([
+            page.waitForSelector('#openRoomPopUp'),
+            page.click('#createNewRoomBTN')
+        ]);
 
-    //     const room = {
-    //         name: faker.name.title(),
-    //         nickname: faker.name.firstName(),
-    //     };
+        const room = {
+            name: faker.name.title(),
+            nickname: faker.name.firstName(),
+        };
 
-    //     await page.click("#roomName");
-    //     await page.type("#roomName", room.name);
+        await page.click("#roomName");
+        await page.type("#roomName", room.name);
 
-    //     await page.focus("#nickName");
-    //     const inputValue = await page.$eval('#nickName', el => el.value);
-    //     for (let i = 0; i < inputValue.length; i++) {
-    //         await page.keyboard.press('Backspace');
-    //     }
-    //     await page.click("#nickName");
-    //     await page.type("#nickName", room.nickname);
+        await page.focus("#nickName");
+        const inputValue = await page.$eval('#nickName', el => el.value);
+        for (let i = 0; i < inputValue.length; i++) {
+            await page.keyboard.press('Backspace');
+        }
+        await page.click("#nickName");
+        await page.type("#nickName", room.nickname);
 
-    //     await Promise.all([
-    //         page.waitForNavigation(),
-    //         page.click('#startBTN')
-    //     ]);
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#startBTN')
+        ]);
 
-    //     await page.waitForSelector('#joinGamePage')
-    //     expect(page.url()).toEqual(APP + "JoinGame")
+        await page.waitForSelector('#joinGamePage')
+        expect(page.url()).toEqual(APP + "JoinGame")
 
-    //     await page.waitForSelector('#roomNameHeader')
-    //     var someText = await page.evaluate(() => document.getElementById('roomNameHeader').textContent)
-    //     expect(someText).toEqual(`Room Name:${room.name}`);//correct room name
-    //     someText = await page.evaluate(() => document.getElementById('userNameHeader').textContent)
-    //     expect(someText).toEqual(`User Name:${room.nickname}`);//correct nickname
-    // }, 30000);
+        await page.waitForSelector('#roomNameHeader')
+        var someText = await page.evaluate(() => document.getElementById('roomNameHeader').textContent)
+        expect(someText).toEqual(`Room Name:${room.name}`);//correct room name
+        someText = await page.evaluate(() => document.getElementById('userNameHeader').textContent)
+        expect(someText).toEqual(`User Name:${room.nickname}`);//correct nickname
+    }, 30000);
 
     // test("failed roomCreation", async () => {
     //     await page.screenshot({path: 'puppeteerTests/example.png'});
 
     //     await Promise.all([
-    //         page.waitForSelector('#form-dialog-title'),
+    //         page.waitForSelector('#openRoomPopUp'),
     //         page.click('#createNewRoomBTN')
     //     ]);
 
     //     await page.click('#startBTN')
-    //     //await page.waitForSelector('#form-dialog-title')//stay in same page
+    //     //await page.waitForSelector('#openRoomPopUp')//stay in same page
 
     // }, 30000);
 
@@ -193,15 +193,15 @@ describe("roomCreateAndJoinTest", () => {
 
         //create a new room with original account and wait for other player (also fetch room number)
         await Promise.all([
-            page.waitForSelector('#form-dialog-title'),
+            page.waitForSelector('#openRoomPopUp'),
             page.click('#createNewRoomBTN')
         ]);
         await Promise.all([
-            page.waitFor(() => !document.querySelector("#form-dialog-title")),
+            page.waitFor(() => !document.querySelector("#openRoomPopUp")),
             page.click("#cancelBTN")
         ]);
         await Promise.all([
-            page.waitForSelector('#form-dialog-title'),
+            page.waitForSelector('#openRoomPopUp'),
             page.click('#createNewRoomBTN')
         ]);
         const room = {
@@ -213,9 +213,8 @@ describe("roomCreateAndJoinTest", () => {
             page.waitForNavigation(),
             page.click('#startBTN')
         ]);
-
-        await page.waitForSelector('#joinGamePage')
         expect(page.url()).toEqual(APP + "JoinGame")
+        await page.waitForSelector('#joinGamePage')
 
         await page.waitForSelector('#roomNameHeader')
         var roomNumber = await page.evaluate(() => document.getElementById('roomNumberHeader').textContent)
@@ -223,9 +222,83 @@ describe("roomCreateAndJoinTest", () => {
         //get the actual number from the string
         var number = roomNumber.substring(12)
 
-
         //go with the second account to the home page
+        await Promise.all([
+            page2.waitForNavigation(),
+            page2.click('#homeBTN')
+        ]);
+        expect(page2.url() === APP + "LoginScreen/Home" || page2.url() === APP + "LoginScreen").toBeTruthy();//redirect to home page
+        await page2.waitForSelector('#LoginScreenHomePage')
+
         //join a room
+        await Promise.all([
+            page2.waitForSelector('#openRoomPopUp'),
+            page2.click('#joinRoomBTN')
+        ]);
+
+        await page2.click("#room_id");
+        await page2.type("#room_id", number);
+
+        await Promise.all([
+            page2.waitForNavigation(),
+            page2.click('#startBTN')
+        ]);
+        expect(page2.url()).toEqual(APP + "JoinGame")
+        await page2.waitForSelector('#joinGamePage')
+        
+        await page2.waitForSelector('#roomNameHeader')
+        var someText = await page2.evaluate(() => document.getElementById('roomNameHeader').textContent)
+        expect(someText).toEqual(`Room Name:${room.name}`);//correct room name
+        someText = await page2.evaluate(() => document.getElementById('userNameHeader').textContent)
+        expect(someText).toEqual(`User Name:${secondUser.nickname}`);//correct nickname
+        someText = await page2.evaluate(() => document.getElementById('roomNumberHeader').textContent)
+        expect(someText).toEqual(`Room Number:${secondUser.nickname}`);//correct nickname
+
+
+        //expect that the first user will appear on the second user's screen
+        var text = lead.nickname
+        try {
+            await page2.waitForFunction(
+              text => document.querySelector('body').innerText.includes(text),
+              {},
+              text
+            );
+          } catch(e) {
+            console.log(`The text "${text}" was not found on the page`);
+          }
+
+        //expect that the second user will appear on the first user's screen
+        var text = secondUser.nickname
+        try {
+            await page.waitForFunction(
+              text => document.querySelector('body').innerText.includes(text),
+              {},
+              text
+            );
+          } catch(e) {
+            console.log(`The text "${text}" was not found on the page`);
+          }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        await page2.waitForSelector('#logOutBTN')
+        await page2.goto(homePage);
+        await Promise.all([
+            page2.waitForNavigation(),
+            page2.click('#logOutBTN')
+        ]);
 
     }, 300000)
 

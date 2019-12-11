@@ -28,8 +28,8 @@ beforeAll(async () => {
     });
     page = await browser.newPage();
     //page2 = await browser.newPage();
-    //await page.emulate(iPhone);
-    await page.setViewport({ width, height });
+    await page.emulate(iPhone);
+    //await page.setViewport({ width, height });
     //await page2.setViewport({ width, height });
 });
 

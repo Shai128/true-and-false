@@ -105,7 +105,7 @@ function Home(props) {
   }
 
   return (
-    <div className="LoginScreenHomePage">
+    <div id="LoginScreenHomePage">
       <Container maxWidth="lg" className={classes.container}>
         <Grid container spacing={1}>
           <Grid item xs={12}>
@@ -130,7 +130,7 @@ function Home(props) {
                 </Grid>
 
                 <Grid item xs={12} sm={6}>
-                  <Button variant="contained" color="primary" fullWidth className={classes.button}
+                  <Button id="joinRoomBTN" variant="contained" color="primary" fullWidth className={classes.button}
                     onClick={handleClickJoinGameWindow}>
                     Join a Game
         </Button>
@@ -252,7 +252,7 @@ function PrintCreateGameDialog(props) {
     //todo: redirect to room page
   }
   return (
-    <Dialog open={createGameWindowOpen} onClose={handleCloseCreateGameWindow} aria-labelledby="form-dialog-title">
+    <Dialog id = "openRoomPopUp" open={createGameWindowOpen} onClose={handleCloseCreateGameWindow} aria-labelledby="form-dialog-title">
       <DialogTitle id="form-dialog-title">Create a Room</DialogTitle>
       <DialogContent>
         <DialogContentText>

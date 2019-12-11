@@ -135,7 +135,7 @@ export function PrintJoinGameDialog(props){
       joinRoom(gameID, currentUser, currentGameNickName, history )
   }
   return(
-      <Dialog open={WindowOpen} onClose={onCloseWindow} aria-labelledby="form-dialog-title">
+      <Dialog id = "openRoomPopUp" open={WindowOpen} onClose={onCloseWindow} aria-labelledby="form-dialog-title">
       <DialogTitle id="form-dialog-title">Join a Room</DialogTitle>
       <DialogContent>
         <DialogContentText>
@@ -147,7 +147,7 @@ export function PrintJoinGameDialog(props){
           helperText={gameIDHelperText}
           autoFocus
           margin="dense"
-          id="room id"
+          id="room_id"
           label="Room ID"
           onChange={(event)=>{
             setGameID(event.target.value);
@@ -172,10 +172,10 @@ export function PrintJoinGameDialog(props){
         </Grid>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onCloseWindow} color="primary">
+        <Button id="cancelBTN" onClick={onCloseWindow} color="primary">
           Cancel
         </Button>
-        <Button onClick={joinGame} color="primary">
+        <Button id="startBTN" onClick={joinGame} color="primary">
               Start
         </Button>
       </DialogActions>

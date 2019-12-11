@@ -229,7 +229,7 @@ function LoginScreen(props){
           pathname: `${url}/MyProfile`,
           user: currentUser
         }}>      
-            <ListItem button onClick={onPageChange}>
+            <ListItem id="myProfileBTN" button onClick={onPageChange}>
               <ListItemIcon>
                   <AccountCircleIcon />
               </ListItemIcon>
@@ -241,7 +241,7 @@ function LoginScreen(props){
               pathname: `${url}/MySentences`,
               user: currentUser
             }}>      
-            <ListItem button onClick={onPageChange}>
+            <ListItem id="mySentencesBTN" button onClick={onPageChange}>
               <ListItemIcon>
                   <ListIcon />
               </ListItemIcon>
@@ -254,7 +254,7 @@ function LoginScreen(props){
           pathname:`${url}/GamesList`,
           user: currentUser
         }}>      
-          <ListItem button onClick={onPageChange}>
+          <ListItem id="gamesListBTN" button onClick={onPageChange}>
               <ListItemIcon>
                   <GamesIcon />
               </ListItemIcon>
@@ -268,7 +268,7 @@ function LoginScreen(props){
             pathname:`${url}/ChatLobby`,
             user: currentUser
             }}> 
-    <ListItem button onClick={onPageChange}>
+    <ListItem id="chatLobbyBTN" button onClick={onPageChange}>
      <ListItemIcon > 
          <ChatIcon /> 
          </ListItemIcon> 
