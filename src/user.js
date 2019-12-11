@@ -301,3 +301,69 @@ export function logIn(user, func){
             console.log("failed, status:", fail_status)
             });   
 }
+
+export function resetUnreadMessages(email){
+    fetch(server + '/user/resetUnReadMessages/'+email, {
+        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        credentials: 'include'
+        })
+    .then(response => {
+        console.log("response status:", response.status)
+        if (response.status !== okStatus) {
+            reject(response.status);
+        } else {
+            return new Promise(function(resolve, reject) {
+            resolve(response);
+            })
+        }
+    }, fail_status => {
+        console.log("failed, status:", fail_status);
+    });
+    var user = getUserFromLocalStorage();
+    user.unReadMessages = [];
+    updateUserInLocalStorage(user);
+}
+
+
+export function resetUnreadMessagesFromCertainUser(email, otherUserEmail){
+    fetch(server + '/user/resetUnReadMessagesFromCertainUser/'+email+'/'+otherUserEmail, {
+        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        credentials: 'include'
+        })
+    .then(response => {
+        console.log("response status:", response.status)
+        if (response.status !== okStatus) {
+            reject(response.status);
+        } else {
+            return new Promise(function(resolve, reject) {
+            resolve(response);
+            })
+        }
+    }, fail_status => {
+        console.log("failed, status:", fail_status);
+    });
+    var user = getUserFromLocalStorage();
+    user.unReadMessages = removeUnReadMessagesFromCertainUser(user, otherUserEmail)
+    updateUserInLocalStorage(user);
+}
+
+/**
+ * returns an array of all unReadMessages that were not written by otherUserEmail from user's unReadMessages
+ * @param {the user we read from} user 
+ * @param {the other user that the (first) given user's unReadMessages will be ereased from} otherUserEmail 
+ */
+export function removeUnReadMessagesFromCertainUser(user, otherUserEmail){
+    var unReadMessages = user.unReadMessages;
+    var newUnReadArray = []
+    for(let message of unReadMessages){
+        if(message.authorEmail !== otherUserEmail)
+            newUnReadArray.push(message);
+    }
+    return newUnReadArray;
+}

@@ -134,6 +134,20 @@ async function resetUnReadMessage(email,success){
 
 }
 
+async function removeUnreadMessagesFromCertainUserInDB(email, otherUserEmail, success){
+    userModel.findOne({ email: email }).exec(function (err, user) {
+   
+        if(err) fail('User with email'+email+'does not exist');
+        else{
+           
+        unReadMessages = removeUnreadMessagesFromCertainUser(user, otherUserEmail)
+        userModel.findOneAndUpdate({email: user_email}, { $set:{unReadMessages:unReadMessages}},
+        ()=>{success('Successfully added  message by addressee to user with email '+user_email)}) }
+            
+            
+        });
+}
+
 
 
 
@@ -253,6 +267,20 @@ async function updateUser(userID, user, success, failure) {
     //     data
     // );
 
+}
+/**
+ * returns an array of all unReadMessages that were not written by otherUserEmail from user's unReadMessages
+ * @param {the user we read from} user 
+ * @param {the other user that the (first) given user's unReadMessages will be ereased from} otherUserEmail 
+ */
+function removeUnReadMessagesFromCertainUser(user, otherUserEmail){
+    var unReadMessages = user.unReadMessages;
+    var newUnReadArray = []
+    for(let message of unReadMessages){
+        if(message.authorEmail !== otherUserEmail)
+            newUnReadArray.push(message);
+    }
+    return newUnReadArray;
 }
 
 

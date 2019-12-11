@@ -380,7 +380,7 @@ app.get('/userList/:roomId', (req, res) => {
 /**
  * Resets the unReadMessages array
  */
-app.post('/user/resetUnReadMessages/:email', (req, res)=>{resetUnReadMessage(email, ()=>{})})
+app.post('/user/resetUnReadMessages/:email', (req, res)=>{resetUnReadMessage(req.params.email, ()=>{})})
 
 /**
  * socket io stuff from here on
@@ -455,10 +455,10 @@ io.on('connection', function (socket) {
     io.sockets.emit(data.receiverUserEmail+'_chat_notification', data);
 
     saveMessageInDB(data.user.email, message, data.receiverUserEmail);
-    //addMessageToRecentMessagesInDB(data.user.email, message, data.receiverUserEmail);
+    // addMessageUnReadInDB(data.user.email, message, data.receiverUserEmail);
 
     saveMessageInDB(data.receiverUserEmail, message, data.user.email);
-    //addMessageToRecentMessagesInDB(data.receiverUserEmail, message, data.user.email);
+    addMessageUnReadInDB(data.receiverUserEmail, message, data.user.email);
 
     // io.sockets.connected[data.user.socketID].emit('C_chat', data);
     // io.sockets.connected[data.receiverUser.socketID].emit('C_chat', data);
@@ -521,7 +521,7 @@ function saveMessageInDB(userEmail, message, otherUserEmail){
  * @param {the user that we add the message to his document} userEmail 
  * @param {includes the message content, author, receiver, time} message 
  */
-function addMessageToRecentMessagesInDB(userEmail, message, otherUserEmail){
+function addMessageUnReadInDB(userEmail, message, otherUserEmail){
   var message_copy = JSON.parse(JSON.stringify(message));
   message_copy.otherUserEmail = otherUserEmail;
   message_copy.delivery_timestamp = new Date();

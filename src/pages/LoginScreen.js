@@ -43,7 +43,7 @@ import {LoginScreenHome as Home} from './LoginScreenHome.js';
 
 import {MyProfile} from './MyProfile.js';
 import {MySentences} from './MySentences.js';
-import {getCurrentUserFromSession as getCurrentUser, userIsUpdated, getUserFromProps, logOut, socket} from './../user';
+import {getCurrentUserFromSession as getCurrentUser, userIsUpdated,getCurrentUserFromDB ,getUserFromProps, logOut, socket, resetUnreadMessages} from './../user';
 import {DisplayLoading, PrintMessages} from './../PagesUtils';
 import { Chat } from './Chat.js';
 import {SignIn} from './../App.js'
@@ -156,7 +156,8 @@ function LoginScreen(props){
   const [currentUser, setCurrentUser] = React.useState(getUserFromProps(props));
   const [unreadMessages, setUnreadMessages] = React.useState([]);
   const [unRegisteredUser, setUnRegisteredUser] = React.useState(false);
-  getCurrentUser(currentUser, setCurrentUser,(u)=>{} , ()=>{setUnRegisteredUser(true)});
+  if(!userIsUpdated(currentUser))
+    getCurrentUserFromDB(setCurrentUser, (u)=>{setUnreadMessages(u.unReadMessages)}, ()=>{setUnRegisteredUser(true)});
   const [pageChange, setPageChange] = React.useState(false);
 
 
@@ -174,9 +175,9 @@ function LoginScreen(props){
       if(path_array.length>1 && data.user.email === other_user_email && path_array[path_array.length-2] === 'ChatRoom')
         return;
       var new_message = {
-        writerEmail: data.user.email,
-        author: data.authorName,
-        content: data.messageContent
+        authorEmail: data.user.email,
+        authorName: data.authorName,
+        messageContent: data.messageContent
       };
       setUnreadMessages(unreadMessages.concat(new_message));
   })  
@@ -321,7 +322,11 @@ browserHistory.listen((location, action) => {
             <MenuIcon />
           </IconButton>
   <Popup
-    onClose={()=>{setUnreadMessages([])}}
+    onClose={()=>{
+      setUnreadMessages([]);
+      resetUnreadMessages(currentUser.email); 
+      currentUser.unReadMessages =[];
+    }}
     trigger={
       <IconButton  edge="start" color="inherit" className={classes.menuButton}>
       <Badge badgeContent={unreadMessages.length} color="secondary">

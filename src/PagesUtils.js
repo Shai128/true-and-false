@@ -205,6 +205,7 @@ export function PrintMessages(props){
         return message.slice(0,10)+'...';
       return message;
     }
+    console.log('messages: ', messages);
     let history = useHistory();
     return (
       <div className={classes.root}>
@@ -213,11 +214,11 @@ export function PrintMessages(props){
             <React.Fragment key={index++}>
               <ListItem className={classes.root} button onClick={()=>{
                 history.push({
-                  pathname: `${url}/ChatRoom/`+message.writerEmail,
+                  pathname: `${url}/ChatRoom/`+message.authorEmail,
                   user: user,
                 })
               }}>
-                <ListItemText primary={message.author + ": "+shortMessage(message.content)} /*secondary={date}*/ />
+                <ListItemText primary={message.authorName + ": "+shortMessage(message.messageContent)} /*secondary={date}*/ />
               </ListItem>
             </React.Fragment>
           ))}
@@ -235,7 +236,7 @@ export function PrintChats(props){
   const classes = useStyles();
   let history = useHistory();
   if(isUndefined(messeges_by_addressee) || messeges_by_addressee.length ===0)
-    return;
+    messeges_by_addressee=[];
   const user = getUserFromProps(props);
   let index =0;
   var chats = [];
