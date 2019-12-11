@@ -13,27 +13,31 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import clsx from 'clsx';
+import Divider from '@material-ui/core/Divider';
+
 import {
+    useHistory,
     useRouteMatch,
     Switch,
     Route,
   } from "react-router-dom";
 import {GamePage} from './GamePage.js';
-import {getCreatedGames, getParticipatedGames, getCurrentUser} from './../user';
-import {PrintGames, PrintJoinGameDialog} from './../PagesUtils';
-
-
-
-export function LoginScreenHome(){
+import {userIsUpdated, getCreatedGames, getParticipatedGames, getCurrentUserFromSession as getCurrentUser, getUserFromProps} from './../user';
+import {PrintGames, PrintJoinGameDialog, DisplayLoading} from './../PagesUtils';
+import {createRoom} from './../room.js'
+import {JoinGame} from './JoinGame.js'
+export function LoginScreenHome(props){
     let { path, url } = useRouteMatch();
+    let user = getUserFromProps(props);
     return(
         <Switch>
 
         <Route exact path={path}>
-        <Home path = {path} url = {url}/>
+        <Home path = {path} url = {url} user={user}/>
         </Route>
 
-        <Route path={`${path}/GamePage/:id`} exact component={GamePage} />
+        <Route path={`${path}/GamePage/:id`} exact component={GamePage} user={user} />
+        <Route path={`/JoinGame`} exact component={JoinGame} user={user} />
 
         </Switch>
 
@@ -93,6 +97,12 @@ const handleCloseJoinGameWindow = () => {
 
     const classes = useStyles();
     const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
+    const [currentUser, setCurrentUser] = React.useState(getUserFromProps(props));
+    getCurrentUser(currentUser, setCurrentUser);
+    
+    if(!userIsUpdated(currentUser)){
+      return (<DisplayLoading/>);
+    }
 
     return (
 
@@ -104,7 +114,7 @@ const handleCloseJoinGameWindow = () => {
             <Grid item xs={12}>
 
             <Typography component="h1" variant="h2" justify="center">
-              Welcome!
+              Welcome {currentUser.nickName}!
         </Typography>
             </Grid>
         <Grid item xs={12} sm={6}>
@@ -115,7 +125,8 @@ const handleCloseJoinGameWindow = () => {
 
         <PrintCreateGameDialog
             handleCloseCreateGameWindow= {handleCloseCreateGameWindow}
-            createGameWindowOpen= {createGameWindowOpen}/>
+            createGameWindowOpen= {createGameWindowOpen}
+            currentUser={currentUser}/>
         </Grid>
 
         <Grid item xs={12} sm={6}>
@@ -126,7 +137,7 @@ const handleCloseJoinGameWindow = () => {
         <PrintJoinGameDialog
         handleCloseWindow= {handleCloseJoinGameWindow}
         WindowOpen= {joinGameWindowOpen}
-        nickName = {getCurrentUser().nickName}/>
+        currentUser = {currentUser}/>
         </Grid>
 
         </Grid>
@@ -141,6 +152,7 @@ const handleCloseJoinGameWindow = () => {
             <Typography component="h4" variant="h4" justify="center">
             Recent Games
         </Typography>
+          <Divider/>
             </Grid>
 
             <Grid item xs={12}>
@@ -159,26 +171,24 @@ const handleCloseJoinGameWindow = () => {
 }
 
 function getTwoRecentGames(){
-    //get the first 2 games from each array
-   let participated = getParticipatedGames().slice(0,2);
-   console.log('participated:', participated);
-   let created = getCreatedGames().slice(0,2);
-   console.log('created:', created);
-
-   let games = created.concat(participated);
-   console.log('games:', games);
-   //sorts in O(1) because there are at most 4 elements in the array
-   games.sort(function(game1,game2) {
-    let a=game1.date;
-    let b=game2.date;
-    a = a.split('.').reverse().join('');
-    b = b.split('.').reverse().join('');
-    return a > b ? -1 : a < b ? 1 : 0;
-  });
-
-   console.log('sorted:', games);
-
-   return games.slice(0,2);
+  let participated = getParticipatedGames().slice(0);
+  let created = getCreatedGames().slice(0);
+  let games_num = created.length > participated.length? created.length :  participated.length;
+  let recent_games = [];
+  let games_to_add = 2;
+  
+  for(let games_added=0;games_added<games_to_add; games_added++){
+      if(games_num-games_added<=0)
+        return recent_games;
+      let game_index = games_num - games_added-1;
+      if (typeof created[game_index] !== 'undefined')
+        recent_games.push(created[game_index]);
+      else
+        recent_games.push(participated[game_index]);
+  }
+  
+  return recent_games;
+    
   
 }
 
@@ -214,10 +224,10 @@ const usegameListItemsStyles = makeStyles(theme=>({
 
 
 function PrintCreateGameDialog(props){
-    const {handleCloseCreateGameWindow,  createGameWindowOpen} = props;
+    const {handleCloseCreateGameWindow,  createGameWindowOpen, currentUser} = props;
     const [gameName, setGameName] = React.useState("");
-    const [currentGameNickName, setCurrentGameNickName] = React.useState(getCurrentUser().nickName);
-
+    const [currentGameNickName, setCurrentGameNickName] = React.useState(currentUser.nickName);
+    let history = useHistory();
     const startGame = ()=>{
 /*
         //var user = //todo- get user from session
@@ -237,12 +247,13 @@ function PrintCreateGameDialog(props){
         console.log("starting game!");
         console.log("game name:", gameName);
         console.log('user nickname: ', currentGameNickName);
+        createRoom(gameName, currentUser, currentGameNickName, history);
         //handleCloseCreateGameWindow();
         //todo: redirect to room page
     }
     return(
         <Dialog open={createGameWindowOpen} onClose={handleCloseCreateGameWindow} aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title">Select Room Name</DialogTitle>
+        <DialogTitle id="form-dialog-title">Create a Room</DialogTitle>
         <DialogContent>
           <DialogContentText>
           </DialogContentText>
@@ -264,7 +275,7 @@ function PrintCreateGameDialog(props){
             margin="dense"
             id="nickName"
             label="Nick Name"
-            defaultValue={getCurrentUser().nickName}
+            defaultValue={currentUser.nickName}
             onChange={(event)=>{
                 setCurrentGameNickName(event.target.value);
             }}
