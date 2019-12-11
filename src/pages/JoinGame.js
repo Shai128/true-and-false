@@ -46,42 +46,29 @@ import {
 
 const okStatus = 200;
 
-
-// class Loading extends React.Component {
-//   constructor(props) {
-//     super(props);
-//     this.state = {
-//       done: undefined
-//     };
-//   }
-
-//   componentDidMount() {
-//     setTimeout(() => {
-//       fetch("https://jsonplaceholder.typicode.com/posts")
-//         .then(response => response.json())
-//         .then(json => this.setState({ done: true }));
-//     }, 1200);
-//   }
-
-//   render() {
-//     return (
-//       <div>
-//         {!this.state.done ? (
-//           <ReactLoading type={"bars"} color={"white"} />
-//         ) : (
-//           <h1>hello world</h1>
-//         )}
-//       </div>
-//     );
-//   }
-// }
-
-
 export function JoinGame(props){ 
   
-  console.log ("props",props);
+  console.log ("props",props.location.InfoObject);
 
-  //const [CurrentUser, setCurrentUser] = useState(props.user);
+  // props contains: 
+  // userObject: {
+	// 	user_id_in_room: ...
+	// 	email: ...
+	// 	nickname: ...
+	// 	true_sentences: ...
+	// 	already_seen_sentences: ...
+	// 	...more fields you probably don't need...
+	// }
+	
+	// roomObject: {
+	// 	room_id: ...
+	// 	room_name: ...
+	// 	...more fields you probably don't need...
+	// }
+  const [CurrentRoom, setCurrentRoom] = useState(props.location.InfoObject.roomObject);
+  const [CurrentUser, setCurrentUser] = useState(props.location.InfoObject.userObject);
+
+
   const [PlayersAvailable, setPlayersAvailable] = useState([]);
   const [PlayersUnAvailable, setPlayersUnAvailable] = useState([]);
 
@@ -98,7 +85,7 @@ const useStylesRoomName = makeStyles(theme => ({
 
 const classes = useStylesRoomName();
 
-InitTheRoom(props.location.RoomId);
+InitTheRoom(CurrentRoom.room_id);
 
 socket.on("userJoined", function(userInfo) {
  /*
@@ -190,7 +177,7 @@ socket.on("InvitedToGameByUser", function(args) {
   <Grid item xs={6}>
    <Typography variant="h2" className={classes.title}>
    Room Name: 
-    {props.location.currentRoomName}
+    {CurrentRoom.room_name}
    </Typography>
    </Grid>
 
@@ -198,7 +185,7 @@ socket.on("InvitedToGameByUser", function(args) {
    <Grid item xs={4}>
    <Typography variant="h2" className={classes.roomNumber}>
    User Name: 
-  {props.location.currentNickName}
+  {CurrentUser.nickname}
    </Typography>
    </Grid>
 
@@ -206,7 +193,7 @@ socket.on("InvitedToGameByUser", function(args) {
   <Grid item xs={4}>
    <Typography variant="h2" className={classes.roomNumber}>
    Room Number: 
-  {props.location.RoomId}
+  {CurrentRoom.room_id}
    </Typography>
    </Grid>
 
@@ -268,7 +255,7 @@ function HomepageImage() {
  // const url = 'https://3.bp.blogspot.com/-dPiQYG83TVM/Tom3QSzuYpI/AAAAAAAACcM/3qlVVHdjtT4/s1600/Truth_or_Lie_.png';
  const url = 'https://steemitimages.com/p/D5zH9SyxCKd9GJ4T6rkBdeqZw1coQAaQyCUzUF4FozBvW77pHd44QbfXeeya4Ah28LcdgWFSabaBmuZJgxUXrgCTAr69vWz41v4bEikrEuR2G48JcWt62S4JH37qmY3Vi9qfie?format=match&mode=fit';
   return (
-    <img src={url} style={{width: 600}} alt='true or lie'/>
+    <img src={url} style={{width: 450}} alt='true or lie'/>
   );
 }
 
@@ -719,13 +706,17 @@ const handleClickInvitePlayer = (userThatGotInvited) => {
           <TableBody>
             
             {PlayersAvailable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => {
+              
+              console.log("rowwwwwwww->",row)
+
               return (
+
                 <TableRow hover role="checkbox" tabIndex={-1} key={row.email}>
                   {columnsForAvailable.map(column => { 
-                                        
-                    const value = row.nickname;
+                           
+                  const value = row.nickname;
 
-                    return (
+                  return (
                   <TableCell key={row.email} align={column.align}>
 
                   <Grid container spacing={1}>              
