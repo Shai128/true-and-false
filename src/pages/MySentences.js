@@ -16,6 +16,9 @@ import DeleteTwoToneIcon from '@material-ui/icons/DeleteTwoTone';
 
 import {updateUserToDB, getCurrentUserFromSession, userIsUpdated, getUserFromProps} from './../user.js'
 import {DisplayLoading} from './../PagesUtils';
+import {
+  useHistory,
+} from "react-router-dom";
 const useButtonStyles = makeStyles({
     root: {
       background: props =>
@@ -33,7 +36,7 @@ const useButtonStyles = makeStyles({
   });
 
 export function MySentences(props){
-
+    let history = useHistory();
     const classes = AppUseStyles();
     const buttonClasses = useButtonStyles();
     const [user, setUser] = useState(getUserFromProps(props));
@@ -85,6 +88,8 @@ export function MySentences(props){
               fullWidth
               type="submit"
               onClick={()=>{
+                if(user.true_sentences.length ===0 && user.false_sentences.length ===0)
+                  history.push('/LoginScreen');
                 let user_copy = JSON.parse(JSON.stringify(user));
                 user_copy.true_sentences = truths;
                 user_copy.false_sentences = lies;
