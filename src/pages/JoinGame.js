@@ -91,9 +91,11 @@ socket.on("userJoined", function(userInfo) {
  /*
     userInfo: {email: ..., nickName:...}
  */
-    console.log("received userJoin with userInfo:", userInfo);
+    console.log("userINFO DANN --> ",userInfo);
+    console.log("LIST DANN --> ",PlayersAvailable.values);
+
     var newPlayersAvailable = [...PlayersAvailable]
-    newPlayersAvailable.push(userInfo.nickName)
+    newPlayersAvailable.push({email:userInfo.email,nickname:userInfo.nickName})
     setPlayersAvailable(newPlayersAvailable)
   });
 
@@ -103,11 +105,38 @@ socket.on("userLeft", function(userInfo) {
        userInfo: {email: ..., nickName:...}
     */
        var newPlayersAvailable = [...PlayersAvailable]
-       var index = newPlayersAvailable.indexOf(userInfo.nickName)
+       var index = newPlayersAvailable.indexOf(userInfo)
        newPlayersAvailable.splice(index)
        setPlayersAvailable(newPlayersAvailable)
      });
 
+
+ socket.on("userAccept", function(userInfo) {
+      /*
+         userInfo: {email: ..., nickName:...}
+      */
+     history.push({
+      pathname:'/TheGame',
+      opponentId: userInfo.senderId,
+      user: CurrentUser,
+      room: CurrentRoom,
+    })
+         
+  });
+
+
+  socket.on("userDecline", function(userInfo) {
+    /*
+       userInfo: {email: ..., nickName:...}
+    */
+   history.push({
+    pathname: '/JoinGame',
+    InfoObject: props.location.InfoObject,
+  })  
+       
+});
+
+       
 
 
 const [GotInvitationWindow, setGotInvitationWindow] = React.useState(false);
@@ -118,12 +147,13 @@ const onAccept = () => {
     socket.emit('deliverMessage', {
       message: 'userAccept',
       args: {},
-    //  receiverId: args.senderId,
+      receiverId: SenderInfoID,
       })
-      // move to game - TO DO
       history.push({
         pathname:'/TheGame',
-      // args!!!!!!!
+        opponentId:SenderInfoID,
+        user: CurrentUser,
+        room: CurrentRoom,
       })
 }
 
@@ -133,18 +163,23 @@ const onDecline = () => {
     socket.emit('deliverMessage', {
       message: 'userDecline',
       args: {},
-     // receiverId: args.senderId,
+      receiverId: SenderInfoID,
       })
-      // move to Room back - TO DO
-      // !!!!!!!!!!!!!!!!!!!!!!!!!!
+      history.push({
+        pathname: '/JoinGame',
+        InfoObject: props.location.InfoObject,
+      })  
  }
 
- const [SenderInfo, setSenderInfo] = React.useState(emptyUser());
- 
+ //const [SenderInfo, setSenderInfo] = React.useState(emptyUser());
+ const [SenderInfoID, setSenderInfoID] = React.useState(-1);
+ const [SenderInfoName, setSenderInfoName] = React.useState("");
+
 // TO DO - RON!!!!!!!! - SEND USER INFO     
 socket.on("InvitedToGameByUser", function(args) { 
+  setSenderInfoID(args.senderId);
+  setSenderInfoName(args.senderName);
   setGotInvitationWindow(true);
-  //setSenderInfo(args.userInfo)
 })
 
  const leaveRoom = () => {
@@ -156,11 +191,10 @@ socket.on("InvitedToGameByUser", function(args) {
 };
 
 
-
   return (
     <div>  
 
-  <PrintAnswerPlayerDialog WindowOpen = {GotInvitationWindow} onAccept = {onAccept} onDecline = {onDecline} sender = {SenderInfo}/> 
+  <PrintAnswerPlayerDialog WindowOpen = {GotInvitationWindow} onAccept = {onAccept} onDecline = {onDecline} sender = {SenderInfoName}/> 
       
   <Grid container spacing={2}>
   <Grid item xs={3}>
@@ -654,13 +688,12 @@ export function PlayerListAvailable(props) {
 
 const [InvitePlayerWindowOpen, setInvitePlayerWindowOpen] = React.useState(false);
 
-const handleClickInvitePlayer = (userThatGotInvited) => {
+const handleClickInvitePlayer = (userThatGotInvitedID,userThatGotInvitedName) => {
     // TODO: also makes changeUserAvailability request to server 
-    // if you don't remember what this means -- ask Ron
     socket.emit('deliverMessage', {
     message: 'InvitedToGameByUser',
-    args: {},
-    receiverId: userThatGotInvited,
+    args: {senderName:userThatGotInvitedName},
+    receiverId: userThatGotInvitedID,
     })
     setInvitePlayerWindowOpen(true);
 };
@@ -707,7 +740,7 @@ const handleClickInvitePlayer = (userThatGotInvited) => {
             
             {PlayersAvailable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => {
               
-              console.log("rowwwwwwww->",row)
+              // console.log("rowwwwwwww->",row)
 
               return (
 
@@ -739,7 +772,7 @@ const handleClickInvitePlayer = (userThatGotInvited) => {
                   </Grid>
 
                   <Grid item xs = {2}>
-                  <Button variant="contained" color="primary" fullWidth onClick={()=>{handleClickInvitePlayer(row.email)}} className={classes.button}>
+                  <Button variant="contained" color="primary" fullWidth onClick={()=>{handleClickInvitePlayer(row.email,row.nickname)}} className={classes.button}>
                       Invite to Game
                     </Button>
                     </Grid>
@@ -755,6 +788,7 @@ const handleClickInvitePlayer = (userThatGotInvited) => {
                     <PrintInvitePlayerDialog
                     InvitePlayerWindowOpen = {InvitePlayerWindowOpen}
                     setInvitePlayerWindowOpen = {setInvitePlayerWindowOpen}
+                    userThatInvited = {row.email}
                     />
                   </Grid>
 
@@ -789,12 +823,16 @@ const handleClickInvitePlayer = (userThatGotInvited) => {
 }
 
 
-
 function PrintInvitePlayerDialog(props){  
 
-  const {InvitePlayerWindowOpen, setInvitePlayerWindowOpen} = props;
+  const {InvitePlayerWindowOpen, setInvitePlayerWindowOpen,userThatInvited} = props;
 
   const onCloseWindow = ()=>{
+    socket.emit('deliverMessage', {
+      message: 'CancelInvitation',
+      args: {},
+      receiverId: userThatInvited,
+     })
     setInvitePlayerWindowOpen(false);
   }
 
@@ -828,11 +866,11 @@ function PrintInvitePlayerDialog(props){
 
 function PrintAnswerPlayerDialog(props){  
 
-  const {WindowOpen, onAccept, onDecline, sender} = props;
+  const {WindowOpen, onAccept, onDecline, SenderInfoName} = props;
 
   return(
       <Dialog open={WindowOpen} aria-labelledby="form-dialog-title">
-      <DialogTitle id="form-dialog-title"> {sender.nickName} Invited you to play </DialogTitle>
+      <DialogTitle id="form-dialog-title"> {SenderInfoName} Invited you to play </DialogTitle>
       <DialogContent>
         <DialogContentText>
         </DialogContentText>
