@@ -123,7 +123,7 @@ async function addUserObjectToRoom(room_id,user,success,fail){
                arr_users[arr_users.length]=user;
                room.state_array[user.user_id_in_room]=AVAILABLE_STATE;
                roomModel.findOneAndUpdate({room_id: room_id}, { $set:{users_in_room:arr_users,state_array:room.state_array,available_id:(room.available_id+1),all_sentences:room.all_sentences}},
-                ()=>{success('success')}) }
+                ()=>{success({roomObject: room, userObject: user})}) }
         });
 }
 
@@ -171,7 +171,7 @@ async function createRoom(room_name,success,failure){
             }
             var state_array = new Array(10).fill(INVALID_STATE);
             const newRoom = new roomModel({
-                room_id:room_id,
+                room_id: room_id,
                 all_sentences:[],
                 room_name: room_name,
                 available_id:0,
@@ -180,11 +180,11 @@ async function createRoom(room_name,success,failure){
 
 
             });
+           // console.log("saving new room:", newRoom)
             //saves the room in the db
-            newRoom.save((err)=>{if(err){failure('failed creating a room')} else{
+            newRoom.save((err)=>{if(err){console.log(err); failure('failed creating a room')} else{
                 roomsGlobalArrayModel.findOneAndUpdate({array_id: global_array.array_id}, { $set:{array:global_array.array}},()=>
-                
-                
+            
                 {success(room_id)}
         );  
         }

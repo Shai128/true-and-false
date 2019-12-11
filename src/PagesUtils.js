@@ -269,6 +269,10 @@ export function PrintChats(props){
       </List>);
 }
 
+/**
+ * 
+ * @param {email - the email of the other user. user: current user (not neccessary)} props 
+ */
 export function ChatButton(props){
   let history = useHistory();
   return (

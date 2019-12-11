@@ -24,22 +24,51 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import Switch from '@material-ui/core/Switch';
 import { reject } from 'q';
-  //import {Link,} from "react-router-dom";
-  import Dialog from '@material-ui/core/Dialog';
-  import DialogActions from '@material-ui/core/DialogActions';
-  import DialogContent from '@material-ui/core/DialogContent';
-  import DialogContentText from '@material-ui/core/DialogContentText';
-  import DialogTitle from '@material-ui/core/DialogTitle';
-  import {socket} from '../user.js';
-
-  const okStatus = 200;
-
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import {socket, emptyUser} from '../user.js';
+import { Link } from '@material-ui/core';
+import {LoginScreenHome} from './LoginScreenHome.js';
+import {
+  BrowserRouter as Router,
+  Route,
+  useRouteMatch,
+  Redirect,
+  useHistory,
+} from "react-router-dom";
+// import FadeIn from "react-fade-in";
+// import Lottie from "react-lottie";
+// import ReactLoading from "react-loading";
+// import "bootstrap/dist/css/bootstrap.css";
+import {ChatButton} from './../PagesUtils.js';
+const okStatus = 200;
 
 export function JoinGame(props){ 
-  
-  console.log ("props",props);
+  console.log('props: ', props);
+  console.log ("props",props.location.InfoObject);
 
-  //const [CurrentUser, setCurrentUser] = useState(props.user);
+  // props contains: 
+  // userObject: {
+	// 	user_id_in_room: ...
+	// 	email: ...
+	// 	nickname: ...
+	// 	true_sentences: ...
+	// 	already_seen_sentences: ...
+	// 	...more fields you probably don't need...
+	// }
+	
+	// roomObject: {
+	// 	room_id: ...
+	// 	room_name: ...
+	// 	...more fields you probably don't need...
+	// }
+  const [CurrentRoom, setCurrentRoom] = useState(props.location.InfoObject.roomObject);
+  const [CurrentUser, setCurrentUser] = useState(props.location.InfoObject.userObject);
+
+
   const [PlayersAvailable, setPlayersAvailable] = useState([]);
   const [PlayersUnAvailable, setPlayersUnAvailable] = useState([]);
 
@@ -56,7 +85,7 @@ const useStylesRoomName = makeStyles(theme => ({
 
 const classes = useStylesRoomName();
 
-InitTheRoom(props.location.RoomId);
+InitTheRoom(CurrentRoom.room_id);
 
 socket.on("userJoined", function(userInfo) {
  /*
@@ -79,15 +108,76 @@ socket.on("userLeft", function(userInfo) {
        setPlayersAvailable(newPlayersAvailable)
      });
 
-    
+
+
+const [GotInvitationWindow, setGotInvitationWindow] = React.useState(false);
+let history = useHistory();
+const onAccept = () => {
+
+    // Accept 
+    socket.emit('deliverMessage', {
+      message: 'userAccept',
+      args: {},
+    //  receiverId: args.senderId,
+      })
+      // move to game - TO DO
+      history.push({
+        pathname:'/TheGame',
+      // args!!!!!!!
+      })
+}
+
+const onDecline = () => {
+
+    // Decline 
+    socket.emit('deliverMessage', {
+      message: 'userDecline',
+      args: {},
+     // receiverId: args.senderId,
+      })
+      // move to Room back - TO DO
+      // !!!!!!!!!!!!!!!!!!!!!!!!!!
+ }
+
+ const [SenderInfo, setSenderInfo] = React.useState(emptyUser());
+ 
+// TO DO - RON!!!!!!!! - SEND USER INFO     
+socket.on("InvitedToGameByUser", function(args) { 
+  setGotInvitationWindow(true);
+  //setSenderInfo(args.userInfo)
+})
+
+ const leaveRoom = () => {
+  // var newPlayersAvailable = [...PlayersAvailable]
+  // var index = newPlayersAvailable.indexOf(userInfo.nickName)
+  // newPlayersAvailable.splice(index)
+  // setPlayersAvailable(newPlayersAvailable)
+  history.push("/LoginScreen/Home"); // moves to home page
+};
+
+
+
   return (
-    <div>
-   {/* <HorizontalLinearStepper/> */}
-  
+    <div>  
+
+  <PrintAnswerPlayerDialog WindowOpen = {GotInvitationWindow} onAccept = {onAccept} onDecline = {onDecline} sender = {SenderInfo}/> 
+      
+  <Grid container spacing={2}>
+  <Grid item xs={3}>
+  <div style={{float: 'right'}}>
+    <Button variant="contained" color="primary" fullWidth onClick = {leaveRoom} className={classes.button}>
+     Leave the room
+   </Button>
+   </div>
+ </Grid>
+ </Grid>
+
+
+
   <Grid item xs={6}>
    <Typography variant="h2" className={classes.title}>
    Room Name: 
-    {props.location.currentRoomName}
+    {CurrentRoom.room_name}
    </Typography>
    </Grid>
 
@@ -95,7 +185,7 @@ socket.on("userLeft", function(userInfo) {
    <Grid item xs={4}>
    <Typography variant="h2" className={classes.roomNumber}>
    User Name: 
-  {props.location.currentNickName}
+  {CurrentUser.nickname}
    </Typography>
    </Grid>
 
@@ -103,7 +193,7 @@ socket.on("userLeft", function(userInfo) {
   <Grid item xs={4}>
    <Typography variant="h2" className={classes.roomNumber}>
    Room Number: 
-  {props.location.RoomId}
+  {CurrentRoom.room_id}
    </Typography>
    </Grid>
 
@@ -115,12 +205,12 @@ socket.on("userLeft", function(userInfo) {
 <Grid container spacing={1} justify="center">
 
       <Grid item xs={4}>
-         <Typography variant="h6" className={classes.roomNumber}>
+         <Typography variant="h4" className={classes.roomNumber}>
          Choose a player and start to play!
           </Typography>
           </Grid>
           <Grid item xs={8}>
-          <BasicTextFields/>
+          {/* <BasicTextFields/> */}
           </Grid>
           </Grid>
 
@@ -162,9 +252,10 @@ socket.on("userLeft", function(userInfo) {
 
 function HomepageImage() {
   // const url = 'https://6sense.com/wp-content/uploads/2018/10/2-truths_Canva-011.png';
-  const url = 'https://3.bp.blogspot.com/-dPiQYG83TVM/Tom3QSzuYpI/AAAAAAAACcM/3qlVVHdjtT4/s1600/Truth_or_Lie_.png';
+ // const url = 'https://3.bp.blogspot.com/-dPiQYG83TVM/Tom3QSzuYpI/AAAAAAAACcM/3qlVVHdjtT4/s1600/Truth_or_Lie_.png';
+ const url = 'https://steemitimages.com/p/D5zH9SyxCKd9GJ4T6rkBdeqZw1coQAaQyCUzUF4FozBvW77pHd44QbfXeeya4Ah28LcdgWFSabaBmuZJgxUXrgCTAr69vWz41v4bEikrEuR2G48JcWt62S4JH37qmY3Vi9qfie?format=match&mode=fit';
   return (
-    <img src={url} style={{width: 300}} alt='true or lie'/>
+    <img src={url} style={{width: 450}} alt='true or lie'/>
   );
 }
 
@@ -207,6 +298,12 @@ export function BasicTextFields() {
     </form>
   );
 }
+
+
+
+
+
+
 
 
 // ----------------------THE STEPER--------------------------------- //
@@ -555,15 +652,18 @@ export function SwitchListSecondary() {
 
 export function PlayerListAvailable(props) {
 
-  const handleClickInvitePlayer = () => {
+const [InvitePlayerWindowOpen, setInvitePlayerWindowOpen] = React.useState(false);
+
+const handleClickInvitePlayer = (userThatGotInvited) => {
+    // TODO: also makes changeUserAvailability request to server 
+    // if you don't remember what this means -- ask Ron
+    socket.emit('deliverMessage', {
+    message: 'InvitedToGameByUser',
+    args: {},
+    receiverId: userThatGotInvited,
+    })
     setInvitePlayerWindowOpen(true);
 };
-
-const handleCloseInvitePlayer = () => {
-  setInvitePlayerWindowOpen(false);
-};
-
-const [InvitePlayerWindowOpen, setInvitePlayerWindowOpen] = React.useState(false);
 
   const classes = useStyles();
 
@@ -606,14 +706,20 @@ const [InvitePlayerWindowOpen, setInvitePlayerWindowOpen] = React.useState(false
           <TableBody>
             
             {PlayersAvailable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => {
+              
+              console.log("rowwwwwwww->",row)
+
               return (
+
                 <TableRow hover role="checkbox" tabIndex={-1} key={row.email}>
                   {columnsForAvailable.map(column => { 
-                                        
-                    const value = row.nickname;
+                           
+                  const value = row.nickname;
 
-                    return (
-                      <TableCell key={row.email} align={column.align}>
+                  return (
+                  <TableCell key={row.email} align={column.align}>
+
+                  <Grid container spacing={1}>              
 
                  <Grid container justify="center" alignItems="center">
                       
@@ -632,20 +738,23 @@ const [InvitePlayerWindowOpen, setInvitePlayerWindowOpen] = React.useState(false
 
                   </Grid>
 
-              
-                  <Grid item xs = {3}>
-                  <Button variant="contained" color="primary" fullWidth onClick={handleClickInvitePlayer} className={classes.button}>
+                  <Grid item xs = {2}>
+                  <Button variant="contained" color="primary" fullWidth onClick={()=>{handleClickInvitePlayer(row.email)}} className={classes.button}>
                       Invite to Game
                     </Button>
                     </Grid>
 
-                    <PrintInvitePlayerDialog
-                handleCloseWindow= {handleCloseInvitePlayer}
-                WindowOpen= {InvitePlayerWindowOpen}
-                currentUser = {{}}/>
+                  <Grid item xs = {1}>
+                  <ChatButton email={row.email}/>
+                    </Grid>
+                    </Grid>
 
+
+                    <PrintInvitePlayerDialog
+                    InvitePlayerWindowOpen = {InvitePlayerWindowOpen}
+                    setInvitePlayerWindowOpen = {setInvitePlayerWindowOpen}
+                    />
                   </Grid>
-                
 
                     {/* -------------------------------------------------- */}
 
@@ -680,55 +789,15 @@ const [InvitePlayerWindowOpen, setInvitePlayerWindowOpen] = React.useState(false
 
 
 function PrintInvitePlayerDialog(props){  
-  const {handleCloseWindow,  WindowOpen, currentUser} = props;
-  // const [gameID, setGameID] = React.useState("");
-  // const [currentGameNickName, setCurrentGameNickName] = React.useState(currentUser.nickName);
-  // const [validGameID, setValidGameID] = React.useState(true);
-  // const [validNickName, setvalidNickName] = React.useState(true);
-  // const [nickNameHelperText, setNickNameHelperText] = React.useState('');
-  // const [gameIDHelperText, setGameIDHelperText] = React.useState('');
 
+  const {InvitePlayerWindowOpen, setInvitePlayerWindowOpen} = props;
 
   const onCloseWindow = ()=>{
-   // resetDisplaysContent();
-    handleCloseWindow();
+    setInvitePlayerWindowOpen(false);
   }
 
-  // const displayNickNameTaken = ()=>{
-  //   setNickNameHelperText('This nick name is taken');
-  //   setvalidNickName(false);
-  // }
-
-  // const displayWrongGameID = ()=>{
-  //   setGameIDHelperText('Wrong game ID');
-  //   setValidGameID(false);
-  // }
-
-  // const resetDisplaysContent = ()=>{
-  //   setGameIDHelperText('');
-  //   setNickNameHelperText('');
-  //   setvalidNickName(true);
-  //   setValidGameID(true);
-  // }
-  // socket.on('joinedRoom', function(roomID){
-  //   //todo- redirect to room page (dan's page)
-  // });
-
-  // socket.on('nickNameTaken', function(){
-  //   displayNickNameTaken();
-  //   //todo- open message 'try a different name'
-  // });
-
-  // socket.on('wrongRoomID', function(){
-  //   displayWrongGameID();
-
-  // });
-  
-  const joinGame = ()=>{
-      // console.log("Invite a player!");
-  }
   return(
-      <Dialog open={WindowOpen} onClose={onCloseWindow} aria-labelledby="form-dialog-title">
+      <Dialog open={InvitePlayerWindowOpen} aria-labelledby="form-dialog-title">
       <DialogTitle id="form-dialog-title">Waiting for other player's response</DialogTitle>
       <DialogContent>
         <DialogContentText>
@@ -742,11 +811,8 @@ function PrintInvitePlayerDialog(props){
     
       </DialogActions>
 
-        {/* <Button onClick={onCloseWindow} color="primary">
-        Cancel the invitation
-        </Button> */}
         <Grid container justify="center">
-        <Button onClick={joinGame} color="primary">
+        <Button onClick={onCloseWindow} color="primary">
         Cancel the invitation
         </Button>
         </Grid>
@@ -755,3 +821,64 @@ function PrintInvitePlayerDialog(props){
 
   );
 }
+
+
+
+function PrintAnswerPlayerDialog(props){  
+
+  const {WindowOpen, onAccept, onDecline, sender} = props;
+
+  return(
+      <Dialog open={WindowOpen} aria-labelledby="form-dialog-title">
+      <DialogTitle id="form-dialog-title"> {sender.nickName} Invited you to play </DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+{/* 
+      <Grid container justify="center">
+      <InvitePlayerWaitingImage/>
+      </Grid> */}
+    
+      </DialogActions>
+
+    <Grid container justify="center" alignItems="center">
+        <Grid container justify="center">
+        <Button onClick={onAccept} color="primary">
+        Accept
+        </Button>
+        </Grid>
+
+        <Grid container justify="center">
+        <Button onClick={onDecline} color="primary">
+        Decline 
+        </Button>
+        </Grid>
+     </Grid>
+
+    </Dialog>
+
+  );
+}
+
+
+// function leaveRoom(){  
+
+//   // const {playerEmail} = props;
+ 
+//    return(
+//        <Dialog open={true} aria-labelledby="form-dialog-title">
+//        <DialogTitle id="form-dialog-title"> Log out from room </DialogTitle>
+//        <DialogContent>
+//          <DialogContentText>
+//          </DialogContentText>
+//        </DialogContent>
+//        <DialogActions>
+//        </DialogActions>
+//      </Dialog>
+ 
+//    );
+//  }
+
+

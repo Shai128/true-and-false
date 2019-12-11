@@ -20,7 +20,8 @@ const {
   removeUserFromRoom,
   getRoomSize,
   deleteRoomById,
-  changeUserAvailability
+  changeUserAvailability,
+  findUserByEmailInRoomByRoomID
 } = require("../db/rooms") //imports all room functions
 
 const {
@@ -272,32 +273,52 @@ app.get('/joinRoom/:roomId', (req, res) => {
   serverAddUserToRoom(req, res, req.params.roomId)
 })
 
-function  serverAddUserToRoom(req, res, roomId) {
+function  serverAddUserToRoom(req, res, roomId) { 
   console.log("adding user to room:", roomId)
   getUserInfoFromSession(
     req,
     (userInfo) => {
       console.log("user info", userInfo);
-      addUserToRoom(
+      findUserByEmailInRoomByRoomID(
         roomId,
-        userInfo.email, 
-        (succ) => {
-          console.log("sending the status now")
-         // console.log("created room with id", roomId)
-         console.log("added user",userInfo.email, "to room", roomId)
-          res.status(200).send({ID: roomId});
-          console.log("sent")
-          // add the user's socket to the room
-          var userSocket = findSocketByUserId(userInfo.email)
-   // console.log("user socket", userSocket, "found of user:", userInfo.email)
-          if (userSocket !== undefined) {
-            userSocket.join(roomId.toString())
-            console.log("added the user's", userInfo.email, "socket to room", roomId.toString())
-          }
-          // notify all other users in the room
-          io.to(roomId).emit('userJoined', userInfo)
+        userInfo.email,
+        (found_user_object) => {
+          findRoomById(
+            roomId,
+            (room_object) => {
+              console.log("user is already in room")
+              res.status(200).send(JSON.stringify({
+                userObject: found_user_object,
+                roomObject: room_object
+              }))
+            },
+            (err) => {standardErrorHandling(err)}
+          )
         },
-        (err) => standardErrorHandling(res, err)
+        (user_not_found_err) => {
+          addUserToRoom(
+            roomId,
+            userInfo.email, 
+            (roomAndUser) => {
+              console.log("sending the status now")
+             // console.log("created room with id", roomId)
+             console.log("added user",userInfo.email, "to room", roomId)
+             console.log("roomAndUserObject:", roomAndUser)
+              res.status(200).send(JSON.stringify(roomAndUser));
+              console.log("sent")
+              // add the user's socket to the room
+              var userSocket = findSocketByUserId(userInfo.email)
+              // console.log("user socket", userSocket, "found of user:", userInfo.email)
+              if (userSocket !== undefined) {
+                userSocket.join(roomId.toString())
+                console.log("added the user's", userInfo.email, "socket to room", roomId.toString())
+              }
+              // notify all other users in the room
+              io.to(roomId).emit('userJoined', userInfo)
+            },
+            (err) => standardErrorHandling(res, err)
+          )
+        }
       )
     },
     (err) => {standardErrorHandling(res, err)}
@@ -444,8 +465,8 @@ io.on('connection', function (socket) {
 
   socket.on('chat', function(data){
     console.log(data.messageContent + " was written");
-  //  console.log(socket.handshake.session.userInfo);
-    socket.handshake.session.userInfo = data.user;
+    console.log(socket.handshake.session.userInfo);
+    socket.handshake.session.userInfo = data;
     socket.handshake.session.save();
     
     let message = data;
@@ -497,6 +518,8 @@ io.on('connection', function (socket) {
        "to", 
        data.receiverId
       );
+
+      data.args.senderId = socket.handshake.session.userInfo.email;
 
     receiverSocket.emit(data.message, data.args)
     logDiv()
