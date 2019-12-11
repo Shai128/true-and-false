@@ -8,6 +8,7 @@ const {
   addUnReadMessage,
   addMessegesByAddressee,
   resetUnReadMessage,
+  removeUnReadMessagesFromCertainUserInDB,
 
 } = require("../db/user") // imports all user functions
 const{resetDatabase}=require("../db/general") // imports all generel databse menagement functions
@@ -325,6 +326,7 @@ function  serverAddUserToRoom(req, res, roomId) {
   )
 } 
 
+
 /**
  * Removes a user from a given room.
  * User id is inferred from the session.
@@ -398,10 +400,17 @@ app.get('/userList/:roomId', (req, res) => {
   )
 })
 
-/**
+/** author: Shai
  * Resets the unReadMessages array
  */
 app.post('/user/resetUnReadMessages/:email', (req, res)=>{resetUnReadMessage(req.params.email, ()=>{})})
+
+/**
+ * author: Shai
+ * removes all unreadmessages that were written by otherUserEmail, in email document
+ */
+app.post('/user/resetUnReadMessagesFromCertainUser/:email/:otherUserEmail', (req,res)=>{
+  removeUnReadMessagesFromCertainUserInDB(req.params.email, req.params.otherUserEmail, ()=>{})})
 
 /**
  * socket io stuff from here on
@@ -471,6 +480,9 @@ io.on('connection', function (socket) {
     
     let message = data;
    
+   
+    addMessageUnReadInDB(data.receiverUserEmail, message, data.user.email);
+
     io.sockets.emit(data.user.email+'_chat', data);
     io.sockets.emit(data.receiverUserEmail+'_chat', data);
     io.sockets.emit(data.receiverUserEmail+'_chat_notification', data);
@@ -479,7 +491,6 @@ io.on('connection', function (socket) {
     // addMessageUnReadInDB(data.user.email, message, data.receiverUserEmail);
 
     saveMessageInDB(data.receiverUserEmail, message, data.user.email);
-    addMessageUnReadInDB(data.receiverUserEmail, message, data.user.email);
 
     // io.sockets.connected[data.user.socketID].emit('C_chat', data);
     // io.sockets.connected[data.receiverUser.socketID].emit('C_chat', data);

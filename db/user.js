@@ -1,5 +1,5 @@
 const {mongoose} = require("./config")
-const{isUndefined}=require("../src/Utils")
+const{isUndefined, removeUnReadMessagesFromCertainUser}=require("../src/Utils")
 const salt = '' //todo: change to a real good salt
 const iterations = 1000;
 const LAST_MESSAGES_LIMIT=100
@@ -134,15 +134,25 @@ async function resetUnReadMessage(email,success){
 
 }
 
-async function removeUnreadMessagesFromCertainUserInDB(email, otherUserEmail, success){
+/**
+ * author: Shai
+ * @param {the email of the current user (the user we change)} email 
+ * @param {the user who wrote the messages we remove} otherUserEmail 
+ * @param {function that activates on success } success 
+ */
+async function removeUnReadMessagesFromCertainUserInDB(email, otherUserEmail, success){
     userModel.findOne({ email: email }).exec(function (err, user) {
    
         if(err) fail('User with email'+email+'does not exist');
         else{
-           
-        unReadMessages = removeUnreadMessagesFromCertainUser(user, otherUserEmail)
-        userModel.findOneAndUpdate({email: user_email}, { $set:{unReadMessages:unReadMessages}},
-        ()=>{success('Successfully added  message by addressee to user with email '+user_email)}) }
+        console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+        console.log('removeUnReadMessagesFromCertainUserInDB')
+        console.log('removing data from user: ', user)
+        console.log('other user email: ', otherUserEmail)
+
+        unReadMessages = removeUnReadMessagesFromCertainUser(user, otherUserEmail)
+        userModel.findOneAndUpdate({email: email}, { $set:{unReadMessages:unReadMessages}},
+        ()=>{success('Successfully added  message by addressee to user with email '+email)}) }
             
             
         });
@@ -268,24 +278,11 @@ async function updateUser(userID, user, success, failure) {
     // );
 
 }
-/**
- * returns an array of all unReadMessages that were not written by otherUserEmail from user's unReadMessages
- * @param {the user we read from} user 
- * @param {the other user that the (first) given user's unReadMessages will be ereased from} otherUserEmail 
- */
-function removeUnReadMessagesFromCertainUser(user, otherUserEmail){
-    var unReadMessages = user.unReadMessages;
-    var newUnReadArray = []
-    for(let message of unReadMessages){
-        if(message.authorEmail !== otherUserEmail)
-            newUnReadArray.push(message);
-    }
-    return newUnReadArray;
-}
 
 
 
 
+exports.removeUnReadMessagesFromCertainUserInDB = removeUnReadMessagesFromCertainUserInDB
 exports.createUser = createUser
 exports.findUser = findUser
 exports.updateUser = updateUser

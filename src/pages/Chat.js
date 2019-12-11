@@ -25,7 +25,7 @@ import {
   
 } from "react-router-dom";
 import {createBrowserHistory} from 'history'
-import {socket, getCurrentUserFromDB, userIsUpdated, emptyUser, updateUserInLocalStorage} from './../user.js'
+import {socket, getCurrentUserFromDB, userIsUpdated, emptyUser, updateUserInLocalStorage, resetUnreadMessagesFromCertainUser} from './../user.js'
 import {DisplayLoading} from './../PagesUtils.js'
 import {isUndefined} from './../Utils.js'
 const useButtonStyles = makeStyles({
@@ -171,7 +171,8 @@ export function Chat(props){
       getCurrentUserFromDB(setUser, (user)=>{loadMessagesFromUserHistory(user); scrollToBottomInstantly();}, ()=>{});
       setLastOtherUserEmail(other_user_email);
     }
-    
+    resetUnreadMessagesFromCertainUser(user.email, other_user_email);
+
     const [currentMessage, setCurrentMessage] = React.useState('');
     const scrollToBottom = () => {
       let node = document.getElementById('endOfChat');
@@ -196,6 +197,7 @@ export function Chat(props){
         let message = getMessageFromInput(data.messageContent);
         if(data.authorEmail !== other_user_email && data.authorEmail !== user.email)
           return;
+        resetUnreadMessagesFromCertainUser(user.email, other_user_email);
         let to_append = createNewMessageContent(data.user.email, user.email, data.authorName, message);
         let new_message ={
             delivery_timestamp: Date(),
