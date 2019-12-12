@@ -486,6 +486,7 @@ export function SignIn() {
 
   const [user, setUser] = useState(emptyUser());
   const [isLoading, setIsLoading] = useState(false);
+  const [isWrongLogin, setIsWrongLogin] = useState(false);
 
   const updateField = e => {
     setUser({
@@ -512,6 +513,7 @@ export function SignIn() {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
+                    error = {isWrongLogin}
                     id="EmailInput"
                     className={classes.textField}
                     label="Email"
@@ -526,6 +528,7 @@ export function SignIn() {
                 <Grid item xs={12} sm={6}>
 
                   <TextField
+                    error = {isWrongLogin}
                     id="PasswordInput"
                     label="Password"
                     className={classes.textField}
@@ -543,26 +546,25 @@ export function SignIn() {
 
                   <Button variant="contained" color="primary" fullWidth className={classes.button}
                     onClick={() => {
+                      setIsWrongLogin(false);
                       setIsLoading(true);
                       console.log("sending sign in");
-                      let user = {
-                        email: document.getElementById('EmailInput').value,
-                        password: document.getElementById('PasswordInput').value
-                      }
                       
-                      logIn(user, (data)=>{
+                      logIn(user, 
+                        (user)=>{ // onSuccess function
                         setIsLoading(false);
-                        console.log('frontend got data: ', data);
-                        if(data.status === okStatus ){
-                            console.log("data:", data)
+                        console.log('logged in and frontend got data: ', user);
                             history.push("/LoginScreen");
-                        }
-                      });
+                      },
+                       ()=>{ // onFailure funciton
+                        setIsWrongLogin(true);
+                       });
 
                     }}>
                     Sign In
       </Button>
                 </Grid>
+                {isWrongLogin? 'your email and password does not match' : ''}
               </Grid>
             </form>
           </div>

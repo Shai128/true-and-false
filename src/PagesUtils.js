@@ -21,7 +21,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import {socket, getUserFromProps, getUserFromLocalStorage, userIsUpdated} from './user.js';
+import {socket, getUserFromProps, getCurrentUserFromDB} from './user.js';
 import {useStyles} from './App.js';
 import {joinRoom} from './room.js';
 export function PrintGames(props){
@@ -297,14 +297,15 @@ export function ChatButton(props){
 }
 
 export function AutoRedirectToLoginScreenIfUserInSession(history){
-  var user = getUserFromLocalStorage();
-  var locationArr = history.location.pathname.split("/");
-  var len = locationArr.length;
-  var page = locationArr[len-1];
-  if(userIsUpdated(user) && ( page === 'SignIn' || page === '' || page === 'SignUp')){
-    history.push({
-      pathname: '/LoginScreen',
-      user: user
-    });
-  }
+  getCurrentUserFromDB(()=>{}, ()=>{
+
+    var locationArr = history.location.pathname.split("/");
+    var len = locationArr.length;
+    var page = locationArr[len-1];
+    if( page === 'SignIn' || page === '' || page === 'SignUp'){
+      history.push({
+        pathname: '/LoginScreen',
+      });
+
+  }});
 }
