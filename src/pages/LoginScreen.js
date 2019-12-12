@@ -43,7 +43,7 @@ import {LoginScreenHome as Home} from './LoginScreenHome.js';
 
 import {MyProfile} from './MyProfile.js';
 import {MySentences} from './MySentences.js';
-import {getCurrentUserFromSession as getCurrentUser, userIsUpdated,getCurrentUserFromDB ,getUserFromProps, logOut, socket, resetUnreadMessages, updateUserInLocalStorage} from './../user';
+import {userIsUpdated,getCurrentUserFromDB ,getUserFromProps, logOut, socket, resetUnreadMessages, updateUserInLocalStorage} from './../user';
 import {DisplayLoading, PrintMessages} from './../PagesUtils';
 import { Chat } from './Chat.js';
 import {SignIn} from './../App.js'

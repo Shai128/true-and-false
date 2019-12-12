@@ -75,7 +75,7 @@ export function getCurrentUserFromSession(user, setUser, onSuccess , onFailure){
     }
     /** getting the current user from the local storage, if exists */
     var storage_user = getUserFromLocalStorage();
-    if(!isUndefined(storage_user)){
+    if(userIsUpdated(storage_user)){
         setUser(storage_user);
         if(!isUndefined(onSuccess))
             onSuccess(storage_user);
@@ -101,6 +101,7 @@ export function getUserFromLocalStorage(){
             return parsed_storage_user;
         }
     }
+    return emptyUser();
 }
 
 function fillUserUndefinedData(user){
@@ -132,7 +133,8 @@ export function getCurrentUserFromDB(setUser, onSuccess , onFailure){
     console.log("response status:", response.status)
     if (response.status !== okStatus) {
         reject(response.status);
-        onFailure();
+        if(!isUndefined(onFailure))
+            onFailure();
     } else {
         return new Promise(function(resolve, reject) {
         resolve(response.json());
@@ -263,10 +265,11 @@ export function getUserFromPropsOrFromSession(props, setUser){
 /**
  * 
  * @param {contains the email and password of the user that is willing to log in} user 
- * @param {a function that will be executed after a successful login} func 
+ * @param {a function that will be executed after a successful login. receives the user we read from the db} onSuccess 
+ * @param {a function that will be executed after failure} onFailure
  * tries to log in with the given user. saves the user in the session in case of successful login.
  */
-export function logIn(user, func){
+export function logIn(user, onSuccess, onFailure){
     fetch(server+'/user/'+user.email+'/'+user.password, {
         method: 'GET', // *GET, POST, PUT, DELETE, etc.
         headers: {
@@ -277,9 +280,9 @@ export function logIn(user, func){
         }).then(response => {
             console.log("response:", response)
             console.log("response status:", response.status)
-            func(response);
             if (response.status !== okStatus) {
                 reject(response.status);
+                onFailure();
             } else {
                 return new Promise(function(resolve, reject) {
                 resolve(response.json());
@@ -289,7 +292,7 @@ export function logIn(user, func){
                 if(!userIsUpdated(user)){
                     return;
                 }
-                
+                onSuccess(user);
                 socket.emit('login', {email: user.email,user_id: user.email, nickName: user.nickName});
                 console.log('frontend got data: ', user);
                 /** saving the user we just got to local storage, so next time we will access the user from local storage */
@@ -329,6 +332,8 @@ export function resetUnreadMessages(email){
 
 
 export function resetUnreadMessagesFromCertainUser(email, otherUserEmail){
+    if(isUndefined(email) || isUndefined(otherUserEmail) || email ==='' || otherUserEmail ==='')
+        return;
     fetch(server + '/user/resetUnReadMessagesFromCertainUser/'+email+'/'+otherUserEmail, {
         method: 'POST', // *GET, POST, PUT, DELETE, etc.
         headers: {
