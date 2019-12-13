@@ -45,7 +45,7 @@ export function getParticipatedGames(){
 
 
 const io = require('socket.io-client');
-export const socket = io(server);
+export const socket = io.connect(server, {query: "user_id="+getUserFromLocalStorage().email});
 
 
 /**
@@ -67,24 +67,59 @@ export function getCurrentUser(){
 export function getCurrentUserFromSession(user, setUser, onSuccess , onFailure){
     
     if(userIsUpdated(user)){
+        /*
         if(!isUndefined(onSuccess))
             onSuccess(user);
+            */
         return;
     }
     /** getting the current user from the local storage, if exists */
+    var storage_user = getUserFromLocalStorage();
+    if(!isUndefined(storage_user)){
+        setUser(storage_user);
+        if(!isUndefined(onSuccess))
+            onSuccess(storage_user);
+        return;
+    }
+    
+
+    getCurrentUserFromDB(setUser, onSuccess, onFailure);
+}
+
+
+/**
+ * read the user that was saved in the local storage and calls setUser with the user we found.
+ */
+export function getUserFromLocalStorage(){
+    console.log('entered getUserFromLocalStorage function');
     var storage_user = (localStorage.getItem(user_in_session_key));
     if(!isUndefined(storage_user)){
-        console.log('storage user: ', storage_user)
         var parsed_storage_user = JSON.parse(storage_user);
-        console.log('parsed_storage_user: ', parsed_storage_user)
         if(userIsUpdated(parsed_storage_user)){
+            fillUserUndefinedData(parsed_storage_user);
             console.log('used local storage to get: ', parsed_storage_user)
-            setUser(parsed_storage_user);
-            if(!isUndefined(onSuccess))
-                onSuccess(parsed_storage_user);
-            return;
+            return parsed_storage_user;
         }
     }
+}
+
+function fillUserUndefinedData(user){
+    if(isUndefined(user.true_sentences))
+        user.true_sentences = [];
+    if(isUndefined(user.false_sentences))
+        user.false_sentences = [];
+}
+
+
+/**
+ * reads the user from the db, even if he is in localStorage
+ * @param {the user that will be assigned with the user from the session} user 
+ * @param {a function that sets the user from the session to the user variable} setUser 
+ * @param {function that activates in case of failure} onFailure
+ * @param {function that activates in case of success} onSuccess
+ */
+export function getCurrentUserFromDB(setUser, onSuccess , onFailure){
+    
 
     fetch(server+'/getUserFromSession', {
     method: 'GET', // *GET, POST, PUT, DELETE, etc.
@@ -105,21 +140,27 @@ export function getCurrentUserFromSession(user, setUser, onSuccess , onFailure){
     }
     }).then(user => {
         if(!userIsUpdated(user)){
-            if(!isUndefined(onFailure))
             return;
         }
+        fillUserUndefinedData(user);
         if(!isUndefined(onSuccess))
             onSuccess(user);
         console.log('frontend got data: ', user);
         setUser(user);
         /** saving the user we just got to local storage, so next time we will access the user from local storage */
-        localStorage.setItem(user_in_session_key, JSON.stringify(user));
-        console.log('saved in local storage: ', user)
-        console.log('now we have in local storage: ',  JSON.parse(localStorage.getItem(user_in_session_key)));
+        updateUserInLocalStorage(user);
+        
 
     }, fail_status => {
     console.log("failed, status:", fail_status)
     });
+}
+
+
+export function updateUserInLocalStorage(user){
+    localStorage.setItem(user_in_session_key, JSON.stringify(user))
+    console.log('saved in local storage: ', user)
+    console.log('now we have in local storage: ',  JSON.parse(localStorage.getItem(user_in_session_key)));
 }
 
 export function logOut(){
@@ -160,7 +201,7 @@ export function userIsUpdated(user){
  * edits the user with the same user_.id and puts instead the given user
  */
 export function updateUserToDB(user){
-    localStorage.setItem(user_in_session_key, JSON.stringify(user))
+    updateUserInLocalStorage(user);
     fetch(server+'/userupdate/'+user._id, {
                 method: 'POST', // *GET, POST, PUT, DELETE, etc.
                 headers: {
@@ -180,8 +221,8 @@ export function emptyUser(){
         nickName: '',
         email: '',
         password: '',
-        truths: [],
-        lies: [],
+        true_sentences: [],
+        false_sentences: [],
         createdGames: [],
         participatedGames: []
     }
@@ -249,7 +290,7 @@ export function logIn(user, func){
                     return;
                 }
                 
-                socket.emit('login', {email: user.email, nickName: user.nickName});
+                socket.emit('login', {email: user.email,user_id: user.email, nickName: user.nickName});
                 console.log('frontend got data: ', user);
                 /** saving the user we just got to local storage, so next time we will access the user from local storage */
                 localStorage.setItem(user_in_session_key, JSON.stringify(user));
@@ -259,4 +300,70 @@ export function logIn(user, func){
             }, fail_status => {
             console.log("failed, status:", fail_status)
             });   
+}
+
+export function resetUnreadMessages(email){
+    fetch(server + '/user/resetUnReadMessages/'+email, {
+        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        credentials: 'include'
+        })
+    .then(response => {
+        console.log("response status:", response.status)
+        if (response.status !== okStatus) {
+            reject(response.status);
+        } else {
+            return new Promise(function(resolve, reject) {
+            resolve(response);
+            })
+        }
+    }, fail_status => {
+        console.log("failed, status:", fail_status);
+    });
+    var user = getUserFromLocalStorage();
+    user.unReadMessages = [];
+    updateUserInLocalStorage(user);
+}
+
+
+export function resetUnreadMessagesFromCertainUser(email, otherUserEmail){
+    fetch(server + '/user/resetUnReadMessagesFromCertainUser/'+email+'/'+otherUserEmail, {
+        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        credentials: 'include'
+        })
+    .then(response => {
+        console.log("response status:", response.status)
+        if (response.status !== okStatus) {
+            reject(response.status);
+        } else {
+            return new Promise(function(resolve, reject) {
+            resolve(response);
+            })
+        }
+    }, fail_status => {
+        console.log("failed, status:", fail_status);
+    });
+    var user = getUserFromLocalStorage();
+    user.unReadMessages = removeUnReadMessagesFromCertainUser(user, otherUserEmail)
+    updateUserInLocalStorage(user);
+}
+
+/**
+ * returns an array of all unReadMessages that were not written by otherUserEmail from user's unReadMessages
+ * @param {the user we read from} user 
+ * @param {the other user that the (first) given user's unReadMessages will be ereased from} otherUserEmail 
+ */
+export function removeUnReadMessagesFromCertainUser(user, otherUserEmail){
+    var unReadMessages = user.unReadMessages;
+    var newUnReadArray = []
+    for(let message of unReadMessages){
+        if(message.authorEmail !== otherUserEmail)
+            newUnReadArray.push(message);
+    }
+    return newUnReadArray;
 }

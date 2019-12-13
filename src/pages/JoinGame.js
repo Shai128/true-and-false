@@ -43,11 +43,11 @@ import {
 // import Lottie from "react-lottie";
 // import ReactLoading from "react-loading";
 // import "bootstrap/dist/css/bootstrap.css";
-
+import {ChatButton} from './../PagesUtils.js';
 const okStatus = 200;
 
 export function JoinGame(props){ 
-  
+  console.log('props: ', props);
   console.log ("props",props.location.InfoObject);
 
   // props contains: 
@@ -781,9 +781,7 @@ const handleClickInvitePlayer = (userThatGotInvitedID,userThatGotInvitedName) =>
                     </Grid>
 
                   <Grid item xs = {1}>
-                  <Button variant="contained" color="primary" fullWidth className={classes.button}>
-                      Chat
-                    </Button>
+                  <ChatButton email={row.email}/>
                     </Grid>
                     </Grid>
 

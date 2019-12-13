@@ -28,7 +28,7 @@ import ChatIcon from '@material-ui/icons/Chat';
 
 import App from './../App.js'
 import {
-    BrowserRouter as Router,
+    //BrowserRouter as Router,
     Switch,
     Route,
     Link,
@@ -43,7 +43,7 @@ import {LoginScreenHome as Home} from './LoginScreenHome.js';
 
 import {MyProfile} from './MyProfile.js';
 import {MySentences} from './MySentences.js';
-import {getCurrentUserFromSession as getCurrentUser, userIsUpdated, getUserFromProps, logOut, socket} from './../user';
+import {getCurrentUserFromSession as getCurrentUser, userIsUpdated,getCurrentUserFromDB ,getUserFromProps, logOut, socket, resetUnreadMessages, updateUserInLocalStorage} from './../user';
 import {DisplayLoading, PrintMessages} from './../PagesUtils';
 import { Chat } from './Chat.js';
 import {SignIn} from './../App.js'
@@ -135,7 +135,6 @@ const useStyles = makeStyles(theme => ({
 export function LoginScreenRouter(){
 
   return(
-  <Router>
   <Switch>
     
   <Route path ={'/SignIn'} component={SignIn} />
@@ -153,48 +152,51 @@ export function LoginScreenRouter(){
   </Switch>
 
 
-  </Router>
-  );
+);
 }
 function LoginScreen(props){
   const [currentUser, setCurrentUser] = React.useState(getUserFromProps(props));
   const [unreadMessages, setUnreadMessages] = React.useState([]);
   const [unRegisteredUser, setUnRegisteredUser] = React.useState(false);
-  getCurrentUser(currentUser, setCurrentUser,(u)=>{} , ()=>{setUnRegisteredUser(true)});
+  if(!userIsUpdated(currentUser))
+    getCurrentUserFromDB(setCurrentUser, (u)=>{setUnreadMessages(u.unReadMessages)}, ()=>{setUnRegisteredUser(true)});
   const [pageChange, setPageChange] = React.useState(false);
 
-  let browserHistory = createBrowserHistory();
 
+  let browserHistory = createBrowserHistory();
   
   let history = useHistory();
 
-  useEffect(() => {
-    if(!userIsUpdated(currentUser))
-      return;
-    let isCancelled = false;
+  const setSockets = (location)=>{
     socket.off(currentUser.email+'_chat_notification');
     socket.on(currentUser.email+'_chat_notification', function(data){
-      const path_array = browserHistory.location.pathname.split("/");
-      console.log('browserHistory: ', browserHistory);
-      console.log('history: ', history);
+      const path_array = location.pathname.split("/");
+      console.log('current location: ', location);
 
-      
       var other_user_email = path_array[path_array.length-1];
       if(path_array.length>1 && data.user.email === other_user_email && path_array[path_array.length-2] === 'ChatRoom')
         return;
       var new_message = {
-        writerEmail: data.user.email,
-        author: data.author,
-        content: data.messageContent
+        authorEmail: data.user.email,
+        authorName: data.authorName,
+        messageContent: data.messageContent
       };
-      if(!isCancelled){
-        setUnreadMessages(unreadMessages.concat(new_message));
-      }
-  })
-    return ()=>{
-      isCancelled = true;
-    }
-});
+      setUnreadMessages(unreadMessages.concat(new_message));
+      let user_copy = currentUser;
+      user_copy.unReadMessages = unreadMessages.concat(new_message);
+      updateUserInLocalStorage(user_copy);
+  })  
+}
+browserHistory.listen((location, action) => {
+  // location is an object like window.location
+  setSockets(location);
+  });
+
+  useEffect(() => {
+    if(!userIsUpdated(currentUser))
+      return;
+    setSockets(browserHistory.location);   
+    });
   const [open, setOpen] = React.useState(false);
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -311,7 +313,6 @@ function LoginScreen(props){
 
     return(
       <div>
-        <Router>
  <div className={classes.root}>
       <CssBaseline />
       <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
@@ -326,7 +327,11 @@ function LoginScreen(props){
             <MenuIcon />
           </IconButton>
   <Popup
-    onClose={()=>{setUnreadMessages([])}}
+    onClose={()=>{
+      setUnreadMessages([]);
+      resetUnreadMessages(currentUser.email); 
+      currentUser.unReadMessages =[];
+    }}
     trigger={
       <IconButton  edge="start" color="inherit" className={classes.menuButton}>
       <Badge badgeContent={unreadMessages.length} color="secondary">
@@ -389,7 +394,6 @@ function LoginScreen(props){
         <Switch>  
 
         <Route path={`${path}/ChatRoom/:email`} component = {Chat}/>  
-        <Route path={`/JoinGame`} exact component={JoinGame} user={currentUser} />
         <Route path="/TheGame" exact component={TheGame}/>
 
         
@@ -426,7 +430,6 @@ function LoginScreen(props){
         </main>
 
         </div>
-      </Router>
       </div>
     );
     
