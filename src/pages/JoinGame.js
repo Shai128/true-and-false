@@ -136,8 +136,6 @@ socket.on("userLeft", function(userInfo) {
        
 });
 
-       
-
 
 const [GotInvitationWindow, setGotInvitationWindow] = React.useState(false);
 let history = useHistory();
@@ -254,6 +252,7 @@ socket.on("InvitedToGameByUser", function(args) {
 
   </div>
   );
+
 
  function InitTheRoom(props){   
     fetch('http://localhost:8000/userList/' + props, { 
