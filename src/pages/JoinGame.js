@@ -115,7 +115,7 @@ socket.on("userLeft", function(userInfo) {
       /*
          userInfo: {email: ..., nickName:...}
       */
-     console.log("sending props: " + CurrentUser + CurrentRoom)
+     console.log("sending props: ",  CurrentUser,  CurrentRoom)
      history.push({
       pathname:'/TheGame',
       opponentId: userInfo.senderId,
@@ -152,7 +152,7 @@ const onAccept = () => {
       receiverId: SenderInfoID,
       })
       
-      console.log("sending props: " + CurrentUser + CurrentRoom)
+      console.log("sending props: ",  CurrentUser, CurrentRoom)
       history.push({
         pathname:'/TheGame',
         opponentId:SenderInfoID,

@@ -29,9 +29,9 @@ var guess_str, isCorrect, result;
 export function TheGame(props){
     let history = useHistory();
     const classes = AppUseStyles();
-    console.log("props: " + props.location.user + '\n' + props.loaction.room)
+    console.log("props: ", props)
     const user = props.location.user
-    const room = props.loaction.room
+    const room = props.location.room
     const opponentId = props.location.opponentId; /////////////////////// todo: change to const
     const [choosed, setChoosed] = React.useState(false);
     const [answered, setAnswered] = React.useState(false);
@@ -192,8 +192,8 @@ export function TheGame(props){
           </Grid>
 
           {choosed && !noMoreSentences && myturn &&
-          <Result guess={guess} ans={ans} opponentId={opponentId} correctCount={correctCount} questionsCount={questionsCount} user={user} room={room}
-          setChoosed={setChoosed} setMyturn={setMyturn} setQuestionsCount={setQuestionsCount} setCorrectCount={setCorrectCount}/>}
+          <Result guess={guess} ans={ans} opponentId={opponentId} correctCount={correctCount} questionsCount={questionsCount} user={user} room={room} history={history}
+          opponentId={opponentId} setChoosed={setChoosed} setMyturn={setMyturn} setQuestionsCount={setQuestionsCount} setCorrectCount={setCorrectCount}/>}
 
           {noMoreSentences && <div>
             <Grid item xs={12} sm={12}>
@@ -206,7 +206,7 @@ export function TheGame(props){
                 message: "endMatch",
                 args: {}
               });
-              //updateAfterMatchData(user, room)
+              updateAfterMatchData(user, room, history)
               }}
               >
                 end game
@@ -298,7 +298,12 @@ return (
             <Button id="EndGameBTN"
             variant="contained" color="secondary" fullWidth
             onClick={()=>{ /////////////////// todo: check implementation in backend
-              //updateAfterMatchData(props.user, props.room)
+              socket.emit('deliverMessage',{
+                receiverId: props.opponentId,
+                message: "endMatch",
+                args: {}
+              });
+              updateAfterMatchData(props.user, props.room, props.history)
             }}
             >
               end game
