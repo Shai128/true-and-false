@@ -4,9 +4,17 @@ import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
+import {JoinGame} from './JoinGame.js'
 
 import {useStyles as AppUseStyles} from './../App.js';
 import {Link} from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  useRouteMatch,
+  Redirect,
+  useHistory,
+} from "react-router-dom";
 
 
 import {socket} from './../user.js';
@@ -19,9 +27,11 @@ var trues, falses, seen;
 var guess_str, isCorrect, result;
 
 export function TheGame(props){
+    let history = useHistory();
     const classes = AppUseStyles();
-    // const user = props.location.user
-    // const room = props.loaction.room
+    console.log("props: " + props.location.user + '\n' + props.loaction.room)
+    const user = props.location.user
+    const room = props.loaction.room
     const opponentId = props.location.opponentId; /////////////////////// todo: change to const
     const [choosed, setChoosed] = React.useState(false);
     const [answered, setAnswered] = React.useState(false);
@@ -129,11 +139,7 @@ export function TheGame(props){
       //   room_id: props.location.roomId
       // });
 
-      updateAfterMatchData(props.location.user, props.location.room)
-
-      /**
-       * socket.emit('updateAfterMatchData', updatedUser)
-       */
+      updateAfterMatchData(user, room, history)
     });
 
     console.log("choosed2: " + choosed)
@@ -186,7 +192,7 @@ export function TheGame(props){
           </Grid>
 
           {choosed && !noMoreSentences && myturn &&
-          <Result guess={guess} ans={ans} opponentId={opponentId} correctCount={correctCount} questionsCount={questionsCount} //user={user} room={room}
+          <Result guess={guess} ans={ans} opponentId={opponentId} correctCount={correctCount} questionsCount={questionsCount} user={user} room={room}
           setChoosed={setChoosed} setMyturn={setMyturn} setQuestionsCount={setQuestionsCount} setCorrectCount={setCorrectCount}/>}
 
           {noMoreSentences && <div>
@@ -200,7 +206,7 @@ export function TheGame(props){
                 message: "endMatch",
                 args: {}
               });
-              updateAfterMatchData()
+              //updateAfterMatchData(user, room)
               }}
               >
                 end game
@@ -292,9 +298,7 @@ return (
             <Button id="EndGameBTN"
             variant="contained" color="secondary" fullWidth
             onClick={()=>{ /////////////////// todo: check implementation in backend
-              socket.emit('S_endMatch',{
-              user_id: props.opponentId
-            });
+              //updateAfterMatchData(props.user, props.room)
             }}
             >
               end game
@@ -335,11 +339,15 @@ function getSentence(){
   return {sentence: sentence, ans: ans};
 }
 
-function updateAfterMatchData(user, room){
+function updateAfterMatchData(user, room, history){
   socket.emit('updateAfterMatchData', {}) // todo: complete data
   // history.push({
   //   pathname:'/JoinGame',
   //   userObject: user,
   //   roomObject: room
   // })
+  history.push({
+    pathname: '/JoinGame',
+    InfoObject: {userObject: user, roomObject: room}
+  });
 }
