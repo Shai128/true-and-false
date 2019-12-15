@@ -50,22 +50,31 @@ export function TheGame(props){
       setQuestionsCount(0);
       setMyturn(props.location.turn);
       tmpMyturn = props.location.turn
-      // if (opponentId == "nadav@grinder.com"){ ////////////////////////// todo: change when integrating
-      //   setMyturn(false)
-      //   tmpMyturn = false
-      //   opponentId = "alon@grinder.com"
-      // }
-      // else{
-      //   opponentId = "nadav@grinder.com"
-      // }
       seen = props.location.user.already_seen_sentences;
       //seen = ["A true sentence 1", "A false sentence 2"];
-      trues = props.location.user.true_sentences;
+      // fetch('http://localhost:8000/userSentences/' + opponentId, { 
+      // method: 'GET', // *GET, POST, PUT, DELETE, etc.
+      // headers: {
+      //   'Content-Type': 'application/x-www-form-urlencoded'
+      // },
+      // credentials: 'include',
+      // }).then((response) =>{
+      //   if (response.status !== okStatus) {
+      //     reject(response.status)
+      //   } else {
+      //     return new Promise(function(resolve, reject) {
+      //       resolve(response.json());
+      //     })
+      //   }}).then(data => {      
+      //     trues = data.trues
+      //     falses = data.falses
+      //   })
+      trues = props.location.user.true_sentences; ///// todo: for ron, remove this line
       //trues = ["A true sentence 1", "A true sentence 2", "A true sentence 3"];
       trues = trues.filter(x => !seen.includes(x));
       //falses = props.location.user.false_sentences;
-      falses = ["A false sentence 1", "A false sentence 2", "A false sentence 3"];
-      //falses = falses.filter(x => !seen.includes(x));
+      falses = ["A false sentence 1", "A false sentence 2", "A false sentence 3"]; ///// todo: for ron, remove this line
+      //falses = falses.filter(x => !seen.includes(x)); //////// todo: for ron, add this line
     }
 
     // if (props.location.opponentId == "nadav@grinder.com"){ ////////////////////////// todo: change when integrating
@@ -345,7 +354,7 @@ function getSentence(){
 }
 
 function updateAfterMatchData(user, room, history){
-  socket.emit('updateAfterMatchData', {}) // todo: complete data
+  socket.emit('updateUserInRoom', {roomId: room.room_id, user}) // todo: complete data
   // history.push({
   //   pathname:'/JoinGame',
   //   userObject: user,
