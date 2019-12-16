@@ -101,13 +101,16 @@ socket.on("userJoined", function(userInfo) {
 
   
 socket.on("userLeft", function(userInfo) {
+  console.log("gottt")
     /*
        userInfo: {email: ..., nickName:...}
     */
-       var newPlayersAvailable = [...PlayersAvailable]
-       var index = newPlayersAvailable.indexOf(userInfo)
-       newPlayersAvailable.splice(index)
-       setPlayersAvailable(newPlayersAvailable)
+      //  var newPlayersAvailable = [...PlayersAvailable]
+      //  var index = newPlayersAvailable.indexOf(userInfo)
+      //  newPlayersAvailable.splice(index)
+      var newPlayersAvailable = [...PlayersAvailable]
+      newPlayersAvailable.filter(user => (user.email !== userInfo.email))
+      setPlayersAvailable(newPlayersAvailable)
      });
 
 
@@ -115,7 +118,7 @@ socket.on("userLeft", function(userInfo) {
       /*
          userInfo: {email: ..., nickName:...}
       */
-     console.log("currentuser: " + CurrentUser)
+     console.log("sending props: ",  CurrentUser,  CurrentRoom)
      history.push({
       pathname:'/TheGame',
       opponentId: userInfo.senderId,
@@ -126,21 +129,15 @@ socket.on("userLeft", function(userInfo) {
          
   });
 
-
-  socket.on("userDecline", function(userInfo) {
-    /*
-       userInfo: {email: ..., nickName:...}
-    */
-   history.push({
-    pathname: '/JoinGame',
-    InfoObject: props.location.InfoObject,
-  })  
-       
+socket.on("CancelInvitation", function(userInfo) {
+  console.log("got here")
+  /*
+     userInfo: {email: ..., nickName:...}
+  */
+ setGotInvitationWindow(false);
 });
 
-       
-
-
+      
 const [GotInvitationWindow, setGotInvitationWindow] = React.useState(false);
 let history = useHistory();
 const onAccept = () => {
@@ -151,6 +148,8 @@ const onAccept = () => {
       args: {},
       receiverId: SenderInfoID,
       })
+      
+      console.log("sending props: ",  CurrentUser, CurrentRoom)
       history.push({
         pathname:'/TheGame',
         opponentId:SenderInfoID,
@@ -168,17 +167,12 @@ const onDecline = () => {
       args: {},
       receiverId: SenderInfoID,
       })
-      history.push({
-        pathname: '/JoinGame',
-        InfoObject: props.location.InfoObject,
-      })  
+      setGotInvitationWindow(false);
  }
 
- //const [SenderInfo, setSenderInfo] = React.useState(emptyUser());
  const [SenderInfoID, setSenderInfoID] = React.useState(-1);
  const [SenderInfoName, setSenderInfoName] = React.useState("");
 
-// TO DO - RON!!!!!!!! - SEND USER INFO     
 socket.on("InvitedToGameByUser", function(args) { 
   setSenderInfoID(args.senderId);
   setSenderInfoName(args.senderName);
@@ -186,18 +180,68 @@ socket.on("InvitedToGameByUser", function(args) {
 })
 
  const leaveRoom = () => {
-  // var newPlayersAvailable = [...PlayersAvailable]
-  // var index = newPlayersAvailable.indexOf(userInfo.nickName)
-  // newPlayersAvailable.splice(index)
-  // setPlayersAvailable(newPlayersAvailable)
+ fetch('http://localhost:8000/leaveRoom/' + CurrentRoom.room_id, { 
+  method: 'GET', // *GET, POST, PUT, DELETE, etc.
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded'
+  },
+  credentials: 'include',
+}).then((response) =>{
+  if (response.status !== okStatus) {
+    reject(response.status)
+  } else {
+    return new Promise(function(resolve, reject) {
+      resolve(response.json());
+    })
+  }}).then(fail_status => {
+    console.log("failed. status: ", fail_status)
+  })
   history.push("/LoginScreen/Home"); // moves to home page
 };
 
 
+function PrintAnswerPlayerDialog(props){  
+
+  const {WindowOpen, setWindowOpen, onAccept, onDecline, SenderInfoName} = props;
+
+  return(
+      <Dialog open={WindowOpen} aria-labelledby="form-dialog-title">
+      <DialogTitle id="form-dialog-title"> {SenderInfoName} Invited you to play </DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+{/* 
+      <Grid container justify="center">
+      <InvitePlayerWaitingImage/>
+      </Grid> */}
+    
+      </DialogActions>
+
+    <Grid container justify="center" alignItems="center">
+        <Grid container justify="center">
+        <Button onClick={onAccept} color="primary">
+        Accept
+        </Button>
+        </Grid>
+
+        <Grid container justify="center">
+        <Button onClick={onDecline} color="primary">
+        Decline 
+        </Button>
+        </Grid>
+     </Grid>
+
+    </Dialog>
+
+  );
+}
+
   return (
     <div>  
 
-  <PrintAnswerPlayerDialog WindowOpen = {GotInvitationWindow} onAccept = {onAccept} onDecline = {onDecline} sender = {SenderInfoName}/> 
+  <PrintAnswerPlayerDialog WindowOpen = {GotInvitationWindow} setWindowOpen = {setGotInvitationWindow} onAccept = {onAccept} onDecline = {onDecline} sender = {SenderInfoName}/> 
       
   <Grid container spacing={2}>
   <Grid item xs={3}>
@@ -275,6 +319,18 @@ socket.on("InvitedToGameByUser", function(args) {
       }}).then(data => {      
         if (PlayersAvailable.length === 0 && data.PlayersAvailable !== undefined &&
           PlayersUnAvailable.length === 0 && data.PlayersUnAvailable !== undefined) {
+
+          var newPlayersAvailable1 = [...data.PlayersAvailable]
+          var index = (newPlayersAvailable1).indexOf({email:CurrentUser.email,nickname:CurrentUser.nickname})
+          newPlayersAvailable1.splice(index)
+          console.log("dan new -->", newPlayersAvailable1);
+         // setPlayersAvailable(newPlayersAvailable1)
+
+          // var newPlayersAvailable = [...data.PlayersAvailable]
+          // newPlayersAvailable.filter(user => (user.email != CurrentUser.email))
+         // setPlayersAvailable(newPlayersAvailable)
+         // console.log ("dan 1 new --- >", newPlayersAvailable);
+          console.log ("dan old --- >", data.PlayersAvailable);
           setPlayersAvailable(data.PlayersAvailable);
           setPlayersUnAvailable(data.PlayersUnAvailable);
         }
@@ -689,6 +745,56 @@ export function SwitchListSecondary() {
 
 export function PlayerListAvailable(props) {
 
+  
+socket.on("userDecline", function(userInfo) {
+  /*
+     userInfo: {email: ..., nickName:...}
+  */
+ setInvitePlayerWindowOpen(false);
+  
+});
+
+
+  function PrintInvitePlayerDialog(props){  
+
+    const {InvitePlayerWindowOpen, setInvitePlayerWindowOpen,userThatInvited} = props;
+  
+    const onCloseWindow = ()=>{
+      socket.emit('deliverMessage', {
+        message: 'CancelInvitation',
+        args: {},
+        receiverId: userThatInvited,
+       })
+      setInvitePlayerWindowOpen(false);
+    }
+  
+    return(
+        <Dialog open={InvitePlayerWindowOpen} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">Waiting for other player's response</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+  
+        <Grid container justify="center">
+        <InvitePlayerWaitingImage/>
+        </Grid>
+      
+        </DialogActions>
+  
+          <Grid container justify="center">
+          <Button onClick={onCloseWindow} color="primary">
+          Cancel the invitation
+          </Button>
+          </Grid>
+  
+      </Dialog>
+  
+    );
+  }
+  
+
 const [InvitePlayerWindowOpen, setInvitePlayerWindowOpen] = React.useState(false);
 
 const handleClickInvitePlayer = (userThatGotInvitedID,userThatGotInvitedName) => {
@@ -742,8 +848,9 @@ const handleClickInvitePlayer = (userThatGotInvitedID,userThatGotInvitedName) =>
           <TableBody>
             
             {PlayersAvailable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => {
-              
-              // console.log("rowwwwwwww->",row)
+
+                {/* <Avatar src = {firstLetter}>
+                </Avatar> */}
 
               return (
 
@@ -751,6 +858,7 @@ const handleClickInvitePlayer = (userThatGotInvitedID,userThatGotInvitedName) =>
                   {columnsForAvailable.map(column => { 
                            
                   const value = row.nickname;
+                  const firstLetter = value.substring(0,1)
 
                   return (
                   <TableCell key={row.email} align={column.align}>
@@ -763,8 +871,10 @@ const handleClickInvitePlayer = (userThatGotInvitedID,userThatGotInvitedName) =>
                   <Grid container justify="center" alignItems="center">
                   <Grid item xs = {1}>
 
-                  <Avatar src = {avatarPicAvailable[0]}>
+                  <Avatar>
+                   {firstLetter}
                   </Avatar>
+
                   </Grid>
                   <Grid item xs = {1}>
 
@@ -822,104 +932,4 @@ const handleClickInvitePlayer = (userThatGotInvitedID,userThatGotInvitedName) =>
     </Paper>
   );
 }
-
-
-function PrintInvitePlayerDialog(props){  
-
-  const {InvitePlayerWindowOpen, setInvitePlayerWindowOpen,userThatInvited} = props;
-
-  const onCloseWindow = ()=>{
-    socket.emit('deliverMessage', {
-      message: 'CancelInvitation',
-      args: {},
-      receiverId: userThatInvited,
-     })
-    setInvitePlayerWindowOpen(false);
-  }
-
-  return(
-      <Dialog open={InvitePlayerWindowOpen} aria-labelledby="form-dialog-title">
-      <DialogTitle id="form-dialog-title">Waiting for other player's response</DialogTitle>
-      <DialogContent>
-        <DialogContentText>
-        </DialogContentText>
-      </DialogContent>
-      <DialogActions>
-
-      <Grid container justify="center">
-      <InvitePlayerWaitingImage/>
-      </Grid>
-    
-      </DialogActions>
-
-        <Grid container justify="center">
-        <Button onClick={onCloseWindow} color="primary">
-        Cancel the invitation
-        </Button>
-        </Grid>
-
-    </Dialog>
-
-  );
-}
-
-
-
-function PrintAnswerPlayerDialog(props){  
-
-  const {WindowOpen, onAccept, onDecline, SenderInfoName} = props;
-
-  return(
-      <Dialog open={WindowOpen} aria-labelledby="form-dialog-title">
-      <DialogTitle id="form-dialog-title"> {SenderInfoName} Invited you to play </DialogTitle>
-      <DialogContent>
-        <DialogContentText>
-        </DialogContentText>
-      </DialogContent>
-      <DialogActions>
-{/* 
-      <Grid container justify="center">
-      <InvitePlayerWaitingImage/>
-      </Grid> */}
-    
-      </DialogActions>
-
-    <Grid container justify="center" alignItems="center">
-        <Grid container justify="center">
-        <Button onClick={onAccept} color="primary">
-        Accept
-        </Button>
-        </Grid>
-
-        <Grid container justify="center">
-        <Button onClick={onDecline} color="primary">
-        Decline 
-        </Button>
-        </Grid>
-     </Grid>
-
-    </Dialog>
-
-  );
-}
-
-
-// function leaveRoom(){  
-
-//   // const {playerEmail} = props;
- 
-//    return(
-//        <Dialog open={true} aria-labelledby="form-dialog-title">
-//        <DialogTitle id="form-dialog-title"> Log out from room </DialogTitle>
-//        <DialogContent>
-//          <DialogContentText>
-//          </DialogContentText>
-//        </DialogContent>
-//        <DialogActions>
-//        </DialogActions>
-//      </Dialog>
- 
-//    );
-//  }
-
 

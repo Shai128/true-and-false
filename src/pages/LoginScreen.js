@@ -28,7 +28,7 @@ import ChatIcon from '@material-ui/icons/Chat';
 
 import App from './../App.js'
 import {
-    //BrowserRouter as Router,
+    BrowserRouter as Router,
     Switch,
     Route,
     Link,
@@ -43,7 +43,7 @@ import {LoginScreenHome as Home} from './LoginScreenHome.js';
 
 import {MyProfile} from './MyProfile.js';
 import {MySentences} from './MySentences.js';
-import {userIsUpdated,getCurrentUserFromDB ,getUserFromProps, logOut, socket, resetUnreadMessages, updateUserInLocalStorage} from './../user';
+import {getCurrentUserFromSession as getCurrentUser, userIsUpdated,getCurrentUserFromDB ,getUserFromProps, logOut, socket, resetUnreadMessages, updateUserInLocalStorage} from './../user';
 import {DisplayLoading, PrintMessages} from './../PagesUtils';
 import { Chat } from './Chat.js';
 import {SignIn} from './../App.js'
@@ -135,6 +135,7 @@ const useStyles = makeStyles(theme => ({
 export function LoginScreenRouter(){
 
   return(
+    <Router>
   <Switch>
     
   <Route path ={'/SignIn'} component={SignIn} />
@@ -150,6 +151,7 @@ export function LoginScreenRouter(){
   <Route path="/TheGame" exact component={TheGame}/>
 
   </Switch>
+  </Router>
 
 
 );
