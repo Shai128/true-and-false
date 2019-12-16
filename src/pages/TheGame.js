@@ -18,9 +18,9 @@ import {
 
 
 import {socket} from './../user.js';
-// const io = require('socket.io-client');
-// const socket = io('http://localhost:8000');
 
+var matchPoints
+var totalPoints
 var sentenceCheck = ""
 var ans, flag = true;
 var trues, falses, seen;
@@ -45,40 +45,54 @@ export function TheGame(props){
     const [opIsCorrect, setOpIsCorrect] = React.useState("");
     
     var tmpMyturn = true
-    var points = correctCount*2 + (questionsCount - correctCount)*1
+    
     if(questionsCount == -1){
+      sentenceCheck = ""
+      matchPoints = 0
+      totalPoints = user.score
+      setCorrectCount(0)
       setQuestionsCount(0);
       setMyturn(props.location.turn);
       tmpMyturn = props.location.turn
-      // if (opponentId == "nadav@grinder.com"){ ////////////////////////// todo: change when integrating
-      //   setMyturn(false)
-      //   tmpMyturn = false
-      //   opponentId = "alon@grinder.com"
-      // }
-      // else{
-      //   opponentId = "nadav@grinder.com"
-      // }
-      seen = props.location.user.already_seen_sentences;
+      seen = user.already_seen_sentences;
       //seen = ["A true sentence 1", "A false sentence 2"];
-      trues = props.location.user.true_sentences;
-      //trues = ["A true sentence 1", "A true sentence 2", "A true sentence 3"];
+
+      // fetch('http://localhost:8000/userSentences/' + opponentId, { 
+      // method: 'GET', // *GET, POST, PUT, DELETE, etc.
+      // headers: {
+      //   'Content-Type': 'application/x-www-form-urlencoded'
+      // },
+      // credentials: 'include',
+      // }).then((response) =>{
+      //   if (response.status !== okStatus) {
+      //     reject(response.status)
+      //   } else {
+      //     return new Promise(function(resolve, reject) {
+      //       resolve(response.json());
+      //     })
+      //   }}).then(data => {      
+      //     trues = data.trues
+      //     falses = data.falses
+      //   })
+
+      // let opponentUser = props.location.room.users_in_room.find(user => user.email == opponentId)
+      // trues = opponentUser.true_sentences
+      // falses = opponentUser.false_sentences
+
+      //trues = props.location.user.true_sentences; 
+      trues = ["A true sentence 1", "A true sentence 2", "A true sentence 3"]; ///// todo: for ron, remove this line
       trues = trues.filter(x => !seen.includes(x));
       //falses = props.location.user.false_sentences;
-      falses = ["A false sentence 1", "A false sentence 2", "A false sentence 3"];
-      //falses = falses.filter(x => !seen.includes(x));
+      falses = ["A false sentence 1", "A false sentence 2", "A false sentence 3"]; ///// todo: for ron, remove this line
+      falses = falses.filter(x => !seen.includes(x));
     }
 
-    // if (props.location.opponentId == "nadav@grinder.com"){ ////////////////////////// todo: change when integrating
-    //   opponentId = "alon@grinder.com"
-    // }
-    // else{
-    //   opponentId = "nadav@grinder.com"
-    // }
+    matchPoints = correctCount*3 + (questionsCount - correctCount)*1
+    totalPoints = user.score + matchPoints
 
-    var op_guess, op_isCorrect;
-
-    //console.log('myturn: ' + myturn + " tmpMyturn: " + tmpMyturn + " sentenceCheck: " + sentenceCheck)
+    console.log('myturn: ', myturn, " tmpMyturn: ", tmpMyturn + " sentenceCheck: ", sentenceCheck)
     if(myturn && sentenceCheck == "" && tmpMyturn){
+      console.log("got here!")
       setChoosed(false);
       //console.log('sentence before chosing a new one: ' + sentence)
       let tmp = getSentence();
@@ -131,18 +145,9 @@ export function TheGame(props){
       //console.log("continueMatch2: " + myturn + sentence)
     });
 
-    socket.on('endMatch', function(){ /////////////////////// todo: check backend implementation
-      // socket.emit('S_updateAfterMatchData',{
-      //   user_id: opponentId,
-      //   sennSentences: seen,
-      //   pointsToAdd: points,
-      //   room_id: props.location.roomId
-      // });
-
-      updateAfterMatchData(user, room, history)
+    socket.on('endMatch', function(){
+      updateAfterMatchData(user, room, matchPoints, history)
     });
-
-    console.log("choosed2: " + choosed)
 
     return (
       <Container component="main" maxWidth="md">
@@ -151,8 +156,9 @@ export function TheGame(props){
           <Grid container>
             <Grid item xs={12} sm={6}>
               <Typography variant="h6" align="left" color="primary">
-                points in this round: {points}<br/>
-                correct answers in this round: {correctCount}/{questionsCount}
+                Your total points: {totalPoints}<br/>
+                Points in this round: {matchPoints}<br/>
+                Correct answers in this round: {correctCount}/{questionsCount}
               </Typography>
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -193,7 +199,7 @@ export function TheGame(props){
 
           {choosed && !noMoreSentences && myturn &&
           <Result guess={guess} ans={ans} opponentId={opponentId} correctCount={correctCount} questionsCount={questionsCount} user={user} room={room} history={history}
-          opponentId={opponentId} setChoosed={setChoosed} setMyturn={setMyturn} setQuestionsCount={setQuestionsCount} setCorrectCount={setCorrectCount}/>}
+          opponentId={opponentId} matchPoints={matchPoints} setChoosed={setChoosed} setMyturn={setMyturn} setQuestionsCount={setQuestionsCount} setCorrectCount={setCorrectCount}/>}
 
           {noMoreSentences && <div>
             <Grid item xs={12} sm={12}>
@@ -206,7 +212,7 @@ export function TheGame(props){
                 message: "endMatch",
                 args: {}
               });
-              updateAfterMatchData(user, room, history)
+              updateAfterMatchData(user, room, matchPoints, history)
               }}
               >
                 end game
@@ -303,7 +309,7 @@ return (
                 message: "endMatch",
                 args: {}
               });
-              updateAfterMatchData(props.user, props.room, props.history)
+              updateAfterMatchData(props.user, props.room, props.matchPoints, props.history)
             }}
             >
               end game
@@ -344,15 +350,16 @@ function getSentence(){
   return {sentence: sentence, ans: ans};
 }
 
-function updateAfterMatchData(user, room, history){
-  socket.emit('updateAfterMatchData', {}) // todo: complete data
-  // history.push({
-  //   pathname:'/JoinGame',
-  //   userObject: user,
-  //   roomObject: room
-  // })
+function updateAfterMatchData(user, room, matchPoints, history){
+  console.log("update after user points: ", matchPoints)
+
+  let newUser = user
+  newUser.already_seen_sentences = seen
+  newUser.score += matchPoints 
+  socket.emit('updateUserInRoom', {roomId: room.room_id, userId: newUser}) // todo: complete data
+
   history.push({
     pathname: '/JoinGame',
-    InfoObject: {userObject: user, roomObject: room}
+    InfoObject: {userObject: newUser, roomObject: room}
   });
 }
