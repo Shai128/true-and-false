@@ -47,6 +47,7 @@ import {ChatButton} from './../PagesUtils.js';
 const okStatus = 200;
 
 export function JoinGame(props){ 
+
   console.log('props: ', props);
   console.log ("props",props.location.InfoObject);
 
@@ -68,6 +69,8 @@ export function JoinGame(props){
   const [CurrentRoom, setCurrentRoom] = useState(props.location.InfoObject.roomObject);
   const [CurrentUser, setCurrentUser] = useState(props.location.InfoObject.userObject);
 
+  const [roomUpdated, setRoomUpdated] = useState(false);
+
 
   const [PlayersAvailable, setPlayersAvailable] = useState([]);
   const [PlayersUnAvailable, setPlayersUnAvailable] = useState([]);
@@ -84,8 +87,8 @@ const useStylesRoomName = makeStyles(theme => ({
 }));
 
 const classes = useStylesRoomName();
-
-InitTheRoom(CurrentRoom.room_id);
+if(!roomUpdated)
+  InitTheRoom(CurrentRoom.room_id, setRoomUpdated);
 
 socket.on("userJoined", function(userInfo) {
  /*
@@ -240,6 +243,7 @@ socket.on("InvitedToGameByUser", function(args) {
           PlayersUnAvailable.length === 0 && data.PlayersUnAvailable !== undefined) {
           setPlayersAvailable(data.PlayersAvailable);
           setPlayersUnAvailable(data.PlayersUnAvailable);
+          setRoomUpdated(true);
         }
       }, fail_status => {
         console.log("failed. status: ", fail_status)
