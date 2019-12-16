@@ -15,7 +15,8 @@ const {
   removeUserFromRoom,
   getRoomSize,
   deleteRoomById,
-  findUserByEmailInRoomByRoomID
+  findUserByEmailInRoomByRoomID,
+  updateRoom
 } = require("../db/rooms") //imports all room functions
 
 const {
@@ -476,6 +477,8 @@ io.on('connection', function (socket) {
   })
 
 
+
+
   /**
    * Passes a message from one user to another.
    * 
@@ -515,6 +518,42 @@ io.on('connection', function (socket) {
     logDiv()
   });
 
+  /**
+   * updates an existing user in a room with after match data
+   * i.e. updates it's seen sentences and score.
+   * parameter type:
+   * data = {
+   *  roomId: ... // id of room in which user is located
+   *  user: ...  // user to update
+   * }
+   */
+  socket.on('updateUserInRoom', function(data) {
+    logDiv('updateUserInRoom')
+    console.log('updating user', data.user.email, 'in room', data.roomId)
+    findRoomById(
+      data.roomId,
+      (roomObject) => {
+        // update only the correct user in the room
+        roomObject.users_in_room.map(
+          (userObject) => {
+            return ((userObject.email === data.user.email) ? 
+            data.user : userObject)
+          }
+        )
+        
+        // write back the room
+        updateRoom(
+          roomObject, 
+          (success) => {
+            console.log("success")
+          },
+          (err) => console.log(err)
+          )
+
+      },
+      (err) => console.log(err),
+      )
+  })
 
 /**
  * adding the message to the specific chat list between the two users
@@ -535,139 +574,6 @@ function saveMessageInDB(userEmail, message){
 function addMessageToRecentMessagesInDB(userEmail, message){
 
 }
-
-
-
-/*
-  socket.on('S_openRoom', function (data) {
-    //var roomArray = //todo- get roomArray from database
-    var r;
-    do {
-      r = Math.floor(Math.random() * 1000) + 1;
-    }
-    while (roomArray[r]);
-    roomArray[r] = 1;
-    //todo- update roomArrayTo database
-    var room = {
-      roomID: r,
-      roomName: data.roomName,
-      users: [data.user]
-    }
-    //todo- add room to the database
-    io.sockets.connected[data.user.socketID].emit('C_roomOpened', room.roomID)
-  })*/
-
-  // socket.on('S_joinRoom', function (data) {
-  //   //var room = //todo- get room from database with data.roomID
-
-  //   //if(couldnt find room){
-  //   //  io.sockets.connected[data.user.socketID].emit('C_wrongRoomID');
-  //   //}
-  //   var isTaken = false;
-  //   for (let user of room.users) {
-  //     if (user.gameNickName == data.nickName) {
-  //       io.sockets.connected[data.user.socketID].emit('C_nickNameTaken');
-  //       isTaken = true;
-  //       break
-  //     }
-  //   }
-
-  //   if (isTaken == false) {
-
-
-  //     for (let user of room.users) {
-  //       io.sockets.connected[data.user.socketID].emit('C_someonejoinedRoom', data.user);
-  //     }
-
-  //     room.users.push(data.user);
-  //     //todo- update database with updated room
-
-  //     io.sockets.connected[data.user.socketID].emit('C_joinedRoom', room);
-
-
-  //   }
-  // });
-
-  // socket.on('S_leaveRoom', function (data) {
-  //   //handle when a player leaves a room
-  //   io.sockets.connected[data.user.socketID].emit('C_chat', data);
-  //   io.sockets.connected[data.receiverUser.socketID].emit('C_chat', data);
-  // })
-
-
-
-
-
-
-  //when a player clicks on another player to start a match.
-  //data has sender, receiver, roomID
-//   socket.on('S_invitePlayerForMatch', function (data) {
-//     io.sockets.connected[data.receiver.socketID].emit('C_invitationToMatch', data);
-//   })
-
-//   //when a player responds to another player's match invitation.
-//   //data has sender, receiver, roomID, accepted (boolean)
-//   socket.on('S_matchInvitationResponse', function (data) {
-//     if(data.accepted == true){
-//       io.sockets.connected[data.receiver.socketID].emit('C_matchInvitationAccepted', data);
-//     }
-//     else{
-//       io.sockets.connected[data.receiver.socketID].emit('C_matchInvitationRejected', data);
-//     }
-//   })
-
-
-// var data = {
-//   sender: user,
-//   receiver: other_user,
-//   roomid: roomid
-// }
-//   socket.emit('S_invitePlayerForChat', data);
-
-
-// socket.on('C_invitationToChat', function (data){
-
-// })
-
-
-//   //when a player invites another player to chat.
-//   //data has sender, receiver, roomID
-//   socket.on('S_invitePlayerForChat', function (data) {
-//     io.sockets.connected[data.receiver.socketID].emit('C_invitationToChat', data);
-//   })
-
-//   //when a player responds to another player's match invitation.
-//   //data has sender, receiver, roomID, accepted (boolean)
-//   socket.on('S_chatInvitationResponse', function (data) {
-//     if(data.accepted == true){
-//       io.sockets.connected[data.receiver.socketID].emit('C_chatInvitationAccepted', data);
-//     }
-//     else{
-//       io.sockets.connected[data.receiver.socketID].emit('C_chatInvitationRejected', data);
-//     }
-//   })
-
-
-
-//   //when 2 players agree to play a game
-//   //data has player1, player2, roomID
-//   socket.on('S_matchStart', function (data) {
-//     for (let user of getRoomFromDatabase(data.roomID).users) {
-//             io.sockets.connected[data.user.socketID].emit('C_matchStarted', data.user);
-//     }
-//   })
-
-
-//   //when a player leaves during a match
-//   //data has sender, receiver, roomID
-//   socket.on('S_leaveMatch', function (data) {
-//     io.sockets.connected[data.receiver.socketID].emit('C_opponentLeftMatch', data);
-//   })
-//  //when a player leaves during chat
-//   //data has sender, receiver, roomID
-//   socket.on('S_leaveChat', function (data) {
-//     io.sockets.connected[data.receiver.socketID].emit('C_opponentLeftChat', data);
-//   })
 
   socket.on('disconnect', function () {
     logDiv('new disconnect')
