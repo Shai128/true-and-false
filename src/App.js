@@ -257,6 +257,7 @@ function SignUp() {
                 body: 'json=' + JSON.stringify(user)
               }).then( (data) =>{
                 logIn(user, (data)=>{
+                  // todo: check if the email is already in the db!!
                   console.log('frontend got data: ', data);
                   if(data.status === okStatus ){
                     history.push("/LoginScreen/MySentences");

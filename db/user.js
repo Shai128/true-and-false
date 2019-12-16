@@ -3,6 +3,7 @@ const{isUndefined, removeUnReadMessagesFromCertainUser}=require("../src/Utils")
 const salt = '' //todo: change to a real good salt
 const iterations = 1000;
 const LAST_MESSAGES_LIMIT=100
+const USER_ALREADY_EXISTS = 'user already exists error'
 const userSchema= new mongoose.Schema(
     { 
         email:String,
@@ -49,25 +50,31 @@ const userModel = mongoose.model('users',userSchema) //creating the class userMo
  * @param {function: what to do if the operation failed} failure 
  */
 function createUser(user,success,failure){
-    let hashedPassword = user.password;
-    const newUser = new userModel({
-        password: hashedPassword,
-        email: user.email,
-        salt: salt,
-        iterations: iterations,
-        nickName: user.nickName,
-        firstName: user.firstName, 
-        //games: {} // creating a user with no games
-                                 });
-    //saves the user in the db
-    console.log("entered");
-    newUser.save((err)=>{
-        if(err)
-            failure(err)
-        else 
-            success()
+    userModel.findOne({ email: user.email }).exec(function (err, dbUser) {
+    if(err) {
+        let hashedPassword = user.password;
+        const newUser = new userModel({
+            password: hashedPassword,
+            email: user.email,
+            salt: salt,
+            iterations: iterations,
+            nickName: user.nickName,
+            firstName: user.firstName, 
+            //games: {} // creating a user with no games
+                                    });
+        //saves the user in the db
+        newUser.save((err)=>{
+            if(err)
+                failure(err)
+            else 
+                success()
+        })
+    }
+    else
+        failure(USER_ALREADY_EXISTS)
     })
 }
+
 async function updateLastActiveAt(email,date,success,fail){
     console.log(date);
     userModel.findOneAndUpdate({email: email}, { $set:{ last_active_at :  date }},(err,doc)=>{
@@ -145,10 +152,6 @@ async function removeUnReadMessagesFromCertainUserInDB(email, otherUserEmail, su
    
         if(err) fail('User with email'+email+'does not exist');
         else{
-        console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-        console.log('removeUnReadMessagesFromCertainUserInDB')
-        console.log('removing data from user: ', user)
-        console.log('other user email: ', otherUserEmail)
 
         unReadMessages = removeUnReadMessagesFromCertainUser(user, otherUserEmail)
         userModel.findOneAndUpdate({email: email}, { $set:{unReadMessages:unReadMessages}},
