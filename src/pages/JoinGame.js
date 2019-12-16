@@ -849,12 +849,16 @@ const handleClickInvitePlayer = (userThatGotInvitedID,userThatGotInvitedName) =>
             
             {PlayersAvailable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => {
 
+                {/* <Avatar src = {firstLetter}>
+                </Avatar> */}
+
               return (
 
                 <TableRow hover role="checkbox" tabIndex={-1} key={row.email}>
                   {columnsForAvailable.map(column => { 
                            
                   const value = row.nickname;
+                  const firstLetter = value.substring(0,1)
 
                   return (
                   <TableCell key={row.email} align={column.align}>
@@ -867,8 +871,10 @@ const handleClickInvitePlayer = (userThatGotInvitedID,userThatGotInvitedName) =>
                   <Grid container justify="center" alignItems="center">
                   <Grid item xs = {1}>
 
-                  <Avatar src = {avatarPicAvailable[0]}>
+                  <Avatar>
+                   {firstLetter}
                   </Avatar>
+
                   </Grid>
                   <Grid item xs = {1}>
 
