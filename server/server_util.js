@@ -1,3 +1,5 @@
+const{isUndefined}=require("../src/Utils")
+
 /**
  * Selects a random sentence from a users truths and lies.
  * @param {*} user The subject of the true/lie sentence
@@ -61,8 +63,12 @@ function endSession(req, res) {
 function getIdentifierFromSession(req, success, failure) {
   logDiv("getIdentifierFromsEssion");
   console.log("session:",req.session)
-  const id = req.session.userInfo.email;
-  if (!id) {  failure("session does not exist") ;logDiv();} else { 
+
+  if (isUndefined(req.session.userInfo) || !req.session.userInfo.email) {  
+    failure("session does not exist") ;
+    logDiv();
+  } else { 
+    const id = req.session.userInfo.email;
     console.log("id from session:", id)
     logDiv();
     success(id) 

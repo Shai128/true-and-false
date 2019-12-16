@@ -24,7 +24,7 @@ import {Chat as ChatRoom} from './pages/Chat.js';
 import {JoinGame} from './pages/JoinGame.js';
 import {PrintJoinGameDialog, DisplayLoading, AutoRedirectToLoginScreenIfUserInSession} from './PagesUtils.js';
 import {okStatus, validEmail, passwordIsStrongEnough, isUndefined} from './Utils.js'
-import {emptyUser, logIn} from './user.js'
+import {emptyUser, logIn, validOldPassword} from './user.js'
 //import { createBrowserHistory } from '../../../AppData/Local/Microsoft/TypeScript/3.6/node_modules/@types/history';
 function Copyright() {
   return (
@@ -107,11 +107,13 @@ function SignUp() {
   const [user, setUser] = useState(emptyUser);
   const initMessages = {
     errorPassword: false,
+    errorConfirmPassword: false,
     errorFirstName: false,
     errorEmail: false,
     passwordHelperText: '',
     firstNameHelperText: '',
-    emailHelperText: ''
+    emailHelperText: '',
+    confirmPasswordHelerText: '',
   }
   const [textsMessages, setTextsMessages] = React.useState(initMessages);
   const updateField = e => {
@@ -157,7 +159,14 @@ function SignUp() {
       }
       if(isUndefined(user.firstName) || user.firstName  === ''){
         newTextsMessages.errorFirstName = true;
-        newTextsMessages.firstNameHelperText = "please provide a firstName"
+        newTextsMessages.firstNameHelperText = "please provide a firstName";
+        //changeTextMessage(true, errorFirstName, "please provide a firstName", firstNameHelperText);
+        isValid= false;
+      }
+      if(user.confirmPassword !== user.password){
+        newTextsMessages.errorPassword = true;
+        newTextsMessages.errorConfirmPassword = true;
+        newTextsMessages.confirmPasswordHelerText = "passwords does not match";
         //changeTextMessage(true, errorFirstName, "please provide a firstName", firstNameHelperText);
         isValid= false;
       }
@@ -235,6 +244,23 @@ function SignUp() {
               />
             </Grid>
 
+            <Grid item xs={12}>
+              <TextField
+                error={textsMessages.errorConfirmPassword}
+                helperText = {textsMessages.confirmPasswordHelerText}
+                variant="outlined"
+                required
+                fullWidth
+                name="confirmPassword"
+                label="Confirm Password"
+                type="password"
+                id="confirmPassword"
+                autoComplete="current-password"
+                onChange={updateField}
+              />
+            </Grid>
+
+
           </Grid>
           <Button
             //type="submit"
@@ -248,6 +274,7 @@ function SignUp() {
               // let data = new FormData();
               // data.append( "json", JSON.stringify(user));
               
+
               fetch('http://localhost:8000/user', {
                 method: 'POST', // *GET, POST, PUT, DELETE, etc.
                 headers: {
@@ -558,6 +585,7 @@ export function SignIn() {
                             history.push("/LoginScreen");
                       },
                        ()=>{ // onFailure funciton
+                        setIsLoading(false);
                         setIsWrongLogin(true);
                        });
 

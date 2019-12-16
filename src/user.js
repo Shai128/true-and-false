@@ -166,6 +166,7 @@ export function updateUserInLocalStorage(user){
 }
 
 export function logOut(){
+    socket.emit("logout");
     fetch(server + '/logout', {
         method: 'GET', // *GET, POST, PUT, DELETE, etc.
         headers: {
@@ -226,7 +227,8 @@ export function emptyUser(){
         true_sentences: [],
         false_sentences: [],
         createdGames: [],
-        participatedGames: []
+        participatedGames: [],
+        confirmPassword: '',
     }
 }
 
@@ -372,3 +374,9 @@ export function removeUnReadMessagesFromCertainUser(user, otherUserEmail){
     }
     return newUnReadArray;
 }
+
+
+export function validOldPassword(oldPassword, enteredOldPassword){
+    return oldPassword === enteredOldPassword // todo: hash the entered old password
+  }
+  

@@ -15,7 +15,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
 import {useStyles as AppUseStyles} from './../App.js';
-import {getCurrentUserFromSession as getCurrentUser, updateUserToDB, getUserFromProps} from './../user.js'
+import {getCurrentUserFromSession as getCurrentUser, updateUserToDB, getUserFromProps, validOldPassword} from './../user.js'
 import {passwordIsStrongEnough } from './../Utils.js'
 const useButtonStyles = makeStyles({
     root: {
@@ -327,9 +327,6 @@ function PrintChangePassword(props){
 
 }
 
-function validOldPassword(oldPassword, enteredOldPassword){
-  return oldPassword === enteredOldPassword // todo: hash the entered old password
-}
 
 
 
