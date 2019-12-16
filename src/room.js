@@ -30,7 +30,6 @@ export function createRoom(roomName, currentuser, currentGameNickName, history){
                 pathname: '/JoinGame',
                 InfoObject: roomAndUserObject,
             });
-            //todo: redirect to Dan's page with the given roomID and the user! H-A-L-I-F!
         }, fail_status => {
         console.log("failed, status:", fail_status)
         });

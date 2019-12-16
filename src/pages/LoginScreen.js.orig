@@ -393,11 +393,15 @@ browserHistory.listen((location, action) => {
 
         
         <RedirectToHomeIfNeeded url={url} />
+        
         <Switch>  
 
         <Route path={`${path}/ChatRoom/:email`} component = {Chat}/>  
+<<<<<<< HEAD
         <Route path={`/JoinGame`} exact component={JoinGame} user={currentUser} />
         <Route path="/TheGame" exact component={TheGame}/>
+=======
+>>>>>>> origin/almost_final_for_merg_dan
 
         
         <Route path="/SignIn">

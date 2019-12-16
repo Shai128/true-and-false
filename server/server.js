@@ -18,8 +18,9 @@ const {
   findRoomById,
   getAvailableUsers,
   getUnAvailableUsers,
-  removeUserFromRoom,
+  deleteUserByEmailInRoomByRoomID,
   getRoomSize,
+  updateRoom,
   deleteRoomById,
   changeUserAvailability,
   findUserByEmailInRoomByRoomID
@@ -127,6 +128,7 @@ app.get('/logout', (req, res) => {
     (userInfo) => {
       console.log("user:", userInfo.email, "is logging out")
       req.session.userInfo = {}
+      console.log("updates userInfo5: {}", req.session.userInfo)
       res.status(200).send("successfuly logged out")
     },
     (err) => standardErrorHandling(res, err)
@@ -151,10 +153,12 @@ function serverLoginUser(req, res) {
   findUser(data,
     (found_user)=>{
       if (found_user.password === data.password) { // TODO: should later change to hash(password)
+      //  console.log("data", data, "foundUser:", found_user)
         req.session.userInfo = {
-          email: data["email"],
-          nickName: data["nickName"]
+          email: found_user["email"],
+          nickName: found_user["nickName"]
         }
+        console.log("updated userInfo1", req.session.userInfo)
       
         console.log('saved email:', data['email'])
         console.log("successfuly returned user: " + found_user.get('email'));
@@ -288,6 +292,12 @@ function  serverAddUserToRoom(req, res, roomId) {
             roomId,
             (room_object) => {
               console.log("user is already in room")
+              var userSocket = findSocketByUserId(userInfo.email)
+              // console.log("user socket", userSocket, "found of user:", userInfo.email)
+              if (userSocket !== undefined) {
+                userSocket.join(roomId.toString())
+                console.log("added the user's", userInfo.email, "socket to room", roomId.toString())
+              }
               res.status(200).send(JSON.stringify({
                 userObject: found_user_object,
                 roomObject: room_object
@@ -315,6 +325,10 @@ function  serverAddUserToRoom(req, res, roomId) {
                 console.log("added the user's", userInfo.email, "socket to room", roomId.toString())
               }
               // notify all other users in the room
+              console.log("emitting a message to room", roomId, "about player join", userInfo)
+              io.in(roomId).clients((err, clients) => {
+                console.log("clients of room:", clients); // an array containing socket ids in 'room3'
+              });
               io.to(roomId).emit('userJoined', userInfo)
             },
             (err) => standardErrorHandling(res, err)
@@ -337,7 +351,7 @@ app.get('/leaveRoom/:roomId', (req, res) => {
   getUserInfoFromSession(
     req,
     (userInfo) => {
-      removeUserFromRoom(
+      deleteUserByEmailInRoomByRoomID(
         roomId,
         userInfo.email, 
         (succ) => {
@@ -353,6 +367,7 @@ app.get('/leaveRoom/:roomId', (req, res) => {
                 deleteRoomById(roomId, () => {}, (err) => console.log(err))
               } else {
                 // notify users in room about leaving
+                console.log("emitting a message to room", roomId, "about player leave", userInfo)
                 io.to(roomId).emit('userLeft', userInfo)
               }
             },
@@ -443,10 +458,13 @@ io.on('connection', function (socket) {
   console.log("all sockets so far:", Object.keys(io.sockets.sockets))
   logDiv()
 
-  socket.handshake.session.userInfo = {email: socket.request._query['user_id']}
+  if(socket.handshake.session.userInfo === undefined) {
+    socket.handshake.session.userInfo = {}
+  }
+  socket.handshake.session.userInfo.email = socket.request._query['user_id']
   socket.handshake.session.save();
+  console.log("updated userInfo2 (socket)", socket.handshake.session.userInfo)
 
-  console.log("after socket update:", socket.handshake.session.userInfo)
   // If the user is already in a room - subscribe to that room with his new socket
   findUser(
     {email: socket.handshake.session.userInfo.email},
@@ -459,7 +477,7 @@ io.on('connection', function (socket) {
   socket.on("login", function(userInfo) {
     logDiv("socket login")
     console.log(userInfo.email + " has logged in");
-    console.log("full info:", userInfo)
+    console.log("updated userInfo3 (socket):", userInfo)
     socket.handshake.session.userInfo = userInfo;
     socket.handshake.session.save();
     logDiv();
@@ -475,6 +493,7 @@ io.on('connection', function (socket) {
   socket.on('chat', function(data){
     console.log(data.messageContent + " was written");
     console.log(socket.handshake.session.userInfo);
+    console.log("updates userInfo4 (socket)", data)
     socket.handshake.session.userInfo = data;
     socket.handshake.session.save();
     
@@ -561,139 +580,42 @@ function addMessageUnReadInDB(userEmail, message, otherUserEmail){
   message_copy.delivery_timestamp = new Date();
   addUnReadMessage(userEmail, message_copy, ()=>{}, (err)=>{console.log(err)});
 }
+ /**
+   * updates an existing user in a room with after match data
+   * i.e. updates it's seen sentences and score.
+   * parameter type:
+   * data = {
+   *  roomId: ... // id of room in which user is located
+   *  user: ...  // user to update
+   * }
+   */
+  socket.on('updateUserInRoom', function(data) {
+    logDiv('updateUserInRoom')
+    console.log('updating user', data.user.email, 'in room', data.roomId)
+    findRoomById(
+      data.roomId,
+      (roomObject) => {
+        // update only the correct user in the room
+        roomObject.users_in_room.map(
+          (userObject) => {
+            return ((userObject.email === data.user.email) ? 
+            data.user : userObject)
+          }
+        )
+        
+        // write back the room
+        updateRoom(
+          roomObject, 
+          (success) => {
+            console.log("success")
+          },
+          (err) => console.log(err)
+          )
 
-
-
-/*
-  socket.on('S_openRoom', function (data) {
-    //var roomArray = //todo- get roomArray from database
-    var r;
-    do {
-      r = Math.floor(Math.random() * 1000) + 1;
-    }
-    while (roomArray[r]);
-    roomArray[r] = 1;
-    //todo- update roomArrayTo database
-    var room = {
-      roomID: r,
-      roomName: data.roomName,
-      users: [data.user]
-    }
-    //todo- add room to the database
-    io.sockets.connected[data.user.socketID].emit('C_roomOpened', room.roomID)
-  })*/
-
-  // socket.on('S_joinRoom', function (data) {
-  //   //var room = //todo- get room from database with data.roomID
-
-  //   //if(couldnt find room){
-  //   //  io.sockets.connected[data.user.socketID].emit('C_wrongRoomID');
-  //   //}
-  //   var isTaken = false;
-  //   for (let user of room.users) {
-  //     if (user.gameNickName == data.nickName) {
-  //       io.sockets.connected[data.user.socketID].emit('C_nickNameTaken');
-  //       isTaken = true;
-  //       break
-  //     }
-  //   }
-
-  //   if (isTaken == false) {
-
-
-  //     for (let user of room.users) {
-  //       io.sockets.connected[data.user.socketID].emit('C_someonejoinedRoom', data.user);
-  //     }
-
-  //     room.users.push(data.user);
-  //     //todo- update database with updated room
-
-  //     io.sockets.connected[data.user.socketID].emit('C_joinedRoom', room);
-
-
-  //   }
-  // });
-
-  // socket.on('S_leaveRoom', function (data) {
-  //   //handle when a player leaves a room
-  //   io.sockets.connected[data.user.socketID].emit('C_chat', data);
-  //   io.sockets.connected[data.receiverUser.socketID].emit('C_chat', data);
-  // })
-
-
-
-
-
-
-  //when a player clicks on another player to start a match.
-  //data has sender, receiver, roomID
-//   socket.on('S_invitePlayerForMatch', function (data) {
-//     io.sockets.connected[data.receiver.socketID].emit('C_invitationToMatch', data);
-//   })
-
-//   //when a player responds to another player's match invitation.
-//   //data has sender, receiver, roomID, accepted (boolean)
-//   socket.on('S_matchInvitationResponse', function (data) {
-//     if(data.accepted == true){
-//       io.sockets.connected[data.receiver.socketID].emit('C_matchInvitationAccepted', data);
-//     }
-//     else{
-//       io.sockets.connected[data.receiver.socketID].emit('C_matchInvitationRejected', data);
-//     }
-//   })
-
-
-// var data = {
-//   sender: user,
-//   receiver: other_user,
-//   roomid: roomid
-// }
-//   socket.emit('S_invitePlayerForChat', data);
-
-
-// socket.on('C_invitationToChat', function (data){
-
-// })
-
-
-//   //when a player invites another player to chat.
-//   //data has sender, receiver, roomID
-//   socket.on('S_invitePlayerForChat', function (data) {
-//     io.sockets.connected[data.receiver.socketID].emit('C_invitationToChat', data);
-//   })
-
-//   //when a player responds to another player's match invitation.
-//   //data has sender, receiver, roomID, accepted (boolean)
-//   socket.on('S_chatInvitationResponse', function (data) {
-//     if(data.accepted == true){
-//       io.sockets.connected[data.receiver.socketID].emit('C_chatInvitationAccepted', data);
-//     }
-//     else{
-//       io.sockets.connected[data.receiver.socketID].emit('C_chatInvitationRejected', data);
-//     }
-//   })
-
-
-
-//   //when 2 players agree to play a game
-//   //data has player1, player2, roomID
-//   socket.on('S_matchStart', function (data) {
-//     for (let user of getRoomFromDatabase(data.roomID).users) {
-//             io.sockets.connected[data.user.socketID].emit('C_matchStarted', data.user);
-//     }
-//   })
-
-
-//   //when a player leaves during a match
-//   //data has sender, receiver, roomID
-//   socket.on('S_leaveMatch', function (data) {
-//     io.sockets.connected[data.receiver.socketID].emit('C_opponentLeftMatch', data);
-//   })
-//  //when a player leaves during chat
-//   //data has sender, receiver, roomID
-//   socket.on('S_leaveChat', function (data) {
-//     io.sockets.connected[data.receiver.socketID].emit('C_opponentLeftChat', data);
-//   })
+      },
+      (err) => console.log(err),
+      )
+  })
 
   socket.on('disconnect', function () {
     logDiv('new disconnect')
@@ -701,5 +623,3 @@ function addMessageUnReadInDB(userEmail, message, otherUserEmail){
     logDiv()
   })
 })
-
-
