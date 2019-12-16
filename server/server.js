@@ -18,7 +18,7 @@ const {
   findRoomById,
   getAvailableUsers,
   getUnAvailableUsers,
-  removeUserFromRoom,
+  deleteUserByEmailInRoomByRoomID,
   getRoomSize,
   deleteRoomById,
   changeUserAvailability,
@@ -127,6 +127,7 @@ app.get('/logout', (req, res) => {
     (userInfo) => {
       console.log("user:", userInfo.email, "is logging out")
       req.session.userInfo = {}
+      console.log("updates userInfo5: {}", req.session.userInfo)
       res.status(200).send("successfuly logged out")
     },
     (err) => standardErrorHandling(res, err)
@@ -151,10 +152,12 @@ function serverLoginUser(req, res) {
   findUser(data,
     (found_user)=>{
       if (found_user.password === data.password) { // TODO: should later change to hash(password)
+      //  console.log("data", data, "foundUser:", found_user)
         req.session.userInfo = {
           email: data["email"],
-          nickName: data["nickName"]
+          nickName: found_user["nickName"]
         }
+        console.log("updated userInfo1", req.session.userInfo)
       
         console.log('saved email:', data['email'])
         console.log("successfuly returned user: " + found_user.get('email'));
@@ -288,6 +291,12 @@ function  serverAddUserToRoom(req, res, roomId) {
             roomId,
             (room_object) => {
               console.log("user is already in room")
+              var userSocket = findSocketByUserId(userInfo.email)
+              // console.log("user socket", userSocket, "found of user:", userInfo.email)
+              if (userSocket !== undefined) {
+                userSocket.join(roomId.toString())
+                console.log("added the user's", userInfo.email, "socket to room", roomId.toString())
+              }
               res.status(200).send(JSON.stringify({
                 userObject: found_user_object,
                 roomObject: room_object
@@ -315,6 +324,10 @@ function  serverAddUserToRoom(req, res, roomId) {
                 console.log("added the user's", userInfo.email, "socket to room", roomId.toString())
               }
               // notify all other users in the room
+              console.log("emitting a message to room", roomId, "about player join", userInfo)
+              io.in(roomId).clients((err, clients) => {
+                console.log("clients of room:", clients); // an array containing socket ids in 'room3'
+              });
               io.to(roomId).emit('userJoined', userInfo)
             },
             (err) => standardErrorHandling(res, err)
@@ -337,7 +350,7 @@ app.get('/leaveRoom/:roomId', (req, res) => {
   getUserInfoFromSession(
     req,
     (userInfo) => {
-      removeUserFromRoom(
+      deleteUserByEmailInRoomByRoomID(
         roomId,
         userInfo.email, 
         (succ) => {
@@ -353,6 +366,7 @@ app.get('/leaveRoom/:roomId', (req, res) => {
                 deleteRoomById(roomId, () => {}, (err) => console.log(err))
               } else {
                 // notify users in room about leaving
+                console.log("emitting a message to room", roomId, "about player leave", userInfo)
                 io.to(roomId).emit('userLeft', userInfo)
               }
             },
@@ -443,10 +457,11 @@ io.on('connection', function (socket) {
   console.log("all sockets so far:", Object.keys(io.sockets.sockets))
   logDiv()
 
+
   socket.handshake.session.userInfo = {email: socket.request._query['user_id']}
   socket.handshake.session.save();
+  console.log("updated userInfo2 (socket)", socket.handshake.session.userInfo)
 
-  console.log("after socket update:", socket.handshake.session.userInfo)
   // If the user is already in a room - subscribe to that room with his new socket
   findUser(
     {email: socket.handshake.session.userInfo.email},
@@ -459,7 +474,7 @@ io.on('connection', function (socket) {
   socket.on("login", function(userInfo) {
     logDiv("socket login")
     console.log(userInfo.email + " has logged in");
-    console.log("full info:", userInfo)
+    console.log("updated userInfo3 (socket):", userInfo)
     socket.handshake.session.userInfo = userInfo;
     socket.handshake.session.save();
     logDiv();
@@ -475,6 +490,7 @@ io.on('connection', function (socket) {
   socket.on('chat', function(data){
     console.log(data.messageContent + " was written");
     console.log(socket.handshake.session.userInfo);
+    console.log("updates userInfo4 (socket)", data)
     socket.handshake.session.userInfo = data;
     socket.handshake.session.save();
     
