@@ -84,13 +84,13 @@ describe("signInAndSignUp", () => {
             page.waitForNavigation(),
             page.click('#submit')
         ]);
-        
+
         expect(page.url() === APP + "LoginScreen/Home" || page.url() === APP + "LoginScreen").toBeTruthy();//redirect to home page
-        await page.waitForSelector('#logOutBTN')
+        await page.waitForSelector('#LoginScreenHomePage')
         const welcomeMessage = await page.evaluate(() => document.getElementById('welcomeMessage').textContent)
         expect(welcomeMessage).toEqual(`Welcome ${lead.email}!`);//greet by correct name
 
-        
+        await page.waitForSelector('#logOutBTN')
         await Promise.all([
             page.waitForNavigation(),
             page.click('#logOutBTN')
@@ -159,4 +159,150 @@ describe("signInAndSignUp", () => {
         expect(page.url()).toEqual(APP + "SignIn")//stay in the signIn page
     }, 300000);
 
+    test("succesful personal information change", async () => {
+        //sign in
+        await page.goto(APP);
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#signInBTN')
+        ]);
+        expect(page.url()).toEqual(APP + "SignIn")//redirect to signIn page
+        await page.click("#EmailInput");
+        await page.type("#EmailInput", lead.email);
+        await page.click("#PasswordInput");
+        await page.type("#PasswordInput", lead.password);
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#submit')
+        ]);
+
+        expect(page.url() === APP + "LoginScreen/Home" || page.url() === APP + "LoginScreen").toBeTruthy();//redirect to home page
+        await page.waitForSelector('#LoginScreenHomePage')
+
+        //go to my profile page
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#myProfileBTN')
+        ]);
+        expect(page.url()).toEqual(APP + "MyProfile")//redirect to myProfile page
+        await page.waitForSelector('#MyProfilePage')
+
+        //change name, nickname and email
+        await page.click("#firstName");
+        await page.type("#firstName", "CHANGED_" + lead.name);
+        await page.click("#nickName");
+        await page.type("#nickName", "CHANGED_" + lead.nickname);
+        await page.click("#email");
+        await page.type("#email", "CHANGED_" + lead.email);
+        await page.click('#saveBTN')
+        await page.waitFor(1000)
+
+        //check password change
+        //check that cancel button works
+        await Promise.all([
+            page.waitForSelector('#openRoomPopUp'),
+            page.click('#changePasswordBTN')
+        ]);
+        await Promise.all([
+            page.waitFor(() => !document.querySelector("#openRoomPopUp")),
+            page.click("#cancelBTN")
+        ]);
+
+        //check that immediate submit does not change password 
+        await Promise.all([
+            page.waitForSelector('#openRoomPopUp'),
+            page.click('#changePasswordBTN')
+        ]);
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#confirmBTN')
+        ]);
+        text = "password saved successfuly!"
+        try {
+            await page.waitForFunction(
+                text => !document.querySelector('body').innerText.includes(text),
+                {},
+                text
+            );
+        } catch (e) {
+            console.log(`The text "${text}" was found on the page`);
+        }
+
+        //check wrong old password does not change password
+        await page.click("#oldPasswordId");
+        await page.type("#oldPasswordId", "WRONG_" + lead.password);
+        await page.click("#newPasswordId");
+        await page.type("#newPasswordId", "CHANGED_" + lead.password);
+        await page.click("#confirmPasswordId");
+        await page.type("#confirmPasswordId", "CHANGED_" + lead.password);
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#confirmBTN')
+        ]);
+        try {
+            await page.waitForFunction(
+                text => !document.querySelector('body').innerText.includes(text),
+                {},
+                text
+            );
+        } catch (e) {
+            console.log(`The text "${text}" was found on the page`);
+        }
+
+        //check wrong confirmed password does not change password
+        await page.focus("#oldPasswordId");
+        const inputValue = await page.$eval('#oldPasswordId', el => el.value);
+        for (let i = 0; i < inputValue.length; i++) {
+            await page.keyboard.press('Backspace');
+        }
+        await page.click("#oldPasswordId");
+        await page.type("#oldPasswordId", lead.password);
+
+        await page.focus("#confirmPasswordId");
+        await page.type("#confirmPasswordId", "NOT_SAME");
+        try {
+            await page.waitForFunction(
+                text => !document.querySelector('body').innerText.includes(text),
+                {},
+                text
+            );
+        } catch (e) {
+            console.log(`The text "${text}" was found on the page`);
+        }
+
+        //fix everything and change password successfully
+        await page.focus("#confirmPasswordId");
+        for (let i = 0; i < 8; i++) {
+            await page.keyboard.press('Backspace');
+        }
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#confirmBTN')
+        ]);
+        try {
+            await page.waitForFunction(
+                text => document.querySelector('body').innerText.includes(text),
+                {},
+                text
+            );
+        } catch (e) {
+            console.log(`The text "${text}" was not found on the page`);
+        }
+        await Promise.all([
+            page.waitFor(() => !document.querySelector("#openRoomPopUp")),
+            page.click("#cancelBTN")
+        ]);
+
+
+        //check that all changes actually applied
+
+
+
+        await page.waitForSelector('#logOutBTN')
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#logOutBTN')
+        ]);
+
+    }, 300000);
 });

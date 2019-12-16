@@ -47,7 +47,7 @@ export function MySentences(props){
     }
     
     return (
-      <div className="MySentencesPage">
+      <div id="MySentencesPage">
         <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper} >

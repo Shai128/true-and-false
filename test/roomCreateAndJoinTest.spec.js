@@ -190,6 +190,7 @@ describe("roomCreateAndJoinTest", () => {
             page2.click('#submit')
         ]);
         expect(page2.url()).toEqual(APP + "LoginScreen/MySentences")//redirect to personal info page
+        await page.waitForSelector('#MySentencesPage')
 
         //create a new room with original account and wait for other player (also fetch room number)
         await Promise.all([
@@ -278,21 +279,6 @@ describe("roomCreateAndJoinTest", () => {
           } catch(e) {
             console.log(`The text "${text}" was not found on the page`);
           }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         await page2.waitForSelector('#logOutBTN')
         await page2.goto(homePage);
         await Promise.all([
