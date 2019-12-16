@@ -154,7 +154,7 @@ function serverLoginUser(req, res) {
       if (found_user.password === data.password) { // TODO: should later change to hash(password)
       //  console.log("data", data, "foundUser:", found_user)
         req.session.userInfo = {
-          email: data["email"],
+          email: found_user["email"],
           nickName: found_user["nickName"]
         }
         console.log("updated userInfo1", req.session.userInfo)
@@ -458,7 +458,7 @@ io.on('connection', function (socket) {
   logDiv()
 
 
-  socket.handshake.session.userInfo = {email: socket.request._query['user_id']}
+  socket.handshake.session.userInfo.email = socket.request._query['user_id']
   socket.handshake.session.save();
   console.log("updated userInfo2 (socket)", socket.handshake.session.userInfo)
 
