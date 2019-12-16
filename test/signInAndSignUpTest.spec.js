@@ -68,96 +68,96 @@ describe("signInAndSignUp", () => {
         ]);
     }, 300000);
 
-    // test("succesful sign in", async () => {
-    //     var HTMLelement;
-    //     await page.goto(APP);
-    //     await Promise.all([
-    //         page.waitForNavigation(),
-    //         page.click('#signInBTN')
-    //     ]);
-    //     expect(page.url()).toEqual(APP + "SignIn")//redirect to signIn page
-    //     await page.click("#EmailInput");
-    //     await page.type("#EmailInput", lead.email);
-    //     await page.click("#PasswordInput");
-    //     await page.type("#PasswordInput", lead.password);
-    //     await Promise.all([
-    //         page.waitForNavigation(),
-    //         page.click('#submit')
-    //     ]);
+    test("succesful sign in", async () => {
+        var HTMLelement;
+        await page.goto(APP);
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#signInBTN')
+        ]);
+        expect(page.url()).toEqual(APP + "SignIn")//redirect to signIn page
+        await page.click("#EmailInput");
+        await page.type("#EmailInput", lead.email);
+        await page.click("#PasswordInput");
+        await page.type("#PasswordInput", lead.password);
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#submit')
+        ]);
 
-    //     expect(page.url() === APP + "LoginScreen/Home" || page.url() === APP + "LoginScreen").toBeTruthy();//redirect to home page
-    //     await page.waitForSelector('#LoginScreenHomePage')
-    //     const welcomeMessage = await page.evaluate(() => document.getElementById('welcomeMessage').textContent)
-    //     expect(welcomeMessage).toEqual(`Welcome ${lead.email}!`);//greet by correct name
+        expect(page.url() === APP + "LoginScreen/Home" || page.url() === APP + "LoginScreen").toBeTruthy();//redirect to home page
+        await page.waitForSelector('#LoginScreenHomePage')
+        const welcomeMessage = await page.evaluate(() => document.getElementById('welcomeMessage').textContent)
+        expect(welcomeMessage).toEqual(`Welcome ${lead.email}!`);//greet by correct name
 
-    //     await page.waitForSelector('#logOutBTN')
-    //     await Promise.all([
-    //         page.waitForNavigation(),
-    //         page.click('#logOutBTN')
-    //     ]);
+        await page.waitForSelector('#logOutBTN')
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#logOutBTN')
+        ]);
 
-    // }, 300000);
+    }, 300000);
 
-    // test("failed sign up", async () => {
-    //     var HTMLelement;
-    //     await page.goto(APP);
-    //     await Promise.all([
-    //         page.waitForNavigation(),
-    //         page.click('#signUpBTN')
-    //     ]);
-    //     expect(page.url()).toEqual(APP + "SignUp")//redirect to signUp page
+    test("failed sign up", async () => {
+        var HTMLelement;
+        await page.goto(APP);
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#signUpBTN')
+        ]);
+        expect(page.url()).toEqual(APP + "SignUp")//redirect to signUp page
 
-    //     await page.click("#submit");
-    //     expect(page.url()).toEqual(APP + "SignUp")//stay in signUp page
+        await page.click("#submit");
+        expect(page.url()).toEqual(APP + "SignUp")//stay in signUp page
 
-    //     await page.click("#firstName");
-    //     await page.type("#firstName", lead.name);
-    //     await page.click("#nickName");
-    //     await page.type("#nickName", lead.nickname);
-    //     await page.click("#email");
-    //     await page.type("#email", lead.email);
-    //     await page.click("#password");
-    //     await page.type("#password", lead.password);
-    //     await page.click("#submit");
-    //     expect(page.url()).toEqual(APP + "SignUp")//stay in signUp page
+        await page.click("#firstName");
+        await page.type("#firstName", lead.name);
+        await page.click("#nickName");
+        await page.type("#nickName", lead.nickname);
+        await page.click("#email");
+        await page.type("#email", lead.email);
+        await page.click("#password");
+        await page.type("#password", lead.password);
+        await page.click("#submit");
+        expect(page.url()).toEqual(APP + "SignUp")//stay in signUp page
 
-    // }, 300000);
+    }, 300000);
 
-    // test("failed sign in", async () => {
-    //     var HTMLelement;
-    //     await page.goto(APP);
-    //     await Promise.all([
-    //         page.waitForNavigation(),
-    //         page.click('#signInBTN')
-    //     ]);
+    test("failed sign in", async () => {
+        var HTMLelement;
+        await page.goto(APP);
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#signInBTN')
+        ]);
 
-    //     expect(page.url()).toEqual(APP + "SignIn");//redirect to signIn page
+        expect(page.url()).toEqual(APP + "SignIn");//redirect to signIn page
 
-    //     await page.click("#submit");
-    //     expect(page.url()).toEqual(APP + "SignIn")//stay in the signIn page
+        await page.click("#submit");
+        expect(page.url()).toEqual(APP + "SignIn")//stay in the signIn page
 
-    //     await page.focus("#EmailInput");
-    //     await page.type("#EmailInput", lead.email);
-    //     await page.click("#submit");
-    //     expect(page.url()).toEqual(APP + "SignIn")//stay in the signIn page
+        await page.focus("#EmailInput");
+        await page.type("#EmailInput", lead.email);
+        await page.click("#submit");
+        expect(page.url()).toEqual(APP + "SignIn")//stay in the signIn page
 
-    //     await page.focus("#EmailInput");
-    //     const inputValue = await page.$eval('#EmailInput', el => el.value);
-    //     for (let i = 0; i < inputValue.length; i++) {
-    //         await page.keyboard.press('Backspace');
-    //     }
-    //     await page.focus("#PasswordInput");
-    //     await page.type("#PasswordInput", lead.password);
-    //     await page.click("#submit");
-    //     expect(page.url()).toEqual(APP + "SignIn")//stay in the signIn page
+        await page.focus("#EmailInput");
+        const inputValue = await page.$eval('#EmailInput', el => el.value);
+        for (let i = 0; i < inputValue.length; i++) {
+            await page.keyboard.press('Backspace');
+        }
+        await page.focus("#PasswordInput");
+        await page.type("#PasswordInput", lead.password);
+        await page.click("#submit");
+        expect(page.url()).toEqual(APP + "SignIn")//stay in the signIn page
 
-    //     await page.click("#EmailInput");
-    //     await page.type("#EmailInput", lead.email);
-    //     await page.click("#PasswordInput");
-    //     await page.type("#PasswordInput", "BAD_PASSWORD");
-    //     await page.click("#submit");
-    //     expect(page.url()).toEqual(APP + "SignIn")//stay in the signIn page
-    // }, 300000);
+        await page.click("#EmailInput");
+        await page.type("#EmailInput", lead.email);
+        await page.click("#PasswordInput");
+        await page.type("#PasswordInput", "BAD_PASSWORD");
+        await page.click("#submit");
+        expect(page.url()).toEqual(APP + "SignIn")//stay in the signIn page
+    }, 300000);
 
     test("succesful personal information change", async () => {
         //sign in
@@ -184,7 +184,7 @@ describe("signInAndSignUp", () => {
             page.waitForNavigation(),
             page.click('#myProfileBTN')
         ]);
-        
+
         await page.waitForSelector('#MyProfilePage')
         expect(page.url()).toEqual(APP + "LoginScreen/MyProfile")//redirect to myProfile page
 
@@ -194,7 +194,7 @@ describe("signInAndSignUp", () => {
         await page.focus("#nickName");
         await page.type("#nickName", "_CHANGED");
         await page.focus("#email");
-        const L = await page.$eval('#email', el => el.value);
+        var L = await page.$eval('#email', el => el.value);
         for (let i = 0; i < L.length; i++) {
             await page.keyboard.press('ArrowLeft');
         }
@@ -235,11 +235,11 @@ describe("signInAndSignUp", () => {
 
         //check wrong old password does not change password
         await page.click("#oldPasswordId");
-        await page.type("#oldPasswordId", "WRONG_" + lead.password);
+        await page.type("#oldPasswordId", lead.password + "_WRONG");
         await page.click("#password");
-        await page.type("#password", "CHANGED_" + lead.password);
+        await page.type("#password", lead.password + "_CHANGED");
         await page.click("#confirmPasswordId");
-        await page.type("#confirmPasswordId", "CHANGED_" + lead.password);
+        await page.type("#confirmPasswordId", lead.password + "_CHANGED");
         await page.click('#confirmBTN')
         await page.waitFor(1000)
 
@@ -255,8 +255,7 @@ describe("signInAndSignUp", () => {
 
         //check wrong confirmed password does not change password
         await page.focus("#oldPasswordId");
-        const inputValue = await page.$eval('#oldPasswordId', el => el.value);
-        for (let i = 0; i < inputValue.length; i++) {
+        for (let i = 0; i < 6; i++) { // 6 for _WRONG
             await page.keyboard.press('Backspace');
         }
         await page.click("#oldPasswordId");
@@ -278,7 +277,7 @@ describe("signInAndSignUp", () => {
 
         //fix everything and change password successfully
         await page.focus("#confirmPasswordId");
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < 8; i++) { // 8 for NOT_SAME
             await page.keyboard.press('Backspace');
         }
         await page.click('#confirmBTN')
@@ -306,9 +305,42 @@ describe("signInAndSignUp", () => {
             page.waitForNavigation(),
             page.click('#logOutBTN')
         ]);
+        await page.waitForSelector('#TrueAndFalseHomePage')
+
+        //try to sign in with old email and password
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#signInBTN')
+        ]);
+        await page.waitForSelector('#SignInPage')
+        expect(page.url()).toEqual(APP + "SignIn");//redirect to signIn page
+
+        await page.focus("#EmailInput");
+        await page.type("#EmailInput", lead.email);
+        await page.focus("#PasswordInput");
+        await page.type("#PasswordInput", lead.password);
+        await page.click("#submit");
+        expect(page.url()).toEqual(APP + "SignIn")//stay in the signIn page
+
+        await page.focus("#EmailInput");
+        //sign in with new email and password
+        L = await page.$eval('#email', el => el.value);
+        for (let i = 0; i < L.length; i++) {
+            await page.keyboard.press('ArrowLeft');
+        }
+        await page.type("#EmailInput", "CHANGED_");
+        await page.focus("#PasswordInput");
+        await page.type("#PasswordInput", "_CHANGED");
         
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#submit')
+        ]);
 
-
+        expect(page.url() === APP + "LoginScreen/Home" || page.url() === APP + "LoginScreen").toBeTruthy();//redirect to home page
+        await page.waitForSelector('#LoginScreenHomePage')
+        const welcomeMessage = await page.evaluate(() => document.getElementById('welcomeMessage').textContent)
+        expect(welcomeMessage).toEqual(`Welcome CHANGED_${lead.email}!`);//greet by correct name
 
         await page.waitForSelector('#logOutBTN')
         await Promise.all([
