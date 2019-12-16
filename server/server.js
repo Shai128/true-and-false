@@ -458,7 +458,9 @@ io.on('connection', function (socket) {
   console.log("all sockets so far:", Object.keys(io.sockets.sockets))
   logDiv()
 
-
+  if(socket.handshake.session.userInfo === undefined) {
+    socket.handshake.session.userInfo = {}
+  }
   socket.handshake.session.userInfo.email = socket.request._query['user_id']
   socket.handshake.session.save();
   console.log("updated userInfo2 (socket)", socket.handshake.session.userInfo)
