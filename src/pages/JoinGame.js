@@ -115,7 +115,7 @@ socket.on("userLeft", function(userInfo) {
       /*
          userInfo: {email: ..., nickName:...}
       */
-     console.log("currentuser: " + CurrentUser)
+     console.log("sending props: ",  CurrentUser,  CurrentRoom)
      history.push({
       pathname:'/TheGame',
       opponentId: userInfo.senderId,
@@ -151,6 +151,8 @@ const onAccept = () => {
       args: {},
       receiverId: SenderInfoID,
       })
+      
+      console.log("sending props: ",  CurrentUser, CurrentRoom)
       history.push({
         pathname:'/TheGame',
         opponentId:SenderInfoID,
@@ -847,30 +849,21 @@ function PrintInvitePlayerDialog(props){
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-
       <Grid container justify="center">
       <InvitePlayerWaitingImage/>
       </Grid>
     
       </DialogActions>
-
         <Grid container justify="center">
         <Button onClick={onCloseWindow} color="primary">
         Cancel the invitation
         </Button>
         </Grid>
-
     </Dialog>
-
   );
 }
-
-
-
 function PrintAnswerPlayerDialog(props){  
-
   const {WindowOpen, onAccept, onDecline, SenderInfoName} = props;
-
   return(
       <Dialog open={WindowOpen} aria-labelledby="form-dialog-title">
       <DialogTitle id="form-dialog-title"> {SenderInfoName} Invited you to play </DialogTitle>
@@ -885,29 +878,22 @@ function PrintAnswerPlayerDialog(props){
       </Grid> */}
     
       </DialogActions>
-
     <Grid container justify="center" alignItems="center">
         <Grid container justify="center">
         <Button onClick={onAccept} color="primary">
         Accept
         </Button>
         </Grid>
-
         <Grid container justify="center">
         <Button onClick={onDecline} color="primary">
         Decline 
         </Button>
         </Grid>
      </Grid>
-
     </Dialog>
-
   );
 }
-
-
 // function leaveRoom(){  
-
 //   // const {playerEmail} = props;
  
 //    return(
@@ -923,5 +909,3 @@ function PrintAnswerPlayerDialog(props){
  
 //    );
 //  }
-
-
