@@ -25,7 +25,6 @@ import {GamePage} from './GamePage.js';
 import {userIsUpdated, getCreatedGames, getParticipatedGames, getCurrentUserFromSession as getCurrentUser, getUserFromProps} from './../user';
 import {PrintGames, PrintJoinGameDialog, DisplayLoading} from './../PagesUtils';
 import {createRoom} from './../room.js'
-import {JoinGame} from './JoinGame.js'
 export function LoginScreenHome(props){
     let { path, url } = useRouteMatch();
     let user = getUserFromProps(props);
@@ -37,7 +36,6 @@ export function LoginScreenHome(props){
         </Route>
 
         <Route path={`${path}/GamePage/:id`} exact component={GamePage} user={user} />
-        <Route path={`/JoinGame`} exact component={JoinGame} user={user} />
 
         </Switch>
 
@@ -114,7 +112,7 @@ const handleCloseJoinGameWindow = () => {
             <Grid item xs={12}>
 
             <Typography component="h1" variant="h2" justify="center">
-              Welcome {currentUser.nickName}!
+              Welcome {currentUser.firstName}!
         </Typography>
             </Grid>
         <Grid item xs={12} sm={6}>
