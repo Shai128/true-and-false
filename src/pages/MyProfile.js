@@ -268,7 +268,7 @@ function PrintChangePassword(props) {
             />
           </Grid>
           <Grid item xs={12}>
-            <TextField id="newPasswordId"
+            <TextField
               error={errorNewPassword}
               helperText={newPasswordHelperText}
               variant="outlined"
