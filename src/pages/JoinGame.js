@@ -108,13 +108,11 @@ socket.on("userLeft", function(userInfo) {
     /*
        userInfo: {email: ..., nickName:...}
     */
-      //  var newPlayersAvailable = [...PlayersAvailable]
-      //  var index = newPlayersAvailable.indexOf(userInfo)
-      //  newPlayersAvailable.splice(index)
-      var newPlayersAvailable = [...PlayersAvailable]
-      newPlayersAvailable.filter(user => (user.email !== userInfo.email))
-      setPlayersAvailable(newPlayersAvailable)
-     });
+   var newPlayersAvailable1 = [...PlayersAvailable]
+   var index = (newPlayersAvailable1).indexOf({email:userInfo.email,nickname:userInfo.nickName})
+   newPlayersAvailable1.splice(index)
+   setPlayersAvailable(newPlayersAvailable1)
+   });
 
 
  socket.on("userAccept", function(userInfo) {
@@ -327,14 +325,14 @@ function PrintAnswerPlayerDialog(props){
           var index = (newPlayersAvailable1).indexOf({email:CurrentUser.email,nickname:CurrentUser.nickname})
           newPlayersAvailable1.splice(index)
           console.log("dan new -->", newPlayersAvailable1);
-         // setPlayersAvailable(newPlayersAvailable1)
+          setPlayersAvailable(newPlayersAvailable1)
 
           // var newPlayersAvailable = [...data.PlayersAvailable]
           // newPlayersAvailable.filter(user => (user.email != CurrentUser.email))
          // setPlayersAvailable(newPlayersAvailable)
          // console.log ("dan 1 new --- >", newPlayersAvailable);
           console.log ("dan old --- >", data.PlayersAvailable);
-          setPlayersAvailable(data.PlayersAvailable);
+          //setPlayersAvailable(data.PlayersAvailable);
           setPlayersUnAvailable(data.PlayersUnAvailable);
           setRoomUpdated(true);
         }
