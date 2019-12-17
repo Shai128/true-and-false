@@ -38,6 +38,11 @@ afterAll(() => {
 });
 
 describe("signInAndSignUp", () => {
+    // async function fillEmptyTextBox(page, id, text) {
+    //     console.log('check');
+    //     await page.click("#" + id);
+    //     await page.type("#" + id, text);
+    // }
 
     test("succesful sign up", async () => {
         var HTMLelement;
@@ -47,6 +52,7 @@ describe("signInAndSignUp", () => {
             page.click('#signUpBTN')
         ]);
         expect(page.url()).toEqual(APP + "SignUp");//redirect to signUp page
+
         await page.click("#firstName");
         await page.type("#firstName", lead.name);
         await page.click("#nickName");

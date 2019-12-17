@@ -24,23 +24,12 @@ export function createRoom(roomName, currentuser, currentGameNickName, history){
             resolve(response.json());
             })
         }
-        }).then(room => {
-            
-            console.log("room ron!",room);
-
-            console.log("user",currentuser);
-            console.log("name of room",roomName);
-            console.log("id",currentGameNickName);
-
-            console.log('createRoom frontend got data: ', room);
+        }).then(roomAndUserObject => {
+            console.log("received roomAndUserObject:", roomAndUserObject)
             history.push({
                 pathname: '/JoinGame',
-                user: currentuser,
-                RoomId: room.ID,
-                currentNickName: currentGameNickName,
-                currentRoomName: roomName,
+                InfoObject: roomAndUserObject,
             });
-            //todo: redirect to Dan's page with the given roomID and the user! H-A-L-I-F!
         }, fail_status => {
         console.log("failed, status:", fail_status)
         });
@@ -52,7 +41,7 @@ export function createRoom(roomName, currentuser, currentGameNickName, history){
  * @param {the current user} user 
  * @param {the nickname the user chose for this room} currentGameNickName 
  */
-export function joinRoom(roomID, user, currentGameNickName, history){
+export function joinRoom(roomID, currentuser, currentGameNickName, history){
     fetch(server + '/joinRoom/' + roomID, {
         method: 'GET', // *GET, POST, PUT, DELETE, etc.
         headers: {
@@ -68,21 +57,13 @@ export function joinRoom(roomID, user, currentGameNickName, history){
             resolve(response.json());
             })
         }
-        }).then(succ => {
-            console.log('frontend got data: ', user);
-
-          //  console.log("user",currentuser);
-          //  console.log("name of room",room.ID);
-          //  console.log("id",currentGameNickName);
-          
+        }).then(roomAndUserObject => {
 
             history.push({
                 pathname: '/JoinGame',
-                user: user,
-                RoomId: roomID,
-                currentGameNickName: currentGameNickName,
+                InfoObject: roomAndUserObject,
             });
-            //todo: redirect to Dan's page with the roomID and the user! H-A-L-I-F!
+
         }, fail_status => {
         console.log("failed, status:", fail_status)
         });

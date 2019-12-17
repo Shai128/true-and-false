@@ -8,7 +8,7 @@ import {
       Link,
       useHistory,
   } from "react-router-dom";
-//import {isUndefined} from './Utils.js';
+import {isUndefined} from './Utils.js';
 
 import ChatIcon from '@material-ui/icons/Chat';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -21,7 +21,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import {socket, getUserFromProps} from './user.js';
+import {socket, getUserFromProps, getCurrentUserFromDB} from './user.js';
 import {useStyles} from './App.js';
 import {joinRoom} from './room.js';
 export function PrintGames(props){
@@ -198,7 +198,6 @@ export function PrintMessages(props){
     const classes = useStyles();
     const url = props.url;
     const messages =props.messages;
-    const onPageChange = props.onPageChange;
     const user = getUserFromProps(props);
     var index =0;
     const shortMessage = (message) =>{
@@ -206,22 +205,21 @@ export function PrintMessages(props){
         return message.slice(0,10)+'...';
       return message;
     }
+    console.log('messages: ', messages);
+    let history = useHistory();
     return (
       <div className={classes.root}>
         <List >
           {messages.map((message) => (
             <React.Fragment key={index++}>
-              <Link className={classes.root} to={
-                {
-                  pathname: `${url}/ChatRoom/`+message.writerEmail,
+              <ListItem className={classes.root} button onClick={()=>{
+                history.push({
+                  pathname: `${url}/ChatRoom/`+message.authorEmail,
                   user: user,
-                }
-              }
-              >
-              <ListItem className={classes.root} button onClick={onPageChange}>
-                <ListItemText primary={message.author + ": "+shortMessage(message.content)} /*secondary={date}*/ />
+                })
+              }}>
+                <ListItemText primary={message.authorName + ": "+shortMessage(message.messageContent)} /*secondary={date}*/ />
               </ListItem>
-              </Link>
             </React.Fragment>
           ))}
         </List>
@@ -233,52 +231,56 @@ export function PrintMessages(props){
 
 
 export function PrintChats(props){
-  var chats =props.chats;
+  var messeges_by_addressee  = JSON.parse(JSON.stringify(props.chats));
+  
   const classes = useStyles();
+  let history = useHistory();
+  if(isUndefined(messeges_by_addressee) || messeges_by_addressee.length ===0)
+    messeges_by_addressee=[];
   const user = getUserFromProps(props);
   let index =0;
-  var obj = {};
-
-  for ( let i=0, len=chats.length; i < len; i++ )
-      obj[chats[i].otherUserEmail] = chats[i];
-  chats=[];
-  for ( let key in obj )
-    chats.push(obj[key]);
-
+  var chats = [];
+  for(let chat of messeges_by_addressee){
+    let last_message = chat.messages[ chat.messages.length-1];
+    last_message.delivery_timestamp =  Date.parse(last_message.delivery_timestamp)
+    chats.push(last_message);
+    console.log(last_message);
+  }
+  chats.sort((message1, message2)=>{return message1.delivery_timestamp<message2.delivery_timestamp? 1: -1});
   return (<List className={classes.list}>
         {chats.map((chat) => (
           
           <React.Fragment key={index++}>
-            <Link to={
-              {
-                pathname: `/LoginScreen/ChatRoom/`+chat.otherUserEmail,
-                user: user,
-              }
-            }
-            >
-            <ListItem button >
-              <ListItemText primary={chat.otherUserName} secondary={
+            
+            <ListItem button  onClick={()=>{
+            history.push({
+              pathname: `/LoginScreen/ChatRoom/`+chat.otherUserEmail,
+              user: user,
+            })
+          }} >
+              <ListItemText primary={chat.otherUserEmail} secondary={
                 
                 (chat.authorEmail === user.email? 'You: ' : (chat.authorName +": ")) +
                   chat.messageContent
                 } />
             </ListItem>
-            </Link>
           </React.Fragment>
         ))}
       </List>);
 }
 
+/**
+ * 
+ * @param {email - the email of the other user. user: current user (not neccessary)} props 
+ */
 export function ChatButton(props){
-
+  let history = useHistory();
   return (
-      <ListItem button>
-          <Link to={
-          {
-            pathname: `/LoginScreen/ChatRoom/`+props.email,
-            user: props.user
-          }
-        }>
+      <ListItem button onClick={()=>{history.push({
+        pathname: `/LoginScreen/ChatRoom/`+props.email,
+        user: props.user
+      })}}>
+         
       <Grid container alignContent='center' direction='column' alignItems='center' justify='center'>
       <Grid item xs={5}>
         <ListItemIcon >
@@ -289,8 +291,21 @@ export function ChatButton(props){
         <ListItemText primary="Chat"/>
         </Grid>
         </Grid>
-        </Link>
         </ListItem>
       
   );
+}
+
+export function AutoRedirectToLoginScreenIfUserInSession(history){
+  getCurrentUserFromDB(()=>{}, ()=>{
+
+    var locationArr = history.location.pathname.split("/");
+    var len = locationArr.length;
+    var page = locationArr[len-1];
+    if( page === 'SignIn' || page === '' || page === 'SignUp'){
+      history.push({
+        pathname: '/LoginScreen',
+      });
+
+  }});
 }

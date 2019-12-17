@@ -24,22 +24,50 @@ import ListItemText from '@material-ui/core/ListItemText';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import Switch from '@material-ui/core/Switch';
 import { reject } from 'q';
-  //import {Link,} from "react-router-dom";
-  import Dialog from '@material-ui/core/Dialog';
-  import DialogActions from '@material-ui/core/DialogActions';
-  import DialogContent from '@material-ui/core/DialogContent';
-  import DialogContentText from '@material-ui/core/DialogContentText';
-  import DialogTitle from '@material-ui/core/DialogTitle';
-  import {socket} from '../user.js';
-
-  const okStatus = 200;
-
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import {socket, emptyUser} from '../user.js';
+import { Link } from '@material-ui/core';
+import {LoginScreenHome} from './LoginScreenHome.js';
+import {
+  BrowserRouter as Router,
+  Route,
+  useRouteMatch,
+  Redirect,
+  useHistory,
+} from "react-router-dom";
+import {ChatButton} from './../PagesUtils.js';
+const okStatus = 200;
 
 export function JoinGame(props){ 
-  
-  console.log ("props",props);
 
-  //const [CurrentUser, setCurrentUser] = useState(props.user);
+  console.log('props: ', props);
+  console.log ("props",props.location.InfoObject);
+
+  // props contains: 
+  // userObject: {
+	// 	user_id_in_room: ...
+	// 	email: ...
+	// 	nickname: ...
+	// 	true_sentences: ...
+	// 	already_seen_sentences: ...
+	// 	...more fields you probably don't need...
+	// }
+	
+	// roomObject: {
+	// 	room_id: ...
+	// 	room_name: ...
+	// 	...more fields you probably don't need...
+	// }
+  const [CurrentRoom, setCurrentRoom] = useState(props.location.InfoObject.roomObject);
+  const [CurrentUser, setCurrentUser] = useState(props.location.InfoObject.userObject);
+
+  const [roomUpdated, setRoomUpdated] = useState(false);
+
+
   const [PlayersAvailable, setPlayersAvailable] = useState([]);
   const [PlayersUnAvailable, setPlayersUnAvailable] = useState([]);
 
@@ -55,39 +83,180 @@ const useStylesRoomName = makeStyles(theme => ({
 }));
 
 const classes = useStylesRoomName();
-
-InitTheRoom(props.location.RoomId);
+if(!roomUpdated)
+  InitTheRoom(CurrentRoom.room_id, setRoomUpdated);
 
 socket.on("userJoined", function(userInfo) {
  /*
     userInfo: {email: ..., nickName:...}
  */
-    console.log("received userJoin with userInfo:", userInfo);
+
+    console.log("userINFO DANN --> ",userInfo);
+    console.log("LIST DANN --> ",PlayersAvailable.values);
+
     var newPlayersAvailable = [...PlayersAvailable]
-    newPlayersAvailable.push(userInfo.nickName)
+    newPlayersAvailable.push({email:userInfo.email,nickname:userInfo.nickName})
     setPlayersAvailable(newPlayersAvailable)
   });
 
   
 socket.on("userLeft", function(userInfo) {
+  console.log("gottt")
     /*
        userInfo: {email: ..., nickName:...}
     */
-       var newPlayersAvailable = [...PlayersAvailable]
-       var index = newPlayersAvailable.indexOf(userInfo.nickName)
-       newPlayersAvailable.splice(index)
-       setPlayersAvailable(newPlayersAvailable)
-     });
+   var newPlayersAvailable1 = [...PlayersAvailable]
+   var index = (newPlayersAvailable1).indexOf({email:userInfo.email,nickname:userInfo.nickName})
+   newPlayersAvailable1.splice(index)
+   setPlayersAvailable(newPlayersAvailable1)
+   });
 
+
+ socket.on("userAccept", function(userInfo) {
+      /*
+         userInfo: {email: ..., nickName:...}
+      */
+     console.log("sending props: ",  CurrentUser,  CurrentRoom)
+     history.push({
+      pathname:'/TheGame',
+      opponentId: userInfo.senderId,
+      user: CurrentUser,
+      room: CurrentRoom,
+      turn: false
+    })
+         
+  });
+
+socket.on("CancelInvitation", function(userInfo) {
+  console.log("got here")
+  /*
+     userInfo: {email: ..., nickName:...}
+  */
+ setGotInvitationWindow(false);
+});
+
+      
+const [GotInvitationWindow, setGotInvitationWindow] = React.useState(false);
+let history = useHistory();
+const onAccept = () => {
+
+    // Accept 
+    socket.emit('deliverMessage', {
+      message: 'userAccept',
+      args: {},
+      receiverId: SenderInfoID,
+      })
+      
+      console.log("sending props: ",  CurrentUser, CurrentRoom)
+      history.push({
+        pathname:'/TheGame',
+        opponentId:SenderInfoID,
+        user: CurrentUser,
+        room: CurrentRoom,
+        turn: true
+      })
+}
+
+const onDecline = () => {
+
+    // Decline 
+    socket.emit('deliverMessage', {
+      message: 'userDecline',
+      args: {},
+      receiverId: SenderInfoID,
+      })
+      setGotInvitationWindow(false);
+ }
+
+ const [SenderInfoID, setSenderInfoID] = React.useState(-1);
+ const [SenderInfoName, setSenderInfoName] = React.useState("");
+
+socket.on("InvitedToGameByUser", function(args) { 
+  setSenderInfoID(args.senderId);
+  setSenderInfoName(args.senderName);
+  setGotInvitationWindow(true);
+})
+
+ const leaveRoom = () => {
+ fetch('http://localhost:8000/leaveRoom/' + CurrentRoom.room_id, { 
+  method: 'GET', // *GET, POST, PUT, DELETE, etc.
+  headers: {
+    'Content-Type': 'application/x-www-form-urlencoded'
+  },
+  credentials: 'include',
+}).then((response) =>{
+  if (response.status !== okStatus) {
+    reject(response.status)
+  } else {
+    return new Promise(function(resolve, reject) {
+      resolve(response.json());
+    })
+  }}).then(fail_status => {
+    console.log("failed. status: ", fail_status)
+  })
+  history.push("/LoginScreen/Home"); // moves to home page
+};
+
+
+function PrintAnswerPlayerDialog(props){  
+
+  const {WindowOpen, setWindowOpen, onAccept, onDecline, SenderInfoName} = props;
+
+  return(
+      <Dialog open={WindowOpen} aria-labelledby="form-dialog-title">
+      <DialogTitle id="form-dialog-title"> {SenderInfoName} Invited you to play </DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+{/* 
+      <Grid container justify="center">
+      <InvitePlayerWaitingImage/>
+      </Grid> */}
     
+      </DialogActions>
+
+    <Grid container justify="center" alignItems="center">
+        <Grid container justify="center">
+        <Button onClick={onAccept} color="primary">
+        Accept
+        </Button>
+        </Grid>
+
+        <Grid container justify="center">
+        <Button onClick={onDecline} color="primary">
+        Decline 
+        </Button>
+        </Grid>
+     </Grid>
+
+    </Dialog>
+
+  );
+}
+
   return (
-    <div id="joinGamePage">
-   {/* <HorizontalLinearStepper/> */}
-  
+    <div>  
+
+  <PrintAnswerPlayerDialog WindowOpen = {GotInvitationWindow} setWindowOpen = {setGotInvitationWindow} onAccept = {onAccept} onDecline = {onDecline} sender = {SenderInfoName}/> 
+      
+  <Grid container spacing={2}>
+  <Grid item xs={3}>
+  <div style={{float: 'right'}}>
+    <Button variant="contained" color="primary" fullWidth onClick = {leaveRoom} className={classes.button}>
+     Leave the room
+   </Button>
+   </div>
+ </Grid>
+ </Grid>
+
+
+
   <Grid item xs={6}>
-   <Typography id="roomNameHeader" variant="h2" className={classes.title}>
+   <Typography variant="h2" className={classes.title}>
    Room Name: 
-    {props.location.currentRoomName}
+    {CurrentRoom.room_name}
    </Typography>
    </Grid>
 
@@ -95,7 +264,7 @@ socket.on("userLeft", function(userInfo) {
    <Grid item xs={4}>
    <Typography id="userNameHeader" variant="h2" className={classes.roomNumber}>
    User Name: 
-  {props.location.currentNickName}
+  {CurrentUser.nickname}
    </Typography>
    </Grid>
 
@@ -103,7 +272,7 @@ socket.on("userLeft", function(userInfo) {
   <Grid item xs={4}>
    <Typography id="roomNumberHeader" variant="h2" className={classes.roomNumber}>
    Room Number: 
-  {props.location.RoomId}
+  {CurrentRoom.room_id}
    </Typography>
    </Grid>
 
@@ -115,12 +284,12 @@ socket.on("userLeft", function(userInfo) {
 <Grid container spacing={1} justify="center">
 
       <Grid item xs={4}>
-         <Typography variant="h6" className={classes.roomNumber}>
+         <Typography variant="h4" className={classes.roomNumber}>
          Choose a player and start to play!
           </Typography>
           </Grid>
           <Grid item xs={8}>
-          <BasicTextFields/>
+          {/* <BasicTextFields/> */}
           </Grid>
           </Grid>
 
@@ -148,8 +317,21 @@ socket.on("userLeft", function(userInfo) {
       }}).then(data => {      
         if (PlayersAvailable.length === 0 && data.PlayersAvailable !== undefined &&
           PlayersUnAvailable.length === 0 && data.PlayersUnAvailable !== undefined) {
-          setPlayersAvailable(data.PlayersAvailable);
+
+          var newPlayersAvailable1 = [...data.PlayersAvailable]
+          var index = (newPlayersAvailable1).indexOf({email:CurrentUser.email,nickname:CurrentUser.nickname})
+          newPlayersAvailable1.splice(index)
+          console.log("dan new -->", newPlayersAvailable1);
+          setPlayersAvailable(newPlayersAvailable1)
+
+          // var newPlayersAvailable = [...data.PlayersAvailable]
+          // newPlayersAvailable.filter(user => (user.email != CurrentUser.email))
+         // setPlayersAvailable(newPlayersAvailable)
+         // console.log ("dan 1 new --- >", newPlayersAvailable);
+          console.log ("dan old --- >", data.PlayersAvailable);
+          //setPlayersAvailable(data.PlayersAvailable);
           setPlayersUnAvailable(data.PlayersUnAvailable);
+          setRoomUpdated(true);
         }
       }, fail_status => {
         console.log("failed. status: ", fail_status)
@@ -162,9 +344,10 @@ socket.on("userLeft", function(userInfo) {
 
 function HomepageImage() {
   // const url = 'https://6sense.com/wp-content/uploads/2018/10/2-truths_Canva-011.png';
-  const url = 'https://3.bp.blogspot.com/-dPiQYG83TVM/Tom3QSzuYpI/AAAAAAAACcM/3qlVVHdjtT4/s1600/Truth_or_Lie_.png';
+ // const url = 'https://3.bp.blogspot.com/-dPiQYG83TVM/Tom3QSzuYpI/AAAAAAAACcM/3qlVVHdjtT4/s1600/Truth_or_Lie_.png';
+ const url = 'https://steemitimages.com/p/D5zH9SyxCKd9GJ4T6rkBdeqZw1coQAaQyCUzUF4FozBvW77pHd44QbfXeeya4Ah28LcdgWFSabaBmuZJgxUXrgCTAr69vWz41v4bEikrEuR2G48JcWt62S4JH37qmY3Vi9qfie?format=match&mode=fit';
   return (
-    <img src={url} style={{width: 300}} alt='true or lie'/>
+    <img src={url} style={{width: 450}} alt='true or lie'/>
   );
 }
 
@@ -207,154 +390,6 @@ export function BasicTextFields() {
     </form>
   );
 }
-
-
-// ----------------------THE STEPER--------------------------------- //
-const useStylesSteper = makeStyles(theme => ({
-  root: {
-    width: '90%',
-  },
-  button: {
-    marginRight: theme.spacing(1),
-  },
-  instructions: {
-    marginTop: theme.spacing(1),
-    marginBottom: theme.spacing(1),
-  },
-}));
-
-function getSteps() {
-  return ['Home Page', 'Join a game', 'Play!'];
-}
-
-function getStepContent(step) {
-  switch (step) {
-    case 0:
-      return '';
-    case 1:
-      return '';
-    case 2:
-      return '';
-    default:
-      return '';
-  }
-}
-
-export function HorizontalLinearStepper() {
-  const classes = useStylesSteper();
-  const [activeStep, setActiveStep] = React.useState(0);
-  const [skipped, setSkipped] = React.useState(new Set());
-  const steps = getSteps();
-
-  const isStepOptional = step => {
-    return step === 1;
-  };
-
-  const isStepSkipped = step => {
-    return skipped.has(step);
-  };
-
-  const handleNext = () => {
-    let newSkipped = skipped;
-    if (isStepSkipped(activeStep)) {
-      newSkipped = new Set(newSkipped.values());
-      newSkipped.delete(activeStep);
-    }
-
-    setActiveStep(prevActiveStep => prevActiveStep + 1);
-    setSkipped(newSkipped);
-  };
-
-  const handleBack = () => {
-    setActiveStep(prevActiveStep => prevActiveStep - 1);
-  };
-
-  const handleSkip = () => {
-    if (!isStepOptional(activeStep)) {
-      // You probably want to guard against something like this,
-      // it should never occur unless someone's actively trying to break something.
-      throw new Error("You can't skip a step that isn't optional.");
-    }
-
-    setActiveStep(prevActiveStep => prevActiveStep + 1);
-    setSkipped(prevSkipped => {
-      const newSkipped = new Set(prevSkipped.values());
-      newSkipped.add(activeStep);
-      return newSkipped;
-    });
-  };
-
-  const handleReset = () => {
-    setActiveStep(0);
-  };
-
-  return (
-    <div className={classes.root}>
-      <Stepper activeStep={activeStep}>
-        {steps.map((label, index) => {
-          const stepProps = {};
-          const labelProps = {};
-          if (isStepOptional(index)) {
-            labelProps.optional = <Typography variant="caption"></Typography>;
-          }
-          if (isStepSkipped(index)) {
-            stepProps.completed = false;
-          }
-          return (
-            <Step key={label} {...stepProps}>
-              <StepLabel {...labelProps}>{label}</StepLabel>
-            </Step>
-          );
-        })}
-      </Stepper>
-      <div>
-        {activeStep === steps.length ? (
-          <div>
-            {/* <Typography className={classes.instructions}>
-              All steps completed - you&apos;re finished
-            </Typography> */}
-            {/* <Button onClick={handleReset} className={classes.button}>
-              Reset
-            </Button> */}
-          </div>
-        ) : (
-          <div>
-            <Typography className={classes.instructions}>{getStepContent(activeStep)}</Typography>
-            <div>
-              <Button disabled={activeStep === 0} onClick={handleBack} className={classes.button}>
-                Back
-              </Button>
-              {/* {isStepOptional(activeStep) && (
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleSkip}
-                  className={classes.button}
-                >
-                  Skip
-                </Button>
-              )} */}
-
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleNext}
-                className={classes.button}
-              >
-                {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
-              </Button>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ------------------------------------------------------------------- //
-
-
-
 
 // ------------------ LIST OF PLAYERS IN THE ROOM ------------------ //
 
@@ -555,15 +590,67 @@ export function SwitchListSecondary() {
 
 export function PlayerListAvailable(props) {
 
-  const handleClickInvitePlayer = () => {
-    setInvitePlayerWindowOpen(true);
-};
+  
+socket.on("userDecline", function(userInfo) {
+  /*
+     userInfo: {email: ..., nickName:...}
+  */
+ setInvitePlayerWindowOpen(false);
+  
+});
 
-const handleCloseInvitePlayer = () => {
-  setInvitePlayerWindowOpen(false);
-};
+
+  function PrintInvitePlayerDialog(props){  
+
+    const {InvitePlayerWindowOpen, setInvitePlayerWindowOpen,userThatInvited} = props;
+  
+    const onCloseWindow = ()=>{
+      socket.emit('deliverMessage', {
+        message: 'CancelInvitation',
+        args: {},
+        receiverId: userThatInvited,
+       })
+      setInvitePlayerWindowOpen(false);
+    }
+  
+    return(
+        <Dialog open={InvitePlayerWindowOpen} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">Waiting for other player's response</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+  
+        <Grid container justify="center">
+        <InvitePlayerWaitingImage/>
+        </Grid>
+      
+        </DialogActions>
+  
+          <Grid container justify="center">
+          <Button onClick={onCloseWindow} color="primary">
+          Cancel the invitation
+          </Button>
+          </Grid>
+  
+      </Dialog>
+  
+    );
+  }
+  
 
 const [InvitePlayerWindowOpen, setInvitePlayerWindowOpen] = React.useState(false);
+
+const handleClickInvitePlayer = (userThatGotInvitedID,userThatGotInvitedName) => {
+    // TODO: also makes changeUserAvailability request to server 
+    socket.emit('deliverMessage', {
+    message: 'InvitedToGameByUser',
+    args: {senderName:userThatGotInvitedName},
+    receiverId: userThatGotInvitedID,
+    })
+    setInvitePlayerWindowOpen(true);
+};
 
   const classes = useStyles();
 
@@ -606,14 +693,22 @@ const [InvitePlayerWindowOpen, setInvitePlayerWindowOpen] = React.useState(false
           <TableBody>
             
             {PlayersAvailable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => {
+
+                {/* <Avatar src = {firstLetter}>
+                </Avatar> */}
+
               return (
+
                 <TableRow hover role="checkbox" tabIndex={-1} key={row.email}>
                   {columnsForAvailable.map(column => { 
-                                        
-                    const value = row.nickname;
+                           
+                  const value = row.nickname;
+                  const firstLetter = value.substring(0,1)
 
-                    return (
-                      <TableCell key={row.email} align={column.align}>
+                  return (
+                  <TableCell key={row.email} align={column.align}>
+
+                  <Grid container spacing={1}>              
 
                  <Grid container justify="center" alignItems="center">
                       
@@ -621,8 +716,10 @@ const [InvitePlayerWindowOpen, setInvitePlayerWindowOpen] = React.useState(false
                   <Grid container justify="center" alignItems="center">
                   <Grid item xs = {1}>
 
-                  <Avatar src = {avatarPicAvailable[0]}>
+                  <Avatar>
+                   {firstLetter}
                   </Avatar>
+
                   </Grid>
                   <Grid item xs = {1}>
 
@@ -632,20 +729,24 @@ const [InvitePlayerWindowOpen, setInvitePlayerWindowOpen] = React.useState(false
 
                   </Grid>
 
-              
-                  <Grid item xs = {3}>
-                  <Button variant="contained" color="primary" fullWidth onClick={handleClickInvitePlayer} className={classes.button}>
+                  <Grid item xs = {2}>
+                  <Button variant="contained" color="primary" fullWidth onClick={()=>{handleClickInvitePlayer(row.email,row.nickname)}} className={classes.button}>
                       Invite to Game
                     </Button>
                     </Grid>
 
-                    <PrintInvitePlayerDialog
-                handleCloseWindow= {handleCloseInvitePlayer}
-                WindowOpen= {InvitePlayerWindowOpen}
-                currentUser = {{}}/>
+                  <Grid item xs = {1}>
+                  <ChatButton email={row.email}/>
+                    </Grid>
+                    </Grid>
 
+
+                    <PrintInvitePlayerDialog
+                    InvitePlayerWindowOpen = {InvitePlayerWindowOpen}
+                    setInvitePlayerWindowOpen = {setInvitePlayerWindowOpen}
+                    userThatInvited = {row.email}
+                    />
                   </Grid>
-                
 
                     {/* -------------------------------------------------- */}
 
@@ -677,81 +778,3 @@ const [InvitePlayerWindowOpen, setInvitePlayerWindowOpen] = React.useState(false
   );
 }
 
-
-
-function PrintInvitePlayerDialog(props){  
-  const {handleCloseWindow,  WindowOpen, currentUser} = props;
-  // const [gameID, setGameID] = React.useState("");
-  // const [currentGameNickName, setCurrentGameNickName] = React.useState(currentUser.nickName);
-  // const [validGameID, setValidGameID] = React.useState(true);
-  // const [validNickName, setvalidNickName] = React.useState(true);
-  // const [nickNameHelperText, setNickNameHelperText] = React.useState('');
-  // const [gameIDHelperText, setGameIDHelperText] = React.useState('');
-
-
-  const onCloseWindow = ()=>{
-   // resetDisplaysContent();
-    handleCloseWindow();
-  }
-
-  // const displayNickNameTaken = ()=>{
-  //   setNickNameHelperText('This nick name is taken');
-  //   setvalidNickName(false);
-  // }
-
-  // const displayWrongGameID = ()=>{
-  //   setGameIDHelperText('Wrong game ID');
-  //   setValidGameID(false);
-  // }
-
-  // const resetDisplaysContent = ()=>{
-  //   setGameIDHelperText('');
-  //   setNickNameHelperText('');
-  //   setvalidNickName(true);
-  //   setValidGameID(true);
-  // }
-  // socket.on('joinedRoom', function(roomID){
-  //   //todo- redirect to room page (dan's page)
-  // });
-
-  // socket.on('nickNameTaken', function(){
-  //   displayNickNameTaken();
-  //   //todo- open message 'try a different name'
-  // });
-
-  // socket.on('wrongRoomID', function(){
-  //   displayWrongGameID();
-
-  // });
-  
-  const joinGame = ()=>{
-      // console.log("Invite a player!");
-  }
-  return(
-      <Dialog open={WindowOpen} onClose={onCloseWindow} aria-labelledby="form-dialog-title">
-      <DialogTitle id="form-dialog-title">Waiting for other player's response</DialogTitle>
-      <DialogContent>
-        <DialogContentText>
-        </DialogContentText>
-      </DialogContent>
-      <DialogActions>
-
-      <Grid container justify="center">
-      <InvitePlayerWaitingImage/>
-      </Grid>
-    
-      </DialogActions>
-
-        {/* <Button onClick={onCloseWindow} color="primary">
-        Cancel the invitation
-        </Button> */}
-        <Grid container justify="center">
-        <Button onClick={joinGame} color="primary">
-        Cancel the invitation
-        </Button>
-        </Grid>
-
-    </Dialog>
-
-  );
-}

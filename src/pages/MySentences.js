@@ -16,6 +16,9 @@ import DeleteTwoToneIcon from '@material-ui/icons/DeleteTwoTone';
 
 import {updateUserToDB, getCurrentUserFromSession, userIsUpdated, getUserFromProps} from './../user.js'
 import {DisplayLoading} from './../PagesUtils';
+import {
+  useHistory,
+} from "react-router-dom";
 const useButtonStyles = makeStyles({
     root: {
       background: props =>
@@ -33,19 +36,16 @@ const useButtonStyles = makeStyles({
   });
 
 export function MySentences(props){
-
+    let history = useHistory();
     const classes = AppUseStyles();
     const buttonClasses = useButtonStyles();
-    console.log('props: ', props);
     const [user, setUser] = useState(getUserFromProps(props));
-    const [truths, setTruths] = useState(user.truths);
-    const [lies, setLies] =  useState(user.lies);
-    getCurrentUserFromSession(user, setUser);
-
+    const [truths, setTruths] = useState(user.true_sentences);
+    const [lies, setLies] =  useState(user.false_sentences);
+    getCurrentUserFromSession(user, setUser, (user)=>{setTruths(user.true_sentences); setLies(user.false_sentences)} );
     if(!userIsUpdated(user)){
       return (<DisplayLoading/>);
-    }
-    
+    } 
     return (
       <div id="MySentencesPage">
         <Container component="main" maxWidth="xs">
@@ -89,8 +89,14 @@ export function MySentences(props){
               fullWidth
               type="submit"
               onClick={()=>{
-               updateUserToDB(user);
-                }
+                if(user.true_sentences.length ===0 && user.false_sentences.length ===0)
+                  history.push('/LoginScreen');
+                let user_copy = JSON.parse(JSON.stringify(user));
+                user_copy.true_sentences = truths;
+                user_copy.false_sentences = lies;
+                setUser(user_copy);
+                updateUserToDB(user_copy);
+              }
             }>
               Save
               </Button>
@@ -153,6 +159,7 @@ function GetSentencesComponentsByList(props){
     
     const classes = listStyles();
     const sentences = props.sentences;
+    
     const setSentences = props.setSentences;
     //const [sentences, setSentences] = useState(props.sentences);
     const handleAddSentence = () =>{
@@ -173,7 +180,7 @@ function GetSentencesComponentsByList(props){
     <div>
     <List className={classes.list}>
    
-    {sentences.map(({ id, value }) => (
+    { sentences.map(({ id, value }) => (
         <ListItem className={classes.listItem} key={id} alignItems='flex-start'>
             
         <Grid container spacing={2}>  

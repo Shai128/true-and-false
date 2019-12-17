@@ -221,7 +221,7 @@ browserHistory.listen((location, action) => {
       pathname:`${url}/Home`,
       user: currentUser
       }}> 
-    <ListItem id="homeBTN" button onClick={onPageChange}>
+    <ListItem button onClick={onPageChange}>
      <ListItemIcon > 
          <HomeIcon /> 
          </ListItemIcon> 
@@ -235,7 +235,7 @@ browserHistory.listen((location, action) => {
           pathname: `${url}/MyProfile`,
           user: currentUser
         }}>      
-            <ListItem id="myProfileBTN" button onClick={onPageChange}>
+            <ListItem button onClick={onPageChange}>
               <ListItemIcon>
                   <AccountCircleIcon />
               </ListItemIcon>
@@ -247,7 +247,7 @@ browserHistory.listen((location, action) => {
               pathname: `${url}/MySentences`,
               user: currentUser
             }}>      
-            <ListItem id="mySentencesBTN" button onClick={onPageChange}>
+            <ListItem button onClick={onPageChange}>
               <ListItemIcon>
                   <ListIcon />
               </ListItemIcon>
@@ -260,7 +260,7 @@ browserHistory.listen((location, action) => {
           pathname:`${url}/GamesList`,
           user: currentUser
         }}>      
-          <ListItem id="gamesListBTN" button onClick={onPageChange}>
+          <ListItem button onClick={onPageChange}>
               <ListItemIcon>
                   <GamesIcon />
               </ListItemIcon>
@@ -274,7 +274,7 @@ browserHistory.listen((location, action) => {
             pathname:`${url}/ChatLobby`,
             user: currentUser
             }}> 
-    <ListItem id="chatLobbyBTN" button onClick={onPageChange}>
+    <ListItem button onClick={onPageChange}>
      <ListItemIcon > 
          <ChatIcon /> 
          </ListItemIcon> 
@@ -362,7 +362,7 @@ browserHistory.listen((location, action) => {
    </Typography>
 
 
-    <Button id="logOutBTN" color="inherit"
+    <Button color="inherit"
     onClick={logout}>
       Log Out
       </Button>
@@ -393,11 +393,15 @@ browserHistory.listen((location, action) => {
 
         
         <RedirectToHomeIfNeeded url={url} />
+        
         <Switch>  
 
         <Route path={`${path}/ChatRoom/:email`} component = {Chat}/>  
+<<<<<<< HEAD
         <Route path={`/JoinGame`} exact component={JoinGame} user={currentUser} />
         <Route path="/TheGame" exact component={TheGame}/>
+=======
+>>>>>>> origin/almost_final_for_merg_dan
 
         
         <Route path="/SignIn">

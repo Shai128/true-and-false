@@ -1,6 +1,7 @@
 /*Settings to access to the database to the collection containing the rooms*/
 const {mongoose} = require("./config")
 const{userModel} = require("./user")
+const{isUndefined}=require("../src/Utils")
 const{roomsGlobalArrayModel}=require("./roomsGlobalArray")
 const INVALID_STATE=0;
 const UNVAILABLE_STATE=2;
@@ -122,7 +123,7 @@ async function addUserObjectToRoom(room_id,user,success,fail){
                arr_users[arr_users.length]=user;
                room.state_array[user.user_id_in_room]=AVAILABLE_STATE;
                roomModel.findOneAndUpdate({room_id: room_id}, { $set:{users_in_room:arr_users,state_array:room.state_array,available_id:(room.available_id+1),all_sentences:room.all_sentences}},
-                ()=>{success('success')}) }
+                ()=>{success({roomObject: room, userObject: user})}) }
         });
 }
 
@@ -168,21 +169,22 @@ async function createRoom(room_name,success,failure){
                     break;
                 }
             }
+            var state_array = new Array(10).fill(INVALID_STATE);
             const newRoom = new roomModel({
-                room_id:room_id,
+                room_id: room_id,
                 all_sentences:[],
                 room_name: room_name,
                 available_id:0,
-                state_array: [0,0,0,0,0,0,0,0,0,0,0,0],
+                state_array: state_array,
                 users_in_room:  []        
 
 
             });
+           // console.log("saving new room:", newRoom)
             //saves the room in the db
-            newRoom.save((err)=>{if(err){failure('failed creating a room')} else{
+            newRoom.save((err)=>{if(err){console.log(err); failure('failed creating a room')} else{
                 roomsGlobalArrayModel.findOneAndUpdate({array_id: global_array.array_id}, { $set:{array:global_array.array}},()=>
-                
-                
+            
                 {success(room_id)}
         );  
         }
@@ -216,7 +218,25 @@ async function get_available_users(room_id,success,failure){
         }
 });
 }
+async function changeUserAvailability(room_id,email,status,success,fail){
+    roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
+        if(err) fail('Room with id'+room_id+'does not exist');
+        else{
+            var i,not_found=1;
+                for(i=0;i<room.users_in_room.length;i++){
+                    if(!isUndefined(room.users_in_room[i]&& room.users_in_room[i].email==email)){
+                        not_found=0;
+                        room.state_array[i]=status;
+                    }
+                }
+                if(not_found)fail('User with email '+email+' was not found in room with id '+room_id);
+                else{
+                    roomModel.findOneAndUpdate({room_id: room_id}, { $set:{state_array:room.state_array}},
+                    ()=>{success('Successfully changed the availabilty of user with email '+email+' in room with id '+room_id);}) }
 
+                }
+        }
+);}
 async function get_unavailable_users(room_id,success,failure){
     roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
         if(err) failure('Room with id'+room_id+'does not exist');

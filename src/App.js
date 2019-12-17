@@ -22,9 +22,10 @@ import {
 import { LoginScreenRouter as LoginScreen } from './pages/LoginScreen.js';
 import { Chat as ChatRoom } from './pages/Chat.js';
 import { JoinGame } from './pages/JoinGame.js';
-import { PrintJoinGameDialog, DisplayLoading } from './PagesUtils.js';
+import { PrintJoinGameDialog, DisplayLoading, AutoRedirectToLoginScreenIfUserInSession } from './PagesUtils.js';
 import { okStatus, validEmail, passwordIsStrongEnough, isUndefined } from './Utils.js'
-import { emptyUser, logIn } from './user.js'
+import { emptyUser, logIn, validOldPassword } from './user.js'
+//import { createBrowserHistory } from '../../../AppData/Local/Microsoft/TypeScript/3.6/node_modules/@types/history';
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
@@ -106,11 +107,13 @@ function SignUp() {
   const [user, setUser] = useState(emptyUser);
   const initMessages = {
     errorPassword: false,
+    errorConfirmPassword: false,
     errorFirstName: false,
     errorEmail: false,
     passwordHelperText: '',
     firstNameHelperText: '',
-    emailHelperText: ''
+    emailHelperText: '',
+    confirmPasswordHelerText: '',
   }
   const [textsMessages, setTextsMessages] = React.useState(initMessages);
   const updateField = e => {
@@ -156,7 +159,14 @@ function SignUp() {
     }
     if (isUndefined(user.firstName) || user.firstName === '') {
       newTextsMessages.errorFirstName = true;
-      newTextsMessages.firstNameHelperText = "please provide a firstName"
+      newTextsMessages.firstNameHelperText = "please provide a firstName";
+      //changeTextMessage(true, errorFirstName, "please provide a firstName", firstNameHelperText);
+      isValid = false;
+    }
+    if (user.confirmPassword !== user.password) {
+      newTextsMessages.errorPassword = true;
+      newTextsMessages.errorConfirmPassword = true;
+      newTextsMessages.confirmPasswordHelerText = "passwords does not match";
       //changeTextMessage(true, errorFirstName, "please provide a firstName", firstNameHelperText);
       isValid = false;
     }
@@ -235,11 +245,28 @@ function SignUp() {
                 />
               </Grid>
 
+              <Grid item xs={12}>
+                <TextField
+                  error={textsMessages.errorConfirmPassword}
+                  helperText={textsMessages.confirmPasswordHelerText}
+                  variant="outlined"
+                  required
+                  fullWidth
+                  name="confirmPassword"
+                  label="Confirm Password"
+                  type="password"
+                  id="confirmPassword"
+                  autoComplete="current-password"
+                  onChange={updateField}
+                />
+              </Grid>
+
+
             </Grid>
             <Button
               //type="submit"
-              fullWidth
               id="submit"
+              fullWidth
               variant="contained"
               color="primary"
               className={classes.submit}
@@ -248,6 +275,7 @@ function SignUp() {
                   return;
                 // let data = new FormData();
                 // data.append( "json", JSON.stringify(user));
+
 
                 fetch('http://localhost:8000/user', {
                   method: 'POST', // *GET, POST, PUT, DELETE, etc.
@@ -258,6 +286,7 @@ function SignUp() {
                   body: 'json=' + JSON.stringify(user)
                 }).then((data) => {
                   logIn(user, (data) => {
+                    // todo: check if the email is already in the db!!
                     console.log('frontend got data: ', data);
                     if (data.status === okStatus) {
                       history.push("/LoginScreen/MySentences");
@@ -285,6 +314,8 @@ function SignUp() {
 }
 
 function LinksPage() {
+  let history = useHistory();
+  AutoRedirectToLoginScreenIfUserInSession(history);
   return (
     <div>
       <Switch>
@@ -485,6 +516,7 @@ export function SignIn() {
 
   const [user, setUser] = useState(emptyUser());
   const [isLoading, setIsLoading] = useState(false);
+  const [isWrongLogin, setIsWrongLogin] = useState(false);
 
   const updateField = e => {
     setUser({
@@ -511,6 +543,7 @@ export function SignIn() {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
+                    error={isWrongLogin}
                     id="EmailInput"
                     className={classes.textField}
                     label="Email"
@@ -525,6 +558,7 @@ export function SignIn() {
                 <Grid item xs={12} sm={6}>
 
                   <TextField
+                    error={isWrongLogin}
                     id="PasswordInput"
                     label="Password"
                     className={classes.textField}
@@ -542,26 +576,26 @@ export function SignIn() {
 
                   <Button id="submit" variant="contained" color="primary" fullWidth className={classes.button}
                     onClick={() => {
+                      setIsWrongLogin(false);
                       setIsLoading(true);
                       console.log("sending sign in");
-                      let user = {
-                        email: document.getElementById('EmailInput').value,
-                        password: document.getElementById('PasswordInput').value
-                      }
 
-                      logIn(user, (data) => {
-                        setIsLoading(false);
-                        console.log('frontend got data: ', data);
-                        if (data.status === okStatus) {
-                          console.log("data:", data)
+                      logIn(user,
+                        (user) => { // onSuccess function
+                          setIsLoading(false);
+                          console.log('logged in and frontend got data: ', user);
                           history.push("/LoginScreen");
-                        }
-                      });
+                        },
+                        () => { // onFailure funciton
+                          setIsLoading(false);
+                          setIsWrongLogin(true);
+                        });
 
                     }}>
                     Sign In
       </Button>
                 </Grid>
+                {isWrongLogin ? 'your email and password does not match' : ''}
               </Grid>
             </form>
           </div>
