@@ -11,8 +11,10 @@ const userSchema= new mongoose.Schema(
         salt: String,
         iterations: Number,
         nickName: String,
-        current_room_id: Number,
-        current_room_name: String,
+        roomObject: {
+            room_id: Number,
+            room_name: String
+        },
         score: Number,
         pic_url: String,
         firstName: String,

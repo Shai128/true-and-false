@@ -90,8 +90,11 @@ function changeRoomInUser(email, room_id, room_name, success, failure) {
     console.log("updating user:", email, "current_room_id:", room_id, "current_room_name:", room_name)
     findUserByField('email', email, (userObject) => {
         userObject = userObject[0]
-        userObject.current_room_id = room_id;
-        userObject.current_room_name = room_name;
+        userObject.roomObject = {
+            room_id: room_id,
+            room_name: room_name
+        }
+        console.log("user should update to:", userObject)
         updateUser(
             email,
             userObject,
