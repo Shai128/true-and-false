@@ -19,12 +19,12 @@ import {
   useHistory
 } from "react-router-dom";
 
-import { LoginScreenRouter as LoginScreen } from './pages/LoginScreen.js';
-import { Chat as ChatRoom } from './pages/Chat.js';
-import { JoinGame } from './pages/JoinGame.js';
-import { PrintJoinGameDialog, DisplayLoading, AutoRedirectToLoginScreenIfUserInSession } from './PagesUtils.js';
-import { okStatus, validEmail, passwordIsStrongEnough, isUndefined } from './Utils.js'
-import { emptyUser, logIn, validOldPassword } from './user.js'
+import {LoginScreenRouter as LoginScreen} from './pages/LoginScreen.js';
+import {Chat as ChatRoom} from './pages/Chat.js';
+import {JoinGame} from './pages/JoinGame.js';
+import {PrintJoinGameDialog, DisplayLoading, AutoRedirectToLoginScreenIfUserInSession} from './PagesUtils.js';
+import {okStatus, validEmail, passwordIsStrongEnough, isUndefined} from './Utils.js'
+import {emptyUser, logIn} from './user.js'
 //import { createBrowserHistory } from '../../../AppData/Local/Microsoft/TypeScript/3.6/node_modules/@types/history';
 function Copyright() {
   return (
@@ -262,41 +262,40 @@ function SignUp() {
               </Grid>
 
 
-            </Grid>
-            <Button
-              //type="submit"
-              id="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-              onClick={() => {
-                if (!validUser())
-                  return;
-                // let data = new FormData();
-                // data.append( "json", JSON.stringify(user));
+          </Grid>
+          <Button
+            //type="submit"
+            id="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            className={classes.submit}
+            onClick={()=>{
+              if(!validUser())
+                return;
+              // let data = new FormData();
+              // data.append( "json", JSON.stringify(user));
+              
 
+              fetch('http://localhost:8000/user', {
+                method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                credentials: 'include',
+                body: 'json=' + JSON.stringify(user)
+              }).then( (data) =>{
+                logIn(user, (data)=>{
+                  // todo: check if the email is already in the db!!
+                  console.log('frontend got data: ', data);
+                  // console.log('data.status: ', data.status)
+                  history.push("/LoginScreen/MySentences");
+                });
+              })
 
-                fetch('http://localhost:8000/user', {
-                  method: 'POST', // *GET, POST, PUT, DELETE, etc.
-                  headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                  },
-                  credentials: 'include',
-                  body: 'json=' + JSON.stringify(user)
-                }).then((data) => {
-                  logIn(user, (data) => {
-                    // todo: check if the email is already in the db!!
-                    console.log('frontend got data: ', data);
-                    if (data.status === okStatus) {
-                      history.push("/LoginScreen/MySentences");
-                    }
-                  });
-                })
+            }}>
 
-              }}>
-
-              Sign Up
+            Sign Up
           </Button>
             <Grid container justify="center">
               <Grid item>

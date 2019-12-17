@@ -160,6 +160,7 @@ export function getCurrentUserFromDB(setUser, onSuccess , onFailure){
 
 
 export function updateUserInLocalStorage(user){
+    console.log("entered updateUserInLocalStorage")
     localStorage.setItem(user_in_session_key, JSON.stringify(user))
     console.log('saved in local storage: ', user)
     console.log('now we have in local storage: ',  JSON.parse(localStorage.getItem(user_in_session_key)));
@@ -244,6 +245,9 @@ export function getUserFromProps(props){
         
     if(!isUndefined(props) &&!isUndefined(props.user) && userIsUpdated(props.user))
         return props.user;
+
+    if(!isUndefined(props) &&!isUndefined(props.location) && !isUndefined(props.location.InfoObject) && userIsUpdated(props.InfoObject))
+        return props.user;
     return emptyUser();
 }
 
@@ -284,7 +288,8 @@ export function logIn(user, onSuccess, onFailure){
             console.log("response status:", response.status)
             if (response.status !== okStatus) {
                 reject(response.status);
-                onFailure();
+                if(!isUndefined(onFailure))
+                    onFailure();
             } else {
                 return new Promise(function(resolve, reject) {
                 resolve(response.json());
@@ -294,7 +299,8 @@ export function logIn(user, onSuccess, onFailure){
                 if(!userIsUpdated(user)){
                     return;
                 }
-                onSuccess(user);
+                if(!isUndefined(user))
+                    onSuccess(user);
                 socket.emit('login', {email: user.email,user_id: user.email, nickName: user.nickName});
                 console.log('frontend got data: ', user);
                 /** saving the user we just got to local storage, so next time we will access the user from local storage */

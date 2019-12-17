@@ -40,13 +40,20 @@ import {
   useHistory,
 } from "react-router-dom";
 import {ChatButton} from './../PagesUtils.js';
+import IconButton from '@material-ui/core/IconButton';
+import SearchIcon from '@material-ui/icons/Search';
+import Container from '@material-ui/core/Container';
+import clsx from 'clsx';
+import Divider from '@material-ui/core/Divider';
+import {getUserFromProps, getCurrentUserFromSession } from './../user.js';
+import {validEmail} from './../Utils.js'
+import {PrintChats, DisplayLoading} from './../PagesUtils.js'
+import {isUndefined} from './../Utils.js'
+
+
 const okStatus = 200;
 
 export function JoinGame(props){ 
-
-  console.log('props: ', props);
-  console.log ("props",props.location.InfoObject);
-
   // props contains: 
   // userObject: {
 	// 	user_id_in_room: ...
@@ -61,13 +68,19 @@ export function JoinGame(props){
 	// 	room_id: ...
 	// 	room_name: ...
 	// 	...more fields you probably don't need...
-	// }
-  const [CurrentRoom, setCurrentRoom] = useState(props.location.InfoObject.roomObject);
-  const [CurrentUser, setCurrentUser] = useState(props.location.InfoObject.userObject);
+  // }
+  let roomObject;
+  if(!isUndefined(props) && !isUndefined(props.location)&& !isUndefined(props.location.InfoObject))
+    roomObject = props.location.InfoObject.roomObject;
+  else
+    roomObject = {}
+  const [CurrentRoom, setCurrentRoom] = useState(roomObject);
+  const [CurrentUser, setCurrentUser] = useState(getUserFromProps(props));
+  const [isUpdatedData, setIsUpdatedData] = useState(false);
 
+  getCurrentUserFromSession(CurrentUser, setCurrentUser, (user)=>{console.log('got user from session: ', user);setCurrentRoom(user.roomObject); setIsUpdatedData(true)}, ()=>{});
+ 
   const [roomUpdated, setRoomUpdated] = useState(false);
-
-
   const [PlayersAvailable, setPlayersAvailable] = useState([]);
   const [PlayersUnAvailable, setPlayersUnAvailable] = useState([]);
 
@@ -82,7 +95,22 @@ const useStylesRoomName = makeStyles(theme => ({
   },
 }));
 
+const [GotInvitationWindow, setGotInvitationWindow] = React.useState(false);
+let history = useHistory();
 const classes = useStylesRoomName();
+const [SenderInfoID, setSenderInfoID] = React.useState(-1);
+const [SenderInfoName, setSenderInfoName] = React.useState("");
+const classes1 = useStyles();
+const fixedHeightPaper = clsx(classes1.paper, classes1.fixedHeight);
+const [user, setUser] = React.useState(getUserFromProps(props));
+const [inputName, setInputName] = React.useState('');
+// const [error, setError] = React.useState(false);
+const [helperText, setHelperText] = React.useState(''); 
+
+
+if(!isUpdatedData){
+  return (<DisplayLoading/>);
+}
 if(!roomUpdated)
   InitTheRoom(CurrentRoom.room_id, setRoomUpdated);
 
@@ -135,9 +163,7 @@ socket.on("CancelInvitation", function(userInfo) {
  setGotInvitationWindow(false);
 });
 
-      
-const [GotInvitationWindow, setGotInvitationWindow] = React.useState(false);
-let history = useHistory();
+    
 const onAccept = () => {
 
     // Accept 
@@ -167,9 +193,6 @@ const onDecline = () => {
       })
       setGotInvitationWindow(false);
  }
-
- const [SenderInfoID, setSenderInfoID] = React.useState(-1);
- const [SenderInfoName, setSenderInfoName] = React.useState("");
 
 socket.on("InvitedToGameByUser", function(args) { 
   setSenderInfoID(args.senderId);
@@ -236,39 +259,32 @@ function PrintAnswerPlayerDialog(props){
   );
 }
 
+const handleClickSearch = (event)=>{
+  setHelperText('');
+  // var currentUserFound = (PlayersAvailable.map(User => (User.nickname == event)))[0];
+  // handleClickInvitePlayer(currentUserFound.email,currentUserFound.nickname)
+  // if(!validEmail(inputName)){
+  //     setHelperText('Please provide a valid email');
+  //     return;
+  // }
+  // else
+      // history.push({
+      //     pathname: '/LoginScreen/ChatRoom/'+inputName,
+      //     user: user,
+      //     })
+}
+
   return (
     <div id="joinGamePage">  
 
   <PrintAnswerPlayerDialog WindowOpen = {GotInvitationWindow} setWindowOpen = {setGotInvitationWindow} onAccept = {onAccept} onDecline = {onDecline} sender = {SenderInfoName}/> 
-      
-  <Grid container spacing={2}>
-  <Grid item xs={3}>
-  <div style={{float: 'right'}}>
-    <Button id="leaveRoomBTN" variant="contained" color="primary" fullWidth onClick = {leaveRoom} className={classes.button}>
+  <div style={{float: 'right', marginRight: 10, marginTop: 10,}}>
+    <Button id="leaveRoomBTN" variant="contained" color="primary" onClick = {leaveRoom} className={classes.button}>
      Leave the room
    </Button>
    </div>
- </Grid>
- </Grid>
 
-
-
-  <Grid item xs={6}>
-   <Typography id="roomNameHeader" variant="h2" className={classes.title}>
-   Room Name: 
-    {CurrentRoom.room_name}
-   </Typography>
-   </Grid>
-
-
-   <Grid item xs={4}>
-   <Typography id="userNameHeader" variant="h2" className={classes.roomNumber}>
-   User Name: 
-  {CurrentUser.nickname}
-   </Typography>
-   </Grid>
-
-
+   
   <Grid item xs={4}>
    <Typography id="roomNumberHeader" variant="h2" className={classes.roomNumber}>
    Room Number: 
@@ -276,28 +292,82 @@ function PrintAnswerPlayerDialog(props){
    </Typography>
    </Grid>
 
+  <Grid item xs={6}>
+   <Typography id="roomNameHeader" variant="h3" className={classes.roomNumber}>
+   Room Name: 
+    {CurrentRoom.room_name}
+   </Typography>
+   </Grid>
+
+
+   <Grid item xs={4}>
+   <Typography id="userNameHeader" variant="h3" className={classes.roomNumber}>
+   User Name: 
+  {CurrentUser.nickname}
+   </Typography>
+   </Grid>
+
 
 <Grid container spacing={3} justify="center">
       <HomepageImage/> 
-      </Grid>
+</Grid>
 
-<Grid container spacing={1} justify="center">
 
-      <Grid item xs={4}>
-         <Typography variant="h4" className={classes.roomNumber}>
-         Choose a player and start to play!
-          </Typography>
-          </Grid>
-          <Grid item xs={8}>
-          {/* <BasicTextFields/> */}
-          </Grid>
-          </Grid>
+      {/* ******************************************************************************************** */}
+
+      {/* <Grid container spacing={3} justify="center"> */}
+          <div component="form" className={fixedHeightPaper}>
+            <Grid container>
+                <Grid item xs={12}>
+                    <Typography component="h4" variant="h5">
+                        Enter a user's name and start to play!
+                    </Typography>
+                </Grid>
+                <Grid item xs={4}>
+                <TextField
+                className={classes.input}
+                placeholder="Enter a user's name"
+                fullWidth
+                variant="outlined"
+                helperText={helperText}
+                id="nickname"
+                name="nickname"
+                autoComplete="nickname"
+                onKeyPress={(ev) => {
+                    if (ev.key === 'Enter') {
+                        handleClickSearch(ev);
+                    }
+                }
+                } 
+                onChange={(event)=>{
+                  setInputName(event.target.value);
+                }}
+                />
+                </Grid>
+                <Grid item xs={2}>
+                    <IconButton /*type="submit"*/ className={classes.iconButton} onClick={handleClickSearch} aria-label="search">
+                        <SearchIcon />
+                    </IconButton>
+                </Grid>
+            </Grid>
+       
+      </div> 
+
+      {/* </Grid> */}
+
+
+      {/* ******************************************************************************************** */}
+
+
+
+
 
    <PlayerListAvailable PlayersAvailable = {PlayersAvailable}/>
   
    {/* <PlayerListUnavailable PlayersUnAvailable = {PlayersUnAvailable}/> */}
 
   </div>
+  
   );
 
  function InitTheRoom(props){   
@@ -436,7 +506,15 @@ const useStyles = makeStyles({
     color: 'white',
     height: 48,
     },
-
+    paper: {
+     // padding: theme.spacing(2),
+      display: 'flex',
+      overflow: 'auto',
+      flexDirection: 'column',
+      marginBottom: 10,
+    },
+    fixedHeight: {
+    },
 });
 
 // ------------------------------------------------------------------------------------- //
@@ -777,4 +855,6 @@ const handleClickInvitePlayer = (userThatGotInvitedID,userThatGotInvitedName) =>
     </Paper>
   );
 }
+
+
 

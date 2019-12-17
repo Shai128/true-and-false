@@ -1,5 +1,6 @@
 import {okStatus, /*isUndefined*/} from './Utils.js'
 import { reject } from 'q';
+import { updateUserInLocalStorage } from './user.js';
 const server = 'http://localhost:8000';
 
 /**
@@ -26,10 +27,15 @@ export function createRoom(roomName, currentuser, currentGameNickName, history){
         }
         }).then(roomAndUserObject => {
             console.log("received roomAndUserObject:", roomAndUserObject)
+            let new_user = JSON.parse(JSON.stringify(currentuser));
+            new_user.roomObject = roomAndUserObject.roomObject;
+            updateUserInLocalStorage(new_user);
             history.push({
-                pathname: '/JoinGame',
+                pathname: '/LoginScreen/JoinGame',
                 InfoObject: roomAndUserObject,
             });
+            
+           
         }, fail_status => {
         console.log("failed, status:", fail_status)
         });
@@ -58,9 +64,11 @@ export function joinRoom(roomID, currentuser, currentGameNickName, history){
             })
         }
         }).then(roomAndUserObject => {
-
+            let new_user = JSON.parse(JSON.stringify(currentuser));
+            new_user.roomObject = roomAndUserObject.roomObject;
+            updateUserInLocalStorage(new_user);
             history.push({
-                pathname: '/JoinGame',
+                pathname: '/LoginScreen/JoinGame',
                 InfoObject: roomAndUserObject,
             });
 

@@ -51,7 +51,7 @@ const userModel = mongoose.model('users',userSchema) //creating the class userMo
  */
 function createUser(user,success,failure){
     userModel.findOne({ email: user.email }).exec(function (err, dbUser) {
-    if(err || !(dbUser)) {
+    if(err || !dbUser) {
         let hashedPassword = user.password;
         const newUser = new userModel({
             password: hashedPassword,
