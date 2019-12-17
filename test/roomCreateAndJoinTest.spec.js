@@ -37,6 +37,8 @@ beforeEach(async () => {
     ]);
 
     expect(page.url() === APP + "LoginScreen/Home" || page.url() === APP + "LoginScreen").toBeTruthy()//redirect to home page
+    await page.waitForSelector("#LoginScreenHomePage")
+
 }, 700000);
 
 afterEach(async () => {
@@ -61,8 +63,8 @@ beforeAll(async () => {
     // Create a new incognito browser context
     //const context = await browser.createIncognitoBrowserContext();
     // Create a new page inside context.
-    const context = await browser.createIncognitoBrowserContext();
-    page = await context.newPage();
+    const context1 = await browser.createIncognitoBrowserContext();
+    page = await context1.newPage();
     //page = await browser.newPage();
 
     //page = await browser.newPage();
@@ -86,15 +88,10 @@ beforeAll(async () => {
     await page.type("#password", lead.password);
     await page.click("#confirmPassword");
     await page.type("#confirmPassword", lead.password);
-
-
-    await page.click('#submit')
-    await page.waitFor(2000)
-    await page.goto(APP + "LoginScreen/MySentences");
-    // await Promise.all([
-    //     page.waitForNavigation(),
-    //     page.click('#submit')
-    // ]);
+    await Promise.all([
+        page.waitForNavigation(),
+        page.click('#submit')
+    ]);
 
     expect(page.url()).toEqual(APP + "LoginScreen/MySentences")//redirect to personal info page
     await page.waitForSelector('#MySentencesPage')
@@ -116,6 +113,7 @@ afterAll(() => {
 describe("roomCreateAndJoinTest", () => {
 
     test("successfull roomCreation", async () => {
+        await page.waitForSelector("#LoginScreenHomePage")
         await Promise.all([
             page.waitForSelector('#openRoomPopUp'),
             page.click('#createNewRoomBTN')
@@ -153,7 +151,7 @@ describe("roomCreateAndJoinTest", () => {
         ]);
 
         await page.waitForSelector('#joinGamePage')
-        expect(page.url()).toEqual(APP + "JoinGame")
+        expect(page.url() === APP + "LoginScreen/JoinGame" || page.url() === APP + "JoinGame").toBeTruthy()//redirect to home page
 
         await page.waitForSelector('#roomNameHeader')
         var someText = await page.evaluate(() => document.getElementById('roomNameHeader').textContent)
@@ -217,13 +215,11 @@ describe("roomCreateAndJoinTest", () => {
 
 
 
-    //     await page.click('#submit')
-    // await page.waitFor(2000)
-    // await page.goto(APP + "LoginScreen/MySentences");
-    // // await Promise.all([
-    // //     page.waitForNavigation(),
-    // //     page.click('#submit')
-    // // ]);
+       
+    // await Promise.all([
+    //     page.waitForNavigation(),
+    //     page.click('#submit')
+    // ]);
     //     expect(page2.url()).toEqual(APP + "LoginScreen/MySentences")//redirect to personal info page
     //     await page.waitForSelector('#MySentencesPage')
 

@@ -303,7 +303,7 @@ const handleClickSearch = (event)=>{
    <Grid item xs={4}>
    <Typography id="userNameHeader" variant="h3" className={classes.roomNumber}>
    User Name: 
-  {CurrentUser.nickname}
+  {CurrentUser.nickName}
    </Typography>
    </Grid>
 
