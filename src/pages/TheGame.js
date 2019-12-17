@@ -57,8 +57,8 @@ export function TheGame(props){
       setQuestionsCount(0);
       setMyturn(props.location.turn);
       tmpMyturn = props.location.turn
-      seen = user.already_seen_sentences;
-      //seen = ["A true sentence 1", "A false sentence 2"];
+     // seen = user.already_seen_sentences;
+      seen = ["A true sentence 1", "A false sentence 2"];
 
 
       // todo: for ron, add the next http request
@@ -90,10 +90,10 @@ export function TheGame(props){
 
       //trues = props.location.user.true_sentences; 
       trues = ["A true sentence 1", "A true sentence 2", "A true sentence 3"]; ///// todo: for ron, remove this line
-      trues = trues.filter(x => !seen.includes(x));
+     // trues = trues.filter(x => !seen.includes(x));
       //falses = props.location.user.false_sentences;
       falses = ["A false sentence 1", "A false sentence 2", "A false sentence 3"]; ///// todo: for ron, remove this line
-      falses = falses.filter(x => !seen.includes(x));
+     // falses = falses.filter(x => !seen.includes(x));
     }
 
     matchPoints = correctCount*3 + (questionsCount - correctCount)*1

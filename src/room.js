@@ -64,7 +64,9 @@ export function joinRoom(roomID, currentuser, currentGameNickName, history){
             })
         }
         }).then(roomAndUserObject => {
-
+            let new_user = JSON.parse(JSON.stringify(currentuser));
+            new_user.roomObject = roomAndUserObject.roomObject;
+            updateUserInLocalStorage(new_user);
             history.push({
                 pathname: '/LoginScreen/JoinGame',
                 InfoObject: roomAndUserObject,
