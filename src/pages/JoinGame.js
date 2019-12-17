@@ -47,8 +47,7 @@ import clsx from 'clsx';
 import Divider from '@material-ui/core/Divider';
 import {getUserFromProps, getCurrentUserFromSession } from './../user.js';
 import {validEmail} from './../Utils.js'
-import {PrintChats} from './../PagesUtils.js'
-
+import {PrintChats, DisplayLoading} from './../PagesUtils.js'
 import {isUndefined} from './../Utils.js'
 
 
@@ -71,18 +70,17 @@ export function JoinGame(props){
 	// 	...more fields you probably don't need...
   // }
   let roomObject;
-  if(!isUndefined(props) && !isUndefined(props.location))
+  if(!isUndefined(props) && !isUndefined(props.location)&& !isUndefined(props.location.InfoObject))
     roomObject = props.location.InfoObject.roomObject;
   else
     roomObject = {}
   const [CurrentRoom, setCurrentRoom] = useState(roomObject);
   const [CurrentUser, setCurrentUser] = useState(getUserFromProps(props));
+  const [isUpdatedData, setIsUpdatedData] = useState(false);
 
-  getCurrentUserFromSession(CurrentUser, setCurrentUser, (user)=>{setCurrentRoom(user.roomObject)}, ()=>{});
-
+  getCurrentUserFromSession(CurrentUser, setCurrentUser, (user)=>{console.log('got user from session: ', user);setCurrentRoom(user.roomObject); setIsUpdatedData(true)}, ()=>{});
+ 
   const [roomUpdated, setRoomUpdated] = useState(false);
-
-
   const [PlayersAvailable, setPlayersAvailable] = useState([]);
   const [PlayersUnAvailable, setPlayersUnAvailable] = useState([]);
 
@@ -97,7 +95,22 @@ const useStylesRoomName = makeStyles(theme => ({
   },
 }));
 
+const [GotInvitationWindow, setGotInvitationWindow] = React.useState(false);
+let history = useHistory();
 const classes = useStylesRoomName();
+const [SenderInfoID, setSenderInfoID] = React.useState(-1);
+const [SenderInfoName, setSenderInfoName] = React.useState("");
+const classes1 = useStyles();
+const fixedHeightPaper = clsx(classes1.paper, classes1.fixedHeight);
+const [user, setUser] = React.useState(getUserFromProps(props));
+const [inputName, setInputName] = React.useState('');
+// const [error, setError] = React.useState(false);
+const [helperText, setHelperText] = React.useState(''); 
+
+
+if(!isUpdatedData){
+  return (<DisplayLoading/>);
+}
 if(!roomUpdated)
   InitTheRoom(CurrentRoom.room_id, setRoomUpdated);
 
@@ -150,9 +163,7 @@ socket.on("CancelInvitation", function(userInfo) {
  setGotInvitationWindow(false);
 });
 
-      
-const [GotInvitationWindow, setGotInvitationWindow] = React.useState(false);
-let history = useHistory();
+    
 const onAccept = () => {
 
     // Accept 
@@ -182,9 +193,6 @@ const onDecline = () => {
       })
       setGotInvitationWindow(false);
  }
-
- const [SenderInfoID, setSenderInfoID] = React.useState(-1);
- const [SenderInfoName, setSenderInfoName] = React.useState("");
 
 socket.on("InvitedToGameByUser", function(args) { 
   setSenderInfoID(args.senderId);
@@ -251,17 +259,6 @@ function PrintAnswerPlayerDialog(props){
   );
 }
 
-
-
-const classes1 = useStyles();
-const fixedHeightPaper = clsx(classes1.paper, classes1.fixedHeight);
-const [user, setUser] = React.useState(getUserFromProps(props));
-
-const [inputName, setInputName] = React.useState('');
-// const [error, setError] = React.useState(false);
-const [helperText, setHelperText] = React.useState(''); 
-
-
 const handleClickSearch = (event)=>{
   setHelperText('');
   // var currentUserFound = (PlayersAvailable.map(User => (User.nickname == event)))[0];
@@ -276,7 +273,6 @@ const handleClickSearch = (event)=>{
       //     user: user,
       //     })
 }
-
 
   return (
     <div>  

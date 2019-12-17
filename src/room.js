@@ -27,13 +27,15 @@ export function createRoom(roomName, currentuser, currentGameNickName, history){
         }
         }).then(roomAndUserObject => {
             console.log("received roomAndUserObject:", roomAndUserObject)
+            let new_user = JSON.parse(JSON.stringify(currentuser));
+            new_user.roomObject = roomAndUserObject.roomObject;
+            updateUserInLocalStorage(new_user);
             history.push({
                 pathname: '/LoginScreen/JoinGame',
                 InfoObject: roomAndUserObject,
             });
-            let new_user = currentuser;
-            new_user.currentRoomID = roomAndUserObject.roomObject;
-            updateUserInLocalStorage(currentuser);
+            
+           
         }, fail_status => {
         console.log("failed, status:", fail_status)
         });

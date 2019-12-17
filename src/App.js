@@ -286,9 +286,8 @@ function SignUp() {
                 logIn(user, (data)=>{
                   // todo: check if the email is already in the db!!
                   console.log('frontend got data: ', data);
-                  if(data.status === okStatus ){
-                    history.push("/LoginScreen/MySentences");
-                  }
+                  // console.log('data.status: ', data.status)
+                  history.push("/LoginScreen/MySentences");
                 });
               })
 
