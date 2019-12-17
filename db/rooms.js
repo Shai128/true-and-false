@@ -8,6 +8,7 @@ const UNVAILABLE_STATE=2;
 const AVAILABLE_STATE=1;
 const PLAYERS_AMOUNT=10;
 
+
 const roomSchema = new mongoose.Schema(
     { 
         room_id: {type: Number, unique: true,required:true},
