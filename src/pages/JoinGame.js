@@ -237,14 +237,14 @@ function PrintAnswerPlayerDialog(props){
 }
 
   return (
-    <div>  
+    <div id="joinGamePage">  
 
   <PrintAnswerPlayerDialog WindowOpen = {GotInvitationWindow} setWindowOpen = {setGotInvitationWindow} onAccept = {onAccept} onDecline = {onDecline} sender = {SenderInfoName}/> 
       
   <Grid container spacing={2}>
   <Grid item xs={3}>
   <div style={{float: 'right'}}>
-    <Button variant="contained" color="primary" fullWidth onClick = {leaveRoom} className={classes.button}>
+    <Button id="leaveRoomBTN" variant="contained" color="primary" fullWidth onClick = {leaveRoom} className={classes.button}>
      Leave the room
    </Button>
    </div>
@@ -254,7 +254,7 @@ function PrintAnswerPlayerDialog(props){
 
 
   <Grid item xs={6}>
-   <Typography variant="h2" className={classes.title}>
+   <Typography id="roomNameHeader" variant="h2" className={classes.title}>
    Room Name: 
     {CurrentRoom.room_name}
    </Typography>
