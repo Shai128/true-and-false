@@ -26,7 +26,7 @@ var matchPoints
 var totalPoints
 var sentenceCheck = ""
 var ans, flag = true;
-var trues, falses, seen;
+var trues = [], falses = [], seen = [];
 var guess_str, isCorrect, result;
 
 export function TheGame(props){
@@ -78,6 +78,9 @@ export function TheGame(props){
         }}).then(data => {      
           trues = data.truths
           falses = data.lies
+
+          trues = trues.filter(x => !seen.includes(x));
+          falses = falses.filter(x => !seen.includes(x));
           console.log("received data from server: ", data)
         })
         
@@ -90,10 +93,8 @@ export function TheGame(props){
 
       //trues = props.location.user.true_sentences; 
       //trues = ["A true sentence 1", "A true sentence 2", "A true sentence 3"]; ///// todo: for ron, remove this line
-      trues = trues.filter(x => !seen.includes(x));
       //falses = props.location.user.false_sentences;
       //falses = ["A false sentence 1", "A false sentence 2", "A false sentence 3"]; ///// todo: for ron, remove this line
-      falses = falses.filter(x => !seen.includes(x));
     }
 
     matchPoints = correctCount*3 + (questionsCount - correctCount)*1
