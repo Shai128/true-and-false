@@ -23,7 +23,8 @@ const {
   updateRoom,
   deleteRoomById,
   changeUserAvailability,
-  findUserByEmailInRoomByRoomID
+  findUserByEmailInRoomByRoomID,
+  getAllSentencesArray
 } = require("../db/rooms") //imports all room functions
 
 const {
@@ -382,6 +383,41 @@ app.get('/leaveRoom/:roomId', (req, res) => {
 })
 
 /**
+ * returns the truths and lies of a given user (opponent) in a given room
+ * return format is an object: 
+ * {
+ *  truths: [array of true sentences about the opponent].
+ *  lies: [array of false sentences about the opponent].
+ * }
+ */
+app.get('/userSentences/:opponentId/:roomId', (req, res) => {
+  logDiv('userSentences')
+  console.log("opponent:", req.params.opponentId, "room:", req.params.roomId)
+  findUserByEmailInRoomByRoomID(
+    req.params.roomId,
+    req.params.opponentId,
+    (userObject) => { // find the given user
+      getAllSentencesArray(
+        req.params.roomId,
+        (allSentences) => { // find the global sentences array to extract lies
+          console.log("user truths:", userObject.true_sentences, "global:", allSentences);
+          var extracted_lies = allSentences.filter(s => !userObject.true_sentences.includes(s))
+          console.log("extracted lies:", extracted_lies)
+
+          res.status(200).send(JSON.stringify({
+            truths: userObject.true_sentences,
+            lies: extracted_lies
+          }))
+          logDiv()
+        },
+        (err) => standardErrorHandling(res, err)
+      )
+    },
+    (err) => standardErrorHandling(res, err)
+  )
+})
+
+/**
  * Returns an object containing the lists of available
  * and unavailable users in a given room.
  */
@@ -513,6 +549,45 @@ io.on('connection', function (socket) {
 
     // io.sockets.connected[data.user.socketID].emit('C_chat', data);
     // io.sockets.connected[data.receiverUser.socketID].emit('C_chat', data);
+  })
+
+  /**
+   * sent by frontend for when a user starts/ends a battle with another user.
+   * args: 
+   * {
+   *  newAvailability: 2 for unavailable or 1 for available
+   *  userId: email of the given user
+   *  roomId: the room in which the user currently participates
+   * }
+   */
+
+  const userStates = {
+    INVALID: 0,
+    AVAILABLE: 1,
+    UNAVAILABLE: 2
+  }
+  socket.on('changeUserAvailability', function(args) {
+    logDiv('changeUserAvailability')
+    console.log("args:", args)
+    changeUserAvailability(
+      args.roomId, 
+      args.userId, 
+      args.newAvailability,
+      (succ) => {
+        console.log(succ)
+        // TODO: should the user socket leave the room?
+        if (args.newAvailability === userStates.AVAILABLE) {
+          // user becomes available -- his socket should rejoin the room
+          socket.join(args.roomId.toString())
+          io.to(args.roomId).emit('userAvailable', args.userId)
+        } else {
+          // user goes unavailable -- his socket should leave the room
+          socket.leave(args.roomId.toString())
+          io.to(args.roomId).emit('userUnavailable', args.userId)
+        }
+      },
+      (err) => console.log(err)
+    )
   })
 
 
