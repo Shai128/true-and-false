@@ -27,7 +27,7 @@ export function createRoom(roomName, currentuser, currentGameNickName, history){
         }).then(roomAndUserObject => {
             console.log("received roomAndUserObject:", roomAndUserObject)
             history.push({
-                pathname: '/JoinGame',
+                pathname: '/LoginScreen/JoinGame',
                 InfoObject: roomAndUserObject,
             });
         }, fail_status => {
@@ -60,7 +60,7 @@ export function joinRoom(roomID, currentuser, currentGameNickName, history){
         }).then(roomAndUserObject => {
 
             history.push({
-                pathname: '/JoinGame',
+                pathname: '/LoginScreen/JoinGame',
                 InfoObject: roomAndUserObject,
             });
 
