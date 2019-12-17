@@ -62,24 +62,24 @@ export function TheGame(props){
 
 
       // todo: for ron, add the next http request
-      // fetch('http://localhost:8000/userSentences/' + opponentId + '/' + room.room_id, { 
-      // method: 'GET', // *GET, POST, PUT, DELETE, etc.
-      // headers: {
-      //   'Content-Type': 'application/x-www-form-urlencoded'
-      // },
-      // credentials: 'include',
-      // }).then((response) =>{
-      //   if (response.status !== okStatus) {
-      //     reject(response.status)
-      //   } else {
-      //     return new Promise(function(resolve, reject) {
-      //       resolve(response.json());
-      //     })
-      //   }}).then(data => {      
-      //     trues = data.trues
-      //     falses = data.falses
-      //     console.log("received data from server: ", data)
-      //   })
+      fetch('http://localhost:8000/userSentences/' + opponentId + '/' + room.room_id, { 
+      method: 'GET', // *GET, POST, PUT, DELETE, etc.
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      credentials: 'include',
+      }).then((response) =>{
+        if (response.status !== okStatus) {
+          reject(response.status)
+        } else {
+          return new Promise(function(resolve, reject) {
+            resolve(response.json());
+          })
+        }}).then(data => {      
+          trues = data.truths
+          falses = data.lies
+          console.log("received data from server: ", data)
+        })
         
       //   console.log("trues: ", trues)
       //   console.log("falses: ", falses)
@@ -89,10 +89,10 @@ export function TheGame(props){
       // falses = opponentUser.false_sentences
 
       //trues = props.location.user.true_sentences; 
-      trues = ["A true sentence 1", "A true sentence 2", "A true sentence 3"]; ///// todo: for ron, remove this line
+      //trues = ["A true sentence 1", "A true sentence 2", "A true sentence 3"]; ///// todo: for ron, remove this line
       trues = trues.filter(x => !seen.includes(x));
       //falses = props.location.user.false_sentences;
-      falses = ["A false sentence 1", "A false sentence 2", "A false sentence 3"]; ///// todo: for ron, remove this line
+      //falses = ["A false sentence 1", "A false sentence 2", "A false sentence 3"]; ///// todo: for ron, remove this line
       falses = falses.filter(x => !seen.includes(x));
     }
 
