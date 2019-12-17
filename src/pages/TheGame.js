@@ -5,6 +5,7 @@ import Container from '@material-ui/core/Container';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import {JoinGame} from './JoinGame.js'
+import { reject } from 'q';
 
 import {useStyles as AppUseStyles} from './../App.js';
 import {Link} from "react-router-dom";
@@ -18,6 +19,8 @@ import {
 
 
 import {socket} from './../user.js';
+
+const okStatus = 200;
 
 var matchPoints
 var totalPoints
@@ -57,7 +60,9 @@ export function TheGame(props){
       seen = user.already_seen_sentences;
       //seen = ["A true sentence 1", "A false sentence 2"];
 
-      // fetch('http://localhost:8000/userSentences/' + opponentId, { 
+
+      // todo: for ron, add the next http request
+      // fetch('http://localhost:8000/userSentences/' + opponentId + '/' + room.room_id, { 
       // method: 'GET', // *GET, POST, PUT, DELETE, etc.
       // headers: {
       //   'Content-Type': 'application/x-www-form-urlencoded'
@@ -73,7 +78,11 @@ export function TheGame(props){
       //   }}).then(data => {      
       //     trues = data.trues
       //     falses = data.falses
+      //     console.log("received data from server: ", data)
       //   })
+        
+      //   console.log("trues: ", trues)
+      //   console.log("falses: ", falses)
 
       // let opponentUser = props.location.room.users_in_room.find(user => user.email == opponentId)
       // trues = opponentUser.true_sentences
@@ -156,7 +165,7 @@ export function TheGame(props){
           <Grid container>
             <Grid item xs={12} sm={6}>
               <Typography variant="h6" align="left" color="primary">
-                Your total points: {totalPoints}<br/>
+                {/* Your total points: {totalPoints}<br/> */}
                 Points in this round: {matchPoints}<br/>
                 Correct answers in this round: {correctCount}/{questionsCount}
               </Typography>
@@ -356,7 +365,7 @@ function updateAfterMatchData(user, room, matchPoints, history){
   let newUser = user
   newUser.already_seen_sentences = seen
   newUser.score += matchPoints 
-  socket.emit('updateUserInRoom', {roomId: room.room_id, userId: newUser}) // todo: complete data
+  socket.emit('updateUserInRoom', {roomId: room.room_id, user: newUser}) // todo: complete data
 
   history.push({
     pathname: '/JoinGame',
