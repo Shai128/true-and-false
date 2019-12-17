@@ -49,7 +49,7 @@ import {getUserFromProps, getCurrentUserFromSession } from './../user.js';
 import {validEmail} from './../Utils.js'
 import {PrintChats} from './../PagesUtils.js'
 
-
+import {isUndefined} from './../Utils.js'
 
 
 const okStatus = 200;
@@ -69,9 +69,16 @@ export function JoinGame(props){
 	// 	room_id: ...
 	// 	room_name: ...
 	// 	...more fields you probably don't need...
-	// }
-  const [CurrentRoom, setCurrentRoom] = useState(props.location.InfoObject.roomObject);
-  const [CurrentUser, setCurrentUser] = useState(props.location.InfoObject.userObject);
+  // }
+  let roomObject;
+  if(!isUndefined(props) && !isUndefined(props.location))
+    roomObject = props.location.InfoObject.roomObject;
+  else
+    roomObject = {}
+  const [CurrentRoom, setCurrentRoom] = useState(roomObject);
+  const [CurrentUser, setCurrentUser] = useState(getUserFromProps(props));
+
+  getCurrentUserFromSession(CurrentUser, setCurrentUser, (user)=>{setCurrentRoom(user.roomObject)}, ()=>{});
 
   const [roomUpdated, setRoomUpdated] = useState(false);
 

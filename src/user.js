@@ -244,6 +244,9 @@ export function getUserFromProps(props){
         
     if(!isUndefined(props) &&!isUndefined(props.user) && userIsUpdated(props.user))
         return props.user;
+
+    if(!isUndefined(props) &&!isUndefined(props.location) && !isUndefined(props.location.InfoObject) && userIsUpdated(props.InfoObject))
+        return props.user;
     return emptyUser();
 }
 

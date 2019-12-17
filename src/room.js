@@ -1,5 +1,6 @@
 import {okStatus, /*isUndefined*/} from './Utils.js'
 import { reject } from 'q';
+import { updateUserInLocalStorage } from './user.js';
 const server = 'http://localhost:8000';
 
 /**
@@ -30,6 +31,9 @@ export function createRoom(roomName, currentuser, currentGameNickName, history){
                 pathname: '/LoginScreen/JoinGame',
                 InfoObject: roomAndUserObject,
             });
+            let new_user = currentuser;
+            new_user.currentRoomID = roomAndUserObject.roomObject;
+            updateUserInLocalStorage(currentuser);
         }, fail_status => {
         console.log("failed, status:", fail_status)
         });
