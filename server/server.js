@@ -206,7 +206,7 @@ function serverUserExists(req, res) {
 function serverUserUpdate(req, res) {
   console.log('update user');
   let data = JSON.parse(req.body.json)
-  updateUser(req.params.id, data,
+  updateUser(req.params.id,null, data,
     ()=>{
       console.log("succesfully updated user: " + data.email)
       res.status(200).send("success");
@@ -433,7 +433,7 @@ app.get('/userList/:roomId', (req, res) => {
           findRoomById(
             roomId, 
             (roomObject) => {
-              //console.log("Players available" ,availableUsers)
+              console.log("Players available" ,availableUsers)
               res.status(200).send(JSON.stringify({
                 PlayersAvailable: convertUserListFormat(availableUsers),
                 PlayersUnAvailable: convertUserListFormat(unavailableUsers),

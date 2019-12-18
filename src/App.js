@@ -23,7 +23,7 @@ import {LoginScreenRouter as LoginScreen} from './pages/LoginScreen.js';
 import {Chat as ChatRoom} from './pages/Chat.js';
 import {JoinGame} from './pages/JoinGame.js';
 import {PrintJoinGameDialog, DisplayLoading, AutoRedirectToLoginScreenIfUserInSession} from './PagesUtils.js';
-import {okStatus, validEmail, passwordIsStrongEnough, isUndefined} from './Utils.js'
+import {validEmail, passwordIsStrongEnough, isUndefined} from './Utils.js'
 import {emptyUser, logIn} from './user.js'
 //import { createBrowserHistory } from '../../../AppData/Local/Microsoft/TypeScript/3.6/node_modules/@types/history';
 function Copyright() {

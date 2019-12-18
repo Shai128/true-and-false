@@ -5,7 +5,7 @@ import Container from '@material-ui/core/Container';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import {JoinGame} from './JoinGame.js'
-import { reject } from 'q';
+
 
 import {useStyles as AppUseStyles} from './../App.js';
 import {Link} from "react-router-dom";
@@ -20,13 +20,13 @@ import {
 
 import {socket} from './../user.js';
 
-const okStatus = 200;
-
+import {DisplayLoading} from './../PagesUtils.js'
+import {okStatus} from './../Utils.js'
+import {getSentencesFromDB} from './../game.js'
 var matchPoints
 var totalPoints
 var sentenceCheck = ""
 var ans, flag = true;
-var trues = [], falses = [], seen = [];
 var guess_str, isCorrect, result;
 
 export function TheGame(props){
@@ -47,6 +47,29 @@ export function TheGame(props){
     const [opGuess, setOpGuess] = React.useState("");
     const [opIsCorrect, setOpIsCorrect] = React.useState("");
     
+    const [truths, setTruths] = React.useState([]);
+    const [lies, setLies] = React.useState([]);
+    const [isFinishedLoading, setIsFinishedLoading] = React.useState(true);
+    const [seenSentences, setSeenSentences] = React.useState(user.already_seen_sentences);
+
+
+    if(!isFinishedLoading){
+      getSentencesFromDB(opponentId, room, 
+        (data)=>{
+          let trues = data.truths
+          let falses = data.lies
+          trues = trues.filter(x => !seenSentences.includes(x));
+          falses = falses.filter(x => !seenSentences.includes(x));
+          setTruths(trues);
+          setLies(falses);
+          setIsFinishedLoading(true)
+      }, ()=>{})
+      return (<DisplayLoading/>);
+    }
+
+    
+
+
     var tmpMyturn = true
     
     if(questionsCount == -1){
@@ -57,46 +80,9 @@ export function TheGame(props){
       setQuestionsCount(0);
       setMyturn(props.location.turn);
       tmpMyturn = props.location.turn
-     // seen = user.already_seen_sentences;
-      seen = ["A true sentence 1", "A false sentence 2"];
+      //seen = user.already_seen_sentences;
 
 
-      // todo: for ron, add the next http request
-      fetch('http://localhost:8000/userSentences/' + opponentId + '/' + room.room_id, { 
-      method: 'GET', // *GET, POST, PUT, DELETE, etc.
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      credentials: 'include',
-      }).then((response) =>{
-        if (response.status !== okStatus) {
-          reject(response.status)
-        } else {
-          return new Promise(function(resolve, reject) {
-            resolve(response.json());
-          })
-        }}).then(data => {      
-          trues = data.truths
-          falses = data.lies
-
-          trues = trues.filter(x => !seen.includes(x));
-          falses = falses.filter(x => !seen.includes(x));
-          console.log("received data from server: ", data)
-        })
-        
-      //   console.log("trues: ", trues)
-      //   console.log("falses: ", falses)
-
-      // let opponentUser = props.location.room.users_in_room.find(user => user.email == opponentId)
-      // trues = opponentUser.true_sentences
-      // falses = opponentUser.false_sentences
-
-      //trues = props.location.user.true_sentences; 
-      trues = ["A true sentence 1", "A true sentence 2", "A true sentence 3"]; ///// todo: for ron, remove this line
-     // trues = trues.filter(x => !seen.includes(x));
-      //falses = props.location.user.false_sentences;
-      falses = ["A false sentence 1", "A false sentence 2", "A false sentence 3"]; ///// todo: for ron, remove this line
-     // falses = falses.filter(x => !seen.includes(x));
     }
 
     matchPoints = correctCount*3 + (questionsCount - correctCount)*1
@@ -107,7 +93,7 @@ export function TheGame(props){
       console.log("got here!")
       setChoosed(false);
       //console.log('sentence before chosing a new one: ' + sentence)
-      let tmp = getSentence();
+      let tmp = getSentence(truths, lies, seenSentences, setTruths, setLies, setSeenSentences);
       sentenceCheck = tmp.sentence
       setSentence(tmp.sentence);
       //console.log('sentence after chosing a new one: ' + tmp.sentence + ", " + sentence)
@@ -158,7 +144,7 @@ export function TheGame(props){
     });
 
     socket.on('endMatch', function(){
-      updateAfterMatchData(user, room, matchPoints, history)
+      updateAfterMatchData(user, room, matchPoints, history, seenSentences)
     });
 
     return (
@@ -210,7 +196,7 @@ export function TheGame(props){
           </Grid>
 
           {choosed && !noMoreSentences && myturn &&
-          <Result guess={guess} ans={ans} opponentId={opponentId} correctCount={correctCount} questionsCount={questionsCount} user={user} room={room} history={history}
+          <Result seenSentences = {seenSentences} guess={guess} ans={ans} opponentId={opponentId} correctCount={correctCount} questionsCount={questionsCount} user={user} room={room} history={history}
           opponentId={opponentId} matchPoints={matchPoints} setChoosed={setChoosed} setMyturn={setMyturn} setQuestionsCount={setQuestionsCount} setCorrectCount={setCorrectCount}/>}
 
           {noMoreSentences && <div>
@@ -224,7 +210,7 @@ export function TheGame(props){
                 message: "endMatch",
                 args: {}
               });
-              updateAfterMatchData(user, room, matchPoints, history)
+              updateAfterMatchData(user, room, matchPoints, history, seenSentences)
               }}
               >
                 end game
@@ -321,7 +307,7 @@ return (
                 message: "endMatch",
                 args: {}
               });
-              updateAfterMatchData(props.user, props.room, props.matchPoints, props.history)
+              updateAfterMatchData(props.user, props.room, props.matchPoints, props.history, props.seenSentences)
             }}
             >
               end game
@@ -334,26 +320,33 @@ return (
   );
 }
 
-function getSentence(){
+function getSentence(truths, lies, seenSentences, setTruths, setLies, setSeenSentences){
   let ans, sentence;
-  console.log(trues)
-  console.log(falses)
-  console.log(seen)
-  if ((Math.floor(Math.random()*2) || falses.length == 0) && trues.length > 0){
+  console.log(truths)
+  console.log(lies)
+  console.log(seenSentences)
+  if ((Math.floor(Math.random()*2) || lies.length == 0) && truths.length > 0){
     ans = true;
     //let filtered_trues = trues.filter(x => !seen.includes(x));
-    let i = Math.floor(Math.random()*trues.length)
-    seen.push(trues[i]);
-    sentence = trues[i];
-    trues.splice(i, 1);
+    let i = Math.floor(Math.random()*truths.length)
+    setSeenSentences(seenSentences.concat([truths[i]]));
+    sentence = truths[i];
+    
+    let new_truths = JSON.parse(JSON.stringify(truths));
+    new_truths.splice(i, 1);
+    setTruths(new_truths);
   }
-  else if(falses.length > 0){
+  else if(lies.length > 0){
     ans = false;
     //let filtered_falses = falses.filter(x => !seen.includes(x));
-    let i = Math.floor(Math.random()*falses.length)
-    seen.push(falses[i]);
-    sentence = falses[i];
-    falses.splice(i, 1);
+    let i = Math.floor(Math.random()*lies.length)
+    setSeenSentences(seenSentences.concat([lies[i]]));
+
+    sentence = lies[i];
+     
+    let new_lies = JSON.parse(JSON.stringify(lies));
+    new_lies.splice(i, 1);
+    setLies(new_lies);
   }
   else {
     sentence = "No more sentences...";
@@ -362,16 +355,16 @@ function getSentence(){
   return {sentence: sentence, ans: ans};
 }
 
-function updateAfterMatchData(user, room, matchPoints, history){
+function updateAfterMatchData(user, room, matchPoints, history, seenSentences){
   console.log("update after user points: ", matchPoints)
 
-  let newUser = user
-  newUser.already_seen_sentences = seen
+  let newUser = JSON.parse(JSON.stringify(user));
+  newUser.already_seen_sentences = seenSentences
   newUser.score += matchPoints 
   socket.emit('updateUserInRoom', {roomId: room.room_id, user: newUser}) // todo: complete data
 
   history.push({
-    pathname: '/JoinGame',
+    pathname: '/LoginScreen/JoinGame',
     InfoObject: {userObject: newUser, roomObject: room}
   });
 }

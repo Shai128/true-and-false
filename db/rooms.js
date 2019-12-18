@@ -74,8 +74,10 @@ async function findUserByEmailInRoomByRoomID(room_id,email,success,fail){ //room
                var i; 
                var flag_not_found=1;
                for( i=0; i<arr_users.length; i++){
-
-                    if(arr_users[i]!=undefined && arr_users[i].email==email){flag_not_found=0; success(arr_users[i])}
+                    if(arr_users[i]!=undefined && arr_users[i].email==email){
+                        flag_not_found=0; 
+                        success(arr_users[i])
+                    }
                 }
                 if(flag_not_found){fail('User with email ' +email+ ' was not found in room with id '+room_id)}
         }
@@ -96,6 +98,7 @@ function changeRoomInUser(email, room_id, room_name, success, failure) {
         }
         console.log("user should update to:", userObject)
         updateUser(
+            null,
             email,
             userObject,
             (succ) => {
@@ -157,17 +160,16 @@ async function addUserObjectToRoom(room_id,user,success,fail){
 }
 
 async function addUserToRoom(room_id,email,success,fail){
-console.log('got here 1.5');
+console.log('addUserToRoom got params: room_id: ', room_id+ " email: ", email);
 roomModel.find({ room_id: room_id }, (err, docs) => {
     var room = docs[0]
     if (room === undefined) {fail("room does not exist"); return}
     if (err) {fail(err)} else {
-        console.log('got here 1');
-            console.log('got here 1');
+        console.log('addUserToRoom. room ', room_id + "found. ");
             userModel.findOne({ email: email }).exec(function (err2, user) {
-                if(err2) fail('User with email'+email+'does not exist');
+                if(err2) fail('trying to add user to room. ',room_id +' User with email'+email+'does not exist');
                 else{
-                    console.log('got here 2');
+                    console.log('addUserToRoom got here 2');
                     var false_array = new Array(PLAYERS_AMOUNT).fill(false);
                     var userInRoom={
                         user_id_in_room:room.available_id,
@@ -177,7 +179,8 @@ roomModel.find({ room_id: room_id }, (err, docs) => {
                         pic_url: user.pic_url,
                         array_of_ids_of_users_already_played_with: false_array,
                         true_sentences: user.true_sentences,
-                        already_seen_sentences: user.true_sentences,
+                        //false_sentences: user.false_sentences,
+                        already_seen_sentences: (user.true_sentences).concat(user.false_sentences),
                         score:0
                     }
 
