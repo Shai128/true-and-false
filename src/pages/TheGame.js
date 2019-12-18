@@ -26,7 +26,7 @@ var matchPoints
 var totalPoints
 var sentenceCheck = ""
 var ans, flag = true;
-var trues, falses, seen;
+var trues = [], falses = [], seen = [];
 var guess_str, isCorrect, result;
 
 export function TheGame(props){
@@ -62,24 +62,27 @@ export function TheGame(props){
 
 
       // todo: for ron, add the next http request
-      // fetch('http://localhost:8000/userSentences/' + opponentId + '/' + room.room_id, { 
-      // method: 'GET', // *GET, POST, PUT, DELETE, etc.
-      // headers: {
-      //   'Content-Type': 'application/x-www-form-urlencoded'
-      // },
-      // credentials: 'include',
-      // }).then((response) =>{
-      //   if (response.status !== okStatus) {
-      //     reject(response.status)
-      //   } else {
-      //     return new Promise(function(resolve, reject) {
-      //       resolve(response.json());
-      //     })
-      //   }}).then(data => {      
-      //     trues = data.trues
-      //     falses = data.falses
-      //     console.log("received data from server: ", data)
-      //   })
+      fetch('http://localhost:8000/userSentences/' + opponentId + '/' + room.room_id, { 
+      method: 'GET', // *GET, POST, PUT, DELETE, etc.
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      credentials: 'include',
+      }).then((response) =>{
+        if (response.status !== okStatus) {
+          reject(response.status)
+        } else {
+          return new Promise(function(resolve, reject) {
+            resolve(response.json());
+          })
+        }}).then(data => {      
+          trues = data.truths
+          falses = data.lies
+
+          trues = trues.filter(x => !seen.includes(x));
+          falses = falses.filter(x => !seen.includes(x));
+          console.log("received data from server: ", data)
+        })
         
       //   console.log("trues: ", trues)
       //   console.log("falses: ", falses)
