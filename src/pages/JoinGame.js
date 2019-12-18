@@ -195,6 +195,7 @@ const onDecline = () => {
  }
 
 socket.on("InvitedToGameByUser", function(args) { 
+  console.log("dannnn ->", args);
   setSenderInfoID(args.senderId);
   setSenderInfoName(args.senderName);
   setGotInvitationWindow(true);
@@ -224,6 +225,7 @@ socket.on("InvitedToGameByUser", function(args) {
 function PrintAnswerPlayerDialog(props){  
 
   const {WindowOpen, setWindowOpen, onAccept, onDecline, SenderInfoName} = props;
+  console.log("name -->", SenderInfoName);
 
   return(
       <Dialog open={WindowOpen} aria-labelledby="form-dialog-title">
@@ -277,7 +279,7 @@ const handleClickSearch = (event)=>{
   return (
     <div>  
 
-  <PrintAnswerPlayerDialog WindowOpen = {GotInvitationWindow} setWindowOpen = {setGotInvitationWindow} onAccept = {onAccept} onDecline = {onDecline} sender = {SenderInfoName}/> 
+  <PrintAnswerPlayerDialog WindowOpen = {GotInvitationWindow} setWindowOpen = {setGotInvitationWindow} onAccept = {onAccept} onDecline = {onDecline} SenderInfoName = {SenderInfoName}/> 
   <div style={{float: 'right', marginRight: 10, marginTop: 10,}}>
     <Button variant="contained" color="primary" onClick = {leaveRoom} className={classes.button}>
      Leave the room
@@ -299,11 +301,10 @@ const handleClickSearch = (event)=>{
    </Typography>
    </Grid>
 
-
    <Grid item xs={4}>
    <Typography variant="h3" className={classes.roomNumber}>
    User Name: 
-  {CurrentUser.nickname}
+  {CurrentUser.nickName}
    </Typography>
    </Grid>
 
@@ -809,7 +810,7 @@ const handleClickInvitePlayer = (userThatGotInvitedID,userThatGotInvitedName) =>
 
                   <Grid item xs = {2}>
                   <Button variant="contained" color="primary" fullWidth onClick={()=>{handleClickInvitePlayer(row.email,row.nickname)}} className={classes.button}>
-                      Invite to Game
+                  Invite to Game
                     </Button>
                     </Grid>
 
