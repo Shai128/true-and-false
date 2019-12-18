@@ -133,7 +133,7 @@ async function deleteUserByEmailInRoomByRoomID(room_id,email,success,fail){ //ro
                                     if(arr_users[i]!=undefined) flag=1;
                                 
                                 }
-                                if(flag==0){
+                                if(flag===0){
                                     console.log('got here with', room_id);
                                 await roomModel.remove({room_id: room_id});
                                 roomsGlobalArrayModel.findOne({array_id:1}).exec(function(err,arr){
