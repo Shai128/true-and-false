@@ -258,8 +258,9 @@ async function changeUserAvailability(room_id,email,status,success,fail){
         else{
             var i,not_found=1;
                 for(i=0;i<room.users_in_room.length;i++){
-                    if(!isUndefined(room.users_in_room[i]&& room.users_in_room[i].email==email)){
+                    if(!isUndefined(room.users_in_room[i])&& (room.users_in_room[i].email===email)){
                         console.log("found the user index", i)
+                        console.log("email:", room.users_in_room[i].email)
                         not_found=0;
                         room.state_array[i]=status;
                         break;

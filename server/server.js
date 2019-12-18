@@ -593,7 +593,7 @@ io.on('connection', function (socket) {
       (err) => console.log(err)
     )
   })
-s
+
 
   /**
    * Passes a message from one user to another.
