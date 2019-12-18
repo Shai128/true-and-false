@@ -71,7 +71,7 @@ export function JoinGame(props){
   // }
   let roomObject;
   console.log("the received props:", props)
-  if(!isUndefined(props) && !isUndefined(props.location))
+  if(!isUndefined(props) && !isUndefined(props.location) && !isUndefined(props.location.InfoObject))
     roomObject = props.location.InfoObject.roomObject;
   else
     roomObject = {}
