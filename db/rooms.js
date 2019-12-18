@@ -23,8 +23,9 @@ const roomSchema = new mongoose.Schema(
                 nickname: String,
                 pic_url: String,
                 array_of_ids_of_users_already_played_with: [{type: Boolean}],
-                true_sentences:[{type: String}],
-                already_seen_sentences:[{type: String}],
+                true_sentences:[{id: Number, value: String}],
+                already_seen_sentences:[{id: Number, value: String}],
+                false_sentences: [{id: Number, value: String}],
                 score: Number
             }]        
     }
@@ -149,7 +150,7 @@ async function addUserObjectToRoom(room_id,user,success,fail){
             var orig_sentences_array_length=room.all_sentences.length;
             var i;
             for(i=0;i<user.true_sentences.length;i++){
-                room.all_sentences[orig_sentences_array_length+i]=user.true_sentences[i];
+                room.all_sentences[orig_sentences_array_length+i]=user.true_sentences[i].value;
             }
               var arr_users=room.users_in_room;
                arr_users[arr_users.length]=user;
@@ -169,7 +170,7 @@ roomModel.find({ room_id: room_id }, (err, docs) => {
             userModel.findOne({ email: email }).exec(function (err2, user) {
                 if(err2) fail('trying to add user to room. ',room_id +' User with email'+email+'does not exist');
                 else{
-                    console.log('addUserToRoom got here 2');
+                    console.log('addUserToRoom found user: ', user);
                     var false_array = new Array(PLAYERS_AMOUNT).fill(false);
                     var userInRoom={
                         user_id_in_room:room.available_id,
@@ -179,7 +180,7 @@ roomModel.find({ room_id: room_id }, (err, docs) => {
                         pic_url: user.pic_url,
                         array_of_ids_of_users_already_played_with: false_array,
                         true_sentences: user.true_sentences,
-                        //false_sentences: user.false_sentences,
+                        false_sentences: user.false_sentences,
                         already_seen_sentences: (user.true_sentences).concat(user.false_sentences),
                         score:0
                     }
@@ -195,6 +196,22 @@ async function createRoom(room_name,success,failure){
     roomsGlobalArrayModel.findOne({ array_id: 1 }).exec(function (err, global_array) {
         if (err) {failure('unexpected error occured during fetching the rooms global array')}
         else {
+            
+            if(isUndefined(global_array)){
+                global_array = {
+                    array_id:1,
+                    array: (new Array(100)).fill(false)
+                }
+                const new_global_array = new roomsGlobalArrayModel(global_array);
+                //saves the user in the db
+                new_global_array.save((err)=>{
+                    if(err)
+                        failure(err)
+                    else 
+                        success()
+                });
+            }
+            
             var room_id,i;
             for(i=0;i<global_array.array.length;i++){
                 if(!global_array.array[i]){

@@ -4,16 +4,12 @@ import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import {JoinGame} from './JoinGame.js'
+//import {JoinGame} from './JoinGame.js'
 
 
 import {useStyles as AppUseStyles} from './../App.js';
-import {Link} from "react-router-dom";
+//import {Link} from "react-router-dom";
 import {
-  BrowserRouter as Router,
-  Route,
-  useRouteMatch,
-  Redirect,
   useHistory,
 } from "react-router-dom";
 
@@ -21,11 +17,10 @@ import {
 import {socket} from './../user.js';
 
 import {DisplayLoading} from './../PagesUtils.js'
-import {okStatus} from './../Utils.js'
+import {isUndefined} from './../Utils.js'
 import {getSentencesFromDB} from './../game.js'
 var matchPoints
 var totalPoints
-var sentenceCheck = ""
 var ans, flag = true;
 var guess_str, isCorrect, result;
 
@@ -46,20 +41,31 @@ export function TheGame(props){
     const [sentence, setSentence] = React.useState("");
     const [opGuess, setOpGuess] = React.useState("");
     const [opIsCorrect, setOpIsCorrect] = React.useState("");
-    
+    const [sentenceCheck, setSentenceCheck] = React.useState("");
     const [truths, setTruths] = React.useState([]);
     const [lies, setLies] = React.useState([]);
-    const [isFinishedLoading, setIsFinishedLoading] = React.useState(true);
-    const [seenSentences, setSeenSentences] = React.useState(user.already_seen_sentences);
+    const [isFinishedLoading, setIsFinishedLoading] = React.useState(false);
+    let initial_seen = isUndefined(user.already_seen_sentences)? [] : user.already_seen_sentences
+    const [seenSentences, setSeenSentences] = React.useState(initial_seen);
 
 
     if(!isFinishedLoading){
       getSentencesFromDB(opponentId, room, 
         (data)=>{
+          console.log('getSentencesFromDB');
+          console.log('got data from DB: ', data);
           let trues = data.truths
           let falses = data.lies
-          trues = trues.filter(x => !seenSentences.includes(x));
-          falses = falses.filter(x => !seenSentences.includes(x));
+
+          const validSentence = (x) =>{
+            let lies = isUndefined(user.false_sentences)? []: user.false_sentences;
+            let truths = isUndefined(user.true_sentences)? []: user.true_sentences;
+
+            return !seenSentences.includes(x) && !truths.includes(x) && !lies.includes(x);
+          }
+
+          trues = trues.filter(x => validSentence(x));
+          falses = falses.filter(x => validSentence(x));
           setTruths(trues);
           setLies(falses);
           setIsFinishedLoading(true)
@@ -72,8 +78,8 @@ export function TheGame(props){
 
     var tmpMyturn = true
     
-    if(questionsCount == -1){
-      sentenceCheck = ""
+    if(questionsCount === -1){
+      setSentenceCheck("")
       matchPoints = 0
       totalPoints = user.score
       setCorrectCount(0)
@@ -81,23 +87,23 @@ export function TheGame(props){
       setMyturn(props.location.turn);
       tmpMyturn = props.location.turn
       //seen = user.already_seen_sentences;
-
-
     }
 
     matchPoints = correctCount*3 + (questionsCount - correctCount)*1
     totalPoints = user.score + matchPoints
 
     console.log('myturn: ', myturn, " tmpMyturn: ", tmpMyturn + " sentenceCheck: ", sentenceCheck)
-    if(myturn && sentenceCheck == "" && tmpMyturn){
+    if(myturn && sentenceCheck === "" && tmpMyturn){
       console.log("got here!")
       setChoosed(false);
       //console.log('sentence before chosing a new one: ' + sentence)
       let tmp = getSentence(truths, lies, seenSentences, setTruths, setLies, setSeenSentences);
-      sentenceCheck = tmp.sentence
+      setSentenceCheck(tmp.sentence);
       setSentence(tmp.sentence);
       //console.log('sentence after chosing a new one: ' + tmp.sentence + ", " + sentence)
       ans = tmp.ans;
+      console.log('delivering message: displaySentence with sentence: ', tmp.sentence);
+
       socket.emit('deliverMessage',{
         message: "displaySentence",
         receiverId: opponentId,
@@ -114,28 +120,37 @@ export function TheGame(props){
     }
 
     if (!myturn && !choosed){
-      sentenceCheck = "Loading...";
+      // really important comment by: Shai. That's not how to write a code. 
+      // you should make "Loading..." a constant variable (name is loading for example with value "Loading...")
+      // and assign the constant variable here. this mistake repeats over and over in the code and 
+      // this is really sad :(
+      setSentenceCheck("Loading..."); 
       setSentence("Loading...");
       setChoosed(true);
     }
 
     socket.on('displaySentence', function(args){
+      socket.off('displaySentence');
       console.log('received displaySentence')
-      sentenceCheck = "opponent's turn: ".concat(args.sentence);
+      console.log('args: ', args)
+      setSentenceCheck("opponent's turn: ".concat(args.sentence));
       setSentence("opponent's turn: ".concat(args.sentence));
       setChoosed(true);
     });
 
     socket.on('displayAnswer', function(args){
+      socket.off('displayAnswer');
       setOpGuess(args.guess);
       setOpIsCorrect(args.isCorrect);
       setAnswered(true);
     });
 
     socket.on('continueMatch', function(args){
+      socket.off('continueMatch');
+
       //console.log("continueMatch1: " + myturn + sentenceCheck)
       if (sentenceCheck.startsWith("opponent's turn:")){ // if it is the first time here
-        sentenceCheck = ""
+        setSentenceCheck("")
         setSentence("");
       }
       setAnswered(false);
@@ -144,6 +159,7 @@ export function TheGame(props){
     });
 
     socket.on('endMatch', function(){
+      socket.off('endMatch');
       updateAfterMatchData(user, room, matchPoints, history, seenSentences)
     });
 
@@ -161,14 +177,13 @@ export function TheGame(props){
             </Grid>
             <Grid item xs={12} sm={6}>
               <Typography variant="h6" align="right" color="primary">
-                Playing against {props.location.user.nickname}
+                Playing against {props.location.user.nickName}
               </Typography>
             </Grid>
           </Grid>
           <Grid container spacing={2} alignItems="stretch" justify="center">
             <Grid item xs={12} sm={12}>
               <Typography variant="h3" align="center">
-                <br/>
                 {sentence}
               </Typography>
             </Grid>
@@ -352,7 +367,7 @@ function getSentence(truths, lies, seenSentences, setTruths, setLies, setSeenSen
     sentence = "No more sentences...";
     ans = "";
   }
-  return {sentence: sentence, ans: ans};
+  return {sentence: sentence.value, ans: ans};
 }
 
 function updateAfterMatchData(user, room, matchPoints, history, seenSentences){

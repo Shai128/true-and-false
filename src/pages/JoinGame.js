@@ -112,7 +112,7 @@ const [helperText, setHelperText] = React.useState('');
 if(!isUpdatedData){
   return (<DisplayLoading/>);
 }
-if(!roomUpdated)
+if(!roomUpdated && isUpdatedData)
   InitTheRoom(CurrentRoom.room_id, setRoomUpdated);
 
 socket.on("userJoined", function(userInfo) {

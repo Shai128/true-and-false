@@ -26,7 +26,7 @@ const {
   findUserByEmailInRoomByRoomID,
   getAllSentencesArray
 } = require("../db/rooms") //imports all room functions
-
+const {isUndefined} = require('../src/Utils.js');
 const {
   getRandomSentence,
   standardErrorHandling,
@@ -397,6 +397,7 @@ app.get('/userSentences/:opponentId/:roomId', (req, res) => {
     req.params.roomId,
     req.params.opponentId,
     (userObject) => { // find the given user
+      console.log('in userSentences found user: ', userObject);
       getAllSentencesArray(
         req.params.roomId,
         (allSentences) => { // find the global sentences array to extract lies
@@ -670,7 +671,9 @@ function addMessageUnReadInDB(userEmail, message, otherUserEmail){
     findRoomById(
       data.roomId,
       (roomObject) => {
+        console.log('roomObject: ', roomObject);
         // update only the correct user in the room
+        roomObject.users_in_room.filter(x=>!isUndefined(x))
         roomObject.users_in_room.map(
           (userObject) => {
             return ((userObject.email === data.user.email) ? 
