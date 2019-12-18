@@ -126,14 +126,34 @@ async function deleteUserByEmailInRoomByRoomID(room_id,email,success,fail){ //ro
                     room.state_array[j]=INVALID_STATE;
                     roomModel.findOneAndUpdate({room_id: room_id}, { $set:{users_in_room:arr_users,state_array: room.state_array }},()=>{
 
-                        changeRoomInUser(email, -1, "no room", () => {
-                            success('Successfully removed');
+                        changeRoomInUser(email, -1, "no room", async ()=>{
+                                var flag=0;
+                                console.log('got here1');
+                                for(i=0;i<arr_users.length;i++){
+                                    if(arr_users[i]!=undefined) flag=1;
+                                
+                                }
+                                if(flag==0){
+                                    console.log('got here with', room_id);
+                                await roomModel.remove({room_id: room_id});
+                                roomsGlobalArrayModel.findOne({array_id:1}).exec(function(err,arr){
+                                    if(err){fail('shit'); console.log('should not get here')}
+                                    else{
+                                        console.log('the array is:', arr.array);
+                                    arr.array[room_id]=false;
+                            roomsGlobalArrayModel.findOneAndUpdate({array_id: 1}, { $set:{array:arr.array }},()=>{     
+                                success('Successfully removed');
+                                });}
+                               
+                            }) }
+
+                            })
+                            
                         },
                         (err) => fail(err));
-                    }) }
-        }
-    });   
-}
+    }}}
+    
+    ); }
 
 
 async function addUserObjectToRoom(room_id,user,success,fail){
