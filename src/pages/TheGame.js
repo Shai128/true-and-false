@@ -60,27 +60,6 @@ export function TheGame(props){
     const [myGuess, setMyGuess] =  React.useState(''); // can be TRUE_SENTENCE or FALSE_SENTENCE.
     const [disableButtons, setDisableButtons] =  React.useState(false); // can be TRUE_SENTENCE or FALSE_SENTENCE.
 
-    const initializeSocketListeners = ()=>{
-      socket.on('displaySentence', function(args){
-        socket.off('displaySentence');
-        console.log('received displaySentence')
-        console.log('args: ', args)
-        if(args.info === NO_MORE_SENTENCES)
-          setNoMoreSentences(true);
-        else
-          setSentence(OPPONENT_TURN_MESSAGE + args.sentence);
-      });
-
-      socket.on('displayAnswer', function(args){
-        socket.off('displayAnswer');
-        console.log('received message displayAnswer. args:', args);
-        setOpGuess(args.guess === TRUE_SENTENCE? 'TRUE': 'FALSE');
-        setOpIsCorrect(args.isCorrect? 'right': 'wrong');
-        setAnswered(true);
-      });
-
-      
-    }
 
     useEffect(
       () => {
@@ -109,6 +88,23 @@ export function TheGame(props){
       updateAfterMatchData(user, room, matchPoints, history, seenSentences)
     });
 
+    socket.off('displaySentence');
+    socket.on('displaySentence', function(args){
+      console.log('received displaySentence')
+      console.log('args: ', args)
+      if(args.info === NO_MORE_SENTENCES)
+        setNoMoreSentences(true);
+      else
+        setSentence(OPPONENT_TURN_MESSAGE + args.sentence);
+    });
+
+    socket.off('displayAnswer');
+    socket.on('displayAnswer', function(args){
+      console.log('received message displayAnswer. args:', args);
+      setOpGuess(args.guess === TRUE_SENTENCE? 'TRUE': 'FALSE');
+      setOpIsCorrect(args.isCorrect? 'right': 'wrong');
+      setAnswered(true);
+    });
 
     // sentence is the string sentence that I see now (if it is my turn). I deliver it to my opponent
     // he will be able to see the sentence I currently have.
@@ -152,7 +148,6 @@ export function TheGame(props){
     if(!isFinishedLoading){
       if(!startedReadingFromDB){
         setStartedReadingFromDB(true);
-        initializeSocketListeners();
         getSentencesFromDB(opponentId, room, 
           (data)=>{
             console.log('getSentencesFromDB');
