@@ -152,6 +152,9 @@ async function addUserObjectToRoom(room_id,user,success,fail){
             for(i=0;i<user.true_sentences.length;i++){
                 room.all_sentences[orig_sentences_array_length+i]=user.true_sentences[i].value;
             }
+            for(i=0;i<user.false_sentences.length;i++){
+                room.all_sentences[orig_sentences_array_length+i]=user.false_sentences[i].value;
+            }
               var arr_users=room.users_in_room;
                arr_users[arr_users.length]=user;
                room.state_array[user.user_id_in_room]=AVAILABLE_STATE;

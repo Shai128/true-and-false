@@ -401,12 +401,13 @@ app.get('/userSentences/:opponentId/:roomId', (req, res) => {
       getAllSentencesArray(
         req.params.roomId,
         (allSentences) => { // find the global sentences array to extract lies
+          var extracted_truths = userObject.true_sentences.map(x=>x.value)
           console.log("user truths:", userObject.true_sentences, "global:", allSentences);
-          var extracted_lies = allSentences.filter(s => !userObject.true_sentences.includes(s))
+          var extracted_lies = allSentences.filter(s => !extracted_truths.includes(s))
           console.log("extracted lies:", extracted_lies)
 
           res.status(200).send(JSON.stringify({
-            truths: userObject.true_sentences,
+            truths: extracted_truths,
             lies: extracted_lies
           }))
           logDiv()
@@ -606,7 +607,7 @@ io.on('connection', function (socket) {
     logDiv('delivering message')
     if (data.receiverId === undefined || data.message === undefined) {
       // handle error
-      console.log("bad parameters");
+      console.log("bad parameters. data.receiverId= ", data.receiverId, ". data.message= ", data.message);
       return;
     }
     var receiverSocket = findSocketByUserId(data.receiverId)

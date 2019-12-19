@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{ useEffect} from 'react';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
@@ -19,149 +19,181 @@ import {socket} from './../user.js';
 import {DisplayLoading} from './../PagesUtils.js'
 import {isUndefined} from './../Utils.js'
 import {getSentencesFromDB} from './../game.js'
-var matchPoints
-var totalPoints
-var ans, flag = true;
-var guess_str, isCorrect, result;
+const NO_MORE_SENTENCES = "no more sentences"
+const TRUE_SENTENCE = "true sentence"
+const FALSE_SENTENCE = "false sentence"
+const INITIAL_STATE = "initial game state"
+const MY_TURN_STATE = "my turn and I need to choose a sentence"
+const MY_TURN_SENTENCE_CHOSEN_STATE = "I chose a sentence and now I choose if to continue or end the game"
+const OPPONENT_TURN_STATE = "opponent's turn and he needs to choose a sentence"
+const OPPONENT_TURN_SENTENCE_CHOSEN_STATE = "opponent chose a sentence and now he needs to choose if to continue or end the game"
+const OPPONENT_TURN_MESSAGE = "Opponent's turn. The sentence is: "
 
 export function TheGame(props){
     let history = useHistory();
     const classes = AppUseStyles();
     console.log("props: ", props)
-    const user = props.location.user
-    const room = props.location.room
-    const opponentId = props.location.opponentId; /////////////////////// todo: change to const
+    const user = props.location.user;
+    const room = props.location.room;
+    const [opponentId, setOpponentId] = React.useState(props.location.opponentId); /////////////////////// todo: change to const
     const [choosed, setChoosed] = React.useState(false);
     const [answered, setAnswered] = React.useState(false);
     const [noMoreSentences, setNoMoreSentences] = React.useState(false);
-    const [myturn, setMyturn] = React.useState(true);
+    let myturn = props.location.turn;
     const [questionsCount, setQuestionsCount] = React.useState(-1);
     const [correctCount, setCorrectCount] = React.useState(0);
     const [guess, setGuess] = React.useState(true);
     const [sentence, setSentence] = React.useState("");
     const [opGuess, setOpGuess] = React.useState("");
     const [opIsCorrect, setOpIsCorrect] = React.useState("");
-    const [sentenceCheck, setSentenceCheck] = React.useState("");
     const [truths, setTruths] = React.useState([]);
     const [lies, setLies] = React.useState([]);
     const [isFinishedLoading, setIsFinishedLoading] = React.useState(false);
     let initial_seen = isUndefined(user.already_seen_sentences)? [] : user.already_seen_sentences
     const [seenSentences, setSeenSentences] = React.useState(initial_seen);
+    const [startedReadingFromDB, setStartedReadingFromDB] =  React.useState(false);
+    const [matchPoints, setMatchPoints] =  React.useState(0);
 
+    // const [isFirstTurn, setIsFirstTurn] =  React.useState(true);
+    const [gameState, setGameState] =  React.useState(INITIAL_STATE);
+    const [sentenceType, setSentenceType] =  React.useState(''); // can be TRUE_SENTENCE or FALSE_SENTENCE
+    const [myGuess, setMyGuess] =  React.useState(''); // can be TRUE_SENTENCE or FALSE_SENTENCE.
+    const [disableButtons, setDisableButtons] =  React.useState(false); // can be TRUE_SENTENCE or FALSE_SENTENCE.
 
-    if(!isFinishedLoading){
-      getSentencesFromDB(opponentId, room, 
-        (data)=>{
-          console.log('getSentencesFromDB');
-          console.log('got data from DB: ', data);
-          let trues = data.truths
-          let falses = data.lies
+    const initializeSocketListeners = ()=>{
+      socket.on('displaySentence', function(args){
+        socket.off('displaySentence');
+        console.log('received displaySentence')
+        console.log('args: ', args)
+        if(args.info === NO_MORE_SENTENCES)
+          setNoMoreSentences(true);
+        else
+          setSentence(OPPONENT_TURN_MESSAGE + args.sentence);
+      });
 
-          const validSentence = (x) =>{
-            let lies = isUndefined(user.false_sentences)? []: user.false_sentences;
-            let truths = isUndefined(user.true_sentences)? []: user.true_sentences;
+      socket.on('displayAnswer', function(args){
+        socket.off('displayAnswer');
+        console.log('received message displayAnswer. args:', args);
+        setOpGuess(args.guess === TRUE_SENTENCE? 'TRUE': 'FALSE');
+        setOpIsCorrect(args.isCorrect? 'right': 'wrong');
+        setAnswered(true);
+      });
 
-            return !seenSentences.includes(x) && !truths.includes(x) && !lies.includes(x);
-          }
-
-          trues = trues.filter(x => validSentence(x));
-          falses = falses.filter(x => validSentence(x));
-          setTruths(trues);
-          setLies(falses);
-          setIsFinishedLoading(true)
-      }, ()=>{})
-      return (<DisplayLoading/>);
+      
     }
 
-    
+    useEffect(
+      () => {
+        if(gameState !== MY_TURN_STATE || noMoreSentences)
+          setDisableButtons(true);
+        else
+          setDisableButtons(false);
+        if(gameState == MY_TURN_STATE || gameState == OPPONENT_TURN_STATE)
+          setAnswered(false);
+      },
+      [gameState, noMoreSentences]
+    )
+
+    socket.off('continueMatch');
+    socket.on('continueMatch', function(args){
+      console.log('received continueMatch message.')
+      setGameState(MY_TURN_STATE);
+      console.log('truths: ', truths);
+      console.log('lies: ', lies);
+      console.log('seenSentences: ', seenSentences);
+      getSentenceAndDisplayIt(truths, lies, seenSentences);
+    });
+
+    socket.off('endMatch');
+    socket.on('endMatch', function(){
+      updateAfterMatchData(user, room, matchPoints, history, seenSentences)
+    });
 
 
-    var tmpMyturn = true
-    
-    if(questionsCount === -1){
-      setSentenceCheck("")
-      matchPoints = 0
-      totalPoints = user.score
-      setCorrectCount(0)
-      setQuestionsCount(0);
-      setMyturn(props.location.turn);
-      tmpMyturn = props.location.turn
-      //seen = user.already_seen_sentences;
-    }
-
-    matchPoints = correctCount*3 + (questionsCount - correctCount)*1
-    totalPoints = user.score + matchPoints
-
-    console.log('myturn: ', myturn, " tmpMyturn: ", tmpMyturn + " sentenceCheck: ", sentenceCheck)
-    if(myturn && sentenceCheck === "" && tmpMyturn){
-      console.log("got here!")
-      setChoosed(false);
-      //console.log('sentence before chosing a new one: ' + sentence)
-      let tmp = getSentence(truths, lies, seenSentences, setTruths, setLies, setSeenSentences);
-      setSentenceCheck(tmp.sentence);
-      setSentence(tmp.sentence);
-      //console.log('sentence after chosing a new one: ' + tmp.sentence + ", " + sentence)
-      ans = tmp.ans;
-      console.log('delivering message: displaySentence with sentence: ', tmp.sentence);
-
+    // sentence is the string sentence that I see now (if it is my turn). I deliver it to my opponent
+    // he will be able to see the sentence I currently have.
+    // info can be NO_MORE_SENTENCES, TRUE_SENTENCE or FALSE_SENTENCE
+    const deliverCurrentSentenceToOpponent = (sentence, info)=>{
       socket.emit('deliverMessage',{
         message: "displaySentence",
         receiverId: opponentId,
-        args: {sentence: tmp.sentence}
+        args: {sentence: sentence, info: info}
         });
-      console.log("sending the sentence to opponent")
-      if(sentenceCheck == "No more sentences..."){
-        console.log("no more sentences")
-        setChoosed(true);
-        setNoMoreSentences(true);
-      }
-      console.log("choosed1: " + choosed)
-      //setMyturn(false);
     }
 
-    if (!myturn && !choosed){
-      // really important comment by: Shai. That's not how to write a code. 
-      // you should make "Loading..." a constant variable (name is loading for example with value "Loading...")
-      // and assign the constant variable here. this mistake repeats over and over in the code and 
-      // this is really sad :(
-      setSentenceCheck("Loading..."); 
-      setSentence("Loading...");
-      setChoosed(true);
+    // should be called only once per turn!
+    const getSentenceAndDisplayIt = (truths, lies, seenSentences)=>{
+      let sentence_meta_data = getSentence(truths, lies, seenSentences, setTruths, setLies, setSeenSentences)
+      deliverCurrentSentenceToOpponent(sentence_meta_data.sentence, sentence_meta_data.info)
+      if(sentence_meta_data.info === NO_MORE_SENTENCES){
+        setNoMoreSentences(true)
+        setSentence("There are no more sentences to display!!")
+      }
+      else{
+        setSentence(sentence_meta_data.sentence)
+        setSentenceType(sentence_meta_data.info)
+      }
     }
 
-    socket.on('displaySentence', function(args){
-      socket.off('displaySentence');
-      console.log('received displaySentence')
-      console.log('args: ', args)
-      setSentenceCheck("opponent's turn: ".concat(args.sentence));
-      setSentence("opponent's turn: ".concat(args.sentence));
-      setChoosed(true);
-    });
+    // this function will be called once: after reading the data from the DB
+    const setInitialGameState = (truths, lies, seenSentences)=>{
+      if(gameState === INITIAL_STATE){
+        if(myturn){ // in case the first turn is the mine
+          getSentenceAndDisplayIt(truths, lies, seenSentences);
+          setGameState(MY_TURN_STATE)
+        }
+        else { // in case the first turn is the opponent's
 
-    socket.on('displayAnswer', function(args){
-      socket.off('displayAnswer');
-      setOpGuess(args.guess);
-      setOpIsCorrect(args.isCorrect);
-      setAnswered(true);
-    });
-
-    socket.on('continueMatch', function(args){
-      socket.off('continueMatch');
-
-      //console.log("continueMatch1: " + myturn + sentenceCheck)
-      if (sentenceCheck.startsWith("opponent's turn:")){ // if it is the first time here
-        setSentenceCheck("")
-        setSentence("");
+          setGameState(OPPONENT_TURN_STATE)
+        }
       }
-      setAnswered(false);
-      setMyturn(true);
-      //console.log("continueMatch2: " + myturn + sentence)
-    });
+    }
 
-    socket.on('endMatch', function(){
-      socket.off('endMatch');
-      updateAfterMatchData(user, room, matchPoints, history, seenSentences)
-    });
+    if(!isFinishedLoading){
+      if(!startedReadingFromDB){
+        setStartedReadingFromDB(true);
+        initializeSocketListeners();
+        getSentencesFromDB(opponentId, room, 
+          (data)=>{
+            console.log('getSentencesFromDB');
+            console.log('got data from DB: ', data);
+            let trues = data.truths
+            let falses = data.lies
+
+            const validSentence = (x) =>{
+              let lies = isUndefined(user.false_sentences)? []: user.false_sentences.map(x=>x.value);
+              let truths = isUndefined(user.true_sentences)? []: user.true_sentences.map(x=>x.value);
+
+              return !seenSentences.includes(x) && !truths.includes(x) && !lies.includes(x);
+            }
+            
+            trues = trues.filter(validSentence);
+            falses = falses.filter(validSentence);
+            setTruths(trues);
+            setLies(falses);
+            setInitialGameState(trues, falses, seenSentences)
+            setIsFinishedLoading(true)
+        }, ()=>{})
+      }
+      return (<DisplayLoading/>);
+    }
+
+    // selection can be TRUE_SENTENCE or FALSE_SENTENCE
+    const handleClickTrueOrFalse = (selection)=>{
+      console.log("inside handleClickTrueOrFalse. props: ", props)
+      setGameState(MY_TURN_SENTENCE_CHOSEN_STATE);
+      setMyGuess(selection);
+      socket.emit('deliverMessage',{
+        message: "displayAnswer",
+        receiverId: opponentId,
+        args: {
+          guess: selection,
+          isCorrect: selection === sentenceType
+        }
+      });
+    }
+
+    
 
     return (
       <Container component="main" maxWidth="md">
@@ -192,8 +224,8 @@ export function TheGame(props){
               variant="contained"
               color="primary"
               className={classes.button}
-              disabled={choosed}
-              onClick={()=>{setChoosed(true); setGuess(true); flag = true}}
+              disabled={disableButtons}
+              onClick={()=>{handleClickTrueOrFalse(TRUE_SENTENCE); }}
               fullWidth>
               True
             </Button>
@@ -203,16 +235,17 @@ export function TheGame(props){
               variant="contained"
               color="secondary"
               className={classes.button}
-              disabled={choosed}
-              onClick={()=>{setChoosed(true); setGuess(false); flag = true}}
+              disabled={disableButtons}
+              onClick={()=>{handleClickTrueOrFalse(FALSE_SENTENCE); }}
               fullWidth>
               False
             </Button>
           </Grid>
 
-          {choosed && !noMoreSentences && myturn &&
-          <Result seenSentences = {seenSentences} guess={guess} ans={ans} opponentId={opponentId} correctCount={correctCount} questionsCount={questionsCount} user={user} room={room} history={history}
-          opponentId={opponentId} matchPoints={matchPoints} setChoosed={setChoosed} setMyturn={setMyturn} setQuestionsCount={setQuestionsCount} setCorrectCount={setCorrectCount}/>}
+          
+          <Result myGuess = {myGuess} sentenceType={sentenceType} 
+          gameState={gameState} setGameState={setGameState}
+          opponentId={opponentId}/>
 
           {noMoreSentences && <div>
             <Grid item xs={12} sm={12}>
@@ -246,101 +279,77 @@ export function TheGame(props){
     );
 }
 
+// display my selection result
 function Result(props){
-  let guess = props.guess;
-  let setChoosed = props.setChoosed;
-  let setCorrectCount = props.setCorrectCount;
-  let setQuestionsCount = props.setQuestionsCount;
-  let questionsCount = props.questionsCount;
-  let correctCount = props.correctCount;
-  //var result, isCorrect;
-  //var guess_str;
-  if (flag){
-    setQuestionsCount(questionsCount + 1);
-    if (guess)
-      guess_str = "true";
-    else
-      guess_str = "false";
-    if (guess == props.ans){
-      isCorrect = "right";
-      setCorrectCount(correctCount + 1);
-      result = "You are right!";
-    }
-    else{
-      isCorrect = "wrong";
-      result = "You are wrong...";
-    }
-    flag = false;
-    socket.emit('deliverMessage',{
-      message: "displayAnswer",
-      receiverId: props.opponentId,
-      args: {guess: guess_str,
-      isCorrect: isCorrect}
-    });
+
+  const RIGHT_RESULT = "You are right!!";
+  const WRONG_RESULT = "You are wrong :(";
+  const UNINITIALIZED_RESULT = "";
+  const {myGuess, sentenceType, gameState, setGameState, opponentId} = props;
+  const [result, setResult] = React.useState(UNINITIALIZED_RESULT);
+
+  if(gameState ===INITIAL_STATE || gameState === MY_TURN_STATE || 
+    gameState === OPPONENT_TURN_STATE || gameState ===OPPONENT_TURN_SENTENCE_CHOSEN_STATE){
+    return (<div/>);
   }
-return (
-  <Container component="main" maxWidth="sm">
-    <div>
-      <Grid container spacing={2} justify="center">
-        <Typography variant="h2" justify="center">
-          <br/>
-        {result}
-        </Typography>
+  if(gameState === MY_TURN_SENTENCE_CHOSEN_STATE && result===UNINITIALIZED_RESULT)
+    setResult(myGuess === sentenceType ? RIGHT_RESULT:WRONG_RESULT);
+  return (
+    <Container component="main" maxWidth="sm">
+      <div>
+        <Grid container spacing={2} justify="center">
+          <Typography variant="h2" justify="center">
+            <br/>
+          {result}
+          </Typography>
 
-        <Grid item xs={12} sm={6}>
-          <Button id="NextSentenceBTN"
-          variant="contained" color="primary" fullWidth
-          onClick={()=>{props.setMyturn(false);
-            //flag = true;
-          //  sentence = "";
-            //sentence = "Loading..."; ///////////////////////////////
-            setChoosed(false);
-            setChoosed(true);
-            socket.emit('deliverMessage',{
-            receiverId: props.opponentId,
-            message: "continueMatch",
-            args: {}
-          });
-        }}>
-            next sentence
-          </Button>
-        </Grid>
-
-        <Grid item xs={12} sm={6}>
-          {/* <Link to={
-            {
-              pathname: `/JoinGame`,
-              userObject: props.user,
-              roomObject: props.room
-            }
-            } style={{ textDecoration: 'none' }}> */}
-            <Button id="EndGameBTN"
-            variant="contained" color="secondary" fullWidth
-            onClick={()=>{ /////////////////// todo: check implementation in backend
+          <Grid item xs={12} sm={6}>
+            <Button id="NextSentenceBTN"
+            variant="contained" color="primary" fullWidth
+            onClick={()=>{
+              setResult(UNINITIALIZED_RESULT);
+              setGameState(OPPONENT_TURN_STATE);
+              console.log('emmiting continueMatch message')
               socket.emit('deliverMessage',{
-                receiverId: props.opponentId,
-                message: "endMatch",
-                args: {}
-              });
-              updateAfterMatchData(props.user, props.room, props.matchPoints, props.history, props.seenSentences)
-            }}
-            >
-              end game
+              receiverId: opponentId,
+              message: "continueMatch",
+              args: {}
+            });
+          }}>
+              next sentence
             </Button>
-          {/* </Link> */}
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            
+              <Button id="EndGameBTN"
+              variant="contained" color="secondary" fullWidth
+              onClick={()=>{ /////////////////// todo: check implementation in backend
+                socket.emit('deliverMessage',{
+                  receiverId: opponentId,
+                  message: "endMatch",
+                  args: {}
+                });
+                updateAfterMatchData(props.user, props.room, props.matchPoints, props.history, props.seenSentences)
+              }}
+              >
+                end game
+              </Button>
+          </Grid>
+
         </Grid>
-      </Grid>
-    </div>
-  </Container>
-  );
+      </div>
+    </Container>
+    );
 }
 
 function getSentence(truths, lies, seenSentences, setTruths, setLies, setSeenSentences){
-  let ans, sentence;
+  let ans, sentence, info;
+  console.log('inside getSentence')
   console.log(truths)
   console.log(lies)
   console.log(seenSentences)
-  if ((Math.floor(Math.random()*2) || lies.length == 0) && truths.length > 0){
+  if ((Math.floor(Math.random()*2) || lies.length === 0) && truths.length > 0){
+    console.log('choosing a true sentence');
     ans = true;
     //let filtered_trues = trues.filter(x => !seen.includes(x));
     let i = Math.floor(Math.random()*truths.length)
@@ -350,8 +359,11 @@ function getSentence(truths, lies, seenSentences, setTruths, setLies, setSeenSen
     let new_truths = JSON.parse(JSON.stringify(truths));
     new_truths.splice(i, 1);
     setTruths(new_truths);
+    info = TRUE_SENTENCE;
   }
   else if(lies.length > 0){
+    console.log('choosing a false sentence');
+
     ans = false;
     //let filtered_falses = falses.filter(x => !seen.includes(x));
     let i = Math.floor(Math.random()*lies.length)
@@ -362,12 +374,16 @@ function getSentence(truths, lies, seenSentences, setTruths, setLies, setSeenSen
     let new_lies = JSON.parse(JSON.stringify(lies));
     new_lies.splice(i, 1);
     setLies(new_lies);
+    info = FALSE_SENTENCE
   }
   else {
+    console.log('tried to choose a sentence but there are no more sentences');
+
     sentence = "No more sentences...";
     ans = "";
+    info = NO_MORE_SENTENCES
   }
-  return {sentence: sentence.value, ans: ans};
+  return {sentence: sentence, ans: ans, info: info};
 }
 
 function updateAfterMatchData(user, room, matchPoints, history, seenSentences){
