@@ -91,9 +91,10 @@ function findGame(game, success, failure) {
   })
 }
 function tryout(){
-resetDatabase(15,(fg)=>{},(fg)=>{});
+deleteUserByEmailInRoomByRoomID(0,'alon@gmail.com',(fg)=>{},(fg)=>{console.log(fg)});
+//createRoom('schoo',(fg)=>{},(fg)=>{console.log(fg)});
 }
-//tryout();
+tryout();
 // uncomment this to reset server
 app.get('/', (req, res) => res.send("request for / recieved"))
 
@@ -361,19 +362,11 @@ app.get('/leaveRoom/:roomId', (req, res) => {
           var userSocket = findSocketByUserId(userInfo.email)
           if (userSocket !== undefined) {userSocket.leave(roomId.toString())}
 
-          getRoomSize(
-            roomId, 
-            (size) => {
-              if (size === 0) {
-                deleteRoomById(roomId, () => {}, (err) => console.log(err))
-              } else {
-                // notify users in room about leaving
-                console.log("emitting a message to room", roomId, "about player leave", userInfo)
-                io.to(roomId).emit('userLeft', userInfo)
-              }
-            },
-            (err) => console.log("failed to delete room")
-          )
+          
+          // notify users in room about leaving
+          console.log("emitting a message to room", roomId, "about player leave", userInfo)
+          io.to(roomId).emit('userLeft', userInfo)
+
         },
         (err) => standardErrorHandling(res, err)
       )
