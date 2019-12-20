@@ -14,9 +14,9 @@ import {
 } from "react-router-dom";
 
 
-import {socket} from './../user.js';
+import {socket, emptyUser} from './../user.js';
 
-import {DisplayLoading} from './../PagesUtils.js'
+import {DisplayLoading, DisplayDBError} from './../PagesUtils.js'
 import {isUndefined} from './../Utils.js'
 import {getSentencesFromDB} from './../game.js'
 const NO_MORE_SENTENCES = "no more sentences"
@@ -35,6 +35,18 @@ export function TheGame(props){
     let history = useHistory();
     const classes = AppUseStyles();
     console.log("props: ", props)
+    const [DBError, setDBError] =  React.useState(false);
+    if(isUndefined(props)||isUndefined(props.location) ){
+      setDBError(true);
+      props = {
+        location: {
+          user: emptyUser(),
+          room: {},
+          opponentId: '',
+          turn: true
+        }
+      }
+    }
     const user = props.location.user;
     const room = props.location.room;
     const [opponentId, setOpponentId] = React.useState(props.location.opponentId); /////////////////////// todo: change to const
@@ -72,6 +84,9 @@ export function TheGame(props){
       },
       [gameState, noMoreSentences]
     )
+    if(DBError){
+      return <DisplayDBError history={history}/>
+    }
 
     socket.off('continueMatch');
     socket.on('continueMatch', function(args){
@@ -152,6 +167,10 @@ export function TheGame(props){
           (data)=>{
             console.log('getSentencesFromDB');
             console.log('got data from DB: ', data);
+            if(isUndefined(data)){
+              setDBError(true);
+              return;
+            }
             let trues = data.truths
             let falses = data.lies
 
