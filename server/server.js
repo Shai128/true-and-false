@@ -532,8 +532,8 @@ io.on('connection', function (socket) {
     console.log(data.messageContent + " was written");
     console.log(socket.handshake.session.userInfo);
     console.log("updates userInfo4 (socket)", data)
-    socket.handshake.session.userInfo = data;
-    socket.handshake.session.save();
+    //socket.handshake.session.userInfo = data;
+    //socket.handshake.session.save();
     
     let message = data;
    
