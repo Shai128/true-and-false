@@ -26,7 +26,7 @@ const {
   findUserByEmailInRoomByRoomID,
   getAllSentencesArray
 } = require("../db/rooms") //imports all room functions
-
+const {isUndefined} = require('../src/Utils.js');
 const {
   getRandomSentence,
   standardErrorHandling,
@@ -207,7 +207,7 @@ function serverUserExists(req, res) {
 function serverUserUpdate(req, res) {
   console.log('update user');
   let data = JSON.parse(req.body.json)
-  updateUser(req.params.id, data,
+  updateUser(req.params.id,null, data,
     ()=>{
       console.log("succesfully updated user: " + data.email)
       res.status(200).send("success");
@@ -390,15 +390,17 @@ app.get('/userSentences/:opponentId/:roomId', (req, res) => {
     req.params.roomId,
     req.params.opponentId,
     (userObject) => { // find the given user
+      console.log('in userSentences found user: ', userObject);
       getAllSentencesArray(
         req.params.roomId,
         (allSentences) => { // find the global sentences array to extract lies
+          var extracted_truths = userObject.true_sentences.map(x=>x.value)
           console.log("user truths:", userObject.true_sentences, "global:", allSentences);
-          var extracted_lies = allSentences.filter(s => !userObject.true_sentences.includes(s))
+          var extracted_lies = allSentences.filter(s => !extracted_truths.includes(s))
           console.log("extracted lies:", extracted_lies)
 
           res.status(200).send(JSON.stringify({
-            truths: userObject.true_sentences,
+            truths: extracted_truths,
             lies: extracted_lies
           }))
           logDiv()
@@ -426,7 +428,7 @@ app.get('/userList/:roomId', (req, res) => {
           findRoomById(
             roomId, 
             (roomObject) => {
-              //console.log("Players available" ,availableUsers)
+              console.log("Players available" ,availableUsers)
               res.status(200).send(JSON.stringify({
                 PlayersAvailable: convertUserListFormat(availableUsers),
                 PlayersUnAvailable: convertUserListFormat(unavailableUsers),
@@ -523,8 +525,8 @@ io.on('connection', function (socket) {
     console.log(data.messageContent + " was written");
     console.log(socket.handshake.session.userInfo);
     console.log("updates userInfo4 (socket)", data)
-    socket.handshake.session.userInfo = data;
-    socket.handshake.session.save();
+    //socket.handshake.session.userInfo = data;
+    //socket.handshake.session.save();
     
     let message = data;
    
@@ -598,7 +600,7 @@ io.on('connection', function (socket) {
     logDiv('delivering message')
     if (data.receiverId === undefined || data.message === undefined) {
       // handle error
-      console.log("bad parameters");
+      console.log("bad parameters. data.receiverId= ", data.receiverId, ". data.message= ", data.message);
       return;
     }
     var receiverSocket = findSocketByUserId(data.receiverId)
@@ -663,7 +665,9 @@ function addMessageUnReadInDB(userEmail, message, otherUserEmail){
     findRoomById(
       data.roomId,
       (roomObject) => {
+        console.log('roomObject: ', roomObject);
         // update only the correct user in the room
+        roomObject.users_in_room.filter(x=>!isUndefined(x))
         roomObject.users_in_room.map(
           (userObject) => {
             return ((userObject.email === data.user.email) ? 

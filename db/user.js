@@ -38,7 +38,13 @@ const userSchema= new mongoose.Schema(
                                     authorName: String,
                                     otherUserName:String,
                                     delivery_timestamp:Date}]
-                            }]                   
+                            }],
+        turn:Boolean,
+        opponentId: String,
+        questionsCount: Number,
+        correctCount: Number,
+        score: Number,
+        matchPoints: Number,                   
 
         });
 const userModel = mongoose.model('users',userSchema) //creating the class userModel. a class of types
@@ -264,14 +270,26 @@ async function findUserByField(field, value, success, failure) {
 /**
  * author: Shai
  * @param {the _id of the user we want to update} userID 
+ * @param {the email of the user we want to update} userEmail 
  * @param {the new user that will be put instead of the existing user} user 
  * @param {function that will activated in case of success} success 
  * @param {will be activated in case of failure} failure 
  */
-async function updateUser(userID, user, success, failure) {
+async function updateUser(userID, userEmail, user, success, failure) {
     console.log("updating user by Id:", userID)
+    console.log("updating user by email:", userEmail)
+
     console.log("the user object:", user)
-    const res = await userModel.replaceOne({email: userID}, user); //res.nModified = # updated documents
+    var res;
+    if(!isUndefined(userID))
+        res = await userModel.replaceOne({_id: userID}, user); //res.nModified = # updated documents
+    else if(!isUndefined(userEmail))
+        res = await userModel.replaceOne({email: userEmail}, user); //res.nModified = # updated documents
+    else{
+        failire('bad updateUser params. user was not updated');
+        return;
+    }
+
     if(res.n ==1 && res.nModified ==1) {                     //res.n = # of matched documents
         success();
         console.log('updated user. new user: ', user)

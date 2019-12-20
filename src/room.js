@@ -35,7 +35,6 @@ export function createRoom(roomName, currentuser, currentGameNickName, history){
                 InfoObject: roomAndUserObject,
             });
             
-           
         }, fail_status => {
         console.log("failed, status:", fail_status)
         });

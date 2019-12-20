@@ -118,7 +118,7 @@ export function Chat(props){
  
     const [chatContent, setChatContent] = React.useState('');
     const [chatIndex, setChatIndex] = React.useState(-1);
-
+    const [startedReadingFromDB, setStartedReadingFromDB] = React.useState(false);
     const createNewMessageContent = (authorEmail, thisUserEmail, author, messageContent)=>{
       let className = authorEmail === thisUserEmail? 'this_user_style': 'another_user_style';
       let new_message =  `<Paper className={${className}}>`   //todo: should I make it paper instead of div?
@@ -163,7 +163,8 @@ export function Chat(props){
       }
       setChatContent(historyChatContent);
     }
-    if(!userIsUpdated(user)){
+    if(!startedReadingFromDB){
+      setStartedReadingFromDB(true);
       getCurrentUserFromDB(setUser, (user)=>{loadMessagesFromUserHistory(user); scrollToBottomInstantly();}, ()=>{});
     }
     if(lastOtherUserEmail !== other_user_email){

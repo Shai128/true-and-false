@@ -1,9 +1,14 @@
 import React from 'react';
+import Container from '@material-ui/core/Container';
+
 import ReactLoading from "react-loading";
+import CssBaseline from '@material-ui/core/CssBaseline';
+
 import { makeStyles } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import Typography from '@material-ui/core/Typography'
 import {
       Link,
       useHistory,
@@ -61,6 +66,39 @@ export function DisplayLoading(){
     </div>
   );
 }
+
+
+/**
+ * display a db error message and displaying a return-back-to-home button
+ */
+export function DisplayDBError(){
+
+
+  return (
+
+    <div className="App" >
+          <header className="App-header" >
+          <Container component="main" maxWidth="xs">
+            <CssBaseline />
+
+              <Typography variant="h4" style={{color:'black', marginBottom: '30px', width:'100%'}}>
+              An error occured. Could not read from DB.
+              </Typography>
+
+              <Link to="/LoginScreen">
+                <Button variant="contained" color="primary" fullWidth>
+                Return to home screen
+            </Button>
+              </Link> 
+
+          </Container>
+          </header>
+          
+          </div>
+  );
+}
+
+
 
 export function PrintJoinGameDialog(props){  
   const {handleCloseWindow,  WindowOpen, currentUser} = props;

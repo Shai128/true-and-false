@@ -112,23 +112,27 @@ const [helperText, setHelperText] = React.useState('');
 if(!isUpdatedData){
   return (<DisplayLoading/>);
 }
-if(!roomUpdated)
+if(!roomUpdated && isUpdatedData)
   InitTheRoom(CurrentRoom.room_id, setRoomUpdated);
 
+socket.off("userJoined");
 socket.on("userJoined", function(userInfo) {
  /*
     userInfo: {email: ..., nickName:...}
  */
 
     console.log("userINFO DANN --> ",userInfo);
+    console.log("LIST SHAI --> ",PlayersAvailable);
+
     console.log("LIST DANN --> ",PlayersAvailable.values);
 
     var newPlayersAvailable = [...PlayersAvailable]
     newPlayersAvailable.push({email:userInfo.email,nickname:userInfo.nickName})
+    console.log('By Shai: new player list: ', newPlayersAvailable)
     setPlayersAvailable(newPlayersAvailable)
   });
 
-  
+socket.off('userLeft')
 socket.on("userLeft", function(userInfo) {
   console.log("gottt")
     /*
@@ -140,7 +144,7 @@ socket.on("userLeft", function(userInfo) {
    setPlayersAvailable(newPlayersAvailable1)
    });
 
-
+   socket.off('userAccept')
  socket.on("userAccept", function(userInfo) {
       /*
          userInfo: {email: ..., nickName:...}
@@ -155,7 +159,7 @@ socket.on("userLeft", function(userInfo) {
     })
          
   });
-
+socket.off("CancelInvitation");
 socket.on("CancelInvitation", function(userInfo) {
   console.log("got here")
   /*
@@ -194,7 +198,7 @@ const onDecline = () => {
       })
       setGotInvitationWindow(false);
  }
-
+socket.off('InvitedToGameByUser')
 socket.on("InvitedToGameByUser", function(args) { 
   console.log("dannnn ->", args);
   setSenderInfoID(args.senderId);
@@ -670,7 +674,7 @@ export function SwitchListSecondary() {
 
 export function PlayerListAvailable(props) {
 
-  
+socket.off('userDecline')
 socket.on("userDecline", function(userInfo) {
   /*
      userInfo: {email: ..., nickName:...}
@@ -781,7 +785,7 @@ const handleClickInvitePlayer = (userThatGotInvitedID,userThatGotInvitedName) =>
 
                 <TableRow hover role="checkbox" tabIndex={-1} key={row.email}>
                   {columnsForAvailable.map(column => { 
-                           
+                  console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!row: ', row)
                   const value = row.nickname;
                   const firstLetter = value.substring(0,1)
 
