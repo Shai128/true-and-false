@@ -147,7 +147,7 @@ export function LoginScreenRouter(){
   <Route path={'/LoginScreen'}>  
   <LoginScreen />
   </Route>
-  <Route path="/TheGame" exact component={TheGame}/>
+  <Route path={"/TheGame"} exact component={TheGame}/>
 
   </Switch>
   </Router>
@@ -395,7 +395,7 @@ browserHistory.listen((location, action) => {
 
         <Route path={`${path}/ChatRoom/:email`} component = {Chat}/>  
         <Route path={`${path}/JoinGame`} exact component={JoinGame} user={currentUser} />
-        <Route path={`${path}/TheGame`} exact component={TheGame}/>
+        <Route path={`/TheGame`} exact component={TheGame}/>
 
         
         <Route path="/SignIn">
