@@ -115,7 +115,7 @@ if(!isUpdatedData){
 if(!roomUpdated && isUpdatedData)
   InitTheRoom(CurrentRoom.room_id, setRoomUpdated);
 
-socket.off("userJoined");
+socket.off("userJoined"); 
 socket.on("userJoined", function(userInfo) {
  /*
     userInfo: {email: ..., nickName:...}
