@@ -111,6 +111,7 @@ export function TheGame(props){
           return;
         if (!myturn && !choosed){
           // really important comment by: Shai. That's not how to write a code. 
+          // really important comment by: Dan Kalifa. I agree with Shai :)
           // you should make "Loading..." a constant variable (name is loading for example with value "Loading...")
           // and assign the constant variable here. this mistake repeats over and over in the code and 
           // this is really sad :(

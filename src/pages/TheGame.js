@@ -30,6 +30,12 @@ const OPPONENT_TURN_SENTENCE_CHOSEN_STATE = "opponent chose a sentence and now h
 const OPPONENT_TURN_MESSAGE = "Opponent's turn. The sentence is: "
 const BONUS_POINTS_FOR_CORRECT_ANSWER = 3;
 const BONUS_POINTS_FOR_WRONG_ANSWER = 1;
+const userStates = {
+  INVALID: 0,
+  AVAILABLE: 1,
+  UNAVAILABLE: 2
+}
+
 
 export function TheGame(props){
     let history = useHistory();
@@ -218,8 +224,8 @@ export function TheGame(props){
       });
     }
 
+   
     
-
     return (
       <Container component="main" maxWidth="md">
         <CssBaseline />
@@ -284,7 +290,8 @@ export function TheGame(props){
                 receiverId: opponentId,
                 message: "endMatch",
                 args: {}
-              });
+              })
+            
               updateAfterMatchData(user, room, matchPoints, history, seenSentences)
               }}
               >
@@ -420,6 +427,10 @@ function updateAfterMatchData(user, room, matchPoints, history, seenSentences){
   newUser.already_seen_sentences = seenSentences
   newUser.score += matchPoints 
   socket.emit('updateUserInRoom', {roomId: room.room_id, user: newUser}) // todo: complete data
+
+  socket.emit('changeUserAvailability', {
+    newAvailability:userStates.AVAILABLE,userId:user.email,roomId:room.room_id
+ })
 
   history.push({
     pathname: '/LoginScreen/JoinGame',

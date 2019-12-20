@@ -294,14 +294,19 @@ async function get_available_users(room_id,success,failure){
 });
 }
 async function changeUserAvailability(room_id,email,status,success,fail){
+    console.log("inside db changeUserAvailability")
+    console.log("roomId:", room_id, "email:", email)
     roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
         if(err) fail('Room with id'+room_id+'does not exist');
         else{
             var i,not_found=1;
                 for(i=0;i<room.users_in_room.length;i++){
-                    if(!isUndefined(room.users_in_room[i]&& room.users_in_room[i].email==email)){
+                    if(!isUndefined(room.users_in_room[i])&& (room.users_in_room[i].email===email)){
+                        console.log("found the user index", i)
+                        console.log("email:", room.users_in_room[i].email)
                         not_found=0;
                         room.state_array[i]=status;
+                        break;
                     }
                 }
                 if(not_found)fail('User with email '+email+' was not found in room with id '+room_id);

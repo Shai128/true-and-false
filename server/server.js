@@ -94,7 +94,7 @@ function tryout(){
 deleteUserByEmailInRoomByRoomID(0,'alon@gmail.com',(fg)=>{},(fg)=>{console.log(fg)});
 //createRoom('schoo',(fg)=>{},(fg)=>{console.log(fg)});
 }
-tryout();
+//tryout();
 // uncomment this to reset server
 app.get('/', (req, res) => res.send("request for / recieved"))
 
@@ -569,16 +569,20 @@ io.on('connection', function (socket) {
       args.userId, 
       args.newAvailability,
       (succ) => {
+        console.log("database operation successful")
         console.log(succ)
+        console.log("new availability:", args.newAvailability)
         // TODO: should the user socket leave the room?
         if (args.newAvailability === userStates.AVAILABLE) {
           // user becomes available -- his socket should rejoin the room
+          console.log("emmiting available to", args.roomId, "with args", args.userId)
           socket.join(args.roomId.toString())
           io.to(args.roomId).emit('userAvailable', args.userId)
         } else {
           // user goes unavailable -- his socket should leave the room
-          socket.leave(args.roomId.toString())
+          console.log("emmiting unavailable to", args.roomId, "with args", args.userId)
           io.to(args.roomId).emit('userUnavailable', args.userId)
+          socket.leave(args.roomId.toString())
         }
       },
       (err) => console.log(err)
