@@ -38,7 +38,13 @@ const userSchema= new mongoose.Schema(
                                     authorName: String,
                                     otherUserName:String,
                                     delivery_timestamp:Date}]
-                            }]                   
+                            }],
+        turn:Boolean,
+        opponentId: String,
+        questionsCount: Number,
+        correctCount: Number,
+        score: Number,
+        matchPoints: Number,                   
 
         });
 const userModel = mongoose.model('users',userSchema) //creating the class userModel. a class of types

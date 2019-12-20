@@ -28,6 +28,8 @@ const MY_TURN_SENTENCE_CHOSEN_STATE = "I chose a sentence and now I choose if to
 const OPPONENT_TURN_STATE = "opponent's turn and he needs to choose a sentence"
 const OPPONENT_TURN_SENTENCE_CHOSEN_STATE = "opponent chose a sentence and now he needs to choose if to continue or end the game"
 const OPPONENT_TURN_MESSAGE = "Opponent's turn. The sentence is: "
+const BONUS_POINTS_FOR_CORRECT_ANSWER = 3;
+const BONUS_POINTS_FOR_WRONG_ANSWER = 1;
 
 export function TheGame(props){
     let history = useHistory();
@@ -36,13 +38,11 @@ export function TheGame(props){
     const user = props.location.user;
     const room = props.location.room;
     const [opponentId, setOpponentId] = React.useState(props.location.opponentId); /////////////////////// todo: change to const
-    const [choosed, setChoosed] = React.useState(false);
     const [answered, setAnswered] = React.useState(false);
     const [noMoreSentences, setNoMoreSentences] = React.useState(false);
     let myturn = props.location.turn;
-    const [questionsCount, setQuestionsCount] = React.useState(-1);
+    const [questionsCount, setQuestionsCount] = React.useState(0);
     const [correctCount, setCorrectCount] = React.useState(0);
-    const [guess, setGuess] = React.useState(true);
     const [sentence, setSentence] = React.useState("");
     const [opGuess, setOpGuess] = React.useState("");
     const [opIsCorrect, setOpIsCorrect] = React.useState("");
@@ -67,7 +67,7 @@ export function TheGame(props){
           setDisableButtons(true);
         else
           setDisableButtons(false);
-        if(gameState == MY_TURN_STATE || gameState == OPPONENT_TURN_STATE)
+        if(gameState === MY_TURN_STATE || gameState === OPPONENT_TURN_STATE)
           setAnswered(false);
       },
       [gameState, noMoreSentences]
@@ -178,6 +178,17 @@ export function TheGame(props){
       console.log("inside handleClickTrueOrFalse. props: ", props)
       setGameState(MY_TURN_SENTENCE_CHOSEN_STATE);
       setMyGuess(selection);
+      setQuestionsCount(questionsCount+1)
+      let scoreBonus;
+      let newCorrectCount = correctCount;
+      if(selection === sentenceType){
+        newCorrectCount++;
+        scoreBonus=BONUS_POINTS_FOR_CORRECT_ANSWER;
+      }
+      else
+        scoreBonus = BONUS_POINTS_FOR_WRONG_ANSWER;
+      setCorrectCount(newCorrectCount)
+      setMatchPoints(matchPoints + scoreBonus)
       socket.emit('deliverMessage',{
         message: "displayAnswer",
         receiverId: opponentId,
@@ -240,7 +251,9 @@ export function TheGame(props){
           
           <Result myGuess = {myGuess} sentenceType={sentenceType} 
           gameState={gameState} setGameState={setGameState}
-          opponentId={opponentId}/>
+          opponentId={opponentId} user={user}
+          seenSentences={seenSentences} matchPoints={matchPoints}
+          room = {room}/>
 
           {noMoreSentences && <div>
             <Grid item xs={12} sm={12}>
@@ -280,9 +293,9 @@ function Result(props){
   const RIGHT_RESULT = "You are right!!";
   const WRONG_RESULT = "You are wrong :(";
   const UNINITIALIZED_RESULT = "";
-  const {myGuess, sentenceType, gameState, setGameState, opponentId} = props;
+  const {myGuess, sentenceType, gameState, setGameState, opponentId, user, seenSentences, matchPoints, room} = props;
   const [result, setResult] = React.useState(UNINITIALIZED_RESULT);
-
+  let history = useHistory();
   if(gameState ===INITIAL_STATE || gameState === MY_TURN_STATE || 
     gameState === OPPONENT_TURN_STATE || gameState ===OPPONENT_TURN_SENTENCE_CHOSEN_STATE){
     return (<div/>);
@@ -324,7 +337,7 @@ function Result(props){
                   message: "endMatch",
                   args: {}
                 });
-                updateAfterMatchData(props.user, props.room, props.matchPoints, props.history, props.seenSentences)
+                updateAfterMatchData(user, room, matchPoints, history,seenSentences)
               }}
               >
                 end game
