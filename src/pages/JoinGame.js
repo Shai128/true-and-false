@@ -134,7 +134,7 @@ socket.on("userJoined", function(userInfo) {
 
 socket.off('userLeft')
 socket.on("userLeft", function(userInfo) {
-  console.log("gottt")
+  console.log("gottt user left")
     /*
        userInfo: {email: ..., nickName:...}
     */

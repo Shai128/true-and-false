@@ -75,7 +75,7 @@ async function findUserByEmailInRoomByRoomID(room_id,email,success,fail){ //room
                var i; 
                var flag_not_found=1;
                for( i=0; i<arr_users.length; i++){
-                    if(arr_users[i]!=undefined && arr_users[i].email==email){
+                    if(arr_users[i]!=undefined && arr_users[i].email==email && room.state_array[i] !== INVALID_STATE){
                         flag_not_found=0; 
                         success(arr_users[i])
                     }
@@ -97,7 +97,7 @@ function changeRoomInUser(email, room_id, room_name, success, failure) {
             room_id: room_id,
             room_name: room_name
         }
-        console.log("user should update to:", userObject)
+       // console.log("user should update to:", userObject)
         updateUser(
             null,
             email,
@@ -111,6 +111,70 @@ function changeRoomInUser(email, room_id, room_name, success, failure) {
     }, (err) => failure(err))
 }
 
+/**
+ * This function is called when deleting a room.
+ * Goes over all the users in the room (they are still there in invalid state).
+ * For each user, if the user still exists in the system: appends the room object to the user's game history.
+ * 
+ * Saves only the following fields:
+ * {
+ *  room name: ...
+ *  users_in_room: a list. for each user:
+ *      {
+ *          true sentences,
+ *          false_sentences,
+ *          email,
+ *          nickname,
+ *          score
+ *      }
+ * }
+ */
+async function addRoomToAllUserGameHistory(roomObject) {
+    console.log("add room to user history called with room object:", roomObject);
+    var reducedRoomObject = {
+        room_name: roomObject.room_name,
+        users_in_room: roomObject.users_in_room.map(
+            function(userObject) {
+                return {
+                    true_sentences: userObject.true_sentences,
+                    false_sentences: userObject.false_sentences,
+                    email: userObject.email,
+                    nickname: userObject.nickname,
+                    score: userObject.score
+                }
+
+            }
+        )
+    }
+    console.log("the reduced object:", reducedRoomObject);
+
+    reducedRoomObject.users_in_room.forEach(function(userObject) {
+        addRoomToUserGameHistory(userObject.email, reducedRoomObject);
+    })
+}
+
+/**
+ * Checks if user exists, and if so - adds a given room to the user's game history
+ */
+async function addRoomToUserGameHistory(userEmail, reducedRoomObject) {
+    console.log("adding room to game history of:", userEmail);
+    findUserByField(
+        'email', 
+        userEmail,
+        (userObject) => {
+            userObject = userObject[0];
+            userObject.gameHistory.push(reducedRoomObject);
+            updateUser(
+                undefined, 
+                userEmail, 
+                userObject,
+                (succ) => {console.log("successfuly updated user")},
+                (err) => console.log(err)
+                )
+        },
+        (err) => console.log("failed to add room to game history. error:", err)
+        )
+}
 
 async function deleteUserByEmailInRoomByRoomID(room_id,email,success,fail){ //room_id: int, email: string
     roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
@@ -125,20 +189,20 @@ async function deleteUserByEmailInRoomByRoomID(room_id,email,success,fail){ //ro
                 }
                 if(flag_not_found){fail('User with email ' +email+ ' was not found in room with id '+room_id)}
                 else{ 
-
-                    arr_users[j]=undefined;
                     room.state_array[j]=INVALID_STATE;
-                    roomModel.findOneAndUpdate({room_id: room_id}, { $set:{users_in_room:arr_users,state_array: room.state_array }},()=>{
+                    roomModel.findOneAndUpdate({room_id: room_id}, { $set:{state_array: room.state_array }},()=>{
 
                         changeRoomInUser(email, -1, "no room", async ()=>{
                                 var flag=0;
                                 console.log('got here1');
                                 for(i=0;i<arr_users.length;i++){
-                                    if(arr_users[i]!=undefined) flag=1;
+                                    if(room.state_array[i] !== INVALID_STATE) flag=1;
                                 
                                 }
                                 if(flag===0){
-                                    console.log('got here with', room_id);
+                                    console.log("deleting room:", room_id);
+                                    addRoomToAllUserGameHistory(room)
+
                                 await roomModel.remove({room_id: room_id});
                                 roomsGlobalArrayModel.findOne({array_id:1}).exec(function(err,arr){
                                     if(err){fail('shit'); console.log('should not get here')}
@@ -146,11 +210,10 @@ async function deleteUserByEmailInRoomByRoomID(room_id,email,success,fail){ //ro
                                         console.log('the array is:', arr.array);
                                     arr.array[room_id]=false;
                             roomsGlobalArrayModel.findOneAndUpdate({array_id: 1}, { $set:{array:arr.array }},()=>{     
-                                success('Successfully removed');
                                 });}
                                
                             }) }
-
+                            success('Successfully removed');
                             })
                             
                         },
@@ -166,19 +229,37 @@ async function addUserObjectToRoom(room_id,user,success,fail){
     roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
         if(err) fail('Room with id'+room_id+'does not exist');
         else{
-            //console.log('got here 4');
-            var orig_sentences_array_length=room.all_sentences.length;
+            var already_in_room = false;
+            // check if user already in room. if so -- just update it's status
             var i;
-            for(i=0;i<user.true_sentences.length;i++){
-                room.all_sentences[orig_sentences_array_length+i]=user.true_sentences[i].value;
+            for (i=0; i < room.users_in_room.length; i++) {
+                if (room.users_in_room[i].email === user.email) {
+                    room.state_array[i] = AVAILABLE_STATE;
+                    already_in_room = true;
+                }
             }
-            for(i=0;i<user.false_sentences.length;i++){
-                room.all_sentences[orig_sentences_array_length+i]=user.false_sentences[i].value;
+
+            var arr_users=room.users_in_room;
+            if (! already_in_room) {
+
+                //console.log('got here 4');
+                var orig_sentences_array_length=room.all_sentences.length;
+                var i;
+                for(i=0;i<user.true_sentences.length;i++){
+                    room.all_sentences[orig_sentences_array_length+i]=user.true_sentences[i].value;
+                }
+                for(i=0;i<user.false_sentences.length;i++){
+                    room.all_sentences[orig_sentences_array_length+i]=user.false_sentences[i].value;
+                }
+                arr_users[arr_users.length]=user;
+                room.state_array[user.user_id_in_room]=AVAILABLE_STATE;
             }
-              var arr_users=room.users_in_room;
-               arr_users[arr_users.length]=user;
-               room.state_array[user.user_id_in_room]=AVAILABLE_STATE;
-               roomModel.findOneAndUpdate({room_id: room_id}, { $set:{users_in_room:arr_users,state_array:room.state_array,available_id:(room.available_id+1),all_sentences:room.all_sentences}},
+
+               roomModel.findOneAndUpdate({room_id: room_id}, { $set:{
+                   users_in_room:arr_users,
+                   state_array:room.state_array,
+                   available_id:(already_in_room ? room.available_id : room.available_id+1),
+                   all_sentences:room.all_sentences}},
                 ()=>{success({roomObject: room, userObject: user})}) }
         });
 }
@@ -355,6 +436,7 @@ exports.createRoom=createRoom
 exports.deleteRoomById=deleteRoomById
 exports.findUserByEmailInRoomByRoomID=findUserByEmailInRoomByRoomID
 exports.deleteUserByEmailInRoomByRoomID=deleteUserByEmailInRoomByRoomID
+exports.deleteUserFromRoom = deleteUserByEmailInRoomByRoomID
 exports.addUserObjectToRoom=addUserObjectToRoom
 exports.addUserToRoom=addUserToRoom
 exports.createRoom=createRoom

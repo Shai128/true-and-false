@@ -22,7 +22,7 @@ const userSchema= new mongoose.Schema(
         false_sentences:[{id: Number, value:String}],
         socket: Number,
         last_active_at:Date,
-        games: {},
+        gameHistory: [],
         unReadMessages:[{authorEmail: String,
                             otherUserEmail:String,
                             messageContent:String,
@@ -69,8 +69,13 @@ function createUser(user,success,failure){
             iterations: iterations,
             nickName: user.nickName,
             firstName: user.firstName, 
-            //games: {} // creating a user with no games
+            gameHistory: new Array(0), // creating a user with no games
+            roomObject: {
+                room_id: -1,
+                room_name: "no room"
+            }
                                     });
+        console.log("creted new user:", newUser);
         //saves the user in the db
         newUser.save((err)=>{
             if(err)
@@ -255,9 +260,11 @@ async function deleteUser(data,success,failure){
 } 
 
 /**
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  * ATTENTION TO WHO MAY USE THIS FUNCTION IN THE FUTURE
  * it returns AN ARRAY of all matching users.
  * so if you need a single user, you've got to take the [0] item of the array
+ * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
  */
 async function findUserByField(field, value, success, failure) {
     var query = {};
@@ -286,13 +293,13 @@ async function updateUser(userID, userEmail, user, success, failure) {
     else if(!isUndefined(userEmail))
         res = await userModel.replaceOne({email: userEmail}, user); //res.nModified = # updated documents
     else{
-        failire('bad updateUser params. user was not updated');
+        failure('bad updateUser params. user was not updated');
         return;
     }
 
     if(res.n ==1 && res.nModified ==1) {                     //res.n = # of matched documents
         success();
-        console.log('updated user. new user: ', user)
+        //console.log('updated user. new user: ', user)
     }
     else if (res.n ==0 && res.nModified ==0){
         failure('could not find a user to update')
