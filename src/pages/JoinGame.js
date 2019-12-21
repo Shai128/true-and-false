@@ -70,7 +70,8 @@ export function JoinGame(props){
 	// 	...more fields you probably don't need...
   // }
   let roomObject;
-  if(!isUndefined(props) && !isUndefined(props.location)&& !isUndefined(props.location.InfoObject))
+  console.log("the received props:", props)
+  if(!isUndefined(props) && !isUndefined(props.location) && !isUndefined(props.location.InfoObject))
     roomObject = props.location.InfoObject.roomObject;
   else
     roomObject = {}
@@ -111,23 +112,27 @@ const [helperText, setHelperText] = React.useState('');
 if(!isUpdatedData){
   return (<DisplayLoading/>);
 }
-if(!roomUpdated)
+if(!roomUpdated && isUpdatedData)
   InitTheRoom(CurrentRoom.room_id, setRoomUpdated);
 
+socket.off("userJoined"); 
 socket.on("userJoined", function(userInfo) {
  /*
     userInfo: {email: ..., nickName:...}
  */
 
     console.log("userINFO DANN --> ",userInfo);
+    console.log("LIST SHAI --> ",PlayersAvailable);
+
     console.log("LIST DANN --> ",PlayersAvailable.values);
 
     var newPlayersAvailable = [...PlayersAvailable]
     newPlayersAvailable.push({email:userInfo.email,nickname:userInfo.nickName})
+    console.log('By Shai: new player list: ', newPlayersAvailable)
     setPlayersAvailable(newPlayersAvailable)
   });
 
-  
+socket.off('userLeft')
 socket.on("userLeft", function(userInfo) {
   console.log("gottt")
     /*
@@ -139,12 +144,68 @@ socket.on("userLeft", function(userInfo) {
    setPlayersAvailable(newPlayersAvailable1)
    });
 
+   socket.off('userAvailable')
+   socket.on("userAvailable", function(userInfo) {
+      /*
+         userInfo: {email: ...}
+      */
+      
+     console.log("dont see it avail --->",PlayersAvailable);
+     console.log("dont see it Un_avail --->",PlayersUnAvailable);
 
- socket.on("userAccept", function(userInfo) {
+     var newPlayersUnAvailable = [...PlayersUnAvailable]
+     var index = (newPlayersUnAvailable).findIndex((user) => user.email === userInfo.email)
+     var current_user = newPlayersUnAvailable[index]
+     newPlayersUnAvailable.splice(index)
+     setPlayersUnAvailable(newPlayersUnAvailable)
+     
+    var newPlayersAvailable = [...PlayersAvailable]
+    newPlayersAvailable.push(current_user)
+    setPlayersAvailable(newPlayersAvailable)
+
+     });
+
+     socket.off('userUnAvailable')
+     socket.on("userUnAvailable", function(userInfo) {
+      /*
+         userInfo: {email: ...}
+      */
+
+      console.log("ronn log avail --->",PlayersAvailable);
+      console.log("ronn log Un_avail --->",PlayersUnAvailable);
+
+
+     var newPlayersAvailable = [...PlayersAvailable]
+     var index = (newPlayersAvailable).findIndex((user) => user.email === userInfo.email)
+     var current_user = newPlayersAvailable[index]
+     newPlayersAvailable.splice(index)
+     setPlayersAvailable(newPlayersAvailable)
+     
+    var newPlayersUnAvailable = [...PlayersUnAvailable]
+    newPlayersUnAvailable.push(current_user)
+    setPlayersUnAvailable(newPlayersUnAvailable)
+
+     });
+
+   const userStates = {
+    INVALID: 0,
+    AVAILABLE: 1,
+    UNAVAILABLE: 2
+  }
+
+  
+  socket.off('userAccept')
+
+  socket.on("userAccept", function(userInfo) {
       /*
          userInfo: {email: ..., nickName:...}
       */
      console.log("sending props: ",  CurrentUser,  CurrentRoom)
+
+     socket.emit('changeUserAvailability', {
+      newAvailability:userStates.UNAVAILABLE,userId:CurrentUser.email,roomId:CurrentRoom.room_id
+      })
+
      history.push({
       pathname:'/TheGame',
       opponentId: userInfo.senderId,
@@ -154,7 +215,7 @@ socket.on("userLeft", function(userInfo) {
     })
          
   });
-
+socket.off("CancelInvitation");
 socket.on("CancelInvitation", function(userInfo) {
   console.log("got here")
   /*
@@ -171,6 +232,10 @@ const onAccept = () => {
       message: 'userAccept',
       args: {},
       receiverId: SenderInfoID,
+      })
+
+     socket.emit('changeUserAvailability', {
+      newAvailability:userStates.UNAVAILABLE,userId:CurrentUser.email,roomId:CurrentRoom.room_id
       })
       
       console.log("sending props: ",  CurrentUser, CurrentRoom)
@@ -193,8 +258,9 @@ const onDecline = () => {
       })
       setGotInvitationWindow(false);
  }
-
+socket.off('InvitedToGameByUser')
 socket.on("InvitedToGameByUser", function(args) { 
+  console.log("dannnn ->", args);
   setSenderInfoID(args.senderId);
   setSenderInfoName(args.senderName);
   setGotInvitationWindow(true);
@@ -224,6 +290,7 @@ socket.on("InvitedToGameByUser", function(args) {
 function PrintAnswerPlayerDialog(props){  
 
   const {WindowOpen, setWindowOpen, onAccept, onDecline, SenderInfoName} = props;
+  console.log("name -->", SenderInfoName);
 
   return(
       <Dialog open={WindowOpen} aria-labelledby="form-dialog-title">
@@ -277,7 +344,7 @@ const handleClickSearch = (event)=>{
   return (
     <div id="joinGamePage">  
 
-  <PrintAnswerPlayerDialog WindowOpen = {GotInvitationWindow} setWindowOpen = {setGotInvitationWindow} onAccept = {onAccept} onDecline = {onDecline} sender = {SenderInfoName}/> 
+  <PrintAnswerPlayerDialog WindowOpen = {GotInvitationWindow} setWindowOpen = {setGotInvitationWindow} onAccept = {onAccept} onDecline = {onDecline} SenderInfoName = {SenderInfoName}/> 
   <div style={{float: 'right', marginRight: 10, marginTop: 10,}}>
     <Button id="leaveRoomBTN" variant="contained" color="primary" onClick = {leaveRoom} className={classes.button}>
      Leave the room
@@ -298,7 +365,6 @@ const handleClickSearch = (event)=>{
     {CurrentRoom.room_name}
    </Typography>
    </Grid>
-
 
    <Grid item xs={4}>
    <Typography id="userNameHeader" variant="h3" className={classes.roomNumber}>
@@ -358,13 +424,10 @@ const handleClickSearch = (event)=>{
 
       {/* ******************************************************************************************** */}
 
-
-
-
-
    <PlayerListAvailable PlayersAvailable = {PlayersAvailable}/>
   
-   {/* <PlayerListUnavailable PlayersUnAvailable = {PlayersUnAvailable}/> */}
+   <PlayerListUnAvailable PlayersUnAvailable = {PlayersUnAvailable}/>
+
 
   </div>
   
@@ -391,15 +454,10 @@ const handleClickSearch = (event)=>{
           var newPlayersAvailable1 = [...data.PlayersAvailable]
           var index = (newPlayersAvailable1).indexOf({email:CurrentUser.email,nickname:CurrentUser.nickname})
           newPlayersAvailable1.splice(index)
-          console.log("dan new -->", newPlayersAvailable1);
           setPlayersAvailable(newPlayersAvailable1)
 
-          // var newPlayersAvailable = [...data.PlayersAvailable]
-          // newPlayersAvailable.filter(user => (user.email != CurrentUser.email))
-         // setPlayersAvailable(newPlayersAvailable)
-         // console.log ("dan 1 new --- >", newPlayersAvailable);
-          console.log ("dan old --- >", data.PlayersAvailable);
-          //setPlayersAvailable(data.PlayersAvailable);
+          console.log("unAvailable --->",data.PlayersUnAvailable);
+
           setPlayersUnAvailable(data.PlayersUnAvailable);
           setRoomUpdated(true);
         }
@@ -464,7 +522,7 @@ export function BasicTextFields() {
 // ------------------ LIST OF PLAYERS IN THE ROOM ------------------ //
 
 const columnsForUnAvailable = [
-  { id: 'name', label: 'Unavailable players & Players that you played with', minWidth: 170, align: 'center' },
+  { id: 'name', label: 'Unavailable players', minWidth: 170, align: 'center' },
 ];
 
 const columnsForAvailable = [
@@ -517,150 +575,189 @@ const useStyles = makeStyles({
     },
 });
 
-// ------------------------------------------------------------------------------------- //
+// ------------------------------------------------------------------------------------- /
 
-export function PlayerListUnavailable(props) {
-  const classes = useStyles();
+export function PlayerListUnAvailable(props) {
 
-  const [page, setPage] = React.useState(0);
-  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  
+  // socket.on("userDecline", function(userInfo) {
+  //   /*
+  //      userInfo: {email: ..., nickName:...}
+  //   */
+  //  setInvitePlayerWindowOpen(false);
+    
+  // });
+  
+    const classes = useStyles();
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
+    const [page, setPage] = React.useState(0);
+    const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  
+    const handleChangeRowsPerPage = event => {
+      setRowsPerPage(+event.target.value);
+      setPage(0);
+    };
 
-  const handleChangeRowsPerPage = event => {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
-  };
-
-  const PlayersUnAvailable = props.PlayersUnAvailable;
-
-  return (
-    <Paper className={classes.root}>
-      <div className={classes.tableWrapper}>
-        <Table stickyHeader aria-label="sticky table">
-          <TableHead>
-            <TableRow>
-              {columnsForUnAvailable.map(column => (
-                <TableCell
-                  key={column.id}
-                  align={column.align}
-                  style={{ minWidth: column.minWidth }}
-                >
-                  {column.label}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {PlayersUnAvailable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => {
-              return (
-                <TableRow hover role="checkbox" tabIndex={-1} key={row.code}>
-                  {columnsForUnAvailable.map(column => {
-                    const value = row;
+    const handleChangePage = (event, newPage) => {
+      setPage(newPage);
+    };
+  
+    const {PlayersUnAvailable} = props;  
+  
+    return (
+      <Paper className={classes.root}>
+        <div className={classes.tableWrapper}>
+          <Table stickyHeader aria-label="sticky table">
+            <TableHead>
+              <TableRow>
+                {columnsForUnAvailable.map(column => (
+                  <TableCell
+                    key={column.id}
+                    align={column.align}
+                    style={{ minWidth: column.minWidth }}
+                  >
+                    {column.label}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              
+              {PlayersUnAvailable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => {
+  
+                  {/* <Avatar src = {firstLetter}>
+                  </Avatar> */}
+  
+                return (
+  
+                  <TableRow hover role="checkbox" tabIndex={-1} key={row.email}>
+                    {columnsForUnAvailable.map(column => { 
+                             
+                    const value = row.nickname;
+                    const firstLetter = value.substring(0,1)
+  
                     return (
-                      <TableCell key={column.id} align={column.align}>
-                        {column.format && typeof value === 'number' ? column.format(value) : value}
+                    <TableCell key={row.email} align={column.align}>
+  
+                    <Grid container spacing={1}>              
+  
+                   <Grid container justify="center" alignItems="center">
+                        
+                    <Grid item xs = {5} >
+                    <Grid container justify="center" alignItems="center">
+                    <Grid item xs = {1}>
+  
+                    <Avatar>
+                     {firstLetter}
+                    </Avatar>
+  
+                    </Grid>
+                    <Grid item xs = {1}>
+  
+                    {column.format && typeof value === 'number' ? column.format(value) : value}
+                    </Grid>
+                    </Grid>
+  
+                    </Grid>
+  
+                    <Grid item xs = {1}>
+                    <ChatButton email={row.email}/>
+                      </Grid>
+                      </Grid>
 
-                        {/* add here the pic of each user */}
-                        <Grid container justify="center" alignItems="center">
-                        <Avatar>
-                          {avatarPic[1]}
-                        </Avatar>
-                         </Grid>
-
-                    {/* -------------------------------------------------- */}
-
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
-      </div>
-      <TablePagination
-        rowsPerPageOptions={[10, 25, 100]}
-        component="div"
-        count={PlayersUnAvailable.length}
-        rowsPerPage={rowsPerPage}
-        page={page}
-        backIconButtonProps={{
-          'aria-label': 'previous page',
-        }}
-        nextIconButtonProps={{
-          'aria-label': 'next page',
-        }}
-        onChangePage={handleChangePage}
-        onChangeRowsPerPage={handleChangeRowsPerPage}
-      />
-    </Paper>
-  );
-}
-
+                    </Grid>
+  
+                      {/* -------------------------------------------------- */}
+  
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
+        <TablePagination
+          rowsPerPageOptions={[10, 25, 100]}
+          component="div"
+          count={PlayersUnAvailable.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          backIconButtonProps={{
+            'aria-label': 'previous page',
+          }}
+          nextIconButtonProps={{
+            'aria-label': 'next page',
+          }}
+          onChangePage={handleChangePage}
+          onChangeRowsPerPage={handleChangeRowsPerPage}
+        />
+      </Paper>
+    );
+  }
+  
 
 // ------------------------------------------------------- //
 
-const useStylesSetting = makeStyles(theme => ({
-  root: {
-    width: '100%',
-    maxWidth: 360,
-    backgroundColor: theme.palette.background.paper,
-  },
-}));
+// const useStylesSetting = makeStyles(theme => ({
+//   root: {
+//     width: '100%',
+//     maxWidth: 360,
+//     backgroundColor: theme.palette.background.paper,
+//   },
+// }));
 
-export function SwitchListSecondary() {
-  const classes = useStylesSetting();
-  const [checked, setChecked] = React.useState(['wifi']);
+// export function SwitchListSecondary() {
+//   const classes = useStylesSetting();
+//   const [checked, setChecked] = React.useState(['wifi']);
 
-  const handleToggle = value => () => {
-    const currentIndex = checked.indexOf(value);
-    const newChecked = [...checked];
+//   const handleToggle = value => () => {
+//     const currentIndex = checked.indexOf(value);
+//     const newChecked = [...checked];
 
-    if (currentIndex === -1) {
-      newChecked.push(value);
-    } else {
-      newChecked.splice(currentIndex, 1);
-    }
+//     if (currentIndex === -1) {
+//       newChecked.push(value);
+//     } else {
+//       newChecked.splice(currentIndex, 1);
+//     }
 
-    setChecked(newChecked);
-  };
+//     setChecked(newChecked);
+//   };
 
-  return (
-    <List subheader={<ListSubheader>Settings</ListSubheader>} className={classes.root}>
-      <ListItem>
-        <ListItemIcon>
-          {/* <WifiIcon /> */}
-        </ListItemIcon>
-        <ListItemText id="switch-list-label-wifi" primary="Show players I've played with before" />
-        <ListItemSecondaryAction>
-          <Switch
-            edge="end"
-            onChange={handleToggle('wifi')}
-            checked={checked.indexOf('wifi') !== -1}
-            inputProps={{ 'aria-labelledby': 'switch-list-label-wifi' }}
-          />
-        </ListItemSecondaryAction>
-      </ListItem>
-      <ListItem>
-        <ListItemIcon>
-          {/* <BluetoothIcon /> */}
-        </ListItemIcon>
-        <ListItemText id="switch-list-label-bluetooth" primary="Show users who are not available" />
-        <ListItemSecondaryAction>
-          <Switch
-            edge="end"
-            onChange={handleToggle('bluetooth')}
-            checked={checked.indexOf('bluetooth') !== -1}
-            inputProps={{ 'aria-labelledby': 'switch-list-label-bluetooth' }}
-          />
-        </ListItemSecondaryAction>
-      </ListItem>
-    </List>
-  );
-}
+//   return (
+//     <List subheader={<ListSubheader>Settings</ListSubheader>} className={classes.root}>
+//       <ListItem>
+//         <ListItemIcon>
+//           {/* <WifiIcon /> */}
+//         </ListItemIcon>
+//         <ListItemText id="switch-list-label-wifi" primary="Show players I've played with before" />
+//         <ListItemSecondaryAction>
+//           <Switch
+//             edge="end"
+//             onChange={handleToggle('wifi')}
+//             checked={checked.indexOf('wifi') !== -1}
+//             inputProps={{ 'aria-labelledby': 'switch-list-label-wifi' }}
+//           />
+//         </ListItemSecondaryAction>
+//       </ListItem>
+//       <ListItem>
+//         <ListItemIcon>
+//           {/* <BluetoothIcon /> */}
+//         </ListItemIcon>
+//         <ListItemText id="switch-list-label-bluetooth" primary="Show users who are not available" />
+//         <ListItemSecondaryAction>
+//           <Switch
+//             edge="end"
+//             onChange={handleToggle('bluetooth')}
+//             checked={checked.indexOf('bluetooth') !== -1}
+//             inputProps={{ 'aria-labelledby': 'switch-list-label-bluetooth' }}
+//           />
+//         </ListItemSecondaryAction>
+//       </ListItem>
+//     </List>
+//   );
+// }
 
 
 // ----------------------------------------------------------------------------------------------------------------------- //
@@ -668,7 +765,7 @@ export function SwitchListSecondary() {
 
 export function PlayerListAvailable(props) {
 
-  
+socket.off('userDecline')
 socket.on("userDecline", function(userInfo) {
   /*
      userInfo: {email: ..., nickName:...}
@@ -779,7 +876,7 @@ const handleClickInvitePlayer = (userThatGotInvitedID,userThatGotInvitedName) =>
 
                 <TableRow hover role="checkbox" tabIndex={-1} key={row.email}>
                   {columnsForAvailable.map(column => { 
-                           
+                  console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!row: ', row)
                   const value = row.nickname;
                   const firstLetter = value.substring(0,1)
 
@@ -809,7 +906,7 @@ const handleClickInvitePlayer = (userThatGotInvitedID,userThatGotInvitedName) =>
 
                   <Grid item xs = {2}>
                   <Button variant="contained" color="primary" fullWidth onClick={()=>{handleClickInvitePlayer(row.email,row.nickname)}} className={classes.button}>
-                      Invite to Game
+                  Invite to Game
                     </Button>
                     </Grid>
 

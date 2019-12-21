@@ -3,6 +3,7 @@ const {mongoose} = require("./config")
 const{userModel} = require("./user")
 const{isUndefined}=require("../src/Utils")
 const{roomsGlobalArrayModel}=require("./roomsGlobalArray")
+const{updateUser, findUserByField} = require("./user.js")
 const INVALID_STATE=0;
 const UNVAILABLE_STATE=2;
 const AVAILABLE_STATE=1;
@@ -22,8 +23,9 @@ const roomSchema = new mongoose.Schema(
                 nickname: String,
                 pic_url: String,
                 array_of_ids_of_users_already_played_with: [{type: Boolean}],
-                true_sentences:[{type: String}],
-                already_seen_sentences:[{type: String}],
+                true_sentences:[{id: Number, value: String}],
+                already_seen_sentences:[{id: Number, value: String}],
+                false_sentences: [{id: Number, value: String}],
                 score: Number
             }]        
     }
@@ -73,15 +75,41 @@ async function findUserByEmailInRoomByRoomID(room_id,email,success,fail){ //room
                var i; 
                var flag_not_found=1;
                for( i=0; i<arr_users.length; i++){
-
-                    if(arr_users[i]!=undefined && arr_users[i].email==email){flag_not_found=0; success(arr_users[i])}
+                    if(arr_users[i]!=undefined && arr_users[i].email==email){
+                        flag_not_found=0; 
+                        success(arr_users[i])
+                    }
                 }
                 if(flag_not_found){fail('User with email ' +email+ ' was not found in room with id '+room_id)}
         }
     });
 }
 
-
+/**
+ * after removing or adding user to a room,
+ * this function is called to update the in user object fields
+ */
+function changeRoomInUser(email, room_id, room_name, success, failure) {
+    console.log("updating user:", email, "current_room_id:", room_id, "current_room_name:", room_name)
+    findUserByField('email', email, (userObject) => {
+        userObject = userObject[0]
+        userObject.roomObject = {
+            room_id: room_id,
+            room_name: room_name
+        }
+        console.log("user should update to:", userObject)
+        updateUser(
+            null,
+            email,
+            userObject,
+            (succ) => {
+                console.log("update successful")
+                success(succ)
+            },
+            (err) => failure(err)
+        )
+    }, (err) => failure(err))
+}
 
 
 async function deleteUserByEmailInRoomByRoomID(room_id,email,success,fail){ //room_id: int, email: string
@@ -101,15 +129,40 @@ async function deleteUserByEmailInRoomByRoomID(room_id,email,success,fail){ //ro
                     arr_users[j]=undefined;
                     room.state_array[j]=INVALID_STATE;
                     roomModel.findOneAndUpdate({room_id: room_id}, { $set:{users_in_room:arr_users,state_array: room.state_array }},()=>{
-                        success('Successfully removed');
-                    }) }
-        }
-    });   
-}
+
+                        changeRoomInUser(email, -1, "no room", async ()=>{
+                                var flag=0;
+                                console.log('got here1');
+                                for(i=0;i<arr_users.length;i++){
+                                    if(arr_users[i]!=undefined) flag=1;
+                                
+                                }
+                                if(flag===0){
+                                    console.log('got here with', room_id);
+                                await roomModel.remove({room_id: room_id});
+                                roomsGlobalArrayModel.findOne({array_id:1}).exec(function(err,arr){
+                                    if(err){fail('shit'); console.log('should not get here')}
+                                    else{
+                                        console.log('the array is:', arr.array);
+                                    arr.array[room_id]=false;
+                            roomsGlobalArrayModel.findOneAndUpdate({array_id: 1}, { $set:{array:arr.array }},()=>{     
+                                success('Successfully removed');
+                                });}
+                               
+                            }) }
+
+                            })
+                            
+                        },
+                        (err) => fail(err));
+    }}}
+    
+    ); }
 
 
 async function addUserObjectToRoom(room_id,user,success,fail){
     //console.log('got here 3');
+    console.log("inside addUserObjectToRoom the user:", user)
     roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
         if(err) fail('Room with id'+room_id+'does not exist');
         else{
@@ -117,7 +170,10 @@ async function addUserObjectToRoom(room_id,user,success,fail){
             var orig_sentences_array_length=room.all_sentences.length;
             var i;
             for(i=0;i<user.true_sentences.length;i++){
-                room.all_sentences[orig_sentences_array_length+i]=user.true_sentences[i];
+                room.all_sentences[orig_sentences_array_length+i]=user.true_sentences[i].value;
+            }
+            for(i=0;i<user.false_sentences.length;i++){
+                room.all_sentences[orig_sentences_array_length+i]=user.false_sentences[i].value;
             }
               var arr_users=room.users_in_room;
                arr_users[arr_users.length]=user;
@@ -128,19 +184,18 @@ async function addUserObjectToRoom(room_id,user,success,fail){
 }
 
 async function addUserToRoom(room_id,email,success,fail){
-console.log('got here 1.5');
+console.log('addUserToRoom got params: room_id: ', room_id+ " email: ", email);
 roomModel.find({ room_id: room_id }, (err, docs) => {
     var room = docs[0]
     if (room === undefined) {fail("room does not exist"); return}
     if (err) {fail(err)} else {
-        console.log('got here 1');
-            console.log('got here 1');
+        console.log('addUserToRoom. room ', room_id + "found. ");
             userModel.findOne({ email: email }).exec(function (err2, user) {
-                if(err2) fail('User with email'+email+'does not exist');
+                if(err2) fail('trying to add user to room. ',room_id +' User with email'+email+'does not exist');
                 else{
-                    console.log('got here 2');
+                    console.log('addUserToRoom found user: ', user);
                     var false_array = new Array(PLAYERS_AMOUNT).fill(false);
-                    var user={
+                    var userInRoom={
                         user_id_in_room:room.available_id,
                         email: user.email,
                         password:user.password,
@@ -148,18 +203,38 @@ roomModel.find({ room_id: room_id }, (err, docs) => {
                         pic_url: user.pic_url,
                         array_of_ids_of_users_already_played_with: false_array,
                         true_sentences: user.true_sentences,
-                        already_seen_sentences: user.true_sentences,
+                        false_sentences: user.false_sentences,
+                        already_seen_sentences: (user.true_sentences).concat(user.false_sentences),
                         score:0
                     }
-               
-                addUserObjectToRoom(room_id,user,success,fail);
-               // success('Success'); -- never ever try to uncomment this for thou shall bring hell upon yourselves
-                }})}})}
+
+                changeRoomInUser(user.email, room_id, room.room_name, (succ) => {
+                    console.log("updated the user in the database, now calling addUserObjectToRoom")
+                addUserObjectToRoom(room_id,userInRoom,success,fail);
+                }, (err) => fail(err))
+
+               }})}})}
     
 async function createRoom(room_name,success,failure){
     roomsGlobalArrayModel.findOne({ array_id: 1 }).exec(function (err, global_array) {
         if (err) {failure('unexpected error occured during fetching the rooms global array')}
         else {
+            
+            if(isUndefined(global_array)){
+                global_array = {
+                    array_id:1,
+                    array: (new Array(100)).fill(false)
+                }
+                const new_global_array = new roomsGlobalArrayModel(global_array);
+                //saves the user in the db
+                new_global_array.save((err)=>{
+                    if(err)
+                        failure(err)
+                    else 
+                        success()
+                });
+            }
+            
             var room_id,i;
             for(i=0;i<global_array.array.length;i++){
                 if(!global_array.array[i]){
@@ -219,14 +294,19 @@ async function get_available_users(room_id,success,failure){
 });
 }
 async function changeUserAvailability(room_id,email,status,success,fail){
+    console.log("inside db changeUserAvailability")
+    console.log("roomId:", room_id, "email:", email)
     roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
         if(err) fail('Room with id'+room_id+'does not exist');
         else{
             var i,not_found=1;
                 for(i=0;i<room.users_in_room.length;i++){
-                    if(!isUndefined(room.users_in_room[i]&& room.users_in_room[i].email==email)){
+                    if(!isUndefined(room.users_in_room[i])&& (room.users_in_room[i].email===email)){
+                        console.log("found the user index", i)
+                        console.log("email:", room.users_in_room[i].email)
                         not_found=0;
                         room.state_array[i]=status;
+                        break;
                     }
                 }
                 if(not_found)fail('User with email '+email+' was not found in room with id '+room_id);
@@ -283,3 +363,4 @@ exports.getUnAvailableUsers=get_unavailable_users
 exports.getAllSentencesArray=getAllSentencesArray
 exports.getRoomSize = getRoomSize
 exports.roomModel = roomModel
+exports.changeUserAvailability = changeUserAvailability

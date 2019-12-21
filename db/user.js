@@ -11,7 +11,10 @@ const userSchema= new mongoose.Schema(
         salt: String,
         iterations: Number,
         nickName: String,
-        current_room: Number,
+        roomObject: {
+            room_id: Number,
+            room_name: String
+        },
         score: Number,
         pic_url: String,
         firstName: String,
@@ -35,7 +38,13 @@ const userSchema= new mongoose.Schema(
                                     authorName: String,
                                     otherUserName:String,
                                     delivery_timestamp:Date}]
-                            }]                   
+                            }],
+        turn:Boolean,
+        opponentId: String,
+        questionsCount: Number,
+        correctCount: Number,
+        score: Number,
+        matchPoints: Number,                   
 
         });
 const userModel = mongoose.model('users',userSchema) //creating the class userModel. a class of types
@@ -51,7 +60,7 @@ const userModel = mongoose.model('users',userSchema) //creating the class userMo
  */
 function createUser(user,success,failure){
     userModel.findOne({ email: user.email }).exec(function (err, dbUser) {
-    if(err || !dbUser) {
+    if(err || dbUser === undefined || dbUser === null) {
         let hashedPassword = user.password;
         const newUser = new userModel({
             password: hashedPassword,
@@ -70,8 +79,10 @@ function createUser(user,success,failure){
                 success()
         })
     }
-    else
+    else{
+        console.log("dbuser:", dbUser)
         failure(USER_ALREADY_EXISTS)
+    }
     })
 }
 
@@ -147,13 +158,13 @@ async function resetUnReadMessage(email,success){
  * @param {the user who wrote the messages we remove} otherUserEmail 
  * @param {function that activates on success } success 
  */
-async function removeUnReadMessagesFromCertainUserInDB(email, otherUserEmail, success){
+async function removeUnReadMessagesFromCertainUserInDB(email, otherUserEmail, success, fail){
     userModel.findOne({ email: email }).exec(function (err, user) {
    
         if(err) fail('User with email'+email+'does not exist');
         else{
 
-        unReadMessages = removeUnReadMessagesFromCertainUser(user, otherUserEmail)
+        var unReadMessages = removeUnReadMessagesFromCertainUser(user, otherUserEmail)
         userModel.findOneAndUpdate({email: email}, { $set:{unReadMessages:unReadMessages}},
         ()=>{success('Successfully added  message by addressee to user with email '+email)}) }
             
@@ -243,6 +254,11 @@ async function deleteUser(data,success,failure){
 
 } 
 
+/**
+ * ATTENTION TO WHO MAY USE THIS FUNCTION IN THE FUTURE
+ * it returns AN ARRAY of all matching users.
+ * so if you need a single user, you've got to take the [0] item of the array
+ */
 async function findUserByField(field, value, success, failure) {
     var query = {};
     query[field] = value;
@@ -254,12 +270,26 @@ async function findUserByField(field, value, success, failure) {
 /**
  * author: Shai
  * @param {the _id of the user we want to update} userID 
+ * @param {the email of the user we want to update} userEmail 
  * @param {the new user that will be put instead of the existing user} user 
  * @param {function that will activated in case of success} success 
  * @param {will be activated in case of failure} failure 
  */
-async function updateUser(userID, user, success, failure) {
-    const res = await userModel.replaceOne({_id: userID}, user); //res.nModified = # updated documents
+async function updateUser(userID, userEmail, user, success, failure) {
+    console.log("updating user by Id:", userID)
+    console.log("updating user by email:", userEmail)
+
+    console.log("the user object:", user)
+    var res;
+    if(!isUndefined(userID))
+        res = await userModel.replaceOne({_id: userID}, user); //res.nModified = # updated documents
+    else if(!isUndefined(userEmail))
+        res = await userModel.replaceOne({email: userEmail}, user); //res.nModified = # updated documents
+    else{
+        failire('bad updateUser params. user was not updated');
+        return;
+    }
+
     if(res.n ==1 && res.nModified ==1) {                     //res.n = # of matched documents
         success();
         console.log('updated user. new user: ', user)
