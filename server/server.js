@@ -316,7 +316,7 @@ function  serverAddUserToRoom(req, res, roomId) {
               console.log("sending the status now")
              // console.log("created room with id", roomId)
              console.log("added user",userInfo.email, "to room", roomId)
-             console.log("roomAndUserObject:", roomAndUser)
+           //  console.log("roomAndUserObject:", roomAndUser)
               res.status(200).send(JSON.stringify(roomAndUser));
               console.log("sent")
               // add the user's socket to the room
@@ -428,7 +428,7 @@ app.get('/userList/:roomId', (req, res) => {
           findRoomById(
             roomId, 
             (roomObject) => {
-              console.log("Players available" ,availableUsers)
+              //console.log("Players available" ,availableUsers)
               res.status(200).send(JSON.stringify({
                 PlayersAvailable: convertUserListFormat(availableUsers),
                 PlayersUnAvailable: convertUserListFormat(unavailableUsers),
@@ -581,7 +581,7 @@ io.on('connection', function (socket) {
         } else {
           // user goes unavailable -- his socket should leave the room
           console.log("emmiting unavailable to", args.roomId, "with args", args.userId)
-          io.to(args.roomId).emit('userUnavailable', args.userId)
+          io.to(args.roomId).emit('userUnAvailable', args.userId)
           socket.leave(args.roomId.toString())
         }
       },
