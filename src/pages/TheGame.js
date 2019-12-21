@@ -240,7 +240,7 @@ export function TheGame(props){
             </Grid>
             <Grid item xs={12} sm={6}>
               <Typography variant="h6" align="right" color="primary">
-                Playing against {props.location.user.nickName}
+                Playing against {props.location.opponentName}
               </Typography>
             </Grid>
           </Grid>
