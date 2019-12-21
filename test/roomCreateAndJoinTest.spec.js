@@ -309,7 +309,6 @@ describe("roomCreateAndJoinTest", () => {
             text
         );
         await page2.waitForSelector('#logOutBTN')
-        await page2.goto(homePage);
         await Promise.all([
             page2.waitForNavigation(),
             page2.click('#logOutBTN')
