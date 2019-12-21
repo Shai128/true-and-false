@@ -211,7 +211,8 @@ socket.on("userLeft", function(userInfo) {
       opponentId: userInfo.senderId,
       user: CurrentUser,
       room: CurrentRoom,
-      turn: false
+      turn: false,
+      opponentName: userInfo.nickname
     })
          
   });
@@ -225,12 +226,12 @@ socket.on("CancelInvitation", function(userInfo) {
 });
 
     
-const onAccept = () => {
+function onAccept (props) {
 
     // Accept 
     socket.emit('deliverMessage', {
       message: 'userAccept',
-      args: {},
+      args: {nickname: CurrentUser.nickName},
       receiverId: SenderInfoID,
       })
 
@@ -244,7 +245,8 @@ const onAccept = () => {
         opponentId:SenderInfoID,
         user: CurrentUser,
         room: CurrentRoom,
-        turn: true
+        turn: true,
+        opponentName: props
       })
 }
 
@@ -294,7 +296,7 @@ function PrintAnswerPlayerDialog(props){
 
   return(
       <Dialog id="receivedInvitationPopUp" open={WindowOpen} aria-labelledby="form-dialog-title">
-      <DialogTitle id="form-dialog-title"> {SenderInfoName} Invited you to play </DialogTitle>
+      <DialogTitle id="form-dialog-title"> {SenderInfoName} invited you to play </DialogTitle>
       <DialogContent>
         <DialogContentText>
         </DialogContentText>
@@ -309,7 +311,7 @@ function PrintAnswerPlayerDialog(props){
 
     <Grid container justify="center" alignItems="center">
         <Grid container justify="center">
-        <Button id="acceptBTN" onClick={onAccept} color="primary">
+        <Button id="acceptBTN" onClick={()=>onAccept(SenderInfoName)} color="primary">
         Accept
         </Button>
         </Grid>
@@ -424,7 +426,7 @@ const handleClickSearch = (event)=>{
 
       {/* ******************************************************************************************** */}
 
-   <PlayerListAvailable type={"Available"} PlayersAvailable = {PlayersAvailable}/>
+   <PlayerListAvailable type={"Available"} PlayersAvailable = {PlayersAvailable} CurrentUser ={CurrentUser}/>
   
    <PlayerListUnAvailable type={"Unavailable"} PlayersUnAvailable = {PlayersUnAvailable}/>
 
@@ -817,11 +819,12 @@ socket.on("userDecline", function(userInfo) {
 
 const [InvitePlayerWindowOpen, setInvitePlayerWindowOpen] = React.useState(false);
 
-const handleClickInvitePlayer = (userThatGotInvitedID,userThatGotInvitedName) => {
+const handleClickInvitePlayer = (userThatGotInvitedID,currentUserName) => {
     // TODO: also makes changeUserAvailability request to server 
+    console.log("props name of user -- >",currentUserName);
     socket.emit('deliverMessage', {
     message: 'InvitedToGameByUser',
-    args: {senderName:userThatGotInvitedName},
+    args: {senderName:currentUserName},
     receiverId: userThatGotInvitedID,
     })
     setInvitePlayerWindowOpen(true);
@@ -841,11 +844,8 @@ const handleClickInvitePlayer = (userThatGotInvitedID,userThatGotInvitedName) =>
     setPage(0);
   };
 
-  console.log("dann 1 ", props);
-
-  const {PlayersAvailable} = props;
-
-  console.log("dann 1 ", PlayersAvailable);
+  const {PlayersAvailable, CurrentUser} = props;
+  console.log("Current user is --- >", CurrentUser);
 
 
   return (
@@ -905,7 +905,7 @@ const handleClickInvitePlayer = (userThatGotInvitedID,userThatGotInvitedName) =>
                   </Grid>
 
                   <Grid item xs = {2}>
-                  <Button id={row.nickname + "InviteBTN"} variant="contained" color="primary" fullWidth onClick={()=>{handleClickInvitePlayer(row.email,row.nickname)}} className={classes.button}>
+                  <Button id={row.nickname + "InviteBTN"} variant="contained" color="primary" fullWidth onClick={()=>{handleClickInvitePlayer(row.email,CurrentUser.nickName)}} className={classes.button}>
                   Invite to Game
                     </Button>
                     </Grid>
