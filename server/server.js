@@ -110,10 +110,6 @@ app.post('/user', serverCreateUser)
 app.get('/user/:email/:password', serverLoginUser)
 
 /**
- * Randomizes a sentence for a duel between two users.
- */
-app.get('/randomSentence/:game/:subject/:receiver', serverRandomSentence)
-/**
  * Checks whether a user exists with field == value.
  * (For example, field can be 'username' or 'email')
  */
@@ -173,22 +169,6 @@ function serverLoginUser(req, res) {
         standardErrorHandling(res, "password does not match");
       }
     },(err)=>{standardErrorHandling(res, err)});
-}
-
-
-function serverRandomSentence(req, res) {
-  console.log('random sentence 2');
-
-  findGame(
-    req.params.game,
-    (game_data) => getRandomSentenceForDuel(
-      game_data,
-      req.params.subject, 
-      req.params.receiver, 
-      (sentence_data) => res.send(JSON.stringify(sentence_data)), 
-      (err) => standardErrorHandling(res, err))
-    ,
-    (err) => standardErrorHandling(res, err));
 }
 
 function serverUserExists(req, res) {
@@ -301,6 +281,7 @@ function  serverAddUserToRoom(req, res, roomId) {
                 console.log("added the user's", userInfo.email, "socket to room", roomId.toString())
               }
               res.status(200).send(JSON.stringify({
+                // TODO: send only minimal data required by frontend to reduce latency
                 userObject: found_user_object,
                 roomObject: room_object
               }))
@@ -317,6 +298,7 @@ function  serverAddUserToRoom(req, res, roomId) {
              // console.log("created room with id", roomId)
              console.log("added user",userInfo.email, "to room", roomId)
            //  console.log("roomAndUserObject:", roomAndUser)
+              // TODO: send only minimal data required by frontend to reduce latency
               res.status(200).send(JSON.stringify(roomAndUser));
               console.log("sent")
               // add the user's socket to the room
@@ -357,6 +339,7 @@ app.get('/leaveRoom/:roomId', (req, res) => {
         roomId,
         userInfo.email, 
         (succ) => {
+          console.log("successfuly returned to leave room. should now emit message")
           res.status(200).send(succ);
           // remove the user's socket from room
           var userSocket = findSocketByUserId(userInfo.email)
