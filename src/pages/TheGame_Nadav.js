@@ -185,6 +185,7 @@ export function TheGame(props){
     });
 
     return (
+      <div id="theGamePage">
       <Container component="main" maxWidth="md">
         <CssBaseline />
         <div className={classes.paper} >
@@ -264,6 +265,7 @@ export function TheGame(props){
           </Grid>
         </div>          
       </Container>
+      </div>
     );
 }
 

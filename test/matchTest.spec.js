@@ -3,6 +3,7 @@ import puppeteer from "puppeteer";
 const APP = "http://localhost:3000/";
 const homePage = "http://localhost:3000/LoginScreen/Home"
 import 'babel-polyfill';
+import { JoinGame } from "../src/pages/JoinGame";
 const iPhone = puppeteer.devices['iPhone 6'];
 
 let page;
@@ -21,16 +22,16 @@ const player1 = {
     nickname: faker.name.firstName(),
     email: faker.internet.email(),
     password: faker.random.alphaNumeric(10),
-    trueSentences: [faker.random.words(faker.random.number({ min: 3, max: 6 })), faker.random.words(faker.random.number({ min: 3, max: 6 })), faker.random.words(faker.random.number({ min: 3, max: 6 }))],
-    falseSentences: [faker.random.words(faker.random.number({ min: 3, max: 6 })), faker.random.words(faker.random.number({ min: 3, max: 6 })), faker.random.words(faker.random.number({ min: 3, max: 6 }))]
+    trueSentences: [faker.random.words(faker.random.number({ min: 2, max: 5 })), faker.random.words(faker.random.number({ min: 2, max: 5 })), faker.random.words(faker.random.number({ min: 2, max: 5 }))],
+    falseSentences: [faker.random.words(faker.random.number({ min: 2, max: 5 })), faker.random.words(faker.random.number({ min: 2, max: 5 })), faker.random.words(faker.random.number({ min: 2, max: 5 }))]
 };
 const player2 = {
     name: faker.name.firstName(),
     nickname: faker.name.firstName(),
     email: faker.internet.email(),
     password: faker.random.alphaNumeric(10),
-    trueSentences: [faker.random.words(faker.random.number({ min: 3, max: 6 })), faker.random.words(faker.random.number({ min: 3, max: 6 })), faker.random.words(faker.random.number({ min: 3, max: 6 }))],
-    falseSentences: [faker.random.words(faker.random.number({ min: 3, max: 6 })), faker.random.words(faker.random.number({ min: 3, max: 6 })), faker.random.words(faker.random.number({ min: 3, max: 6 }))]
+    trueSentences: [faker.random.words(faker.random.number({ min: 2, max: 5 })), faker.random.words(faker.random.number({ min: 2, max: 5 })), faker.random.words(faker.random.number({ min: 2, max: 5 }))],
+    falseSentences: [faker.random.words(faker.random.number({ min: 2, max: 5 })), faker.random.words(faker.random.number({ min: 2, max: 5 })), faker.random.words(faker.random.number({ min: 2, max: 5 }))]
 };
 
 beforeAll(async () => {
@@ -237,7 +238,7 @@ describe("matchTest", () => {
             page.click('#mySentencesBTN')
         ]);
         await page.waitForSelector("#MySentencesPage")
-        
+
         var someText = await page.evaluate(() => document.getElementById('TrueSentence0').textContent)
         expect(someText).toEqual(`${player1.trueSentences[0]}`);
         someText = await page.evaluate(() => document.getElementById('FalseSentence2').textContent)
@@ -251,7 +252,7 @@ describe("matchTest", () => {
             page.waitForNavigation(),
             page.click('#homeBTN')
         ]);
-    
+
         expect(page.url() === APP + "LoginScreen/Home" || page.url() === APP + "LoginScreen").toBeTruthy()//redirect to home page
         await page.waitForSelector("#LoginScreenHomePage")
 
@@ -259,7 +260,7 @@ describe("matchTest", () => {
             page.waitForSelector('#openRoomPopUp'),
             page.click('#createNewRoomBTN')
         ]);
-        
+
         const room = {
             name: faker.name.title(),
         };
@@ -341,14 +342,86 @@ describe("matchTest", () => {
             page.click("#acceptBTN")
         ]);
 
-        await page.waitForSelector();
-        await page2.waitForSelector();
-        await page.screenshot({path: 'puppeteerTests/example.png'});
-        await page2.screenshot({path: 'puppeteerTests/example1.png'});
+        await page.waitForSelector("#theGamePage");
+        await page2.waitForSelector("#theGamePage");
 
     }, 700000);
 
     test("successfull match", async () => {
+        //check that the opponent's name is correct
+        var someText = await page.evaluate(() => document.getElementById('opponentName').textContent)
+        expect(someText).toEqual(`Playing against ${player2.nickname}`);//correct nickname
+        someText = await page2.evaluate(() => document.getElementById('opponentName').textContent)
+        expect(someText).toEqual(`Playing against ${player1.nickname}`);//correct nickname
+
+        //see who is first
+        var isPlayer1Turn;
+        try {
+            await page.waitForSelector('#trueBTN', { timeout: 2000 }); //this thing might be flaky. Not sure it is a good idea!!!
+            isPlayer1Turn = true
+        } catch (e) {
+            await page2.waitForSelector('#trueBTN', { timeout: 2000 }); //just to make sure
+            isPlayer1Turn = false
+        }
+
+        //repeat until out of sentences
+        var choice;
+        var outOfsentences = false
+        while (!outOfsentences) {
+            choice = Math.random() >= 0.5; //randomize a boolean
+            try {
+                if(isPlayer1Turn){
+                    await page.waitForSelector('#trueBTN', { timeout: 2000 })
+                    if (choice) {
+                        await page.click('#TrueBTN')
+                    } else {
+                        await page.click('#FalseBTN')
+                    }
+                    await page.waitForSelector("#NextSentenceBTN")
+                    await Promise.all([
+                        page.waitFor(() => !document.querySelector("#TrueBTN")),
+                        page.click("#NextSentenceBTN")
+                    ]);
+                    isPlayer1Turn = false;
+                } else {
+                    await page2.waitForSelector('#trueBTN', { timeout: 2000 })
+                    if (choice) {
+                        await page2.click('#TrueBTN')
+                    } else {
+                        await page2.click('#FalseBTN')
+                    }
+                    await page2.waitForSelector("#NextSentenceBTN")
+                    await Promise.all([
+                        page2.waitFor(() => !document.querySelector("#TrueBTN")),
+                        page2.click("#NextSentenceBTN")
+                    ]);
+                    isPlayer1Turn = true;
+                }
+            } catch (e) {
+                outOfsentences = true
+            }
+        }
+        //exit and log out
+        await page.waitForSelector("#EndGameBTN1") //not sure if this is the correct id
+        await Promise.all([
+            page.waitForNavigation(),
+            page2.waitForNavigation(),
+            page.click("#EndGameBTN1")
+        ]);
+        await page.waitForSelector("#joinGamePage")
+        await page2.waitForSelector("#joinGamePage")
+
+        await Promise.all([
+            page.waitForNavigation(),
+            page2.waitForNavigation(),
+            page.click("#leaveRoomBTN"),
+            page2.click("#leaveRoomBTN"),
+        ]);
+
+        await page.waitForSelector("#LoginScreenHomePage")
+        await page2.waitForSelector("#LoginScreenHomePage")
+
+
     }, 700000);
 
 });
