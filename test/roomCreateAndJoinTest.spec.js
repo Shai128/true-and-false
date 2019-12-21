@@ -96,7 +96,6 @@ beforeAll(async () => {
     expect(page.url()).toEqual(APP + "LoginScreen/MySentences")//redirect to personal info page
     await page.waitForSelector('#MySentencesPage')
     await page.waitForSelector('#logOutBTN')
-    await page.goto(homePage);
     await Promise.all([
         page.waitForNavigation(),
         page.click('#logOutBTN')
