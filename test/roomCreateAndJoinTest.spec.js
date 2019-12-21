@@ -22,11 +22,15 @@ const lead = {
 beforeEach(async () => {
     var HTMLelement;
     await page.goto(APP);
+    await page.waitForSelector('#TrueAndFalseHomePage')
+
     await Promise.all([
         page.waitForNavigation(),
         page.click('#signInBTN')
     ]);
     expect(page.url()).toEqual(APP + "SignIn")//redirect to signIn page
+    await page.waitForSelector('#SignInPage')
+
     await page.click("#EmailInput");
     await page.type("#EmailInput", lead.email);
     await page.click("#PasswordInput");
@@ -44,7 +48,6 @@ beforeEach(async () => {
 afterEach(async () => {
     var HTMLelement;
     await page.waitForSelector('#logOutBTN')
-    await page.goto(homePage);
     await Promise.all([
         page.waitForNavigation(),
         page.click('#logOutBTN')
@@ -71,12 +74,15 @@ beforeAll(async () => {
     //await page.emulate(iPhone);
     await page.setViewport({ width, height });
 
-    var HTMLelement;
     await page.goto(APP);
+    await page.waitForSelector('#TrueAndFalseHomePage')
+
     await Promise.all([
         page.waitForNavigation(),
         page.click('#signUpBTN')
     ]);
+    await page.waitForSelector('#SignUpPage')
+
     expect(page.url()).toEqual(APP + "SignUp")//redirect to signUp page
     await page.click("#firstName");
     await page.type("#firstName", lead.name);
@@ -112,7 +118,6 @@ afterAll(() => {
 describe("roomCreateAndJoinTest", () => {
 
     test("successfull roomCreation", async () => {
-        await page.waitForSelector("#LoginScreenHomePage")
         await Promise.all([
             page.waitForSelector('#openRoomPopUp'),
             page.click('#createNewRoomBTN')
@@ -196,11 +201,15 @@ describe("roomCreateAndJoinTest", () => {
 
         //sign the new player up
         await page2.goto(APP);
+        await page2.waitForSelector('#TrueAndFalseHomePage')
+
         await Promise.all([
             page2.waitForNavigation(),
             page2.click('#signUpBTN')
         ]);
         expect(page2.url()).toEqual(APP + "SignUp")//redirect to signUp page
+        await page2.waitForSelector('#SignUpPage')
+
         await page2.click("#firstName");
         await page2.type("#firstName", secondUser.name);
         await page2.click("#nickName");
@@ -242,7 +251,6 @@ describe("roomCreateAndJoinTest", () => {
             page.click('#startBTN')
         ]);
         expect(page.url() === APP + "LoginScreen/JoinGame" || page2.url() === APP + "JoinGame").toBeTruthy();//redirect to room page
-
         await page.waitForSelector('#joinGamePage')
 
         await page.waitForSelector('#roomNameHeader')
@@ -273,6 +281,8 @@ describe("roomCreateAndJoinTest", () => {
             page2.click('#startBTN')
         ]);
         expect(page2.url() === APP + "LoginScreen/JoinGame" || page2.url() === APP + "JoinGame").toBeTruthy();//redirect to room page
+        await page2.waitForSelector('#joinGamePage')
+
 
         await page2.waitForSelector('#roomNameHeader')
         var someText = await page2.evaluate(() => document.getElementById('roomNameHeader').textContent)
@@ -285,27 +295,19 @@ describe("roomCreateAndJoinTest", () => {
 
         //expect that the first user will appear on the second user's screen
         var text = lead.nickname
-        try {
-            await page2.waitForFunction(
-                text => document.querySelector('body').innerText.includes(text),
-                {},
-                text
-            );
-        } catch (e) {
-            console.log(`The text "${text}" was not found on the page`);
-        }
+        await page2.waitForFunction(
+            text => document.querySelector('body').innerText.includes(text),
+            {},
+            text
+        );
 
         //expect that the second user will appear on the first user's screen
         text = secondUser.nickname
-        try {
-            await page.waitForFunction(
-                text => document.querySelector('body').innerText.includes(text),
-                {},
-                text
-            );
-        } catch (e) {
-            console.log(`The text "${text}" was not found on the page`);
-        }
+        await page.waitForFunction(
+            text => document.querySelector('body').innerText.includes(text),
+            {},
+            text
+        );
         await page2.waitForSelector('#logOutBTN')
         await page2.goto(homePage);
         await Promise.all([

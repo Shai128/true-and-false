@@ -123,7 +123,7 @@ export function MyProfile(props){
               />
             </Grid>
             <Grid container  justify='center'  >
-            <Button className={buttonClasses.root} justify="center" onClick={()=>{handleClickChangePasswordWindow(true)}}>
+            <Button id="changePasswordBTN" className={buttonClasses.root} justify="center" onClick={()=>{handleClickChangePasswordWindow(true)}}>
               Change Password
             </Button>
 

@@ -44,11 +44,14 @@ describe("signInAndSignUp", () => {
     test("succesful sign up", async () => {
         var HTMLelement;
         await page.goto(APP);
+        await page.waitForSelector('#TrueAndFalseHomePage')
+
         await Promise.all([
             page.waitForNavigation(),
             page.click('#signUpBTN')
         ]);
         expect(page.url()).toEqual(APP + "SignUp");//redirect to signUp page
+        await page.waitForSelector('#SignUpPage')
 
         await page.click("#firstName");
         await page.type("#firstName", lead.name);
@@ -65,6 +68,8 @@ describe("signInAndSignUp", () => {
             page.click('#submit')
         ]);
         expect(page.url()).toEqual(APP + "LoginScreen/MySentences")//redirect to personal info page
+        await page.waitForSelector('#MySentencesPage')
+
 
         await page.waitForSelector('#logOutBTN')
         await Promise.all([
@@ -76,8 +81,8 @@ describe("signInAndSignUp", () => {
     }, 300000);
 
     test("succesful sign in", async () => {
-        var HTMLelement;
         await page.goto(APP);
+        await page.waitForSelector('#TrueAndFalseHomePage')
         await Promise.all([
             page.waitForNavigation(),
             page.click('#signInBTN')
@@ -111,6 +116,8 @@ describe("signInAndSignUp", () => {
     // test("failed sign up", async () => {
     //     var HTMLelement;
     //     await page.goto(APP);
+    //await page.waitForSelector('#TrueAndFalseHomePage')
+
     //     await Promise.all([
     //         page.waitForNavigation(),
     //         page.click('#signUpBTN')
@@ -136,6 +143,7 @@ describe("signInAndSignUp", () => {
     test("failed sign in", async () => {
         var HTMLelement;
         await page.goto(APP);
+        await page.waitForSelector('#TrueAndFalseHomePage')
         await Promise.all([
             page.waitForNavigation(),
             page.click('#signInBTN')
@@ -169,194 +177,182 @@ describe("signInAndSignUp", () => {
         expect(page.url()).toEqual(APP + "SignIn")//stay in the signIn page
     }, 300000);
 
-    // test("succesful personal information change", async () => {
-    //     //sign in
-    //     await page.goto(APP);
-    //     await Promise.all([
-    //         page.waitForNavigation(),
-    //         page.click('#signInBTN')
-    //     ]);
-    //     expect(page.url()).toEqual(APP + "SignIn")//redirect to signIn page
-    //     await page.click("#EmailInput");
-    //     await page.type("#EmailInput", lead.email);
-    //     await page.click("#PasswordInput");
-    //     await page.type("#PasswordInput", lead.password);
-    //     await Promise.all([
-    //         page.waitForNavigation(),
-    //         page.click('#submit')
-    //     ]);
+    test("succesful personal information change", async () => {
+        //sign in
+        await page.goto(APP);
+        await page.waitForSelector('#TrueAndFalseHomePage')
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#signInBTN')
+        ]);
+        expect(page.url()).toEqual(APP + "SignIn")//redirect to signIn page
+        await page.waitForSelector("#SignInPage")
 
-    //     expect(page.url() === APP + "LoginScreen/Home" || page.url() === APP + "LoginScreen").toBeTruthy();//redirect to home page
-    //     await page.waitForSelector('#LoginScreenHomePage')
+        await page.click("#EmailInput");
+        await page.type("#EmailInput", lead.email);
+        await page.click("#PasswordInput");
+        await page.type("#PasswordInput", lead.password);
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#submit')
+        ]);
 
-    //     //go to my profile page
-    //     await Promise.all([
-    //         page.waitForNavigation(),
-    //         page.click('#myProfileBTN')
-    //     ]);
+        expect(page.url() === APP + "LoginScreen/Home" || page.url() === APP + "LoginScreen").toBeTruthy();//redirect to home page
+        await page.waitForSelector('#LoginScreenHomePage')
 
-    //     await page.waitForSelector('#MyProfilePage')
-    //     expect(page.url()).toEqual(APP + "LoginScreen/MyProfile")//redirect to myProfile page
+        //go to my profile page
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#myProfileBTN')
+        ]);
 
-    //     //change name, nickname and email
-    //     await page.focus("#firstName");
-    //     await page.type("#firstName", "_CHANGED");
-    //     await page.focus("#nickName");
-    //     await page.type("#nickName", "_CHANGED");
-    //     await page.focus("#email");
-    //     var L = await page.$eval('#email', el => el.value);
-    //     for (let i = 0; i < L.length; i++) {
-    //         await page.keyboard.press('ArrowLeft');
-    //     }
-    //     await page.type("#email", "CHANGED_");
-    //     await page.click('#saveBTN')
-    //     await page.waitFor(1000)
+        await page.waitForSelector('#MyProfilePage')
+        expect(page.url()).toEqual(APP + "LoginScreen/MyProfile")//redirect to myProfile page
 
-    //     //check password change
+        //change name, nickname and email
+        await page.focus("#firstName");
+        await page.type("#firstName", "_CHANGED");
+        await page.focus("#nickName");
+        await page.type("#nickName", "_CHANGED");
+        await page.focus("#email");
+        var L = await page.$eval('#email', el => el.value);
+        for (let i = 0; i < L.length; i++) {
+            await page.keyboard.press('ArrowLeft');
+        }
+        await page.type("#email", "CHANGED_");
+        await page.click('#saveBTN')
+        await page.waitFor(1000)
 
-    //     //check that cancel button works
-    //     await Promise.all([
-    //         page.waitForSelector('#changePasswordPopUp'),
-    //         page.click('#changePasswordBTN')
-    //     ]);
-    //     await Promise.all([
-    //         page.waitFor(() => !document.querySelector("#changePasswordPopUp")),
-    //         page.click("#cancelBTN")
-    //     ]);
+        //check password change
 
-    //     //check that immediate submit does not change password 
-    //     await Promise.all([
-    //         page.waitForSelector('#changePasswordPopUp'),
-    //         page.click('#changePasswordBTN')
-    //     ]);
-    //     await page.click('#confirmBTN')
-    //     await page.waitFor(1000)
+        //check that cancel button works
+        await Promise.all([
+            page.waitForSelector('#changePasswordPopUp'),
+            page.click('#changePasswordBTN')
+        ]);
+        await Promise.all([
+            page.waitFor(() => !document.querySelector("#changePasswordPopUp")),
+            page.click("#cancelBTN")
+        ]);
 
-    //     var text = "password saved successfuly!"
-    //     try {
-    //         await page.waitForFunction(
-    //             text => !document.querySelector('body').innerText.includes(text),
-    //             {},
-    //             text
-    //         );
-    //     } catch (e) {
-    //         console.log(`The text "${text}" was found on the page`);
-    //     }
+        //check that immediate submit does not change password 
+        await Promise.all([
+            page.waitForSelector('#changePasswordPopUp'),
+            page.click('#changePasswordBTN')
+        ]);
+        await page.click('#confirmBTN')
+        await page.waitFor(1000)
 
-    //     //check wrong old password does not change password
-    //     await page.click("#oldPasswordId");
-    //     await page.type("#oldPasswordId", lead.password + "_WRONG");
-    //     await page.click("#password");
-    //     await page.type("#password", lead.password + "_CHANGED");
-    //     await page.click("#confirmPasswordId");
-    //     await page.type("#confirmPasswordId", lead.password + "_CHANGED");
-    //     await page.click('#confirmBTN')
-    //     await page.waitFor(1000)
+        var text = "password saved successfuly!"
+        await page.waitForFunction(
+                    text => !document.querySelector('body').innerText.includes(text),
+                    {},
+                    text
+                );
+        //check wrong old password does not change password
+        await page.click("#oldPasswordId");
+        await page.type("#oldPasswordId", lead.password + "_WRONG");
+        await page.click("#password");
+        await page.type("#password", lead.password + "_CHANGED");
+        await page.click("#confirmPasswordId");
+        await page.type("#confirmPasswordId", lead.password + "_CHANGED");
+        await page.click('#confirmBTN')
+        await page.waitFor(1000)
 
-    //     try {
-    //         await page.waitForFunction(
-    //             text => !document.querySelector('body').innerText.includes(text),
-    //             {},
-    //             text
-    //         );
-    //     } catch (e) {
-    //         console.log(`The text "${text}" was found on the page`);
-    //     }
+        await page.waitForFunction(
+            text => !document.querySelector('body').innerText.includes(text),
+            {},
+            text
+        );
 
-    //     //check wrong confirmed password does not change password
-    //     await page.focus("#oldPasswordId");
-    //     for (let i = 0; i < 6; i++) { // 6 for _WRONG
-    //         await page.keyboard.press('Backspace');
-    //     }
-    //     await page.click("#oldPasswordId");
-    //     await page.type("#oldPasswordId", lead.password);
+        //check wrong confirmed password does not change password
+        await page.focus("#oldPasswordId");
+        for (let i = 0; i < 6; i++) { // 6 for _WRONG
+            await page.keyboard.press('Backspace');
+        }
+        await page.click("#oldPasswordId");
+        await page.type("#oldPasswordId", lead.password);
 
-    //     await page.focus("#confirmPasswordId");
-    //     await page.type("#confirmPasswordId", "NOT_SAME");
-    //     await page.click('#confirmBTN')
-    //     await page.waitFor(1000)
-    //     try {
-    //         await page.waitForFunction(
-    //             text => !document.querySelector('body').innerText.includes(text),
-    //             {},
-    //             text
-    //         );
-    //     } catch (e) {
-    //         console.log(`The text "${text}" was found on the page`);
-    //     }
+        await page.focus("#confirmPasswordId");
+        await page.type("#confirmPasswordId", "NOT_SAME");
+        await page.click('#confirmBTN')
+        await page.waitFor(1000)
+        await page.waitForFunction(
+            text => !document.querySelector('body').innerText.includes(text),
+            {},
+            text
+        );
 
-    //     //fix everything and change password successfully
-    //     await page.focus("#confirmPasswordId");
-    //     for (let i = 0; i < 8; i++) { // 8 for NOT_SAME
-    //         await page.keyboard.press('Backspace');
-    //     }
-    //     await page.click('#confirmBTN')
-    //     await page.waitFor(1000)
-    //     try {
-    //         await page.waitForFunction(
-    //             text => document.querySelector('body').innerText.includes(text),
-    //             {},
-    //             text
-    //         );
-    //     } catch (e) {
-    //         console.log(`The text "${text}" was not found on the page`);
-    //     }
-    //     await Promise.all([
-    //         page.waitFor(() => !document.querySelector("#changePasswordPopUp")),
-    //         page.click("#cancelBTN")
-    //     ]);
+        //fix everything and change password successfully
+        await page.focus("#confirmPasswordId");
+        for (let i = 0; i < 8; i++) { // 8 for NOT_SAME
+            await page.keyboard.press('Backspace');
+        }
+        await page.click('#confirmBTN')
+        await page.waitFor(1000)
+        await page.waitForFunction(
+            text => document.querySelector('body').innerText.includes(text),
+            {},
+            text
+        );
+        await Promise.all([
+            page.waitFor(() => !document.querySelector("#changePasswordPopUp")),
+            page.click("#cancelBTN")
+        ]);
 
 
-    //     //check that all changes actually applied
+        //check that all changes actually applied
 
-    //     //log out
-    //     await page.waitForSelector('#logOutBTN')
-    //     await Promise.all([
-    //         page.waitForNavigation(),
-    //         page.click('#logOutBTN')
-    //     ]);
-    //     await page.waitForSelector('#TrueAndFalseHomePage')
+        //log out
+        await page.waitForSelector('#logOutBTN')
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#logOutBTN')
+        ]);
+        await page.waitForSelector('#TrueAndFalseHomePage')
 
-    //     //try to sign in with old email and password
-    //     await Promise.all([
-    //         page.waitForNavigation(),
-    //         page.click('#signInBTN')
-    //     ]);
-    //     await page.waitForSelector('#SignInPage')
-    //     expect(page.url()).toEqual(APP + "SignIn");//redirect to signIn page
+        //try to sign in with old email and password
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#signInBTN')
+        ]);
+        await page.waitForSelector('#SignInPage')
+        expect(page.url()).toEqual(APP + "SignIn");//redirect to signIn page
 
-    //     await page.focus("#EmailInput");
-    //     await page.type("#EmailInput", lead.email);
-    //     await page.focus("#PasswordInput");
-    //     await page.type("#PasswordInput", lead.password);
-    //     await page.click("#submit");
-    //     expect(page.url()).toEqual(APP + "SignIn")//stay in the signIn page
+        await page.focus("#EmailInput");
+        await page.type("#EmailInput", lead.email);
+        await page.focus("#PasswordInput");
+        await page.type("#PasswordInput", lead.password);
+        await page.click("#submit");
+        expect(page.url()).toEqual(APP + "SignIn")//stay in the signIn page
 
-    //     await page.focus("#EmailInput");
-    //     //sign in with new email and password
-    //     L = await page.$eval('#email', el => el.value);
-    //     for (let i = 0; i < L.length; i++) {
-    //         await page.keyboard.press('ArrowLeft');
-    //     }
-    //     await page.type("#EmailInput", "CHANGED_");
-    //     await page.focus("#PasswordInput");
-    //     await page.type("#PasswordInput", "_CHANGED");
+        await page.focus("#EmailInput");
+        //sign in with new email and password
+        L = await page.$eval('#email', el => el.value);
+        for (let i = 0; i < L.length; i++) {
+            await page.keyboard.press('ArrowLeft');
+        }
+        await page.type("#EmailInput", "CHANGED_");
+        await page.focus("#PasswordInput");
+        await page.type("#PasswordInput", "_CHANGED");
         
-    //     await Promise.all([
-    //         page.waitForNavigation(),
-    //         page.click('#submit')
-    //     ]);
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#submit')
+        ]);
 
-    //     expect(page.url() === APP + "LoginScreen/Home" || page.url() === APP + "LoginScreen").toBeTruthy();//redirect to home page
-    //     await page.waitForSelector('#LoginScreenHomePage')
-    //     const welcomeMessage = await page.evaluate(() => document.getElementById('welcomeMessage').textContent)
-    //     expect(welcomeMessage).toEqual(`Welcome ${lead.name}_CHANGED!`);//greet by correct name
+        expect(page.url() === APP + "LoginScreen/Home" || page.url() === APP + "LoginScreen").toBeTruthy();//redirect to home page
+        await page.waitForSelector('#LoginScreenHomePage')
+        const welcomeMessage = await page.evaluate(() => document.getElementById('welcomeMessage').textContent)
+        expect(welcomeMessage).toEqual(`Welcome ${lead.name}_CHANGED!`);//greet by correct name
 
-    //     await page.waitForSelector('#logOutBTN')
-    //     await Promise.all([
-    //         page.waitForNavigation(),
-    //         page.click('#logOutBTN')
-    //     ]);
+        await page.waitForSelector('#logOutBTN')
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#logOutBTN')
+        ]);
+        await page.waitForSelector('#TrueAndFalseHomePage')
 
-    // }, 300000);
+
+    }, 300000);
 });
