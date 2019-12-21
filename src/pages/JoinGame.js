@@ -293,7 +293,7 @@ function PrintAnswerPlayerDialog(props){
   console.log("name -->", SenderInfoName);
 
   return(
-      <Dialog open={WindowOpen} aria-labelledby="form-dialog-title">
+      <Dialog id="receivedInvitationPopUp" open={WindowOpen} aria-labelledby="form-dialog-title">
       <DialogTitle id="form-dialog-title"> {SenderInfoName} Invited you to play </DialogTitle>
       <DialogContent>
         <DialogContentText>
@@ -309,13 +309,13 @@ function PrintAnswerPlayerDialog(props){
 
     <Grid container justify="center" alignItems="center">
         <Grid container justify="center">
-        <Button onClick={onAccept} color="primary">
+        <Button id="acceptBTN" onClick={onAccept} color="primary">
         Accept
         </Button>
         </Grid>
 
         <Grid container justify="center">
-        <Button onClick={onDecline} color="primary">
+        <Button id="declineBTN" onClick={onDecline} color="primary">
         Decline 
         </Button>
         </Grid>
@@ -424,9 +424,9 @@ const handleClickSearch = (event)=>{
 
       {/* ******************************************************************************************** */}
 
-   <PlayerListAvailable PlayersAvailable = {PlayersAvailable}/>
+   <PlayerListAvailable type={"Available"} PlayersAvailable = {PlayersAvailable}/>
   
-   <PlayerListUnAvailable PlayersUnAvailable = {PlayersUnAvailable}/>
+   <PlayerListUnAvailable type={"Unavailable"} PlayersUnAvailable = {PlayersUnAvailable}/>
 
 
   </div>
@@ -661,7 +661,7 @@ export function PlayerListUnAvailable(props) {
                     </Grid>
   
                     <Grid item xs = {1}>
-                    <ChatButton email={row.email}/>
+                    <ChatButton id={row.nickname + props.type + "ChatBTN"} email={row.email}/>
                       </Grid>
                       </Grid>
 
@@ -789,7 +789,7 @@ socket.on("userDecline", function(userInfo) {
     }
   
     return(
-        <Dialog open={InvitePlayerWindowOpen} aria-labelledby="form-dialog-title">
+        <Dialog id="waitingForResponsePopUp" open={InvitePlayerWindowOpen} aria-labelledby="form-dialog-title">
         <DialogTitle id="form-dialog-title">Waiting for other player's response</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -804,7 +804,7 @@ socket.on("userDecline", function(userInfo) {
         </DialogActions>
   
           <Grid container justify="center">
-          <Button onClick={onCloseWindow} color="primary">
+          <Button id="cancelBTN" onClick={onCloseWindow} color="primary">
           Cancel the invitation
           </Button>
           </Grid>
@@ -905,13 +905,13 @@ const handleClickInvitePlayer = (userThatGotInvitedID,userThatGotInvitedName) =>
                   </Grid>
 
                   <Grid item xs = {2}>
-                  <Button variant="contained" color="primary" fullWidth onClick={()=>{handleClickInvitePlayer(row.email,row.nickname)}} className={classes.button}>
+                  <Button id={row.nickname + "InviteBTN"} variant="contained" color="primary" fullWidth onClick={()=>{handleClickInvitePlayer(row.email,row.nickname)}} className={classes.button}>
                   Invite to Game
                     </Button>
                     </Grid>
 
                   <Grid item xs = {1}>
-                  <ChatButton email={row.email}/>
+                  <ChatButton id={row.nickname + props.type + "ChatBTN"} email={row.email}/>
                     </Grid>
                     </Grid>
 
