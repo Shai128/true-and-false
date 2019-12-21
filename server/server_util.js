@@ -1,5 +1,4 @@
 const{isUndefined}=require("../src/Utils")
-
 /**
  * Selects a random sentence from a users truths and lies.
  * @param {*} user The subject of the true/lie sentence

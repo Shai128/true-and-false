@@ -69,7 +69,11 @@ function createUser(user,success,failure){
             iterations: iterations,
             nickName: user.nickName,
             firstName: user.firstName, 
-            gameHistory: new Array(0) // creating a user with no games
+            gameHistory: new Array(0), // creating a user with no games
+            roomObject: {
+                room_id: -1,
+                room_name: "no room"
+            }
                                     });
         console.log("creted new user:", newUser);
         //saves the user in the db

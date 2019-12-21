@@ -34,7 +34,7 @@ const {
   getIdentifierFromSession,
   logDiv,
   getUserInfoFromSession,
-  convertUserListFormat
+  convertUserListFormat,
 } = require("./server_util")
 
 const mongoose = require("../db/config")
@@ -290,33 +290,42 @@ function  serverAddUserToRoom(req, res, roomId) {
           )
         },
         (user_not_found_err) => {
-          addUserToRoom(
-            roomId,
-            userInfo.email, 
-            (roomAndUser) => {
-              console.log("sending the status now")
-             // console.log("created room with id", roomId)
-             console.log("added user",userInfo.email, "to room", roomId)
-           //  console.log("roomAndUserObject:", roomAndUser)
-              // TODO: send only minimal data required by frontend to reduce latency
-              res.status(200).send(JSON.stringify(roomAndUser));
-              console.log("sent")
-              // add the user's socket to the room
-              var userSocket = findSocketByUserId(userInfo.email)
-              // console.log("user socket", userSocket, "found of user:", userInfo.email)
-              if (userSocket !== undefined) {
-                userSocket.join(roomId.toString())
-                console.log("added the user's", userInfo.email, "socket to room", roomId.toString())
-              }
-              // notify all other users in the room
-              console.log("emitting a message to room", roomId, "about player join", userInfo)
-              io.in(roomId).clients((err, clients) => {
-                console.log("clients of room:", clients); // an array containing socket ids in 'room3'
-              });
-              io.to(roomId).emit('userJoined', userInfo)
+          leaveCurrentRoom(
+            {
+              email: userInfo.email,
+              nickname: userInfo.nickname
+            },
+            () => {
+              addUserToRoom(
+                roomId,
+                userInfo.email, 
+                (roomAndUser) => {
+                  console.log("sending the status now")
+                 // console.log("created room with id", roomId)
+                 console.log("added user",userInfo.email, "to room", roomId)
+               //  console.log("roomAndUserObject:", roomAndUser)
+                  // TODO: send only minimal data required by frontend to reduce latency
+                  res.status(200).send(JSON.stringify(roomAndUser));
+                  console.log("sent")
+                  // add the user's socket to the room
+                  var userSocket = findSocketByUserId(userInfo.email)
+                  // console.log("user socket", userSocket, "found of user:", userInfo.email)
+                  if (userSocket !== undefined) {
+                    userSocket.join(roomId.toString())
+                    console.log("added the user's", userInfo.email, "socket to room", roomId.toString())
+                  }
+                  // notify all other users in the room
+                  console.log("emitting a message to room", roomId, "about player join", userInfo)
+                  io.in(roomId).clients((err, clients) => {
+                    console.log("clients of room:", clients); // an array containing socket ids in 'room3'
+                  });
+                  io.to(roomId).emit('userJoined', userInfo)
+                },
+                (err) => standardErrorHandling(res, err)
+              )
             },
             (err) => standardErrorHandling(res, err)
-          )
+          );
         }
       )
     },
@@ -327,7 +336,7 @@ function  serverAddUserToRoom(req, res, roomId) {
 
 /**
  * Removes a user from a given room.
- * User id is inferred from the session.
+ * User id is inferred from the session. - DEPRECATED
  */
 app.get('/leaveRoom/:roomId', (req, res) => {
   var roomId = req.params.roomId
@@ -335,28 +344,53 @@ app.get('/leaveRoom/:roomId', (req, res) => {
   getUserInfoFromSession(
     req,
     (userInfo) => {
-      deleteUserByEmailInRoomByRoomID(
-        roomId,
-        userInfo.email, 
-        (succ) => {
-          console.log("successfuly returned to leave room. should now emit message")
-          res.status(200).send(succ);
-          // remove the user's socket from room
-          var userSocket = findSocketByUserId(userInfo.email)
-          if (userSocket !== undefined) {userSocket.leave(roomId.toString())}
-
-          
-          // notify users in room about leaving
-          console.log("emitting a message to room", roomId, "about player leave", userInfo)
-          io.to(roomId).emit('userLeft', userInfo)
-
-        },
+      leaveCurrentRoom(
+        userInfo,
+        (succ) => res.status(200).send(succ),
         (err) => standardErrorHandling(res, err)
-      )
+        )
     },
     (err) => {standardErrorHandling(res, err)}
   )
 })
+
+
+/**
+ * find the user's current room and leave it.
+ */
+function leaveCurrentRoom(userInfo, success, failure) {
+  logDiv('leaveCurrentRoom')
+  console.log("user:", userInfo.email, "is leaving it's current room");
+  findUser(
+    {email: userInfo.email},
+    (userObject) => {
+      const roomId = userObject.roomObject.room_id;
+      console.log("the current room to leave:", roomId);
+      if (roomId === -1) {
+        success()
+      } else {
+        deleteUserByEmailInRoomByRoomID(
+          roomId,
+          userInfo.email,
+          (succ) => {
+          // remove the user's socket from room
+            var userSocket = findSocketByUserId(userInfo.email)
+            if (userSocket !== undefined) {userSocket.leave(roomId.toString())}
+
+            
+            // notify users in room about leaving
+            console.log("emitting a message to room", roomId, "about player leave", userInfo)
+            io.to(roomId).emit('userLeft', userInfo)
+
+            success("successfuly left the room")
+          },
+          (err) => failure(err)
+        )
+      }
+    },
+    (err) => failure(err)
+    )
+}
 
 /**
  * returns the truths and lies of a given user (opponent) in a given room

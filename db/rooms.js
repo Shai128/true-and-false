@@ -436,6 +436,7 @@ exports.createRoom=createRoom
 exports.deleteRoomById=deleteRoomById
 exports.findUserByEmailInRoomByRoomID=findUserByEmailInRoomByRoomID
 exports.deleteUserByEmailInRoomByRoomID=deleteUserByEmailInRoomByRoomID
+exports.deleteUserFromRoom = deleteUserByEmailInRoomByRoomID
 exports.addUserObjectToRoom=addUserObjectToRoom
 exports.addUserToRoom=addUserToRoom
 exports.createRoom=createRoom
