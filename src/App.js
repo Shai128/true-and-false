@@ -19,12 +19,12 @@ import {
   useHistory
 } from "react-router-dom";
 
-import {LoginScreenRouter as LoginScreen} from './pages/LoginScreen.js';
-import {Chat as ChatRoom} from './pages/Chat.js';
-import {JoinGame} from './pages/JoinGame.js';
-import {PrintJoinGameDialog, DisplayLoading, AutoRedirectToLoginScreenIfUserInSession} from './PagesUtils.js';
-import {validEmail, passwordIsStrongEnough, isUndefined} from './Utils.js'
-import {emptyUser, logIn} from './user.js'
+import { LoginScreenRouter as LoginScreen } from './pages/LoginScreen.js';
+import { Chat as ChatRoom } from './pages/Chat.js';
+import { JoinGame } from './pages/JoinGame.js';
+import { PrintJoinGameDialog, DisplayLoading, AutoRedirectToLoginScreenIfUserInSession } from './PagesUtils.js';
+import { validEmail, passwordIsStrongEnough, isUndefined } from './Utils.js'
+import { emptyUser, logIn } from './user.js'
 //import { createBrowserHistory } from '../../../AppData/Local/Microsoft/TypeScript/3.6/node_modules/@types/history';
 function Copyright() {
   return (
@@ -86,10 +86,10 @@ export const useStyles = makeStyles(theme => ({
     color: '#000000'
   },
   gamesListItems: {
-    background: 'linear-gradient(to right, #4ecdc4, #556270)', /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    background: 'linear-gradient(to right, #2bc0e4, #eaecc6);', /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
     border: '0',
     borderRadius: 3,
-    color: 'white',
+    color: 'black',
     height: 48,
     padding: '0 30px',
     margin: '5px'
@@ -139,39 +139,39 @@ function SignUp() {
    * returns true is the user is valid or false if it is not.
    * prints error messages accordingly
    */
-  const validUser = ()=>{
+  const validUser = () => {
 
     var newTextsMessages = initMessages;
 
     var isValid = true;
-      if(!validEmail(user.email)){
-        newTextsMessages.errorEmail = true;
-        newTextsMessages.emailHelperText = "please provide a valid email address"
-        //changeTextMessage(true,errorEmail, "please provide a valid email address", emailHelperText);
-        isValid= false;
-      }
-      
-      if(!passwordIsStrongEnough(user.password)){
-        newTextsMessages.errorPassword = true;
-        newTextsMessages.passwordHelperText = "please provide a strong password"
-        //changeTextMessage(true,errorPassword, "please provide a strong password", passwordHelperText);
-        isValid= false;
-      }
-      if(isUndefined(user.firstName) || user.firstName  === ''){
-        newTextsMessages.errorFirstName = true;
-        newTextsMessages.firstNameHelperText = "please provide a firstName";
-        //changeTextMessage(true, errorFirstName, "please provide a firstName", firstNameHelperText);
-        isValid= false;
-      }
-      if(user.confirmPassword !== user.password){
-        newTextsMessages.errorPassword = true;
-        newTextsMessages.errorConfirmPassword = true;
-        newTextsMessages.confirmPasswordHelerText = "passwords does not match";
-        //changeTextMessage(true, errorFirstName, "please provide a firstName", firstNameHelperText);
-        isValid= false;
-      }
-      setTextsMessages(newTextsMessages);
-      return isValid;
+    if (!validEmail(user.email)) {
+      newTextsMessages.errorEmail = true;
+      newTextsMessages.emailHelperText = "please provide a valid email address"
+      //changeTextMessage(true,errorEmail, "please provide a valid email address", emailHelperText);
+      isValid = false;
+    }
+
+    if (!passwordIsStrongEnough(user.password)) {
+      newTextsMessages.errorPassword = true;
+      newTextsMessages.passwordHelperText = "please provide a strong password"
+      //changeTextMessage(true,errorPassword, "please provide a strong password", passwordHelperText);
+      isValid = false;
+    }
+    if (isUndefined(user.firstName) || user.firstName === '') {
+      newTextsMessages.errorFirstName = true;
+      newTextsMessages.firstNameHelperText = "please provide a firstName";
+      //changeTextMessage(true, errorFirstName, "please provide a firstName", firstNameHelperText);
+      isValid = false;
+    }
+    if (user.confirmPassword !== user.password) {
+      newTextsMessages.errorPassword = true;
+      newTextsMessages.errorConfirmPassword = true;
+      newTextsMessages.confirmPasswordHelerText = "passwords does not match";
+      //changeTextMessage(true, errorFirstName, "please provide a firstName", firstNameHelperText);
+      isValid = false;
+    }
+    setTextsMessages(newTextsMessages);
+    return isValid;
   }
 
   let history = useHistory();
@@ -188,11 +188,11 @@ function SignUp() {
         </Typography>
         <form className={classes.form} noValidate>
           <Grid container spacing={2}>
-           
-          <Grid item xs={12}>
+
+            <Grid item xs={12}>
               <TextField
                 error={textsMessages.errorFirstName}
-                helperText = {textsMessages.firstNameHelperText}
+                helperText={textsMessages.firstNameHelperText}
                 variant="outlined"
                 required
                 fullWidth
@@ -200,10 +200,10 @@ function SignUp() {
                 label="First Name"
                 name="firstName"
                 autoComplete="firstName"
-                onChange = {updateField}
+                onChange={updateField}
               />
-              </Grid>
-              <Grid item xs={12}>
+            </Grid>
+            <Grid item xs={12}>
               <TextField
                 variant="outlined"
                 fullWidth
@@ -217,7 +217,7 @@ function SignUp() {
             <Grid item xs={12}>
               <TextField
                 error={textsMessages.errorEmail}
-                helperText = {textsMessages.emailHelperText}
+                helperText={textsMessages.emailHelperText}
                 variant="outlined"
                 required
                 fullWidth
@@ -231,7 +231,7 @@ function SignUp() {
             <Grid item xs={12}>
               <TextField
                 error={textsMessages.errorPassword}
-                helperText = {textsMessages.passwordHelperText}
+                helperText={textsMessages.passwordHelperText}
                 variant="outlined"
                 required
                 fullWidth
@@ -247,7 +247,7 @@ function SignUp() {
             <Grid item xs={12}>
               <TextField
                 error={textsMessages.errorConfirmPassword}
-                helperText = {textsMessages.confirmPasswordHelerText}
+                helperText={textsMessages.confirmPasswordHelerText}
                 variant="outlined"
                 required
                 fullWidth
@@ -268,12 +268,12 @@ function SignUp() {
             variant="contained"
             color="primary"
             className={classes.submit}
-            onClick={()=>{
-              if(!validUser())
+            onClick={() => {
+              if (!validUser())
                 return;
               // let data = new FormData();
               // data.append( "json", JSON.stringify(user));
-              
+
 
               fetch('http://localhost:8000/user', {
                 method: 'POST', // *GET, POST, PUT, DELETE, etc.
@@ -282,8 +282,8 @@ function SignUp() {
                 },
                 credentials: 'include',
                 body: 'json=' + JSON.stringify(user)
-              }).then( (data) =>{
-                logIn(user, (data)=>{
+              }).then((data) => {
+                logIn(user, (data) => {
                   // todo: check if the email is already in the db!!
                   console.log('frontend got data: ', data);
                   // console.log('data.status: ', data.status)
@@ -327,19 +327,19 @@ function LinksPage() {
         <Route exact path="/SignUp">
           <SignUp />
         </Route>
-      
-          <Route path="/LoginScreen">
-            <LoginScreen />
-          </Route>
 
-          <Route path="/ChatRoom">
-            <ChatRoom />
-          </Route>
+        <Route path="/LoginScreen">
+          <LoginScreen />
+        </Route>
+
+        <Route path="/ChatRoom">
+          <ChatRoom />
+        </Route>
 
 
-          <Route path="/JoinGame">
-            <JoinGame />
-          </Route>
+        <Route path="/JoinGame">
+          <JoinGame />
+        </Route>
 
 
       </Switch>
@@ -366,11 +366,11 @@ function Home() {
   const [guestLoginWindowOpen, setguestLoginWindowOpen] = React.useState(false);
   const handleClickGuestLogin = () => {
     setguestLoginWindowOpen(true);
-};
+  };
 
-const handleCloseGuestLoginWindow = () => {
-  setguestLoginWindowOpen(false);
-};
+  const handleCloseGuestLoginWindow = () => {
+    setguestLoginWindowOpen(false);
+  };
   return (
 
     <Container component="main" maxWidth="md">
@@ -396,7 +396,7 @@ const handleCloseGuestLoginWindow = () => {
       </Button>
               </Link>
             </Grid>
-{/* 
+            {/* 
             <Grid item xs={12} sm={6}>
               <Link to="/LoginScreen">
                 <Button variant="contained" color="primary" fullWidth className={classes.button}>
@@ -407,16 +407,16 @@ const handleCloseGuestLoginWindow = () => {
 
             {/* <Grid item xs={12} sm={6}> */}
             <Button variant="contained" color="primary" fullWidth onClick={handleClickGuestLogin} className={classes.button}>
-            Guest Login
+              Guest Login
             </Button>
-            </Grid>
-            <PrintJoinGameDialog
-            handleCloseWindow= {handleCloseGuestLoginWindow}
-            WindowOpen= {guestLoginWindowOpen}
-            currentUser = {emptyUser()}/>
+          </Grid>
+          <PrintJoinGameDialog
+            handleCloseWindow={handleCloseGuestLoginWindow}
+            WindowOpen={guestLoginWindowOpen}
+            currentUser={emptyUser()} />
           {/* </Grid> */}
 
-{/* 
+          {/* 
           <Grid item xs={12} sm={6}>
             <Link to="/ChatRoom">
             <Button variant="contained" color="primary" fullWidth  className={classes.button}>
@@ -425,7 +425,7 @@ const handleCloseGuestLoginWindow = () => {
           </Link>
             </Grid> */}
 
-            
+
           {/* <Grid item xs={12} sm={6}>
             <Link to="/JoinGame">
             <Button variant="contained" color="primary" fullWidth  className={classes.button}>
@@ -521,12 +521,12 @@ export function SignIn() {
       [e.target.name]: e.target.value
     });
   };
-  if(isLoading)
-    return (<DisplayLoading/>);
+  if (isLoading)
+    return (<DisplayLoading />);
   return (
     <div className="App" >
       <header className="App-header" >
-     
+
         <Container component="main" maxWidth="xs">
           <CssBaseline />
           <div className={classes.paper}>
@@ -540,22 +540,22 @@ export function SignIn() {
                 </Grid>
                 <Grid item xs={12} sm={6}>
                   <TextField
-                    error = {isWrongLogin}
+                    error={isWrongLogin}
                     id="EmailInput"
                     className={classes.textField}
                     label="Email"
                     margin="normal"
                     variant="filled"
                     fullWidth
-                    name = 'email'
-                    value = {user.email}
-                    onChange = {updateField}
+                    name='email'
+                    value={user.email}
+                    onChange={updateField}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
 
                   <TextField
-                    error = {isWrongLogin}
+                    error={isWrongLogin}
                     id="PasswordInput"
                     label="Password"
                     className={classes.textField}
@@ -564,9 +564,9 @@ export function SignIn() {
                     margin="normal"
                     variant="filled"
                     fullWidth
-                    name = 'password'
-                    value = {user.password}
-                    onChange = {updateField}
+                    name='password'
+                    value={user.password}
+                    onChange={updateField}
                   />
                 </Grid>
                 <Grid item xs={12}>
@@ -576,30 +576,30 @@ export function SignIn() {
                       setIsWrongLogin(false);
                       setIsLoading(true);
                       console.log("sending sign in");
-                      
-                      logIn(user, 
-                        (user)=>{ // onSuccess function
-                        setIsLoading(false);
-                        console.log('logged in and frontend got data: ', user);
-                            history.push("/LoginScreen");
-                      },
-                       ()=>{ // onFailure funciton
-                        setIsLoading(false);
-                        setIsWrongLogin(true);
-                       });
+
+                      logIn(user,
+                        (user) => { // onSuccess function
+                          setIsLoading(false);
+                          console.log('logged in and frontend got data: ', user);
+                          history.push("/LoginScreen");
+                        },
+                        () => { // onFailure funciton
+                          setIsLoading(false);
+                          setIsWrongLogin(true);
+                        });
 
                     }}>
                     Sign In
       </Button>
                 </Grid>
-                {isWrongLogin? 'your email and password does not match' : ''}
+                {isWrongLogin ? 'your email and password does not match' : ''}
               </Grid>
             </form>
           </div>
-          </Container>
-              <Link to="/SignUp" variant="body2">
-              <Typography variant="h6" component="h3" gutterBottom className={classes.root}>
-                Don't have an account? Sign Up
+        </Container>
+        <Link to="/SignUp" variant="body2">
+          <Typography variant="h6" component="h3" gutterBottom className={classes.root}>
+            Don't have an account? Sign Up
                 </Typography>
         </Link>
 
