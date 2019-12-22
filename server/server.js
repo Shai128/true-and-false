@@ -1,4 +1,4 @@
-const express  = require("express") //express contains functions including app, which is the server
+const express = require("express") //express contains functions including app, which is the server
 const {
   createUser,
   findUser,
@@ -11,7 +11,7 @@ const {
   removeUnReadMessagesFromCertainUserInDB,
 
 } = require("../db/user") // imports all user functions
-const{resetDatabase}=require("../db/general") // imports all generel databse menagement functions
+const { resetDatabase } = require("../db/general") // imports all generel databse menagement functions
 const {
   createRoom,
   addUserToRoom,
@@ -26,7 +26,7 @@ const {
   findUserByEmailInRoomByRoomID,
   getAllSentencesArray
 } = require("../db/rooms") //imports all room functions
-const {isUndefined} = require('../src/Utils.js');
+const { isUndefined } = require('../src/Utils.js');
 const {
   getRandomSentence,
   standardErrorHandling,
@@ -90,9 +90,9 @@ function findGame(game, success, failure) {
     }
   })
 }
-function tryout(){
-deleteUserByEmailInRoomByRoomID(0,'alon@gmail.com',(fg)=>{},(fg)=>{console.log(fg)});
-//createRoom('schoo',(fg)=>{},(fg)=>{console.log(fg)});
+function tryout() {
+  deleteUserByEmailInRoomByRoomID(0, 'alon@gmail.com', (fg) => { }, (fg) => { console.log(fg) });
+  //createRoom('schoo',(fg)=>{},(fg)=>{console.log(fg)});
 }
 //tryout();
 // uncomment this to reset server
@@ -137,7 +137,7 @@ function serverCreateUser(req, res) {
   let data = JSON.parse(req.body.json)
   console.log('trying to create user with data: ' + JSON.stringify(data));
   createUser(data,
-  ()=>{res.status(200).send("success")},(err)=>{standardErrorHandling(res, err)});
+    () => { res.status(200).send("success") }, (err) => { standardErrorHandling(res, err) });
 }
 
 function serverLoginUser(req, res) {
@@ -149,32 +149,48 @@ function serverLoginUser(req, res) {
   }
 
   findUser(data,
-    (found_user)=>{
+    (found_user) => {
       if (found_user.password === data.password) { // TODO: should later change to hash(password)
-      //  console.log("data", data, "foundUser:", found_user)
+        //  console.log("data", data, "foundUser:", found_user)
         req.session.userInfo = {
           email: found_user["email"],
           nickName: found_user["nickName"]
         }
         console.log("updated userInfo1", req.session.userInfo)
-      
+
         console.log('saved email:', data['email'])
         console.log("successfuly returned user: " + found_user.get('email'));
         res.status(200).send(JSON.stringify(found_user));
       } else {
-        console.log("the password: " 
-          + data.password 
-          + " does not match for email: " 
+        console.log("the password: "
+          + data.password
+          + " does not match for email: "
           + data.email);
         standardErrorHandling(res, "password does not match");
       }
-    },(err)=>{standardErrorHandling(res, err)});
+    }, (err) => { standardErrorHandling(res, err) });
+}
+
+
+function serverRandomSentence(req, res) {
+  console.log('random sentence 2');
+
+  findGame(
+    req.params.game,
+    (game_data) => getRandomSentenceForDuel(
+      game_data,
+      req.params.subject,
+      req.params.receiver,
+      (sentence_data) => res.send(JSON.stringify(sentence_data)),
+      (err) => standardErrorHandling(res, err))
+    ,
+    (err) => standardErrorHandling(res, err));
 }
 
 function serverUserExists(req, res) {
   console.log('user exists');
   findUserByField(
-    req.params.field, 
+    req.params.field,
     req.params.value,
     (users) => {
       console.log('searched user with ' + req.params.field + ': ' + req.params.value + '. result: ' + (users.length !== 0))
@@ -187,12 +203,12 @@ function serverUserExists(req, res) {
 function serverUserUpdate(req, res) {
   console.log('update user');
   let data = JSON.parse(req.body.json)
-  updateUser(req.params.id,null, data,
-    ()=>{
+  updateUser(req.params.id, null, data,
+    () => {
       console.log("succesfully updated user: " + data.email)
       res.status(200).send("success");
     }
-    ,(err)=>{standardErrorHandling(res, err)});
+    , (err) => { standardErrorHandling(res, err) });
 }
 
 /**
@@ -201,8 +217,8 @@ function serverUserUpdate(req, res) {
 app.get('/getSessionIdentifier', (req, res) => {
   getIdentifierFromSession(
     req,
-    (id) => {res.status(200).send(id)},
-    (err) => {standardErrorHandling(res, err)}
+    (id) => { res.status(200).send(id) },
+    (err) => { standardErrorHandling(res, err) }
   )
 })
 
@@ -212,8 +228,8 @@ app.get('/getSessionIdentifier', (req, res) => {
  */
 app.get('/getUserByIdentifier/:id', (req, res) => {
   findUser(
-    {email: req.params.id},
-    (user_data) => {res.status(200).send(JSON.stringify(user_data))},
+    { email: req.params.id },
+    (user_data) => { res.status(200).send(JSON.stringify(user_data)) },
     (err) => standardErrorHandling(res, err))
 })
 
@@ -227,11 +243,11 @@ app.get('/getUserFromSession', (req, res) => {
     (id) => {
       console.log('getUserFromSession id:', id);
       findUser(
-        {email: id},
-        (user_data) => {res.status(200).send(JSON.stringify(user_data))},
+        { email: id },
+        (user_data) => { res.status(200).send(JSON.stringify(user_data)) },
         (err) => standardErrorHandling(res, err))
     },
-    (err) => {standardErrorHandling(res, err)}
+    (err) => { standardErrorHandling(res, err) }
   )
 })
 
@@ -239,7 +255,7 @@ app.get('/getUserFromSession', (req, res) => {
  * Creates a new room with a given name.
  * On success, returns the unique "random" id of the new room.
  */
-app.get('/createRoom/:newRoomName',(req,res)=> {
+app.get('/createRoom/:newRoomName', (req, res) => {
   var newRoomName = req.params.newRoomName;
   console.log('trying to create room with name: ' + newRoomName);
   createRoom(
@@ -251,7 +267,7 @@ app.get('/createRoom/:newRoomName',(req,res)=> {
     (err) => standardErrorHandling(res, err)
   )
 })
- 
+
 /**
  * Adds a given user to a given room.
  * User id is inferred from the session.
@@ -260,7 +276,7 @@ app.get('/joinRoom/:roomId', (req, res) => {
   serverAddUserToRoom(req, res, req.params.roomId)
 })
 
-function  serverAddUserToRoom(req, res, roomId) { 
+function serverAddUserToRoom(req, res, roomId) {
   console.log("adding user to room:", roomId)
   getUserInfoFromSession(
     req,
@@ -286,7 +302,7 @@ function  serverAddUserToRoom(req, res, roomId) {
                 roomObject: room_object
               }))
             },
-            (err) => {standardErrorHandling(err)}
+            (err) => { standardErrorHandling(err) }
           )
         },
         (user_not_found_err) => {
@@ -298,12 +314,12 @@ function  serverAddUserToRoom(req, res, roomId) {
             () => {
               addUserToRoom(
                 roomId,
-                userInfo.email, 
+                userInfo.email,
                 (roomAndUser) => {
                   console.log("sending the status now")
-                 // console.log("created room with id", roomId)
-                 console.log("added user",userInfo.email, "to room", roomId)
-               //  console.log("roomAndUserObject:", roomAndUser)
+                  // console.log("created room with id", roomId)
+                  console.log("added user", userInfo.email, "to room", roomId)
+                  //  console.log("roomAndUserObject:", roomAndUser)
                   // TODO: send only minimal data required by frontend to reduce latency
                   res.status(200).send(JSON.stringify(roomAndUser));
                   console.log("sent")
@@ -329,9 +345,9 @@ function  serverAddUserToRoom(req, res, roomId) {
         }
       )
     },
-    (err) => {standardErrorHandling(res, err)}
+    (err) => { standardErrorHandling(res, err) }
   )
-} 
+}
 
 /**
  * Removes a user from a given room.
@@ -347,9 +363,9 @@ app.get('/leaveRoom/:roomId', (req, res) => {
         userInfo,
         (succ) => res.status(200).send(succ),
         (err) => standardErrorHandling(res, err)
-        )
+      )
     },
-    (err) => {standardErrorHandling(res, err)}
+    (err) => { standardErrorHandling(res, err) }
   )
 })
 
@@ -361,7 +377,7 @@ function leaveCurrentRoom(userInfo, success, failure) {
   logDiv('leaveCurrentRoom')
   console.log("user:", userInfo.email, "is leaving it's current room");
   findUser(
-    {email: userInfo.email},
+    { email: userInfo.email },
     (userObject) => {
       const roomId = userObject.roomObject.room_id;
       console.log("the current room to leave:", roomId);
@@ -372,11 +388,11 @@ function leaveCurrentRoom(userInfo, success, failure) {
           roomId,
           userInfo.email,
           (succ) => {
-          // remove the user's socket from room
+            // remove the user's socket from room
             var userSocket = findSocketByUserId(userInfo.email)
-            if (userSocket !== undefined) {userSocket.leave(roomId.toString())}
+            if (userSocket !== undefined) { userSocket.leave(roomId.toString()) }
 
-            
+
             // notify users in room about leaving
             console.log("emitting a message to room", roomId, "about player leave", userInfo)
             io.to(roomId).emit('userLeft', userInfo)
@@ -388,7 +404,7 @@ function leaveCurrentRoom(userInfo, success, failure) {
       }
     },
     (err) => failure(err)
-    )
+  )
 }
 
 /**
@@ -410,7 +426,7 @@ app.get('/userSentences/:opponentId/:roomId', (req, res) => {
       getAllSentencesArray(
         req.params.roomId,
         (allSentences) => { // find the global sentences array to extract lies
-          var extracted_truths = userObject.true_sentences.map(x=>x.value)
+          var extracted_truths = userObject.true_sentences.map(x => x.value)
           console.log("user truths:", userObject.true_sentences, "global:", allSentences);
           var extracted_lies = allSentences.filter(s => !extracted_truths.includes(s))
           console.log("extracted lies:", extracted_lies)
@@ -442,7 +458,7 @@ app.get('/userList/:roomId', (req, res) => {
         roomId,
         (unavailableUsers) => {
           findRoomById(
-            roomId, 
+            roomId,
             (roomObject) => {
               //console.log("Players available" ,availableUsers)
               res.status(200).send(JSON.stringify({
@@ -451,7 +467,7 @@ app.get('/userList/:roomId', (req, res) => {
                 RoomName: roomObject.room_name,
                 RoomId: roomObject.room_id
               }))
-            }, 
+            },
             (err) => standardErrorHandling(res, err)
           )
         },
@@ -465,14 +481,15 @@ app.get('/userList/:roomId', (req, res) => {
 /** author: Shai
  * Resets the unReadMessages array
  */
-app.post('/user/resetUnReadMessages/:email', (req, res)=>{resetUnReadMessage(req.params.email, ()=>{})})
+app.post('/user/resetUnReadMessages/:email', (req, res) => { resetUnReadMessage(req.params.email, () => { }) })
 
 /**
  * author: Shai
  * removes all unreadmessages that were written by otherUserEmail, in email document
  */
-app.post('/user/resetUnReadMessagesFromCertainUser/:email/:otherUserEmail', (req,res)=>{
-  removeUnReadMessagesFromCertainUserInDB(req.params.email, req.params.otherUserEmail, ()=>{})})
+app.post('/user/resetUnReadMessagesFromCertainUser/:email/:otherUserEmail', (req, res) => {
+  removeUnReadMessagesFromCertainUserInDB(req.params.email, req.params.otherUserEmail, () => { })
+})
 
 /**
  * socket io stuff from here on
@@ -487,7 +504,7 @@ io.use(sharedsession(session, {
 function findSocketByUserId(userId) {
   logDiv("findSocketByUserId")
   for (let [socketId, socketObject] of Object.entries(io.sockets.sockets)) {
-  //  console.log("socket:", socketId, "with obj:", JSON.stringify(socketObject.handshake.session.userInfo))
+    //  console.log("socket:", socketId, "with obj:", JSON.stringify(socketObject.handshake.session.userInfo))
     if (socketObject.handshake.session.userInfo.email === userId) {
       logDiv();
       return socketObject;
@@ -505,7 +522,7 @@ io.on('connection', function (socket) {
   console.log("all sockets so far:", Object.keys(io.sockets.sockets))
   logDiv()
 
-  if(socket.handshake.session.userInfo === undefined) {
+  if (socket.handshake.session.userInfo === undefined) {
     socket.handshake.session.userInfo = {}
   }
   socket.handshake.session.userInfo.email = socket.request._query['user_id']
@@ -514,14 +531,14 @@ io.on('connection', function (socket) {
 
   // If the user is already in a room - subscribe to that room with his new socket
   findUser(
-    {email: socket.handshake.session.userInfo.email},
+    { email: socket.handshake.session.userInfo.email },
     (found_user) => {
       socket.join(toString(found_user.current_room))
     },
     (err) => console.log(err)
   )
 
-  socket.on("login", function(userInfo) {
+  socket.on("login", function (userInfo) {
     logDiv("socket login")
     console.log(userInfo.email + " has logged in");
     console.log("updated userInfo3 (socket):", userInfo)
@@ -530,28 +547,28 @@ io.on('connection', function (socket) {
     logDiv();
   });
 
-  socket.on("logout", function(userInfo) {
+  socket.on("logout", function (userInfo) {
     if (socket.handshake.session.userInfo) {
       delete socket.handshake.session.userInfo;
       socket.handshake.session.save();
     }
   });
 
-  socket.on('chat', function(data){
+  socket.on('chat', function (data) {
     console.log(data.messageContent + " was written");
     console.log(socket.handshake.session.userInfo);
     console.log("updates userInfo4 (socket)", data)
     //socket.handshake.session.userInfo = data;
     //socket.handshake.session.save();
-    
+
     let message = data;
-   
-   
+
+
     addMessageUnReadInDB(data.receiverUserEmail, message, data.user.email);
 
-    io.sockets.emit(data.user.email+'_chat', data);
-    io.sockets.emit(data.receiverUserEmail+'_chat', data);
-    io.sockets.emit(data.receiverUserEmail+'_chat_notification', data);
+    io.sockets.emit(data.user.email + '_chat', data);
+    io.sockets.emit(data.receiverUserEmail + '_chat', data);
+    io.sockets.emit(data.receiverUserEmail + '_chat_notification', data);
 
     saveMessageInDB(data.user.email, message, data.receiverUserEmail);
     // addMessageUnReadInDB(data.user.email, message, data.receiverUserEmail);
@@ -577,12 +594,12 @@ io.on('connection', function (socket) {
     AVAILABLE: 1,
     UNAVAILABLE: 2
   }
-  socket.on('changeUserAvailability', function(args) {
+  socket.on('changeUserAvailability', function (args) {
     logDiv('changeUserAvailability')
     console.log("args:", args)
     changeUserAvailability(
-      args.roomId, 
-      args.userId, 
+      args.roomId,
+      args.userId,
       args.newAvailability,
       (succ) => {
         console.log("database operation successful")
@@ -616,7 +633,7 @@ io.on('connection', function (socket) {
    * receiverId: 'email@gmail.com'
    * })
    */
-  socket.on('deliverMessage', function(data) {
+  socket.on('deliverMessage', function (data) {
     logDiv('delivering message')
     if (data.receiverId === undefined || data.message === undefined) {
       // handle error
@@ -632,54 +649,54 @@ io.on('connection', function (socket) {
 
     console.log(
       "sending message",
-       data.message, 
-       "from ", 
-       socket.handshake.session.userInfo.email, 
-       "to", 
-       data.receiverId
-      );
+      data.message,
+      "from ",
+      socket.handshake.session.userInfo.email,
+      "to",
+      data.receiverId
+    );
 
-      data.args.senderId = socket.handshake.session.userInfo.email;
+    data.args.senderId = socket.handshake.session.userInfo.email;
 
     receiverSocket.emit(data.message, data.args)
     logDiv()
   });
 
 
-/**
- * adding the message to the specific chat list between the two users
- * @param {the user that we add the message to his document} userEmail 
- * @param {includes the message content, author, receiver, time} message 
- */
-function saveMessageInDB(userEmail, message, otherUserEmail){
-//todo: call db function to save it in the db
-  var message_copy = JSON.parse(JSON.stringify(message));
-  message_copy.otherUserEmail = otherUserEmail;
-  message_copy.delivery_timestamp = new Date();
-  addMessegesByAddressee(userEmail, message_copy,  otherUserEmail,()=>{}, (err)=>{console.log(err)});
-}
-
-/**
- * adding the message to the recent messages list
- * @param {the user that we add the message to his document} userEmail 
- * @param {includes the message content, author, receiver, time} message 
- */
-function addMessageUnReadInDB(userEmail, message, otherUserEmail){
-  var message_copy = JSON.parse(JSON.stringify(message));
-  message_copy.otherUserEmail = otherUserEmail;
-  message_copy.delivery_timestamp = new Date();
-  addUnReadMessage(userEmail, message_copy, ()=>{}, (err)=>{console.log(err)});
-}
- /**
-   * updates an existing user in a room with after match data
-   * i.e. updates it's seen sentences and score.
-   * parameter type:
-   * data = {
-   *  roomId: ... // id of room in which user is located
-   *  user: ...  // user to update
-   * }
+  /**
+   * adding the message to the specific chat list between the two users
+   * @param {the user that we add the message to his document} userEmail 
+   * @param {includes the message content, author, receiver, time} message 
    */
-  socket.on('updateUserInRoom', function(data) {
+  function saveMessageInDB(userEmail, message, otherUserEmail) {
+    //todo: call db function to save it in the db
+    var message_copy = JSON.parse(JSON.stringify(message));
+    message_copy.otherUserEmail = otherUserEmail;
+    message_copy.delivery_timestamp = new Date();
+    addMessegesByAddressee(userEmail, message_copy, otherUserEmail, () => { }, (err) => { console.log(err) });
+  }
+
+  /**
+   * adding the message to the recent messages list
+   * @param {the user that we add the message to his document} userEmail 
+   * @param {includes the message content, author, receiver, time} message 
+   */
+  function addMessageUnReadInDB(userEmail, message, otherUserEmail) {
+    var message_copy = JSON.parse(JSON.stringify(message));
+    message_copy.otherUserEmail = otherUserEmail;
+    message_copy.delivery_timestamp = new Date();
+    addUnReadMessage(userEmail, message_copy, () => { }, (err) => { console.log(err) });
+  }
+  /**
+    * updates an existing user in a room with after match data
+    * i.e. updates it's seen sentences and score.
+    * parameter type:
+    * data = {
+    *  roomId: ... // id of room in which user is located
+    *  user: ...  // user to update
+    * }
+    */
+  socket.on('updateUserInRoom', function (data) {
     logDiv('updateUserInRoom')
     console.log('updating user', data.user.email, 'in room', data.roomId)
     findRoomById(
@@ -687,26 +704,26 @@ function addMessageUnReadInDB(userEmail, message, otherUserEmail){
       (roomObject) => {
         console.log('roomObject: ', roomObject);
         // update only the correct user in the room
-        roomObject.users_in_room.filter(x=>!isUndefined(x))
+        roomObject.users_in_room.filter(x => !isUndefined(x))
         roomObject.users_in_room.map(
           (userObject) => {
-            return ((userObject.email === data.user.email) ? 
-            data.user : userObject)
+            return ((userObject.email === data.user.email) ?
+              data.user : userObject)
           }
         )
-        
+
         // write back the room
         updateRoom(
-          roomObject, 
+          roomObject,
           (success) => {
             console.log("success")
           },
           (err) => console.log(err)
-          )
+        )
 
       },
       (err) => console.log(err),
-      )
+    )
   })
 
   socket.on('disconnect', function () {
