@@ -140,7 +140,7 @@ socket.on("userLeft", function(userInfo) {
     */
    var newPlayersAvailable1 = [...PlayersAvailable]
    var index = (newPlayersAvailable1).indexOf({email:userInfo.email,nickname:userInfo.nickName})
-   newPlayersAvailable1.splice(index)
+   newPlayersAvailable1.splice(index, 1)
    setPlayersAvailable(newPlayersAvailable1)
    });
 
@@ -156,7 +156,7 @@ socket.on("userLeft", function(userInfo) {
      var newPlayersUnAvailable = [...PlayersUnAvailable]
      var index = (newPlayersUnAvailable).findIndex((user) => user.email === userInfo.email)
      var current_user = newPlayersUnAvailable[index]
-     newPlayersUnAvailable.splice(index)
+     newPlayersUnAvailable.splice(index, 1)
      setPlayersUnAvailable(newPlayersUnAvailable)
      
     var newPlayersAvailable = [...PlayersAvailable]
@@ -171,19 +171,31 @@ socket.on("userLeft", function(userInfo) {
          userInfo: {email: ...}
       */
 
-      console.log("ronn log avail --->",PlayersAvailable);
-      console.log("ronn log Un_avail --->",PlayersUnAvailable);
-
+      console.log("sahii 1 log avail --->",PlayersAvailable);
+      console.log("sahi 1 log Un_avail --->",PlayersUnAvailable);
 
      var newPlayersAvailable = [...PlayersAvailable]
+
+     console.log("new playersAvai --->",newPlayersAvailable);
+
      var index = (newPlayersAvailable).findIndex((user) => user.email === userInfo.email)
      var current_user = newPlayersAvailable[index]
-     newPlayersAvailable.splice(index)
+
+     console.log("current + index --->",current_user, index);
+
+     newPlayersAvailable.splice(index, 1)
      setPlayersAvailable(newPlayersAvailable)
-     
+
+     console.log("sahii 2 log avail --->",PlayersAvailable);
+     console.log("sahi 2 log Un_avail --->",PlayersUnAvailable);
+  
     var newPlayersUnAvailable = [...PlayersUnAvailable]
     newPlayersUnAvailable.push(current_user)
     setPlayersUnAvailable(newPlayersUnAvailable)
+
+    console.log("sahii 3 log avail --->",PlayersAvailable);
+    console.log("sahi 3 log Un_avail --->",PlayersUnAvailable);
+
 
      });
 
@@ -203,7 +215,7 @@ socket.on("userLeft", function(userInfo) {
      console.log("sending props: ",  CurrentUser,  CurrentRoom)
 
      socket.emit('changeUserAvailability', {
-      newAvailability:userStates.UNAVAILABLE,userId:CurrentUser.email,roomId:CurrentRoom.room_id
+      newAvailability:userStates.UNAVAILABLE,userId:CurrentUser.email,roomId:CurrentRoom.room_id,
       })
 
      history.push({
@@ -455,7 +467,7 @@ const handleClickSearch = (event)=>{
 
           var newPlayersAvailable1 = [...data.PlayersAvailable]
           var index = (newPlayersAvailable1).indexOf({email:CurrentUser.email,nickname:CurrentUser.nickname})
-          newPlayersAvailable1.splice(index)
+          newPlayersAvailable1.splice(index, 1)
           setPlayersAvailable(newPlayersAvailable1)
 
           console.log("unAvailable --->",data.PlayersUnAvailable);
