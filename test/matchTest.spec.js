@@ -3,7 +3,6 @@ import puppeteer from "puppeteer";
 const APP = "http://localhost:3000/";
 const homePage = "http://localhost:3000/LoginScreen/Home"
 import 'babel-polyfill';
-import { JoinGame } from "../src/pages/JoinGame";
 const iPhone = puppeteer.devices['iPhone 6'];
 
 let page;
