@@ -140,7 +140,7 @@ export function JoinGame(props) {
     */
     var newPlayersAvailable1 = [...PlayersAvailable]
     var index = (newPlayersAvailable1).indexOf({ email: userInfo.email, nickname: userInfo.nickName })
-    newPlayersAvailable1.splice(index)
+    newPlayersAvailable1.splice(index, 1)
     console.log('user: ', userInfo.email, "left. newPlayersAvailable1: ", newPlayersAvailable1)
     setPlayersAvailable(newPlayersAvailable1)
   });
@@ -157,7 +157,7 @@ export function JoinGame(props) {
     var newPlayersUnAvailable = [...PlayersUnAvailable]
     var index = (newPlayersUnAvailable).findIndex((user) => user.email === userInfo.email)
     var current_user = newPlayersUnAvailable[index]
-    newPlayersUnAvailable.splice(index)
+    newPlayersUnAvailable.splice(index, 1)
     setPlayersUnAvailable(newPlayersUnAvailable)
 
     var newPlayersAvailable = [...PlayersAvailable]
@@ -188,6 +188,10 @@ export function JoinGame(props) {
     setPlayersUnAvailable(newPlayersUnAvailable)
     console.log('player: ', userInfo.email, "became unavailable. newPlayersUnAvailable: ", newPlayersUnAvailable)
     console.log('player: ', userInfo.email, "became unavailable. newPlayersAvailable: ", newPlayersAvailable)
+
+    console.log("sahii 3 log avail --->", PlayersAvailable);
+    console.log("sahi 3 log Un_avail --->", PlayersUnAvailable);
+
 
   });
 
