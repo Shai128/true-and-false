@@ -12,7 +12,7 @@ let browser;
 let player2_trueSentences
 let player2_falseSentences
 
-const width = 1920;
+const width = 1000;
 const height = 1080;
 
 
@@ -21,23 +21,23 @@ const player1 = {
     nickname: faker.name.firstName(),
     email: faker.internet.email(),
     password: faker.random.alphaNumeric(10),
-    trueSentences: [faker.random.words(faker.random.number({ min: 2, max: 5 })), faker.random.words(faker.random.number({ min: 2, max: 5 })), faker.random.words(faker.random.number({ min: 2, max: 5 }))],
-    falseSentences: [faker.random.words(faker.random.number({ min: 2, max: 5 })), faker.random.words(faker.random.number({ min: 2, max: 5 })), faker.random.words(faker.random.number({ min: 2, max: 5 }))]
+    trueSentences: [faker.random.words(faker.random.number({ min: 2, max: 4 })), faker.random.words(faker.random.number({ min: 2, max: 4 })), faker.random.words(faker.random.number({ min: 2, max: 4 }))],
+    falseSentences: [faker.random.words(faker.random.number({ min: 2, max: 4 })), faker.random.words(faker.random.number({ min: 2, max: 4 })), faker.random.words(faker.random.number({ min: 2, max: 4 }))]
 };
 const player2 = {
     name: faker.name.firstName(),
     nickname: faker.name.firstName(),
     email: faker.internet.email(),
     password: faker.random.alphaNumeric(10),
-    trueSentences: [faker.random.words(faker.random.number({ min: 2, max: 5 })), faker.random.words(faker.random.number({ min: 2, max: 5 })), faker.random.words(faker.random.number({ min: 2, max: 5 }))],
-    falseSentences: [faker.random.words(faker.random.number({ min: 2, max: 5 })), faker.random.words(faker.random.number({ min: 2, max: 5 })), faker.random.words(faker.random.number({ min: 2, max: 5 }))]
+    trueSentences: [faker.random.words(faker.random.number({ min: 2, max: 4 })), faker.random.words(faker.random.number({ min: 2, max: 4 })), faker.random.words(faker.random.number({ min: 2, max: 4 }))],
+    falseSentences: [faker.random.words(faker.random.number({ min: 2, max: 4 })), faker.random.words(faker.random.number({ min: 2, max: 4 })), faker.random.words(faker.random.number({ min: 2, max: 4 }))]
 };
 
 beforeAll(async () => {
 
     browser = await puppeteer.launch({
         headless: false,
-        slowMo: 30,
+        slowMo: 40,
         args: [`--window-size=${width},${height}`]
     });
 
@@ -383,6 +383,7 @@ describe("matchTest", () => {
             console.log("got to the while")
             if (isPlayer1Turn) {
                 console.log("player1 plays")
+                await page.waitFor(500)
                 is_enabled = await page.$('#TrueBTN:not([disabled])') !== null;
                 if (is_enabled) {
                     if (choice) {
@@ -393,6 +394,7 @@ describe("matchTest", () => {
                     console.log("player1 chose")
                     await page.waitForSelector("#NextSentenceBTN")
                     console.log("player1 found next")
+                    await page.waitFor(500)
                     await Promise.all([
                         page.waitFor(() => !document.querySelector("#NextSentenceBTN")),
                         page.click("#NextSentenceBTN")
@@ -404,6 +406,7 @@ describe("matchTest", () => {
                 break
             } else {
                 console.log("player2 plays")
+                await page2.waitFor(500)
                 is_enabled = await page2.$('#TrueBTN:not([disabled])') !== null;
                 if (is_enabled) {
                     if (choice) {
@@ -414,6 +417,7 @@ describe("matchTest", () => {
                     console.log("player2 chose")
                     await page2.waitForSelector("#NextSentenceBTN")
                     console.log("player2 found next")
+                    await page2.waitFor(500)
                     await Promise.all([
                         page2.waitFor(() => !document.querySelector("#NextSentenceBTN")),
                         page2.click("#NextSentenceBTN")
@@ -435,6 +439,15 @@ describe("matchTest", () => {
         ]);
         await page.waitForSelector("#joinGamePage")
         await page2.waitForSelector("#joinGamePage")
+
+        await page.screenshot({ path: 'puppeteerTests/example.png' });
+        await page2.screenshot({ path: 'puppeteerTests/example1.png' });
+
+
+        await page.waitFor(100)
+        await page2.waitFor(100)
+        await page.screenshot({ path: 'puppeteerTests/example2.png' });
+        await page2.screenshot({ path: 'puppeteerTests/example3.png' });
 
         await Promise.all([
             page.waitForNavigation(),
