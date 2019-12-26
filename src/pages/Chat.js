@@ -22,9 +22,9 @@ import {
   //Route,
   //Link,
   // useRouteMatch,
+  useHistory,
 
 } from "react-router-dom";
-import { createBrowserHistory } from 'history'
 import { socket, getCurrentUserFromDB, userIsUpdated, emptyUser, updateUserInLocalStorage, resetUnreadMessagesFromCertainUser } from './../user.js'
 import { DisplayLoading } from './../PagesUtils.js'
 import { isUndefined } from './../Utils.js'
@@ -108,7 +108,7 @@ export function Chat(props) {
   const paperClasses = useStyles();
   const fixedHeightPaper = clsx(paperClasses.paper, paperClasses.fixedHeight);
   const chatClasses = useChatStyles();
-  let history = createBrowserHistory();
+  let history = useHistory();
   const path_array = history.location.pathname.split("/");
   var other_user_email = path_array[path_array.length - 1];
   const classes = AppUseStyles();
@@ -266,7 +266,7 @@ export function Chat(props) {
 
             <Grid item xs={12} >
               <Paper>
-                <Typography id = "email" component="h4" variant="h4" justify="flex-end">
+                <Typography id="email" component="h4" variant="h4" justify="flex-end">
                   {other_user_email}
                 </Typography>
               </Paper>
@@ -320,15 +320,27 @@ export function Chat(props) {
               />
             </Grid>
             <Grid item xs={3} >
-              <Button id = "sendBTN" className={buttonClasses.root} fullWidth
+              <Button id="sendBTN" className={buttonClasses.root} fullWidth
                 onClick={sendMessage}>
                 <SendIcon />
               </Button>
             </Grid>
+            {!isUndefined(user.roomObject) && !isUndefined(user.roomObject.room_id) &&
+              user.roomObject.room_id !== -1 &&
+              <Grid item xs={12} >
+
+                <Button className={buttonClasses.root} fullWidth
+                  onClick={() => { history.push('/LoginScreen/JoinGame') }}>
+                  Return Back To Game
+            </Button>
+
+              </Grid>
+            }
           </Grid>
         </div>
       </Container>
     </div>
+
 
   );
 

@@ -43,13 +43,17 @@ import { LoginScreenHome as Home } from './LoginScreenHome.js';
 
 import { MyProfile } from './MyProfile.js';
 import { MySentences } from './MySentences.js';
-import { userIsUpdated, getCurrentUserFromDB, getUserFromProps, logOut, socket, resetUnreadMessages, updateUserInLocalStorage } from './../user';
+import {
+  userIsUpdated, getCurrentUserFromDB, getUserFromProps, logOut, socket,
+  resetUnreadMessages, updateUserInLocalStorage
+} from './../user';
 import { DisplayLoading, PrintMessages } from './../PagesUtils';
 import { Chat } from './Chat.js';
 import { SignIn } from './../App.js'
 import { ChatLobby } from './ChatLobby.js';
 import { JoinGame } from './JoinGame.js'
 import { TheGame } from './TheGame.js'
+import { isUndefined } from './../Utils.js';
 const drawerWidth = 240;
 const useStyles = makeStyles(theme => ({
   root: {
@@ -158,14 +162,19 @@ function LoginScreen(props) {
   const [currentUser, setCurrentUser] = React.useState(getUserFromProps(props));
   const [unreadMessages, setUnreadMessages] = React.useState([]);
   const [unRegisteredUser, setUnRegisteredUser] = React.useState(false);
-  if (!userIsUpdated(currentUser))
-    getCurrentUserFromDB(setCurrentUser, (u) => { setUnreadMessages(u.unReadMessages) }, () => { setUnRegisteredUser(true) });
-  const [pageChange, setPageChange] = React.useState(false);
-
-
-  let browserHistory = createBrowserHistory();
-
   let history = useHistory();
+  let arr = history.location.pathname.split('/');
+  let site = arr[arr.length - 1]
+  console.log('history: ', history);
+  const [isInRoom, setIsInRoom] = React.useState(site === 'JoinGame');
+
+  if (!userIsUpdated(currentUser))
+    getCurrentUserFromDB(setCurrentUser, (u) => {
+      setUnreadMessages(u.unReadMessages);
+      setIsInRoom(!isUndefined(u.roomObject) &&
+        !isUndefined(u.roomObject.room_id) && u.roomObject.room_id !== -1)
+    }, () => { setUnRegisteredUser(true) });
+  const [pageChange, setPageChange] = React.useState(false);
 
   const setSockets = (location) => {
     socket.off(currentUser.email + '_chat_notification');
@@ -187,15 +196,35 @@ function LoginScreen(props) {
       updateUserInLocalStorage(user_copy);
     })
   }
-  browserHistory.listen((location, action) => {
+  history.listen((location, action) => {
+    console.log('location: ', location)
+    console.log('action: ', action)
     // location is an object like window.location
     setSockets(location);
+    let arr = location.pathname.split('/');
+    let site = arr[arr.length - 1]
+    console.log('site: ', site);
+    if (site === 'JoinGame' || (!isUndefined(currentUser.roomObject) &&
+      !isUndefined(currentUser.roomObject.room_id) && currentUser.roomObject.room_id !== -1))
+      setIsInRoom(true)
+    else
+      setIsInRoom(false)
+    if (site === "Home") {
+      setIsInRoom(false)
+      let new_user = currentUser;
+      new_user.roomObject = { room_id: -1 }
+      setCurrentUser(new_user);
+    }
+
+
+
+
   });
 
   useEffect(() => {
     if (!userIsUpdated(currentUser))
       return;
-    setSockets(browserHistory.location);
+    setSockets(history.location);
   });
   const [open, setOpen] = React.useState(false);
   const handleDrawerOpen = () => {
@@ -317,15 +346,16 @@ function LoginScreen(props) {
         <CssBaseline />
         <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>
-            <IconButton
-              edge="start"
-              color="inherit"
-              aria-label="open drawer"
-              onClick={handleDrawerOpen}
-              className={clsx(classes.menuButton, open && classes.menuButtonHidden)}
-            >
-              <MenuIcon />
-            </IconButton>
+            <div className={clsx(classes.menuButton, open && classes.menuButtonHidden)}>
+              {!isInRoom && <IconButton
+                edge="start"
+                color="inherit"
+                aria-label="open drawer"
+                onClick={handleDrawerOpen}
+              >
+                <MenuIcon />
+              </IconButton>}
+            </div>
             <Popup
               onClose={() => {
                 setUnreadMessages([]);
@@ -334,7 +364,7 @@ function LoginScreen(props) {
               }}
               trigger={
                 <IconButton id="notificationsBTN" edge="start" color="inherit" className={classes.menuButton}>
-                  <Badge id={unreadMessages.length + "notifications"} badgeContent={unreadMessages.length} color="secondary">
+                  <Badge badgeContent={unreadMessages.length} color="secondary">
                     <NotificationsIcon />
                   </Badge>
                 </IconButton>
@@ -353,6 +383,7 @@ function LoginScreen(props) {
 
                   </Container>
                 </div>
+
               </div>
             </Popup>
 
@@ -371,23 +402,24 @@ function LoginScreen(props) {
 
         </AppBar>
 
-        <Drawer
-          variant="permanent"
-          classes={{
-            paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
-          }}
-          open={open}
-        >
+        {!isInRoom &&
+          <Drawer
+            variant="permanent"
+            classes={{
+              paper: clsx(classes.drawerPaper, !open && classes.drawerPaperClose),
+            }}
+            open={open}
+          >
 
-          <div className={classes.toolbarIcon}>
-            <IconButton onClick={handleDrawerClose}>
-              <ChevronLeftIcon />
-            </IconButton>
-          </div>
-          <Divider />
-          <List>{listItems}</List>
-          <Divider />
-        </Drawer>
+            <div className={classes.toolbarIcon}>
+              <IconButton onClick={handleDrawerClose}>
+                <ChevronLeftIcon />
+              </IconButton>
+            </div>
+            <Divider />
+            <List>{listItems}</List>
+            <Divider />
+          </Drawer>}
         <main className={classes.content}>
           <div className={classes.appBarSpacer} />
 
@@ -433,7 +465,7 @@ function LoginScreen(props) {
         </main>
 
       </div>
-    </div >
+    </div>
   );
 
 }
