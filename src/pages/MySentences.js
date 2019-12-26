@@ -48,66 +48,67 @@ export function MySentences(props) {
   }
   return (
     <div id="MySentencesPage">
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <div className={classes.paper} >
-          <Typography component="h2" variant="h3" justify="center">
-            My Sentences
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
+      <div className={classes.paper} >
+        <Typography component="h2" variant="h3" justify="center">
+          My Sentences
           </Typography>
 
-          <Grid container spacing={2}>
-            <Grid item xs={12} />
+        <Grid container spacing={2}>
+          <Grid item xs={12} />
 
-            <Grid item l={12} >
-              <Typography component="h5" variant="h6" justify="center">
-                Truth Sentences
+          <Grid item l={12} >
+            <Typography component="h5" variant="h6" justify="center">
+              Truth Sentences
             </Typography>
-              <Divider />
-            </Grid>
-
-            <Grid item xs={12} >
-              <GetSentencesComponentsByList type={"True"} sentences={truths} setSentences={setTruths} />
-            </Grid>
-
-            <Grid item l={12} >
-              <Typography component="h5" variant="h6" justify="center">
-                False Sentences
-            </Typography>
-              <Divider />
-
-            </Grid>
-            <Grid item xs={12} >
-              <GetSentencesComponentsByList type={"False"} sentences={lies} setSentences={setLies} />
-            </Grid>
-
-
-
-            <Grid item xs={12} >
-
-              <Button id="saveBTN"
-                className={buttonClasses.root}
-                fullWidth
-                type="submit"
-                onClick={() => {
-                  if (user.true_sentences.length === 0 && user.false_sentences.length === 0)
-                    history.push('/LoginScreen');
-                  let user_copy = JSON.parse(JSON.stringify(user));
-                  user_copy.true_sentences = truths;
-                  user_copy.false_sentences = lies;
-                  setUser(user_copy);
-                  updateUserToDB(user_copy);
-                }
-                }>
-                Save
-              </Button>
-
-            </Grid>
+            <Divider />
           </Grid>
 
-        </div>
 
 
-      </Container>
+          <Grid item xs={12} >
+            <GetSentencesComponentsByList type={"True"} sentences={truths} setSentences={setTruths} />
+          </Grid>
+          <Grid item l={12} >
+            <Typography component="h5" variant="h6" justify="center">
+              False Sentences
+            </Typography>
+            <Divider />
+          </Grid>
+          <Grid item xs={12} >
+            <GetSentencesComponentsByList type={"False"} sentences={lies} setSentences={setLies} />
+          </Grid>
+
+
+
+          <Grid item xs={12} >
+
+            <Button
+              id="saveBTN"
+              className={buttonClasses.root}
+              fullWidth
+              type="submit"
+              onClick={() => {
+                if (user.true_sentences.length === 0 && user.false_sentences.length === 0)
+                  history.push('/LoginScreen');
+                let user_copy = JSON.parse(JSON.stringify(user));
+                user_copy.true_sentences = truths;
+                user_copy.false_sentences = lies;
+                setUser(user_copy);
+                updateUserToDB(user_copy);
+              }
+              }>
+              Save
+              </Button>
+
+          </Grid>
+        </Grid>
+
+      </div>
+
+
+    </Container>
     </div>
   );
 
@@ -153,13 +154,17 @@ function GetSentencesComponentsByList(props) {
       marginBottom: theme.spacing(2),
       //background: '#2193b0',  /* fallback for old browsers */
       //background: '-webkit-linear-gradient(to right, #6dd5ed, #2193b0)', /* Chrome 10-25, Safari 5.1-6 */
-      background: 'linear-gradient(to right, #6dd5ed, #2193b0)', /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+      background: 'linear-gradient(to right, #000428, #004e92);', /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    },
+    white: {
+      color: 'white'
     },
   }));
 
   const classes = listStyles();
   const sentences = props.sentences;
   const typeOfSentences = sentences
+
   const setSentences = props.setSentences;
   //const [sentences, setSentences] = useState(props.sentences);
   const handleAddSentence = () => {
@@ -191,6 +196,7 @@ function GetSentencesComponentsByList(props) {
                   fullWidth
                   label={'Sentence ' + (id + 1)}
                   value={value}
+                  InputProps={{ className: classes.white }}
                   onChange={(event) => {
                     let new_sentences = sentences.slice();
                     new_sentences[id].value = event.target.value;

@@ -19,12 +19,12 @@ import {
   useHistory
 } from "react-router-dom";
 
-import {LoginScreenRouter as LoginScreen} from './pages/LoginScreen.js';
-import {Chat as ChatRoom} from './pages/Chat.js';
-import {JoinGame} from './pages/JoinGame.js';
-import {PrintJoinGameDialog, DisplayLoading, AutoRedirectToLoginScreenIfUserInSession} from './PagesUtils.js';
-import {validEmail, passwordIsStrongEnough, isUndefined} from './Utils.js'
-import {emptyUser, logIn} from './user.js'
+import { LoginScreenRouter as LoginScreen } from './pages/LoginScreen.js';
+import { Chat as ChatRoom } from './pages/Chat.js';
+import { JoinGame } from './pages/JoinGame.js';
+import { PrintJoinGameDialog, DisplayLoading, AutoRedirectToLoginScreenIfUserInSession } from './PagesUtils.js';
+import { validEmail, passwordIsStrongEnough, isUndefined } from './Utils.js'
+import { emptyUser, logIn } from './user.js'
 //import { createBrowserHistory } from '../../../AppData/Local/Microsoft/TypeScript/3.6/node_modules/@types/history';
 function Copyright() {
   return (
@@ -86,10 +86,10 @@ export const useStyles = makeStyles(theme => ({
     color: '#000000'
   },
   gamesListItems: {
-    background: 'linear-gradient(to right, #4ecdc4, #556270)', /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    background: 'linear-gradient(to right, #2bc0e4, #eaecc6);', /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
     border: '0',
     borderRadius: 3,
-    color: 'white',
+    color: 'black',
     height: 48,
     padding: '0 30px',
     margin: '5px'
@@ -262,40 +262,40 @@ function SignUp() {
               </Grid>
 
 
-          </Grid>
-          <Button
-            //type="submit"
-            id="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-            onClick={()=>{
-              if(!validUser())
-                return;
-              // let data = new FormData();
-              // data.append( "json", JSON.stringify(user));
-              
+            </Grid>
+            <Button
+              //type="submit"
+              id="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+              onClick={() => {
+                if (!validUser())
+                  return;
+                // let data = new FormData();
+                // data.append( "json", JSON.stringify(user));
 
-              fetch('http://localhost:8000/user', {
-                method: 'POST', // *GET, POST, PUT, DELETE, etc.
-                headers: {
-                  'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                credentials: 'include',
-                body: 'json=' + JSON.stringify(user)
-              }).then( (data) =>{
-                logIn(user, (data)=>{
-                  // todo: check if the email is already in the db!!
-                  console.log('frontend got data: ', data);
-                  // console.log('data.status: ', data.status)
-                  history.push("/LoginScreen/MySentences");
-                });
-              })
 
-            }}>
+                fetch('http://localhost:8000/user', {
+                  method: 'POST', // *GET, POST, PUT, DELETE, etc.
+                  headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                  },
+                  credentials: 'include',
+                  body: 'json=' + JSON.stringify(user)
+                }).then((data) => {
+                  logIn(user, (data) => {
+                    // todo: check if the email is already in the db!!
+                    console.log('frontend got data: ', data);
+                    // console.log('data.status: ', data.status)
+                    history.push("/LoginScreen/MySentences");
+                  });
+                })
 
-            Sign Up
+              }}>
+
+              Sign Up
           </Button>
             <Grid container justify="center">
               <Grid item>

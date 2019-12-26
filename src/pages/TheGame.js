@@ -30,6 +30,7 @@ const OPPONENT_TURN_SENTENCE_CHOSEN_STATE = "opponent chose a sentence and now h
 const OPPONENT_TURN_MESSAGE = "Opponent's turn. The sentence is: "
 const BONUS_POINTS_FOR_CORRECT_ANSWER = 3;
 const BONUS_POINTS_FOR_WRONG_ANSWER = 1;
+const NO_MORE_SENTENCES_MESSAGE_TO_USER = "There are no more sentences to display!!"
 const userStates = {
   INVALID: 0,
   AVAILABLE: 1,
@@ -71,6 +72,7 @@ export function TheGame(props) {
   const [seenSentences, setSeenSentences] = React.useState(initial_seen);
   const [startedReadingFromDB, setStartedReadingFromDB] = React.useState(false);
   const [matchPoints, setMatchPoints] = React.useState(0);
+  const [displayEndGameButton, setDisplayEndGameButton] = React.useState(true);
 
   // const [isFirstTurn, setIsFirstTurn] =  React.useState(true);
   const [gameState, setGameState] = React.useState(INITIAL_STATE);
@@ -87,6 +89,13 @@ export function TheGame(props) {
         setDisableButtons(false);
       if (gameState === MY_TURN_STATE || gameState === OPPONENT_TURN_STATE)
         setAnswered(false);
+
+      if (gameState !== MY_TURN_SENTENCE_CHOSEN_STATE)
+        setDisplayEndGameButton(true)
+      else
+        setDisplayEndGameButton(false);
+      if (noMoreSentences)
+        setSentence(NO_MORE_SENTENCES_MESSAGE_TO_USER);
     },
     [gameState, noMoreSentences]
   )
@@ -144,7 +153,7 @@ export function TheGame(props) {
     deliverCurrentSentenceToOpponent(sentence_meta_data.sentence, sentence_meta_data.info)
     if (sentence_meta_data.info === NO_MORE_SENTENCES) {
       setNoMoreSentences(true)
-      setSentence("There are no more sentences to display!!")
+      setSentence(NO_MORE_SENTENCES_MESSAGE_TO_USER)
     }
     else {
       setSentence(sentence_meta_data.sentence)
@@ -164,6 +173,7 @@ export function TheGame(props) {
         setGameState(OPPONENT_TURN_STATE)
       }
     }
+
   }
 
   if (!isFinishedLoading) {
@@ -231,7 +241,7 @@ export function TheGame(props) {
       <Container component="main" maxWidth="md">
         <CssBaseline />
         <div className={classes.paper} >
-          <Grid container>
+          <Grid container >
             <Grid item xs={12} sm={6}>
               <Typography variant="h6" align="left" color="primary">
                 {/* Your total points: {totalPoints}<br/> */}
@@ -247,7 +257,7 @@ export function TheGame(props) {
           </Grid>
           <Grid container spacing={2} alignItems="stretch" justify="center">
             <Grid item xs={12} sm={12}>
-              <Typography variant="h3" align="center">
+              <Typography id="displaidSentence" variant="h3" align="center">
                 {sentence}
               </Typography>
             </Grid>
@@ -281,34 +291,50 @@ export function TheGame(props) {
               seenSentences={seenSentences} matchPoints={matchPoints}
               room={room} />
 
-            {noMoreSentences && <div>
-              <Grid item xs={12} sm={12}>
-                {/* <Link to={{pathname: `/`}} style={{ textDecoration: 'none' }}> */}
-                <Button id="EndGameBTN1"
-                  variant="contained" color="secondary" fullWidth
-                  onClick={() => {
-                    socket.emit('deliverMessage', {
-                      receiverId: opponentId,
-                      message: "endMatch",
-                      args: {}
-                    })
 
-                    updateAfterMatchData(user, room, matchPoints, history, seenSentences)
-                  }}
-                >
-                  end game
-              </Button>
-                {/* </Link> */}
-              </Grid>
-            </div>
-            }
-
-            {answered && <Typography variant="h5">
-              The opponent answered {opGuess}. He was {opIsCorrect}! <br />
-              Waiting to the opponent to choose whether to continue or not.
-            </Typography>}
+            <Grid item xs={12} style={{
+              height: 240, display: "flex",
+              justifyContent: "center",
+              alignItems: "center"
+            }} >
+              {answered && <Typography variant="h5">
+                The opponent answered {opGuess}. He was {opIsCorrect}! <br />
+                Waiting to the opponent to choose whether to continue or not.
+            </Typography>
+              }
+            </Grid>
 
           </Grid>
+
+          <Grid container style={{ height: 100 }}>
+            {displayEndGameButton && <Grid item xs={12}
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center"
+              }}
+            >
+
+              {/* <Link to={{pathname: `/`}} style={{ textDecoration: 'none' }}> */}
+              <Button id="EndGameBTN1"
+
+                variant="contained" color="secondary"
+                onClick={() => {
+                  socket.emit('deliverMessage', {
+                    receiverId: opponentId,
+                    message: "endMatch",
+                    args: {}
+                  });
+                  updateAfterMatchData(user, room, matchPoints, history, seenSentences)
+                }}
+              >
+                end game
+              </Button>
+              {/* </Link> */}
+            </Grid>
+            }
+          </Grid>
+
         </div>
       </Container>
     </div>
