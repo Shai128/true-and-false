@@ -121,9 +121,11 @@ export function Chat(props) {
   const [startedReadingFromDB, setStartedReadingFromDB] = React.useState(false);
   const createNewMessageContent = (authorEmail, thisUserEmail, author, messageContent) => {
     let className = authorEmail === thisUserEmail ? 'this_user_style' : 'another_user_style';
+    let actual_message = getMessageFromInput(messageContent);
+    let sub_message = actual_message.substring(0, 3) //for sagi
     let new_message = `<Paper className={${className}}>`   //todo: should I make it paper instead of div?
-      + `<Typography component="h5" variant="h6">`
-      + author + ": " + getMessageFromInput(messageContent)
+      + `<Typography id="MSG:${sub_message}" component="h5" variant="h6">`
+      + author + ": " + actual_message
       + '</Typography>'
       + '</Paper>'
     return new_message;
@@ -255,81 +257,78 @@ export function Chat(props) {
   }
 
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
+    <div id="chatPage">
+      <Container component="main" maxWidth="xs">
+        <CssBaseline />
 
-      <div className={classes.paper}>
-        <Grid container spacing={2}>
+        <div className={classes.paper}>
+          <Grid container spacing={2}>
 
-          <Grid item xs={12} >
-            <Paper>
-              <Typography component="h4" variant="h4" justify="flex-end">
-                {other_user_email}
-              </Typography>
-            </Paper>
+            <Grid item xs={12} >
+              <Paper>
+                <Typography id = "email" component="h4" variant="h4" justify="flex-end">
+                  {other_user_email}
+                </Typography>
+              </Paper>
 
-          </Grid>
-          <Grid item xs={12} >
+            </Grid>
+            <Grid item xs={12} >
 
-            {/**chat window */}
-            <Paper className={fixedHeightPaper}>
+              {/**chat window */}
+              <Paper className={fixedHeightPaper}>
 
-              <div style={{
-                fontFamily: "inherit", width: '100%',
-                maxWidth: 360,
-                overflowX: 'hidden', overflowY: "auto",
-              }}>
-                <JsxParser
-                  bindings={{
-                    this_user_style: chatClasses.this_user_paper,
-                    another_user_style: chatClasses.another_user_paper,
+                <div style={{
+                  fontFamily: "inherit", width: '100%',
+                  maxWidth: 360,
+                  overflowX: 'hidden', overflowY: "auto",
+                }}>
+                  <JsxParser
+                    bindings={{
+                      this_user_style: chatClasses.this_user_paper,
+                      another_user_style: chatClasses.another_user_paper,
 
-                  }}
-                  components={{ Paper, Typography, Button }}
-                  jsx={chatContent}
-                />
-                <div id='endOfChat' />
+                    }}
+                    components={{ Paper, Typography, Button }}
+                    jsx={chatContent}
+                  />
+                  <div id='endOfChat' />
 
-              </div>
+                </div>
 
-
-
-
-
-            </Paper>
-          </Grid>
+              </Paper>
+            </Grid>
 
 
-          <Grid item xs={9} >
-            <TextField
-              variant="outlined"
-              onKeyPress={(ev) => {
-                if (ev.key === 'Enter') {
-                  sendMessage();
+            <Grid item xs={9} >
+              <TextField
+                variant="outlined"
+                onKeyPress={(ev) => {
+                  if (ev.key === 'Enter') {
+                    sendMessage();
+                  }
                 }
-              }
-              }
-              required
-              fullWidth
-              id="message"
-              name="message"
-              autoComplete="message"
-              value={currentMessage}
-              onChange={(event) => {
-                setCurrentMessage(event.target.value);
-              }}
-            />
+                }
+                required
+                fullWidth
+                id="message"
+                name="message"
+                autoComplete="message"
+                value={currentMessage}
+                onChange={(event) => {
+                  setCurrentMessage(event.target.value);
+                }}
+              />
+            </Grid>
+            <Grid item xs={3} >
+              <Button id = "sendBTN" className={buttonClasses.root} fullWidth
+                onClick={sendMessage}>
+                <SendIcon />
+              </Button>
+            </Grid>
           </Grid>
-          <Grid item xs={3} >
-            <Button className={buttonClasses.root} fullWidth
-              onClick={sendMessage}>
-              <SendIcon />
-            </Button>
-          </Grid>
-        </Grid>
-      </div>
-    </Container>
-
+        </div>
+      </Container>
+    </div>
 
   );
 

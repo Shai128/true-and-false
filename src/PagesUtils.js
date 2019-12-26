@@ -250,7 +250,7 @@ export function PrintMessages(props){
         <List >
           {messages.map((message) => (
             <React.Fragment key={index++}>
-              <ListItem className={classes.root} button onClick={()=>{
+              <ListItem id={"message" + index} className={classes.root} button onClick={()=>{
                 history.push({
                   pathname: `${url}/ChatRoom/`+message.authorEmail,
                   user: user,
@@ -314,7 +314,7 @@ export function PrintChats(props){
 export function ChatButton(props){
   let history = useHistory();
   return (
-      <ListItem button onClick={()=>{history.push({
+      <ListItem id = {props.id} button onClick={()=>{history.push({
         pathname: `/LoginScreen/ChatRoom/`+props.email,
         user: props.user
       })}}>

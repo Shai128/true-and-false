@@ -250,7 +250,7 @@ describe("matchTest", () => {
 
     }, 700000);
 
-    test("successfull invitation", async () => {
+    test("successfull join room", async () => {
         //open a room with player1
         // await Promise.all([
         //     page.waitForNavigation(),
@@ -284,11 +284,11 @@ describe("matchTest", () => {
         var number = roomNumber.substring(12)
 
         //go with the second account to the home page
-        await Promise.all([
-            page2.waitForNavigation(),
-            page2.click('#homeBTN')
-        ]);
-        expect(page2.url() === APP + "LoginScreen/Home" || page2.url() === APP + "LoginScreen").toBeTruthy();//redirect to home page
+        // await Promise.all([
+        //     page2.waitForNavigation(),
+        //     page2.click('#homeBTN')
+        // ]);
+        // expect(page2.url() === APP + "LoginScreen/Home" || page2.url() === APP + "LoginScreen").toBeTruthy();//redirect to home page
         await page2.waitForSelector('#LoginScreenHomePage')
 
         //join a room
@@ -307,6 +307,72 @@ describe("matchTest", () => {
         expect(page2.url() === APP + "LoginScreen/JoinGame" || page2.url() === APP + "JoinGame").toBeTruthy();//redirect to room page
         await page2.waitForSelector('#joinGamePage')
 
+    }, 700000);
+
+    // test("successfull chat routine", async () => {
+    //     //player1 sends player2 a message
+    //     await page.waitForSelector("#" + player2.nickname + "Available" + "ChatBTN")
+
+    //     await Promise.all([
+    //         page.waitForNavigation(),
+    //         page.click("#" + player2.nickname + "Available" + "ChatBTN")
+    //     ]);
+    //     await page.waitForSelector('#chatPage')
+        
+    //     var friends_email = await page.evaluate(() => document.getElementById('email').textContent)
+    //     expect(friends_email).toBe(player2.email)
+
+    //     await page.click("#message");
+    //     await page.type("#message", "Hi!");
+    //     await page.click("#sendBTN");
+        
+    //     //player2 enters the chat page
+    //     console.log("W1")
+    //     //await page2.waitForSelector("#1notifications")
+    //     await page2.waitFor(1000);
+    //     console.log("W2")
+    //     await Promise.all([
+    //         page2.waitForSelector("#notificationsPopUp"),
+    //         page2.click("#notificationsBTN")
+    //     ]);
+    //     console.log("W3")
+    //     await Promise.all([
+    //         page2.waitForNavigation(),
+    //         page2.click("#message1")
+    //     ]);
+    //     await page2.waitForSelector('#chatPage')
+    //     //await page2.waitForSelector("#MSG:" + "Hi!")
+        
+    //     friends_email = await page2.evaluate(() => document.getElementById('email').textContent)
+    //     expect(friends_email).toBe(player1.email)
+        
+    //     //player1 and player2 talk
+    //     await page2.click("#message");
+    //     await page2.type("#message", "My mom says i shouldn't talk to strangers...");
+    //     await Promise.all([
+    //         //page.waitForSelector("#MSG:" + "My "),
+    //         page2.click("#sendBTN")
+    //     ]);
+
+    //     await page.click("#message");
+    //     await page.type("#message", "so let's get to know each other by playing a game!");
+    //     await Promise.all([
+    //         //page2.waitForSelector("#MSG:" + "so "),
+    //         page.click("#sendBTN")
+    //     ]);
+
+    //     await page2.click("#message");
+    //     await page2.type("#message", "OK!, let's go!");
+    //     await Promise.all([
+    //         //page.waitForSelector("#MSG:" + "OK!"),
+    //         page2.click("#sendBTN")
+    //     ]);
+
+    //     //both players return to room
+
+    // }, 700000);
+
+    test("successfull match invitation", async () => {
         await page.waitForSelector("#" + player2.nickname + "InviteBTN")
         await page2.waitForSelector("#" + player1.nickname + "InviteBTN")
 
