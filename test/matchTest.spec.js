@@ -318,14 +318,14 @@ describe("matchTest", () => {
     //         page.click("#" + player2.nickname + "Available" + "ChatBTN")
     //     ]);
     //     await page.waitForSelector('#chatPage')
-        
+
     //     var friends_email = await page.evaluate(() => document.getElementById('email').textContent)
     //     expect(friends_email).toBe(player2.email)
 
     //     await page.click("#message");
     //     await page.type("#message", "Hi!");
     //     await page.click("#sendBTN");
-        
+
     //     //player2 enters the chat page
     //     console.log("W1")
     //     //await page2.waitForSelector("#1notifications")
@@ -342,10 +342,10 @@ describe("matchTest", () => {
     //     ]);
     //     await page2.waitForSelector('#chatPage')
     //     //await page2.waitForSelector("#MSG:" + "Hi!")
-        
+
     //     friends_email = await page2.evaluate(() => document.getElementById('email').textContent)
     //     expect(friends_email).toBe(player1.email)
-        
+
     //     //player1 and player2 talk
     //     await page2.click("#message");
     //     await page2.type("#message", "My mom says i shouldn't talk to strangers...");
@@ -369,7 +369,18 @@ describe("matchTest", () => {
     //     ]);
 
     //     //both players return to room
-
+    //     await Promise.all([
+    //         //page.waitForSelector("#MSG:" + "OK!"),
+    //         page.waitForNavigation(),
+    //         page.click("#backToRoomBTN"),
+    //         page2.waitForNavigation(),
+    //         page2.click("#backToRoomBTN")
+    //     ]);
+    //     expect(page.url() === APP + "LoginScreen/JoinGame" || page2.url() === APP + "JoinGame").toBeTruthy();//redirect to room page
+    //     expect(page2.url() === APP + "LoginScreen/JoinGame" || page2.url() === APP + "JoinGame").toBeTruthy();//redirect to room page
+    //     await page.waitForSelector('#joinGamePage')
+    //     await page2.waitForSelector('#joinGamePage')
+    //     await page.waitFor(10000)
     // }, 700000);
 
     test("successfull match invitation", async () => {
