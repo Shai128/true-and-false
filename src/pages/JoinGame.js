@@ -63,8 +63,13 @@ export function JoinGame(props) {
   getCurrentUserFromSession(CurrentUser, setCurrentUser, (user) => { console.log('got user from session: ', user); setCurrentRoom(user.roomObject); setIsUpdatedData(true) }, () => { });
 
   const [roomUpdated, setRoomUpdated] = useState(false);
-  const [PlayersAvailable, setPlayersAvailable] = useState([]);
-  const [PlayersUnAvailable, setPlayersUnAvailable] = useState([]);
+  const [PlayersList, setPlayersList] = useState({
+    PlayersAvailable: [],
+    PlayersUnAvailable: []
+  });
+
+  // const [PlayersAvailable, setPlayersAvailable] = useState([]);
+  // const [PlayersUnAvailable, setPlayersUnAvailable] = useState([]);
 
   const useStylesRoomName = makeStyles(theme => ({
     title: {
@@ -84,7 +89,6 @@ export function JoinGame(props) {
   const [SenderInfoName, setSenderInfoName] = React.useState("");
   const classes1 = useStyles();
   const fixedHeightPaper = clsx(classes1.paper, classes1.fixedHeight);
-  const [user, setUser] = React.useState(getUserFromProps(props));
   const [inputName, setInputName] = React.useState('');
   const [helperText, setHelperText] = React.useState('');
 
@@ -100,9 +104,14 @@ export function JoinGame(props) {
     /*
        userInfo: {email: ..., nickName:...}
     */
-   var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
-   newPlayersAvailable.push({ email: userInfo.email, nickname: userInfo.nickName })
-   setPlayersAvailable(newPlayersAvailable)
+  //  var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
+  //  newPlayersAvailable.push({ email: userInfo.email, nickname: userInfo.nickName })
+  //  setPlayersAvailable(newPlayersAvailable)
+
+  var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersAvailable));
+  newPlayersAvailable.push({ email: userInfo.email, nickname: userInfo.nickName })
+  setPlayersList({PlayersAvailable: newPlayersAvailable,PlayersUnAvailable: PlayersList.PlayersUnAvailable})
+
   });
 
   socket.off('userLeft')
@@ -112,25 +121,41 @@ export function JoinGame(props) {
        userInfo: {email: ..., nickName:...}
     */
 
-   var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
-   const index = (PlayersAvailable).findIndex(user => user.email === userInfo.email)
-   newPlayersAvailable.splice(index,1)
-   setPlayersAvailable(newPlayersAvailable)
+  //  var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
+  //  const index = (PlayersAvailable).findIndex(user => user.email === userInfo.email)
+  //  newPlayersAvailable.splice(index,1)
+  //  setPlayersAvailable(newPlayersAvailable)
+
+  var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersAvailable));
+  const index = (newPlayersAvailable).findIndex(user => user.email === userInfo.email)
+  newPlayersAvailable.splice(index,1)
+  setPlayersList({PlayersAvailable: newPlayersAvailable,PlayersUnAvailable: PlayersList.PlayersUnAvailable})
+
 
   });
 
   socket.off('userAvailable')
   socket.on("userAvailable", function (userInfo) {
 
-   var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersUnAvailable));
-   const index = (newPlayersUnAvailable).findIndex(user => user.email === userInfo)
-   var current_user = newPlayersUnAvailable[index]
-   newPlayersUnAvailable.splice(index,1)
-   setPlayersUnAvailable(newPlayersUnAvailable)
+  //  var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersUnAvailable));
+  //  const index = (newPlayersUnAvailable).findIndex(user => user.email === userInfo)
+  //  var current_user = newPlayersUnAvailable[index]
+  //  newPlayersUnAvailable.splice(index,1)
+  //  setPlayersUnAvailable(newPlayersUnAvailable)
        
-   var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
-   newPlayersAvailable.push(current_user)
-   setPlayersAvailable(newPlayersAvailable)
+  //  var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
+  //  newPlayersAvailable.push(current_user)
+  //  setPlayersAvailable(newPlayersAvailable)
+
+
+  var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersUnAvailable));
+  const index = (newPlayersUnAvailable).findIndex(user => user.email === userInfo)
+  var current_user = newPlayersUnAvailable[index]
+  newPlayersUnAvailable.splice(index,1)      
+  var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersAvailable));
+  newPlayersAvailable.push(current_user)
+  setPlayersList({PlayersAvailable: newPlayersAvailable,PlayersUnAvailable: newPlayersUnAvailable})
+
 
   });
 
@@ -139,17 +164,27 @@ export function JoinGame(props) {
 
    console.log(CurrentUser.email, "got userUnAvailable", "userInfo:", userInfo);
 
-   var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
-   const index = (newPlayersAvailable).findIndex(user => user.email === userInfo)
-   var current_user = newPlayersAvailable[index]
-   newPlayersAvailable.splice(index,1)
-   setPlayersUnAvailable(newPlayersAvailable)
+  //  var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
+  //  const index = (newPlayersAvailable).findIndex(user => user.email === userInfo)
+  //  var current_user = newPlayersAvailable[index]
+  //  newPlayersAvailable.splice(index,1)
+  //  setPlayersUnAvailable(newPlayersAvailable)
        
-   var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersUnAvailable));
-   newPlayersUnAvailable.push(current_user)
-   setPlayersAvailable(newPlayersUnAvailable)
+  //  var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersUnAvailable));
+  //  newPlayersUnAvailable.push(current_user)
+  //  setPlayersAvailable(newPlayersUnAvailable)
 
-   console.log( "got newPlayers list ", newPlayersAvailable, newPlayersUnAvailable);
+  //  console.log( "got newPlayers list ", newPlayersAvailable, newPlayersUnAvailable);
+
+
+  var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersAvailable));
+  const index = (newPlayersAvailable).findIndex(user => user.email === userInfo)
+  var current_user = newPlayersAvailable[index]
+  newPlayersAvailable.splice(index,1)
+  var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersUnAvailable));
+  newPlayersUnAvailable.push(current_user)
+  setPlayersList({PlayersAvailable: newPlayersAvailable,PlayersUnAvailable: newPlayersUnAvailable})
+
 
   });
 
@@ -390,9 +425,9 @@ export function JoinGame(props) {
 
       {/* ******************************************************************************************** */}
 
-      <PlayerListAvailable type={"Available"} PlayersAvailable={PlayersAvailable} CurrentUser={CurrentUser} />
+      <PlayerListAvailable type={"Available"} PlayersAvailable={PlayersList.PlayersAvailable} CurrentUser={CurrentUser} />
 
-      <PlayerListUnAvailable type={"Unavailable"} PlayersUnAvailable={PlayersUnAvailable} />
+      <PlayerListUnAvailable type={"Unavailable"} PlayersUnAvailable={PlayersList.PlayersUnAvailable} />
 
 
     </div>
@@ -415,19 +450,20 @@ export function JoinGame(props) {
         })
       }
     }).then(data => {
-      if (PlayersAvailable.length === 0 && data.PlayersAvailable !== undefined &&
-        PlayersUnAvailable.length === 0 && data.PlayersUnAvailable !== undefined) {
+      if (PlayersList.PlayersAvailable.length === 0 && data.PlayersAvailable !== undefined &&
+        PlayersList.PlayersUnAvailable.length === 0 && data.PlayersUnAvailable !== undefined) {
 
         console.log('reading users available from data from server 1 ', data.PlayersAvailable);
         var newPlayersAvailable = JSON.parse(JSON.stringify(data.PlayersAvailable));
         console.log('reading users available from data from server 2 ', newPlayersAvailable);
-        const index = (data.PlayersAvailable).findIndex(user => user.email === CurrentUser.email)
+        const index = (newPlayersAvailable).findIndex(user => user.email === CurrentUser.email)
         console.log('reading users available from data from server 3 - index : ', index);
         newPlayersAvailable.splice(index,1)
         console.log('reading users available from DB. newPlayersAvailable 4', newPlayersAvailable);
-        setPlayersAvailable(newPlayersAvailable)
+       // setPlayersAvailable(newPlayersAvailable)
         var newPlayersUnAvailable = JSON.parse(JSON.stringify(data.PlayersUnAvailable));
-        setPlayersUnAvailable(newPlayersUnAvailable);
+     //   setPlayersUnAvailable(newPlayersUnAvailable);
+        setPlayersList({PlayersAvailable: newPlayersAvailable,PlayersUnAvailable: newPlayersUnAvailable})
         setRoomUpdated(true);
       }
     }, fail_status => {
