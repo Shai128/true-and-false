@@ -121,12 +121,9 @@ export function JoinGame(props) {
 
   socket.off('userAvailable')
   socket.on("userAvailable", function (userInfo) {
-    /*
-       userInfo: {email: ...}
-    */
 
    var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersUnAvailable));
-   const index = (newPlayersUnAvailable).findIndex(user => user.email === userInfo.email)
+   const index = (newPlayersUnAvailable).findIndex(user => user.email === userInfo)
    var current_user = newPlayersUnAvailable[index]
    newPlayersUnAvailable.splice(index,1)
    setPlayersUnAvailable(newPlayersUnAvailable)
@@ -139,22 +136,20 @@ export function JoinGame(props) {
 
   socket.off('userUnAvailable')
   socket.on("userUnAvailable", function (userInfo) {
-    /*
-       userInfo: {email: ...}
-    */
 
-    // To Do --- Ron check
-   //console.log(CurrentUser.email, "got userUnAvailable", "userInfo:", userInfo.email, userInfo.nickName);
+   console.log(CurrentUser.email, "got userUnAvailable", "userInfo:", userInfo);
 
    var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
-   const index = (newPlayersAvailable).findIndex(user => user.email === userInfo.email)
-   var current_user = PlayersAvailable[index]
+   const index = (newPlayersAvailable).findIndex(user => user.email === userInfo)
+   var current_user = newPlayersAvailable[index]
    newPlayersAvailable.splice(index,1)
    setPlayersUnAvailable(newPlayersAvailable)
        
    var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersUnAvailable));
    newPlayersUnAvailable.push(current_user)
    setPlayersAvailable(newPlayersUnAvailable)
+
+   console.log( "got newPlayers list ", newPlayersAvailable, newPlayersUnAvailable);
 
   });
 
@@ -189,7 +184,6 @@ export function JoinGame(props) {
   });
   socket.off("CancelInvitation");
   socket.on("CancelInvitation", function (userInfo) {
-    console.log("got here")
     /*
        userInfo: {email: ..., nickName:...}
     */
@@ -233,7 +227,6 @@ export function JoinGame(props) {
   }
   socket.off('InvitedToGameByUser')
   socket.on("InvitedToGameByUser", function (args) {
-    console.log("dannnn ->", args);
     setSenderInfoID(args.senderId);
     setSenderInfoName(args.senderName);
     setGotInvitationWindow(true);
