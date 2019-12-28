@@ -8,45 +8,27 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import TablePagination from '@material-ui/core/TablePagination';
-import Stepper from '@material-ui/core/Stepper';
-import Step from '@material-ui/core/Step';
-import StepLabel from '@material-ui/core/StepLabel';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
 import Avatar from '@material-ui/core/Avatar';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
-import ListItemText from '@material-ui/core/ListItemText';
-import ListSubheader from '@material-ui/core/ListSubheader';
-import Switch from '@material-ui/core/Switch';
 import { reject } from 'q';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import { socket, emptyUser } from '../user.js';
-import { Link } from '@material-ui/core';
-import { LoginScreenHome } from './LoginScreenHome.js';
+import { socket } from '../user.js';
 import {
   BrowserRouter as Router,
-  Route,
-  useRouteMatch,
-  Redirect,
   useHistory,
 } from "react-router-dom";
 import { ChatButton } from './../PagesUtils.js';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
-import Container from '@material-ui/core/Container';
 import clsx from 'clsx';
-import Divider from '@material-ui/core/Divider';
 import { getUserFromProps, getCurrentUserFromSession } from './../user.js';
-import { validEmail } from './../Utils.js'
 import { PrintChats, DisplayLoading } from './../PagesUtils.js'
 import { isUndefined } from './../Utils.js'
 
@@ -70,7 +52,6 @@ export function JoinGame(props) {
   // 	...more fields you probably don't need...
   // }
   let roomObject;
-  console.log("the received props:", props)
   if (!isUndefined(props) && !isUndefined(props.location) && !isUndefined(props.location.InfoObject))
     roomObject = props.location.InfoObject.roomObject;
   else
@@ -105,7 +86,6 @@ export function JoinGame(props) {
   const fixedHeightPaper = clsx(classes1.paper, classes1.fixedHeight);
   const [user, setUser] = React.useState(getUserFromProps(props));
   const [inputName, setInputName] = React.useState('');
-  // const [error, setError] = React.useState(false);
   const [helperText, setHelperText] = React.useState('');
 
 
@@ -120,16 +100,9 @@ export function JoinGame(props) {
     /*
        userInfo: {email: ..., nickName:...}
     */
-
-    console.log("userINFO DANN --> ", userInfo);
-    console.log("LIST SHAI --> ", PlayersAvailable);
-
-    console.log("LIST DANN --> ", PlayersAvailable.values());
-
-    var newPlayersAvailable = [...PlayersAvailable]
-    newPlayersAvailable.push({ email: userInfo.email, nickname: userInfo.nickName })
-    console.log('By Shai: new player list: ', newPlayersAvailable)
-    setPlayersAvailable(newPlayersAvailable)
+   var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
+   newPlayersAvailable.push({ email: userInfo.email, nickname: userInfo.nickName })
+   setPlayersAvailable(newPlayersAvailable)
   });
 
   socket.off('userLeft')
@@ -138,11 +111,12 @@ export function JoinGame(props) {
     /*
        userInfo: {email: ..., nickName:...}
     */
-    var newPlayersAvailable1 = [...PlayersAvailable]
-    var index = (newPlayersAvailable1).indexOf({ email: userInfo.email, nickname: userInfo.nickName })
-    newPlayersAvailable1.splice(index, 1)
-    console.log('user: ', userInfo.email, "left. newPlayersAvailable1: ", newPlayersAvailable1)
-    setPlayersAvailable(newPlayersAvailable1)
+
+   var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
+   const index = (PlayersAvailable).findIndex(user => user.email === userInfo.email)
+   newPlayersAvailable.splice(index,1)
+   setPlayersAvailable(newPlayersAvailable)
+
   });
 
   socket.off('userAvailable')
@@ -151,19 +125,15 @@ export function JoinGame(props) {
        userInfo: {email: ...}
     */
 
-    console.log("dont see it avail --->", PlayersAvailable);
-    console.log("dont see it Un_avail --->", PlayersUnAvailable);
-
-    var newPlayersUnAvailable = [...PlayersUnAvailable]
-    var index = (newPlayersUnAvailable).findIndex((user) => user.email === userInfo.email)
-    var current_user = newPlayersUnAvailable[index]
-    newPlayersUnAvailable.splice(index, 1)
-    setPlayersUnAvailable(newPlayersUnAvailable)
-
-    var newPlayersAvailable = [...PlayersAvailable]
-    newPlayersAvailable.push(current_user)
-    console.log('user: ', userInfo.email, "became available. newPlayersAvailable: ", newPlayersAvailable)
-    setPlayersAvailable(newPlayersAvailable)
+   var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersUnAvailable));
+   const index = (newPlayersUnAvailable).findIndex(user => user.email === userInfo.email)
+   var current_user = newPlayersUnAvailable[index]
+   newPlayersUnAvailable.splice(index,1)
+   setPlayersUnAvailable(newPlayersUnAvailable)
+       
+   var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
+   newPlayersAvailable.push(current_user)
+   setPlayersAvailable(newPlayersAvailable)
 
   });
 
@@ -173,25 +143,18 @@ export function JoinGame(props) {
        userInfo: {email: ...}
     */
 
-    console.log("ronn log avail --->", PlayersAvailable);
-    console.log("ronn log Un_avail --->", PlayersUnAvailable);
+    // To Do --- Ron check
+   //console.log(CurrentUser.email, "got userUnAvailable", "userInfo:", userInfo.email, userInfo.nickName);
 
-
-    var newPlayersAvailable = [...PlayersAvailable]
-    var index = (newPlayersAvailable).findIndex((user) => user.email === userInfo.email)
-    var current_user = newPlayersAvailable[index]
-    newPlayersAvailable.splice(index)
-    setPlayersAvailable(newPlayersAvailable)
-
-    var newPlayersUnAvailable = [...PlayersUnAvailable]
-    newPlayersUnAvailable.push(current_user)
-    setPlayersUnAvailable(newPlayersUnAvailable)
-    console.log('player: ', userInfo.email, "became unavailable. newPlayersUnAvailable: ", newPlayersUnAvailable)
-    console.log('player: ', userInfo.email, "became unavailable. newPlayersAvailable: ", newPlayersAvailable)
-
-    console.log("sahii 3 log avail --->", PlayersAvailable);
-    console.log("sahi 3 log Un_avail --->", PlayersUnAvailable);
-
+   var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
+   const index = (newPlayersAvailable).findIndex(user => user.email === userInfo.email)
+   var current_user = PlayersAvailable[index]
+   newPlayersAvailable.splice(index,1)
+   setPlayersUnAvailable(newPlayersAvailable)
+       
+   var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersUnAvailable));
+   newPlayersUnAvailable.push(current_user)
+   setPlayersAvailable(newPlayersUnAvailable)
 
   });
 
@@ -362,7 +325,6 @@ export function JoinGame(props) {
    </Button>
       </div>
 
-
       <Grid item xs={4}>
         <Typography id="roomNumberHeader" variant="h2" className={classes.roomNumber}>
           Room Number:
@@ -384,10 +346,10 @@ export function JoinGame(props) {
         </Typography>
       </Grid>
 
-
+{/* 
       <Grid container spacing={3} justify="center">
         <HomepageImage />
-      </Grid>
+      </Grid> */}
 
 
       {/* ******************************************************************************************** */}
@@ -463,16 +425,16 @@ export function JoinGame(props) {
       if (PlayersAvailable.length === 0 && data.PlayersAvailable !== undefined &&
         PlayersUnAvailable.length === 0 && data.PlayersUnAvailable !== undefined) {
 
-        var newPlayersAvailable1 = [...data.PlayersAvailable]
-        /*var index = (newPlayersAvailable1).indexOf({ email: CurrentUser.email, nickname: CurrentUser.nickname })
-        newPlayersAvailable1.splice(index)*/
-        console.log('reading users available from DB. newPlayersAvailable1: ', newPlayersAvailable1);
-        setPlayersAvailable(newPlayersAvailable1)
-
-        console.log("unAvailable --->", data.PlayersUnAvailable);
-        console.log('reading users available from DB. PlayersUnAvailable: ', data.PlayersUnAvailable);
-
-        setPlayersUnAvailable(data.PlayersUnAvailable);
+        console.log('reading users available from data from server 1 ', data.PlayersAvailable);
+        var newPlayersAvailable = JSON.parse(JSON.stringify(data.PlayersAvailable));
+        console.log('reading users available from data from server 2 ', newPlayersAvailable);
+        const index = (data.PlayersAvailable).findIndex(user => user.email === CurrentUser.email)
+        console.log('reading users available from data from server 3 - index : ', index);
+        newPlayersAvailable.splice(index,1)
+        console.log('reading users available from DB. newPlayersAvailable 4', newPlayersAvailable);
+        setPlayersAvailable(newPlayersAvailable)
+        var newPlayersUnAvailable = JSON.parse(JSON.stringify(data.PlayersUnAvailable));
+        setPlayersUnAvailable(newPlayersUnAvailable);
         setRoomUpdated(true);
       }
     }, fail_status => {
@@ -710,69 +672,6 @@ export function PlayerListUnAvailable(props) {
     </Paper>
   );
 }
-
-
-// ------------------------------------------------------- //
-
-// const useStylesSetting = makeStyles(theme => ({
-//   root: {
-//     width: '100%',
-//     maxWidth: 360,
-//     backgroundColor: theme.palette.background.paper,
-//   },
-// }));
-
-// export function SwitchListSecondary() {
-//   const classes = useStylesSetting();
-//   const [checked, setChecked] = React.useState(['wifi']);
-
-//   const handleToggle = value => () => {
-//     const currentIndex = checked.indexOf(value);
-//     const newChecked = [...checked];
-
-//     if (currentIndex === -1) {
-//       newChecked.push(value);
-//     } else {
-//       newChecked.splice(currentIndex, 1);
-//     }
-
-//     setChecked(newChecked);
-//   };
-
-//   return (
-//     <List subheader={<ListSubheader>Settings</ListSubheader>} className={classes.root}>
-//       <ListItem>
-//         <ListItemIcon>
-//           {/* <WifiIcon /> */}
-//         </ListItemIcon>
-//         <ListItemText id="switch-list-label-wifi" primary="Show players I've played with before" />
-//         <ListItemSecondaryAction>
-//           <Switch
-//             edge="end"
-//             onChange={handleToggle('wifi')}
-//             checked={checked.indexOf('wifi') !== -1}
-//             inputProps={{ 'aria-labelledby': 'switch-list-label-wifi' }}
-//           />
-//         </ListItemSecondaryAction>
-//       </ListItem>
-//       <ListItem>
-//         <ListItemIcon>
-//           {/* <BluetoothIcon /> */}
-//         </ListItemIcon>
-//         <ListItemText id="switch-list-label-bluetooth" primary="Show users who are not available" />
-//         <ListItemSecondaryAction>
-//           <Switch
-//             edge="end"
-//             onChange={handleToggle('bluetooth')}
-//             checked={checked.indexOf('bluetooth') !== -1}
-//             inputProps={{ 'aria-labelledby': 'switch-list-label-bluetooth' }}
-//           />
-//         </ListItemSecondaryAction>
-//       </ListItem>
-//     </List>
-//   );
-// }
-
 
 // ----------------------------------------------------------------------------------------------------------------------- //
 
