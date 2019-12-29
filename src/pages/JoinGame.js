@@ -73,11 +73,32 @@ export function JoinGame(props) {
 
   const useStylesRoomName = makeStyles(theme => ({
     title: {
-      flexGrow: 1,
-      fontFamily: 'sans-serif',
+      fontFamily: 'Myriad Pro Bold Italic',
+     // fontFamily: 'sans-serif',
+      fontWeight: 'bold',
+      fontSize: 48,
+      marginTop: 0,
+   //   width: 600,
+      height: 60,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     roomNumber: {
-      flexGrow: 1,
+      fontSize: 36,
+      marginTop: 0,
+  //    width: 400,
+      height: 50,
+      justifyContent: 'center',
+      alignItems: 'center',
+      fontFamily: '"Segoe UI"',
+    },
+    userTitle: {
+      fontSize: 28,
+      marginTop: 0,
+  //    width: 400,
+      height: 50,
+      justifyContent: 'center',
+      alignItems: 'center',
       fontFamily: '"Segoe UI"',
     },
   }));
@@ -347,30 +368,34 @@ export function JoinGame(props) {
     <div id="joinGamePage">
 
       <PrintAnswerPlayerDialog WindowOpen={GotInvitationWindow} setWindowOpen={setGotInvitationWindow} onAccept={onAccept} onDecline={onDecline} SenderInfoName={SenderInfoName} />
+   
+      <Grid spacing={1} item xs = {12}>
       <div style={{ float: 'right', marginRight: 10, marginTop: 10, }}>
         <Button id="leaveRoomBTN" variant="contained" color="primary" onClick={leaveRoom} className={classes.button}>
           Leave the room
-   </Button>
+      </Button>
       </div>
-
-      <Grid item xs={4}>
-        <Typography id="roomNumberHeader" variant="h2" className={classes.roomNumber}>
-          Room Number:
-  {CurrentRoom.room_id}
-        </Typography>
       </Grid>
 
-      <Grid item xs={6}>
-        <Typography id="roomNameHeader" variant="h3" className={classes.roomNumber}>
+      <Grid container spacing={1} justify="center">
+        <Typography id="roomNameHeader" variant="h3" className={classes.title}>
           Room Name:
-    {CurrentRoom.room_name}
+      {CurrentRoom.room_name}
+        </Typography>
+        </Grid>
+      
+
+      <Grid container spacing={1} justify="center">
+        <Typography id="roomNumberHeader" variant="h4" className={classes.roomNumber}>
+          Room Number:
+     {CurrentRoom.room_id}
         </Typography>
       </Grid>
 
-      <Grid item xs={4}>
-        <Typography id="userNameHeader" variant="h3" className={classes.roomNumber}>
+      <Grid container spacing={1} justify="center">
+        <Typography id="userNameHeader" variant="h5" className={classes.userTitle}>
           User Name:
-  {CurrentUser.nickName}
+      {CurrentUser.nickName}
         </Typography>
       </Grid>
 
@@ -386,7 +411,7 @@ export function JoinGame(props) {
       <div component="form" className={fixedHeightPaper}>
         <Grid container>
           <Grid item xs={12}>
-            <Typography component="h4" variant="h5">
+            <Typography component="h8" variant="h5">
               Enter a user's name and start to play!
                     </Typography>
           </Grid>
