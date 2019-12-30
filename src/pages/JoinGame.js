@@ -73,7 +73,7 @@ export function JoinGame(props) {
 
   const useStylesRoomName = makeStyles(theme => ({
     title: {
-      fontFamily: 'Myriad Pro Bold Italic',
+      fontFamily: '"Segoe UI"',
      // fontFamily: 'sans-serif',
       fontWeight: 'bold',
       fontSize: 48,
@@ -368,7 +368,8 @@ export function JoinGame(props) {
     <div id="joinGamePage">
 
       <PrintAnswerPlayerDialog WindowOpen={GotInvitationWindow} setWindowOpen={setGotInvitationWindow} onAccept={onAccept} onDecline={onDecline} SenderInfoName={SenderInfoName} />
-   
+      <Grid spacing={1} container>
+
       <Grid spacing={1} item xs = {12}>
       <div style={{ float: 'right', marginRight: 10, marginTop: 10, }}>
         <Button id="leaveRoomBTN" variant="contained" color="primary" onClick={leaveRoom} className={classes.button}>
@@ -377,26 +378,34 @@ export function JoinGame(props) {
       </div>
       </Grid>
 
-      <Grid container spacing={1} justify="center">
+      <Grid item spacing={1}  xs = {12} justify="center">
+        <div style={{ textAlign: 'center'}}>
         <Typography id="roomNameHeader" variant="h3" className={classes.title}>
           Room Name:
       {CurrentRoom.room_name}
         </Typography>
+        </div>
         </Grid>
       
 
-      <Grid container spacing={1} justify="center">
+      <Grid item spacing={1}  xs = {12} justify="center">
+      <div style={{ textAlign: 'center'}}>
         <Typography id="roomNumberHeader" variant="h4" className={classes.roomNumber}>
           Room Number:
      {CurrentRoom.room_id}
         </Typography>
+        </div>
       </Grid>
 
-      <Grid container spacing={1} justify="center">
-        <Typography id="userNameHeader" variant="h5" className={classes.userTitle}>
+
+      <Grid item spacing={1}  xs = {12} justify="center">
+      <div style={{ textAlign: 'center'}}>
+        <Typography id="userNameHeader" justify="center" variant="h5" className={classes.userTitle}>
           User Name:
       {CurrentUser.nickName}
         </Typography>
+        </div>
+      </Grid>
       </Grid>
 
 {/* 
@@ -669,7 +678,7 @@ export function PlayerListUnAvailable(props) {
                     return (
                       <TableCell key={row.email} align={column.align}>
 
-                        <Grid container spacing={1}>
+                        <Grid container spacing={3}>
 
                           <Grid container justify="center" alignItems="center">
 
