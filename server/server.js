@@ -91,8 +91,7 @@ function findGame(game, success, failure) {
   })
 }
 function tryout() {
-  deleteUserByEmailInRoomByRoomID(0, 'alon@gmail.com', (fg) => { }, (fg) => { console.log(fg) });
-  //createRoom('schoo',(fg)=>{},(fg)=>{console.log(fg)});
+  resetDatabase(15,(fg)=>{},(fg)=>{});
 }
 //tryout();
 // uncomment this to reset server
