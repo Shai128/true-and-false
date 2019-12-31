@@ -318,6 +318,7 @@ async function createRoom(room_name, success, failure) {
         else {
 
             if (isUndefined(global_array)) {
+                console.log("golbal array is undefined");
                 global_array = {
                     array_id: 1,
                     array: (new Array(100)).fill(false)
@@ -336,6 +337,7 @@ async function createRoom(room_name, success, failure) {
             for (i = 0; i < global_array.array.length; i++) {
                 if (!global_array.array[i]) {
                     room_id = i
+                    console.log("found free spot for room id:", room_id)
                     global_array.array[i] = true;
                     //console.log('i is:'+i);
                     break;
