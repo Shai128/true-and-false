@@ -91,7 +91,7 @@ function findGame(game, success, failure) {
   })
 }
 function tryout() {
-  resetDatabase(15,(fg)=>{},(fg)=>{});
+  resetDatabase(15, (fg) => { }, (fg) => { });
 }
 //tryout();
 // uncomment this to reset server

@@ -18,6 +18,7 @@ const roomSchema = new mongoose.Schema(
         available_id: { type: Number },
         users_in_room:
             [{
+                firstName: String,
                 user_id_in_room: Number,
                 email: String,
                 password: String,
@@ -141,7 +142,8 @@ async function addRoomToAllUserGameHistory(roomObject) {
                     false_sentences: userObject.false_sentences,
                     email: userObject.email,
                     nickname: userObject.nickname,
-                    score: userObject.score
+                    score: userObject.score,
+                    firstName: userObject.firstName,
                 }
 
             }
@@ -289,6 +291,7 @@ async function addUserToRoom(room_id, email, success, fail) {
                     console.log('addUserToRoom found user: ', user);
                     var false_array = new Array(PLAYERS_AMOUNT).fill(false);
                     var userInRoom = {
+                        firstName: user.firstName,
                         user_id_in_room: room.available_id,
                         email: user.email,
                         password: user.password,
