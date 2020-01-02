@@ -1,4 +1,5 @@
 const okStatus = 200;
+const USER_ALREADY_EXISTS_STATUS = 501;
 const serverIP = 'localhost'
 const httpServerIP = 'http://' + serverIP
 const server = httpServerIP + ':8000'
@@ -42,3 +43,4 @@ exports.passwordIsStrongEnough = passwordIsStrongEnough
 exports.validEmail = validEmail
 exports.serverIP = serverIP;
 exports.server = server;
+exports.USER_ALREADY_EXISTS_STATUS = USER_ALREADY_EXISTS_STATUS

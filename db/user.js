@@ -1,13 +1,13 @@
-const {mongoose} = require("./config")
-const{isUndefined, removeUnReadMessagesFromCertainUser}=require("../src/Utils")
+const { mongoose } = require("./config")
+const { isUndefined, removeUnReadMessagesFromCertainUser } = require("../src/Utils")
 const salt = '' //todo: change to a real good salt
 const iterations = 1000;
-const LAST_MESSAGES_LIMIT=100
+const LAST_MESSAGES_LIMIT = 100
 const USER_ALREADY_EXISTS = 'user already exists error'
-const userSchema= new mongoose.Schema(
-    { 
-        email:String,
-        password:String,
+const userSchema = new mongoose.Schema(
+    {
+        email: String,
+        password: String,
         salt: String,
         iterations: Number,
         nickName: String,
@@ -18,38 +18,42 @@ const userSchema= new mongoose.Schema(
         score: Number,
         pic_url: String,
         firstName: String,
-        true_sentences:[{id: Number, value:String}],
-        false_sentences:[{id: Number, value:String}],
+        true_sentences: [{ id: Number, value: String }],
+        false_sentences: [{ id: Number, value: String }],
         socket: Number,
-        last_active_at:Date,
+        last_active_at: Date,
         gameHistory: [],
-        unReadMessages:[{authorEmail: String,
-                            otherUserEmail:String,
-                            messageContent:String,
-                            authorName: String,
-                            otherUserName:String,
-                            delivery_timestamp:Date
-                            }],
-        messeges_by_addressee:[{email_of_addressee:String,
-                                nickname_of_addressee:String,
-                                messages:[{authorEmail: String,
-                                    otherUserEmail:String,
-                                    messageContent:String,
-                                    authorName: String,
-                                    otherUserName:String,
-                                    delivery_timestamp:Date}]
-                            }],
-        turn:Boolean,
+        unReadMessages: [{
+            authorEmail: String,
+            otherUserEmail: String,
+            messageContent: String,
+            authorName: String,
+            otherUserName: String,
+            delivery_timestamp: Date
+        }],
+        messeges_by_addressee: [{
+            email_of_addressee: String,
+            nickname_of_addressee: String,
+            messages: [{
+                authorEmail: String,
+                otherUserEmail: String,
+                messageContent: String,
+                authorName: String,
+                otherUserName: String,
+                delivery_timestamp: Date
+            }]
+        }],
+        turn: Boolean,
         opponentId: String,
         questionsCount: Number,
         correctCount: Number,
         score: Number,
-        matchPoints: Number,                   
+        matchPoints: Number,
 
-        });
-const userModel = mongoose.model('users',userSchema) //creating the class userModel. a class of types
-                                                    // that comply the conditions of {userSchema and document}
-    
+    });
+const userModel = mongoose.model('users', userSchema) //creating the class userModel. a class of types
+// that comply the conditions of {userSchema and document}
+
 
 
 /**
@@ -58,44 +62,45 @@ const userModel = mongoose.model('users',userSchema) //creating the class userMo
  * @param {function: what to do if the operation succeeded} success 
  * @param {function: what to do if the operation failed} failure 
  */
-function createUser(user,success,failure){
+function createUser(user, success, failure) {
     userModel.findOne({ email: user.email }).exec(function (err, dbUser) {
-    if(err || dbUser === undefined || dbUser === null) {
-        let hashedPassword = user.password;
-        const newUser = new userModel({
-            password: hashedPassword,
-            email: user.email,
-            salt: salt,
-            iterations: iterations,
-            nickName: user.nickName,
-            firstName: user.firstName, 
-            gameHistory: new Array(0), // creating a user with no games
-            roomObject: {
-                room_id: -1,
-                room_name: "no room"
-            }
-                                    });
-        console.log("creted new user:", newUser);
-        //saves the user in the db
-        newUser.save((err)=>{
-            if(err)
-                failure(err)
-            else 
-                success()
-        })
-    }
-    else{
-        console.log("dbuser:", dbUser)
-        failure(USER_ALREADY_EXISTS)
-    }
+        if (err || isUndefined(dbUser)) {
+            let hashedPassword = user.password;
+            const newUser = new userModel({
+                password: hashedPassword,
+                email: user.email,
+                salt: salt,
+                iterations: iterations,
+                nickName: user.nickName,
+                firstName: user.firstName,
+                gameHistory: new Array(0), // creating a user with no games
+                roomObject: {
+                    room_id: -1,
+                    room_name: "no room"
+                }
+            });
+            console.log("creted new user:", newUser);
+            //saves the user in the db
+            newUser.save((err) => {
+                if (err)
+                    failure(err)
+                else
+                    success()
+            })
+        }
+        else {
+            console.log("dbuser:", dbUser)
+            failure(USER_ALREADY_EXISTS)
+        }
     })
 }
 
-async function updateLastActiveAt(email,date,success,fail){
+async function updateLastActiveAt(email, date, success, fail) {
     console.log(date);
-    userModel.findOneAndUpdate({email: email}, { $set:{ last_active_at :  date }},(err,doc)=>{
-        if(err) fail('failed updated the last_active_at field of user with email '+email)
-        else success('Successfully updated the last_active_at field of user with email '+email);   });
+    userModel.findOneAndUpdate({ email: email }, { $set: { last_active_at: date } }, (err, doc) => {
+        if (err) fail('failed updated the last_active_at field of user with email ' + email)
+        else success('Successfully updated the last_active_at field of user with email ' + email);
+    });
 }
 
 /**
@@ -105,55 +110,56 @@ async function updateLastActiveAt(email,date,success,fail){
  * @param {funciton to be executed in case of success} success 
  * @param {function to be executed in case of failure} fail 
  */
-async function addUnReadMessage(email,message_data,success,fail){
+async function addUnReadMessage(email, message_data, success, fail) {
 
     userModel.findOne({ email: email }).exec(function (err, user) {
-        if(err) fail('User with email'+email+'does not exist');
-        else{
-            
-            var extract_data={
+        if (err) fail('User with email' + email + 'does not exist');
+        else {
+
+            var extract_data = {
                 authorEmail
-                :
-                message_data.authorEmail,
+                    :
+                    message_data.authorEmail,
                 otherUserEmail
-                :
-                message_data.otherUserEmail,
+                    :
+                    message_data.otherUserEmail,
                 messageContent
-                :
-                message_data.messageContent,
+                    :
+                    message_data.messageContent,
                 authorName
-                :
-                message_data.authorName,
-                delivery_timestamp:message_data.delivery_timestamp
-                
-               }
-            if(user == null)
-               return;
-            var res=user.unReadMessages;
-            if(isUndefined(user.unReadMessages)||user.unReadMessages.length==0){
-                res=[];
-               res[0]=extract_data;
+                    :
+                    message_data.authorName,
+                delivery_timestamp: message_data.delivery_timestamp
+
             }
-            else if(user.unReadMessages.length<LAST_MESSAGES_LIMIT)
-            res.unshift(extract_data);
-            else{
+            if (user == null)
+                return;
+            var res = user.unReadMessages;
+            if (isUndefined(user.unReadMessages) || user.unReadMessages.length == 0) {
+                res = [];
+                res[0] = extract_data;
+            }
+            else if (user.unReadMessages.length < LAST_MESSAGES_LIMIT)
                 res.unshift(extract_data);
-                res=res.slice(0,LAST_MESSAGES_LIMIT);
+            else {
+                res.unshift(extract_data);
+                res = res.slice(0, LAST_MESSAGES_LIMIT);
             }
-            userModel.findOneAndUpdate({email: email}, { $set:{unReadMessages:res}},
-            ()=>{success('Successfully added unread message to user with email '+email)}) }
-            
-            
-        });
+            userModel.findOneAndUpdate({ email: email }, { $set: { unReadMessages: res } },
+                () => { success('Successfully added unread message to user with email ' + email) })
+        }
+
+
+    });
 
 }
 
 /** author: Shai
  * resets unread messages array
  */
-async function resetUnReadMessage(email,success){
-    userModel.findOneAndUpdate({email: email}, { $set:{unReadMessages:[]}},
-        ()=>{success('Successfully added unread message to user with email '+email)});
+async function resetUnReadMessage(email, success) {
+    userModel.findOneAndUpdate({ email: email }, { $set: { unReadMessages: [] } },
+        () => { success('Successfully added unread message to user with email ' + email) });
 
 }
 
@@ -163,79 +169,83 @@ async function resetUnReadMessage(email,success){
  * @param {the user who wrote the messages we remove} otherUserEmail 
  * @param {function that activates on success } success 
  */
-async function removeUnReadMessagesFromCertainUserInDB(email, otherUserEmail, success, fail){
+async function removeUnReadMessagesFromCertainUserInDB(email, otherUserEmail, success, fail) {
     userModel.findOne({ email: email }).exec(function (err, user) {
-   
-        if(err) fail('User with email'+email+'does not exist');
-        else{
 
-        var unReadMessages = removeUnReadMessagesFromCertainUser(user, otherUserEmail)
-        userModel.findOneAndUpdate({email: email}, { $set:{unReadMessages:unReadMessages}},
-        ()=>{success('Successfully added  message by addressee to user with email '+email)}) }
-            
-            
-        });
+        if (err) fail('User with email' + email + 'does not exist');
+        else {
+
+            var unReadMessages = removeUnReadMessagesFromCertainUser(user, otherUserEmail)
+            userModel.findOneAndUpdate({ email: email }, { $set: { unReadMessages: unReadMessages } },
+                () => { success('Successfully added  message by addressee to user with email ' + email) })
+        }
+
+
+    });
 }
 
 
 
 
-async function addMessegesByAddressee(user_email,message_data,otherUserEmail,success,fail){
+async function addMessegesByAddressee(user_email, message_data, otherUserEmail, success, fail) {
 
     userModel.findOne({ email: user_email }).exec(function (err, user) {
-   
-        if(err) fail('User with email'+user_email+'does not exist');
-        else{
-            var extract_data={
+
+        if (err) fail('User with email' + user_email + 'does not exist');
+        else {
+            var extract_data = {
                 authorEmail
-                :
-                message_data.authorEmail,
+                    :
+                    message_data.authorEmail,
                 otherUserEmail
-                :
-                message_data.otherUserEmail,
+                    :
+                    message_data.otherUserEmail,
                 messageContent
-                :
-                message_data.messageContent,
+                    :
+                    message_data.messageContent,
                 authorName
-                :
-                message_data.authorName,
-                delivery_timestamp:message_data.delivery_timestamp
-                
-               }
-            if(user == null)
-               return;
-            var res=user.messeges_by_addressee;
-            if(isUndefined(user.messeges_by_addressee)){
-                res=[];
-               res[0]={email_of_addressee:otherUserEmail,
-                messages:[extract_data]
+                    :
+                    message_data.authorName,
+                delivery_timestamp: message_data.delivery_timestamp
+
+            }
+            if (user == null)
+                return;
+            var res = user.messeges_by_addressee;
+            if (isUndefined(user.messeges_by_addressee)) {
+                res = [];
+                res[0] = {
+                    email_of_addressee: otherUserEmail,
+                    messages: [extract_data]
                 }
             }
-            var not_found=1,i;
-           for(i=0;i<res.length;i++){
-               if(res[i].email_of_addressee==otherUserEmail){
-                not_found=0;
-                res[i].messages[res[i].messages.length]=extract_data;
-               }
-           }
-           if(not_found){
-               res[res.length]={email_of_addressee:otherUserEmail,
-                messages:[extract_data]
+            var not_found = 1, i;
+            for (i = 0; i < res.length; i++) {
+                if (res[i].email_of_addressee == otherUserEmail) {
+                    not_found = 0;
+                    res[i].messages[res[i].messages.length] = extract_data;
                 }
-           }
-            
-            userModel.findOneAndUpdate({email: user_email}, { $set:{messeges_by_addressee:res}},
-            ()=>{success('Successfully added  message by addressee to user with email '+user_email)}) }
-            
-            
-        });
+            }
+            if (not_found) {
+                res[res.length] = {
+                    email_of_addressee: otherUserEmail,
+                    messages: [extract_data]
+                }
+            }
+
+            userModel.findOneAndUpdate({ email: user_email }, { $set: { messeges_by_addressee: res } },
+                () => { success('Successfully added  message by addressee to user with email ' + user_email) })
+        }
+
+
+    });
 
 }
 
 
 async function findUser(user_data, success, failure) {
     findUserByField(
-        'email', 
+        'email',
         user_data.email,
         (users) => {
             if (users.length !== 1) {
@@ -247,17 +257,17 @@ async function findUser(user_data, success, failure) {
         failure)
 }
 //I added
-async function deleteUser(data,success,failure){
+async function deleteUser(data, success, failure) {
     //console.log("entered delete user");
-    const docs = await userModel.deleteOne({email: data.email});
-    console.log("docs:"+docs);
-    if(!docs){
-        failure("no user with mail "+data.email +" found");
+    const docs = await userModel.deleteOne({ email: data.email });
+    console.log("docs:" + docs);
+    if (!docs) {
+        failure("no user with mail " + data.email + " found");
     } else {
-        success("user with mail "+data.email+"was deleted successfuly" );
+        success("user with mail " + data.email + "was deleted successfuly");
     }
 
-} 
+}
 
 /**
  * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -270,7 +280,7 @@ async function findUserByField(field, value, success, failure) {
     var query = {};
     query[field] = value;
     return userModel.find(query, (err, docs) => {
-        if (err) {failure(err)} else {success(docs)}
+        if (err) { failure(err) } else { success(docs) }
     });
 }
 
@@ -288,30 +298,30 @@ async function updateUser(userID, userEmail, user, success, failure) {
 
     console.log("the user object:", user)
     var res;
-    if(!isUndefined(userID))
-        res = await userModel.replaceOne({_id: userID}, user); //res.nModified = # updated documents
-    else if(!isUndefined(userEmail))
-        res = await userModel.replaceOne({email: userEmail}, user); //res.nModified = # updated documents
-    else{
+    if (!isUndefined(userID))
+        res = await userModel.replaceOne({ _id: userID }, user); //res.nModified = # updated documents
+    else if (!isUndefined(userEmail))
+        res = await userModel.replaceOne({ email: userEmail }, user); //res.nModified = # updated documents
+    else {
         failure('bad updateUser params. user was not updated');
         return;
     }
 
-    if(res.n ==1 && res.nModified ==1) {                     //res.n = # of matched documents
+    if (res.n == 1 && res.nModified == 1) {                     //res.n = # of matched documents
         success();
         //console.log('updated user. new user: ', user)
     }
-    else if (res.n ==0 && res.nModified ==0){
+    else if (res.n == 0 && res.nModified == 0) {
         failure('could not find a user to update')
     }
-    else if (res.n ==1 && res.nModified ==0){
+    else if (res.n == 1 && res.nModified == 0) {
         failure('user found, could not update')
     }
-    else{
+    else {
         failure('fatal error occured.')
     }
     // userModel.findOneAndUpdate({email: data.email}, { $set:{array:global_array.array}},()=>
-                
+
     // const doc = await userModel.findOneIdAndUpdate(
     //     {_id: data._id},
     //     data
@@ -321,15 +331,15 @@ async function updateUser(userID, userEmail, user, success, failure) {
 
 
 
-
+exports.USER_ALREADY_EXISTS = USER_ALREADY_EXISTS
 exports.removeUnReadMessagesFromCertainUserInDB = removeUnReadMessagesFromCertainUserInDB
 exports.createUser = createUser
 exports.findUser = findUser
 exports.updateUser = updateUser
-exports.deleteUser=deleteUser
+exports.deleteUser = deleteUser
 exports.findUserByField = findUserByField
-exports.userModel = userModel   
-exports.updateLastActiveAt=updateLastActiveAt
-exports.addUnReadMessage=addUnReadMessage
-exports.resetUnReadMessage=resetUnReadMessage
-exports.addMessegesByAddressee=addMessegesByAddressee
+exports.userModel = userModel
+exports.updateLastActiveAt = updateLastActiveAt
+exports.addUnReadMessage = addUnReadMessage
+exports.resetUnReadMessage = resetUnReadMessage
+exports.addMessegesByAddressee = addMessegesByAddressee

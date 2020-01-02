@@ -193,7 +193,7 @@ function GetSentencesComponentsByList(props) {
                   className={classes.textField}
                   variant="filled"
                   fullWidth
-                  label={'Sentence ' + (id + 1)}
+                  //label={'Sentence ' + (id + 1)}
                   value={value}
                   InputProps={{ className: classes.white }}
                   onChange={(event) => {

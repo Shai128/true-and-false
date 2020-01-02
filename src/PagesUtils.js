@@ -26,7 +26,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import { socket, getUserFromProps, getCurrentUserFromDB } from './user.js';
+import { getUserFromProps, getCurrentUserFromDB } from './user.js';
 import { useStyles } from './App.js';
 import { joinRoom } from './room.js';
 export function PrintGames(props) {
@@ -121,8 +121,8 @@ export function PrintJoinGameDialog(props) {
   const [validNickName, setvalidNickName] = React.useState(true);
   const [nickNameHelperText, setNickNameHelperText] = React.useState('');
   const [gameIDHelperText, setGameIDHelperText] = React.useState('');
-
-
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [serverError, setServerError] = React.useState(false);
   const onCloseWindow = () => {
     resetDisplaysContent();
     handleCloseWindow();
@@ -134,7 +134,7 @@ export function PrintJoinGameDialog(props) {
   }
 
   const displayWrongGameID = () => {
-    setGameIDHelperText('Wrong game ID');
+    setGameIDHelperText('Wrong room ID');
     setValidGameID(false);
   }
 
@@ -144,21 +144,11 @@ export function PrintJoinGameDialog(props) {
     setvalidNickName(true);
     setValidGameID(true);
   }
-  socket.on('joinedRoom', function (roomID) {
-    //todo- redirect to room page (dan't page)
-  });
 
-  socket.on('nickNameTaken', function () {
-    displayNickNameTaken();
-    //todo- open message 'try a different name'
-  });
-
-  socket.on('wrongRoomID', function () {
-    displayWrongGameID();
-
-  });
   let history = useHistory();
   const joinGame = () => {
+    resetDisplaysContent();
+    setIsLoading(true);
     /*
         //var user = //todo- get user from session
         var roomData = {
@@ -183,8 +173,18 @@ export function PrintJoinGameDialog(props) {
     console.log("starting game!");
     console.log("game ID:", gameID);
     console.log('user nickname: ', currentGameNickName);
-    joinRoom(gameID, currentUser, currentGameNickName, history)
+    joinRoom(gameID, currentUser, currentGameNickName, history, () => { setIsLoading(false); }, () => {
+      //todo: show only one of these:
+      displayNickNameTaken();
+      displayWrongGameID();
+      setServerError(true);
+      setIsLoading(false);
+    })
   }
+
+  if (isLoading)
+    return (<DisplayLoading />);
+
   return (
     <Dialog id="openRoomPopUp" open={WindowOpen} onClose={onCloseWindow} aria-labelledby="form-dialog-title">
       <DialogTitle id="form-dialog-title">Join a Room</DialogTitle>
@@ -219,6 +219,11 @@ export function PrintJoinGameDialog(props) {
                 setCurrentGameNickName(event.target.value);
               }}
             />
+          </Grid>
+          <Grid item justify='center' xs={12}>
+            {serverError && <Typography variant="h6" style={{ color: 'red' }}>
+              Server error occured.
+          </Typography>}
           </Grid>
         </Grid>
       </DialogContent>

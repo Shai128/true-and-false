@@ -1,4 +1,4 @@
-import { okStatus, server /*isUndefined*/ } from './Utils.js'
+import { okStatus, server, isUndefined } from './Utils.js'
 import { reject } from 'q';
 import { updateUserInLocalStorage } from './user.js';
 
@@ -7,8 +7,10 @@ import { updateUserInLocalStorage } from './user.js';
  * @param {the name of the room} roomName 
  * @param {the current user} currentuser 
  * @param {the nick name the user chose for this room} currentGameNickName 
+ * @param {what to do in case of success. receives roomAndUserObject from the db.} onSuccess;
+ * @param {what to do when failes. receives the failure error } onFailure
  */
-export function createRoom(roomName, currentuser, currentGameNickName, history) {
+export function createRoom(roomName, currentuser, currentGameNickName, history, onSuccess, onFailure) {
     fetch(server + '/createRoom/' + roomName, {
         method: 'GET', // *GET, POST, PUT, DELETE, etc.
         headers: {
@@ -26,6 +28,8 @@ export function createRoom(roomName, currentuser, currentGameNickName, history) 
         }
     }).then(roomAndUserObject => {
         console.log("received roomAndUserObject:", roomAndUserObject)
+        if (!isUndefined(onSuccess))
+            onSuccess(roomAndUserObject);
         let new_user = JSON.parse(JSON.stringify(currentuser));
         new_user.roomObject = roomAndUserObject.roomObject;
         updateUserInLocalStorage(new_user);
@@ -35,6 +39,8 @@ export function createRoom(roomName, currentuser, currentGameNickName, history) 
         });
 
     }, fail_status => {
+        if (!isUndefined(onFailure))
+            onFailure();
         console.log("failed, status:", fail_status)
     });
 }
@@ -44,8 +50,10 @@ export function createRoom(roomName, currentuser, currentGameNickName, history) 
  * @param {the user will join that roomID} roomID 
  * @param {the current user} user 
  * @param {the nickname the user chose for this room} currentGameNickName 
+ * @param {what to do in case of success. receives roomAndUserObject from the db.} onSuccess;
+ * @param {what to do when failes. receives the failure error } onFailure
  */
-export function joinRoom(roomID, currentuser, currentGameNickName, history) {
+export function joinRoom(roomID, currentuser, currentGameNickName, history, onSuccess, onFailure) {
     fetch(server + '/joinRoom/' + roomID, {
         method: 'GET', // *GET, POST, PUT, DELETE, etc.
         headers: {
@@ -62,6 +70,8 @@ export function joinRoom(roomID, currentuser, currentGameNickName, history) {
             })
         }
     }).then(roomAndUserObject => {
+        if (!isUndefined(onSuccess))
+            onSuccess(roomAndUserObject);
         let new_user = JSON.parse(JSON.stringify(currentuser));
         new_user.roomObject = roomAndUserObject.roomObject;
         updateUserInLocalStorage(new_user);
@@ -71,6 +81,8 @@ export function joinRoom(roomID, currentuser, currentGameNickName, history) {
         });
 
     }, fail_status => {
+        if (!isUndefined(onFailure))
+            onFailure();
         console.log("failed, status:", fail_status)
     });
 }

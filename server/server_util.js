@@ -1,4 +1,5 @@
-const{isUndefined}=require("../src/Utils")
+const { isUndefined, USER_ALREADY_EXISTS_STATUS } = require("../src/Utils")
+const { USER_ALREADY_EXISTS } = require('../db/user.js')
 /**
  * Selects a random sentence from a users truths and lies.
  * @param {*} user The subject of the true/lie sentence
@@ -6,18 +7,18 @@ const{isUndefined}=require("../src/Utils")
  * @param {*} success Executes after a sentence is selcted
  * @param {*} failure Executes if selection fails
  */
-function getRandomSentence(truths, lies, already_seen=[], success, failure) { 
-    if (truths.length >= 1 && lies.length >= 1) {
-      let is_true = (Math.random() >= 0.5) ? 1 : 0;
-      let arr = [lies, truths][is_true];
-      let sentence = arr[Math.floor(Math.random() * arr.length)];
-      success({
-        is_true: is_true,
-        sentence: sentence
-      });
-    } else {
-        failure("not enough sentences")
-    }
+function getRandomSentence(truths, lies, already_seen = [], success, failure) {
+  if (truths.length >= 1 && lies.length >= 1) {
+    let is_true = (Math.random() >= 0.5) ? 1 : 0;
+    let arr = [lies, truths][is_true];
+    let sentence = arr[Math.floor(Math.random() * arr.length)];
+    success({
+      is_true: is_true,
+      sentence: sentence
+    });
+  } else {
+    failure("not enough sentences")
+  }
 }
 
 function getRandomSentenceForDuel(game, subject_id, receiver_id, success, failure) {
@@ -27,7 +28,7 @@ function getRandomSentenceForDuel(game, subject_id, receiver_id, success, failur
   let lies = [...game.all_sentences].filter(x => !truths.includes(x)).filter(x => !already_seen.includes(x));
 
   getRandomSentence(
-    truths, 
+    truths,
     lies,
     already_seen,
     (sentencePicked) => {
@@ -41,7 +42,7 @@ function getRandomSentenceForDuel(game, subject_id, receiver_id, success, failur
   )
 }
 
-function updateGame(game, success, failure) {} // placeholder
+function updateGame(game, success, failure) { } // placeholder
 
 function addSeenTruth(game, user_id, sentence, success, failure) {
   game.players[user_id].seen.push(sentence);
@@ -49,28 +50,34 @@ function addSeenTruth(game, user_id, sentence, success, failure) {
 }
 
 function standardErrorHandling(res, err) {
-    console.log(err)
-    res.status(500).send(err)
+  console.log(err)
+  var status = 500;
+  switch (err) {
+    case USER_ALREADY_EXISTS:
+      status = USER_ALREADY_EXISTS_STATUS
+      break;
+  }
+  res.status(status).send(err)
 }
 
 function endSession(req, res) {
-  req.session.destroy((err) => {standardErrorHandling(res, err)})
+  req.session.destroy((err) => { standardErrorHandling(res, err) })
   req.session = null
   res.redirect('/')
 }
 
 function getIdentifierFromSession(req, success, failure) {
   logDiv("getIdentifierFromsEssion");
-  console.log("session:",req.session)
+  console.log("session:", req.session)
 
-  if (isUndefined(req.session.userInfo) || !req.session.userInfo.email) {  
-    failure("session does not exist") ;
+  if (isUndefined(req.session.userInfo) || !req.session.userInfo.email) {
+    failure("session does not exist");
     logDiv();
-  } else { 
+  } else {
     const id = req.session.userInfo.email;
     console.log("id from session:", id)
     logDiv();
-    success(id) 
+    success(id)
   }
 }
 
@@ -78,22 +85,22 @@ function getUserInfoFromSession(req, success, failure) {
   logDiv("getUserINFOFromSession")
   console.log("session:", req.session);
   const info = req.session.userInfo;
-  if (!info) { logDiv(); failure("session does not exist") } else { 
+  if (!info) { logDiv(); failure("session does not exist") } else {
     console.log("info from session:", info)
     logDiv()
     success(info)
   }
 }
 
-function convertUserListFormat(fullUserList) { 
+function convertUserListFormat(fullUserList) {
   return Object.values(fullUserList)
 }
 
-function logDiv(header='') {
+function logDiv(header = '') {
   const divLen = 60
   header = header.slice(0, divLen)
   const divWithoutHeader = divLen - header.length;
-  console.log("-".repeat(divWithoutHeader/2) + header + '-'.repeat((divWithoutHeader+1)/2))
+  console.log("-".repeat(divWithoutHeader / 2) + header + '-'.repeat((divWithoutHeader + 1) / 2))
 }
 
 exports.getRandomSentence = getRandomSentence

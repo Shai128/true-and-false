@@ -388,3 +388,32 @@ export function validOldPassword(oldPassword, enteredOldPassword) {
     return oldPassword === enteredOldPassword // todo: hash the entered old password
 }
 
+export function signUp(user, onSuccess, onFailure) {
+    fetch(server + '/user', {
+        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        credentials: 'include',
+        body: 'json=' + JSON.stringify(user)
+
+    }).then(response => {
+        console.log("response:", response)
+        console.log("response status:", response.status)
+        if (response.status !== okStatus) {
+            reject(response.status);
+            if (!isUndefined(onFailure))
+                onFailure(response.status);
+        } else {
+            return new Promise(function (resolve, reject) {
+                resolve(response.json());
+            })
+        }
+    }).then((data) => {
+        if (!userIsUpdated(data))
+            return;
+        if (!isUndefined(onSuccess))
+            onSuccess(data);
+    })
+}
+

@@ -23,8 +23,8 @@ import { LoginScreenRouter as LoginScreen } from './pages/LoginScreen.js';
 import { Chat as ChatRoom } from './pages/Chat.js';
 import { JoinGame } from './pages/JoinGame.js';
 import { PrintJoinGameDialog, DisplayLoading, AutoRedirectToLoginScreenIfUserInSession } from './PagesUtils.js';
-import { validEmail, passwordIsStrongEnough, isUndefined } from './Utils.js'
-import { emptyUser, logIn } from './user.js'
+import { validEmail, passwordIsStrongEnough, isUndefined, USER_ALREADY_EXISTS_STATUS } from './Utils.js'
+import { emptyUser, logIn, signUp } from './user.js'
 //import { createBrowserHistory } from '../../../AppData/Local/Microsoft/TypeScript/3.6/node_modules/@types/history';
 function Copyright() {
   return (
@@ -105,6 +105,8 @@ export const useStyles = makeStyles(theme => ({
 function SignUp() {
   const classes = useStyles();
   const [user, setUser] = useState(emptyUser);
+  const [userAlreadyExists, setUserAlreadyExists] = useState(false);
+
   const initMessages = {
     errorPassword: false,
     errorConfirmPassword: false,
@@ -122,18 +124,6 @@ function SignUp() {
       [e.target.name]: e.target.value
     });
   };
-
-  /*const errorEmail = 'errorEmail', emailHelperText= 'emailHelperText',
-   errorPassword='errorPassword', passwordHelperText='passwordHelperText',
-   firstNameHelperText='firstNameHelperText', errorFirstName='errorFirstName';
-  const changeTextMessage = (error, errorName, helperText, helperTextName) =>{
-    setTextsMessages({
-      ...textsMessages,
-      [errorName]: error,
-      [helperTextName]: helperText
-    });
-  }
-*/
 
   /**
    * returns true is the user is valid or false if it is not.
@@ -271,32 +261,37 @@ function SignUp() {
               color="primary"
               className={classes.submit}
               onClick={() => {
+                setUserAlreadyExists(false);
                 if (!validUser())
                   return;
                 // let data = new FormData();
                 // data.append( "json", JSON.stringify(user));
 
-
-                fetch('http://localhost:8000/user', {
-                  method: 'POST', // *GET, POST, PUT, DELETE, etc.
-                  headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                  },
-                  credentials: 'include',
-                  body: 'json=' + JSON.stringify(user)
-                }).then((data) => {
+                signUp(user, () => {
                   logIn(user, (data) => {
                     // todo: check if the email is already in the db!!
                     console.log('frontend got data: ', data);
                     // console.log('data.status: ', data.status)
                     history.push("/LoginScreen/MySentences");
                   });
-                })
+                }, (error_status) => {
+                  if (error_status === USER_ALREADY_EXISTS_STATUS) {
+                    setUserAlreadyExists(true);
+                  }
 
+                })
               }}>
 
               Sign Up
           </Button>
+            <Grid container justify="center">
+              <Grid item justify='center' xs={12}>
+                {userAlreadyExists && <Typography variant="h6" style={{ color: 'red' }}>
+                  That email is taken. Try another.
+          </Typography>}
+              </Grid>
+
+            </Grid>
             <Grid container justify="center">
               <Grid item>
                 <Link to="/SignIn" variant="body2">

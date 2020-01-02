@@ -241,30 +241,27 @@ function PrintCreateGameDialog(props) {
   const { handleCloseCreateGameWindow, createGameWindowOpen, currentUser } = props;
   const [gameName, setGameName] = React.useState("");
   const [currentGameNickName, setCurrentGameNickName] = React.useState(currentUser.nickName);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [serverError, setServerError] = React.useState(false);
+
   let history = useHistory();
   const startGame = () => {
-    /*
-            //var user = //todo- get user from session
-            var roomData = {
-              roomName: gameName,
-              user: user
-            }
-    
-            socket.on('roomOpened', function(roomID){
-              //todo- redirect to room page
-            });
-    
-            socket.emit('openRoom', roomData)
-    */
-
-
+    setIsLoading(true);
+    setServerError(false);
     console.log("starting game!");
     console.log("game name:", gameName);
     console.log('user nickname: ', currentGameNickName);
-    createRoom(gameName, currentUser, currentGameNickName, history);
-    //handleCloseCreateGameWindow();
-    //todo: redirect to room page
+    createRoom(gameName, currentUser, currentGameNickName, history, () => {
+      setIsLoading(false);
+    },
+      () => {
+        setServerError(true);
+        setIsLoading(false);
+      }
+    );
   }
+  if (isLoading)
+    return (<DisplayLoading />);
   return (
     <Dialog id="openRoomPopUp" open={createGameWindowOpen} onClose={handleCloseCreateGameWindow} aria-labelledby="form-dialog-title">
       <DialogTitle id="form-dialog-title">Create a Room</DialogTitle>
@@ -294,6 +291,11 @@ function PrintCreateGameDialog(props) {
                 setCurrentGameNickName(event.target.value);
               }}
             />
+          </Grid>
+          <Grid item xs={12}>
+            {serverError && <Typography variant="h6" style={{ textAlign: 'center', color: 'red' }}>
+              Server error occured.
+          </Typography>}
           </Grid>
         </Grid>
       </DialogContent>
