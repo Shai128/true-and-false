@@ -34,23 +34,36 @@ export function PrintGames(props) {
   const classes = props.classes;
   const user = getUserFromProps(props);
   let url = props.url;
+
+  if (games.length === 0)
+    return (<div>
+      <Typography variant="h5" component="h3" justify="center">
+        You haven't played yet!
+    </Typography>
+    </div>)
+  games.reverse();
   return (<List className={classes.list}>
-    {games.map(({ room_name, id, date }) => (
-      <React.Fragment key={id}>
-        <Link to={
-          {
-            pathname: `${url}/GamePage/` + id,
-            game: games[id],
-            user: user,
+    {games.map((game) => {
+      var room_name = game.room_name;
+      var id = games.indexOf(game);
+      var date = game.date
+      return (
+        <React.Fragment key={id}>
+          <Link to={
+            {
+              pathname: `${url}/GamePage/` + id,
+              game: games[id],
+              user: user,
+            }
           }
-        }
-        >
-          <ListItem button className={classes.gamesListItems}>
-            <ListItemText primary={room_name} secondary={date} />
-          </ListItem>
-        </Link>
-      </React.Fragment>
-    ))}
+          >
+            <ListItem button className={classes.gamesListItems}>
+              <ListItemText primary={room_name} secondary={date} />
+            </ListItem>
+          </Link>
+        </React.Fragment>
+      )
+    })}
   </List>);
 }
 

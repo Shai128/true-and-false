@@ -185,7 +185,6 @@ function getTwoRecentGames(user) {
       id: participated_len - 2,
       ...participated[participated_len - 2]
     })
-  console.log('chosed recent game:', recent_games);
   /*
   let created = getCreatedGames().slice(0);
   let games_num = created.length > participated.length ? created.length : participated.length;
