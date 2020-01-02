@@ -162,7 +162,7 @@ function GetSentencesComponentsByList(props) {
 
   const classes = listStyles();
   const sentences = props.sentences;
-  const typeOfSentences = sentences
+  //const typeOfSentences = sentences
 
   const setSentences = props.setSentences;
   //const [sentences, setSentences] = useState(props.sentences);

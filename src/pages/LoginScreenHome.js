@@ -22,7 +22,7 @@ import {
   Route,
 } from "react-router-dom";
 import { GamePage } from './GamePage.js';
-import { userIsUpdated, getCreatedGames, getParticipatedGames, getCurrentUserFromSession as getCurrentUser, getUserFromProps } from './../user';
+import { userIsUpdated, getCurrentUserFromSession as getCurrentUser, getUserFromProps } from './../user';
 import { PrintGames, PrintJoinGameDialog, DisplayLoading } from './../PagesUtils';
 import { createRoom } from './../room.js'
 export function LoginScreenHome(props) {

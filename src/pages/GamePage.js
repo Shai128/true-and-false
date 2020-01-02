@@ -23,7 +23,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 
 import Button from '@material-ui/core/Button';
 import { DisplayLoading } from './../PagesUtils'
-import { getCreatedGames, getParticipatedGames, getUserFromProps, getCurrentUserFromSession } from './../user.js';
+import { getUserFromProps, getCurrentUserFromSession } from './../user.js';
 import {
   //BrowserRouter as Router,
   //Switch,

@@ -13,7 +13,7 @@ import {
 } from "react-router-dom";
 
 import { PrintGames, DisplayLoading } from '../PagesUtils.js';
-import { getParticipatedGames, getCreatedGames, getUserFromProps, getCurrentUserFromSession, userIsUpdated } from '../user.js';
+import { getUserFromProps, getCurrentUserFromSession, userIsUpdated } from '../user.js';
 
 export function GamesListPage(props) {
   let { path, url } = useRouteMatch();
@@ -88,7 +88,9 @@ function GetGamesComponents(props) {
 function GetCreatedGamesComponents(props) {
   return (<PrintGames classes={AppUseStyles()} games={props.user.gameHistory} url={props.url} />);
 }
+/*
 function GetParticipatedGamesComponents(props) {
   return (<PrintGames classes={AppUseStyles()} games={getParticipatedGames()} url={props.url} />);
 }
+*/
 

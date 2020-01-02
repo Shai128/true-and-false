@@ -197,6 +197,17 @@ function PrintChangePassword(props) {
     setPasswordChangeMessage('');
   }
 
+
+  const displayWeakPassword = () => {
+    console.log('your password is too weak!');
+    setNewPasswordHelperText('this password is too weak');
+    setErrorNewPassword(true);
+  }
+
+  const displayPasswordSuccessfullyChanged = () => {
+    console.log('password saved successfuly!');
+    setPasswordChangeMessage('password saved successfuly!');
+  }
   const displayPasswordsDontMatch = () => {
     console.log('confirm and new passwords does not match');
     setErrorConfirmPassword(true);
@@ -208,6 +219,8 @@ function PrintChangePassword(props) {
     setErrorOldPassword(true);
     setOldPasswordHelperText('Wrong Old Password');
   }
+
+
   const onClickSave = () => {
     resetDisplaysContent();
     if (!validOldPassword(oldUser.password, passwords.enteredOldPassword)) {
@@ -219,37 +232,9 @@ function PrintChangePassword(props) {
       return;
     }
 
-
-    const onClickSave = () => {
-      resetDisplaysContent();
-      if (!validOldPassword(oldUser.password, passwords.enteredOldPassword)) {
-        displayWrongOldPassword();
-        return;
-      }
-      if (passwords.enteredConfirmPassword !== passwords.enteredNewPassword) {
-        displayPasswordsDontMatch();
-        return;
-      }
-
-      if (typeof passwords.enteredNewPassword === 'undefined' || !passwordIsStrongEnough(passwords.enteredNewPassword)) {
-        displayWeakPassword();
-        return;
-      }
-
-      // the new given password is valid
-      setNewPassword(passwords.enteredNewPassword);
-      let user_to_save = oldUser;
-      user_to_save.password = passwords.enteredNewPassword;
-      setOldUser(user_to_save);
-      updateUserToDB(user_to_save);
-      displayPasswordSuccessfullyChanged();
-    }
-
-
-
-    const displayPasswordSuccessfullyChanged = () => {
-      console.log('password saved successfuly!');
-      setPasswordChangeMessage('password saved successfuly!');
+    if (typeof passwords.enteredNewPassword === 'undefined' || !passwordIsStrongEnough(passwords.enteredNewPassword)) {
+      displayWeakPassword();
+      return;
     }
 
     // the new given password is valid
@@ -262,16 +247,6 @@ function PrintChangePassword(props) {
   }
 
 
-  const displayPasswordSuccessfullyChanged = () => {
-    console.log('password saved successfuly!');
-    setPasswordChangeMessage('password saved successfuly!');
-  }
-
-  const displayWeakPassword = () => {
-    console.log('your password is too weak!');
-    setNewPasswordHelperText('this password is too weak');
-    setErrorNewPassword(true);
-  }
   return (
     <Dialog id="changePasswordPopUp" open={WindowOpen} onClose={onCloseWindow} aria-labelledby="form-dialog-title">
       <DialogTitle id="form-dialog-title">Change Password</DialogTitle>
