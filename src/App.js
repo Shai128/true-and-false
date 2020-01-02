@@ -425,6 +425,10 @@ export function SignIn() {
   const [user, setUser] = useState(emptyUser());
   const [isLoading, setIsLoading] = useState(false);
   const [isWrongLogin, setIsWrongLogin] = useState(false);
+  const [emailError, setEmailError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
+  const [emailHelperText, setEmailHelperText] = useState('');
+  const [passwordHelperText, setPasswordHelperText] = useState('');
 
   const updateField = e => {
     setUser({
@@ -432,6 +436,28 @@ export function SignIn() {
       [e.target.name]: e.target.value
     });
   };
+  const resetDisplay = () => {
+    setEmailError(false);
+    setPasswordError(false);
+    setEmailHelperText('');
+    setPasswordHelperText('');
+    setIsWrongLogin(false);
+  }
+  const validUser = (user) => {
+    var isValid = true;
+    if (!validEmail(user.email)) {
+      setEmailError(true);
+      setEmailHelperText("Please provide a valid email address")
+      isValid = false;
+    }
+
+    if (!passwordIsStrongEnough(user.password)) {
+      setPasswordError(true);
+      setPasswordHelperText("please provide a strong password");
+      isValid = false;
+    }
+    return isValid;
+  }
   if (isLoading)
     return (<DisplayLoading />);
   return (
@@ -451,7 +477,8 @@ export function SignIn() {
                 </Grid>
                 <Grid item xs={6}>
                   <TextField
-                    error={isWrongLogin}
+                    error={emailError}
+                    helperText={emailHelperText}
                     id="EmailInput"
                     className={classes.textField}
                     label="Email"
@@ -466,7 +493,8 @@ export function SignIn() {
                 <Grid item xs={6}>
 
                   <TextField
-                    error={isWrongLogin}
+                    error={passwordError}
+                    helperText={passwordHelperText}
                     id="PasswordInput"
                     label="Password"
                     className={classes.textField}
@@ -484,7 +512,10 @@ export function SignIn() {
 
                   <Button id="submit" variant="contained" color="primary" fullWidth className={classes.button}
                     onClick={() => {
-                      setIsWrongLogin(false);
+                      resetDisplay();
+                      if (!validUser(user)) {
+                        return
+                      }
                       setIsLoading(true);
                       console.log("sending sign in");
 
@@ -503,7 +534,11 @@ export function SignIn() {
                     Sign In
       </Button>
                 </Grid>
-                {isWrongLogin ? 'your email and password does not match' : ''}
+                <Grid item xs={12}>
+                  {isWrongLogin && <Typography variant="h6" style={{ textAlign: 'center', color: 'red' }}>
+                    Your email and password does not match
+          </Typography>}
+                </Grid>
               </Grid>
             </form>
           </div>

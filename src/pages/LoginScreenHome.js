@@ -25,6 +25,7 @@ import { GamePage } from './GamePage.js';
 import { userIsUpdated, getCurrentUserFromSession as getCurrentUser, getUserFromProps } from './../user';
 import { PrintGames, PrintJoinGameDialog, DisplayLoading } from './../PagesUtils';
 import { createRoom } from './../room.js'
+import { isUndefined } from './../Utils.js'
 export function LoginScreenHome(props) {
   let { path, url } = useRouteMatch();
   let user = getUserFromProps(props);
@@ -243,11 +244,43 @@ function PrintCreateGameDialog(props) {
   const [currentGameNickName, setCurrentGameNickName] = React.useState(currentUser.nickName);
   const [isLoading, setIsLoading] = React.useState(false);
   const [serverError, setServerError] = React.useState(false);
+  const [roomNameError, setRoomNameError] = React.useState(false);
+  const [roomNameHelperText, setRoomNameHelperText] = React.useState('');
+  const [nickNameError, setNickNameError] = React.useState(false);
+  const [nickNameHelperText, setNickNameHelperText] = React.useState('');
 
   let history = useHistory();
-  const startGame = () => {
-    setIsLoading(true);
+
+  const resetDisplay = () => {
+    setRoomNameError(false);
+    setRoomNameHelperText('');
     setServerError(false);
+    setNickNameError(false);
+    setNickNameHelperText('');
+    setGameName('');
+  }
+  const validData = (gameName, nickName) => {
+    var isValid = true
+    if (isUndefined(gameName) || gameName === '') {
+      setRoomNameError(true);
+      setRoomNameHelperText('Please provide a room name');
+      isValid = false;
+    }
+    if (isUndefined(nickName) || nickName === '') {
+      setNickNameError(true);
+      setNickNameHelperText('Please provide a nick name');
+      isValid = false;
+    }
+    return isValid;
+  }
+
+  const startGame = () => {
+    console.log("startGame");
+    resetDisplay();
+    if (!validData(gameName, currentGameNickName))
+      return;
+
+    setIsLoading(true);
     console.log("starting game!");
     console.log("game name:", gameName);
     console.log('user nickname: ', currentGameNickName);
@@ -272,6 +305,8 @@ function PrintCreateGameDialog(props) {
           <Grid item xs={12}>
             <TextField
               autoFocus
+              error={roomNameError}
+              helperText={roomNameHelperText}
               margin="dense"
               id="roomName"
               label="Room Name"
@@ -283,6 +318,8 @@ function PrintCreateGameDialog(props) {
           <Grid item xs={12}>
             <TextField
               autoFocus
+              error={nickNameError}
+              helperText={nickNameHelperText}
               margin="dense"
               id="nickName"
               label="Nick Name"
@@ -295,7 +332,7 @@ function PrintCreateGameDialog(props) {
           <Grid item xs={12}>
             {serverError && <Typography variant="h6" style={{ textAlign: 'center', color: 'red' }}>
               Server error occured.
-          </Typography>}
+            </Typography>}
           </Grid>
         </Grid>
       </DialogContent>

@@ -35,7 +35,10 @@ function removeUnReadMessagesFromCertainUser(user, otherUserEmail) {
     }
     return newUnReadArray;
 }
-
+function isNumeric(num) {
+    return !isNaN(num)
+}
+exports.isNumeric = isNumeric
 exports.okStatus = okStatus
 exports.isUndefined = isUndefined
 exports.removeUnReadMessagesFromCertainUser = removeUnReadMessagesFromCertainUser

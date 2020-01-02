@@ -29,6 +29,9 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import { getUserFromProps, getCurrentUserFromDB } from './user.js';
 import { useStyles } from './App.js';
 import { joinRoom } from './room.js';
+import { isNumeric } from './Utils.js'
+
+
 export function PrintGames(props) {
   const games = props.games;
   const classes = props.classes;
@@ -128,6 +131,10 @@ export function PrintJoinGameDialog(props) {
     handleCloseWindow();
   }
 
+  const displayInvalidNickName = () => {
+    setNickNameHelperText('Invalid nick name');
+    setvalidNickName(false);
+  }
   const displayNickNameTaken = () => {
     setNickNameHelperText('This nick name is taken');
     setvalidNickName(false);
@@ -139,36 +146,34 @@ export function PrintJoinGameDialog(props) {
   }
 
   const resetDisplaysContent = () => {
+    setServerError(false);
     setGameIDHelperText('');
     setNickNameHelperText('');
     setvalidNickName(true);
     setValidGameID(true);
+    setGameID('');
   }
+
+  const validData = (gameID, nickName) => {
+    var isValid = true;
+    if (isUndefined(gameID) || gameID === '' || !isNumeric(gameID)) {
+      displayWrongGameID();
+      isValid = false;
+    }
+    if (isUndefined(nickName) || nickName === '') {
+      displayInvalidNickName();
+      isValid = false;
+    }
+    return isValid;
+  }
+
 
   let history = useHistory();
   const joinGame = () => {
     resetDisplaysContent();
+    if (!validData(gameID, currentGameNickName))
+      return;
     setIsLoading(true);
-    /*
-        //var user = //todo- get user from session
-        var roomData = {
-          roomName: gameName,
-          user: user
-        }
-    
-        
-        var user = {
-          //todo- get socketID from session
-          //socketID: ,
-          gameNickName: currentGameNickName
-        }
-        var data = {
-          user: user,
-          roomID: gameID
-        }
-    
-        socket.emit('joinRoom', data);
-    */
 
     console.log("starting game!");
     console.log("game ID:", gameID);
@@ -220,8 +225,8 @@ export function PrintJoinGameDialog(props) {
               }}
             />
           </Grid>
-          <Grid item justify='center' xs={12}>
-            {serverError && <Typography variant="h6" style={{ color: 'red' }}>
+          <Grid item xs={12}>
+            {serverError && <Typography variant="h6" style={{ textAlign: 'center', color: 'red' }}>
               Server error occured.
           </Typography>}
           </Grid>
