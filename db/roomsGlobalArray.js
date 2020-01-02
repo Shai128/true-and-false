@@ -1,12 +1,12 @@
-const {mongoose} = require("./config")
+const { mongoose } = require("./config")
 
 
 const roomsGlobalArraySchema = new mongoose.Schema(
-    { 
-        array_id:{type: Number},
-        array: {type:[Boolean]}
-       });
-const roomsGlobalArrayModel = mongoose.model('roomsglobalarrays',roomsGlobalArraySchema)
+    {
+        array_id: { type: Number },
+        array: { type: [Boolean] }
+    });
+const roomsGlobalArrayModel = mongoose.model('roomsglobalarrays', roomsGlobalArraySchema)
 
 
 /*
@@ -68,4 +68,4 @@ async function help2(field, value, success, failure) {
 exports.getRoomsGlobalArray = getRoomsGlobalArray
 exports.updateRoomsGlobalArray=updateRoomsGlobalArray
 */
-exports.roomsGlobalArrayModel=roomsGlobalArrayModel
+exports.roomsGlobalArrayModel = roomsGlobalArrayModel

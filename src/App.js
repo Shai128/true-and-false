@@ -81,6 +81,7 @@ export const useStyles = makeStyles(theme => ({
     display: 'none',
   },
   root: {
+    textAlign: 'center',
     width: '100%',
     maxWidth: 500,
     color: '#000000'
@@ -393,16 +394,7 @@ function Home() {
       </Button>
                 </Link>
               </Grid>
-              {/* 
-            <Grid item xs={12} sm={6}>
-              <Link to="/LoginScreen">
-                <Button variant="contained" color="primary" fullWidth className={classes.button}>
-                  LoginScreen
-          </Button>
-              </Link>
-            </Grid> */}
 
-              {/* <Grid item xs={12} sm={6}> */}
               <Button variant="contained" color="primary" fullWidth onClick={handleClickGuestLogin} className={classes.button}>
                 Guest Login
             </Button>
@@ -411,26 +403,6 @@ function Home() {
               handleCloseWindow={handleCloseGuestLoginWindow}
               WindowOpen={guestLoginWindowOpen}
               currentUser={emptyUser()} />
-            {/* </Grid> */}
-
-            {/* 
-          <Grid item xs={12} sm={6}>
-            <Link to="/ChatRoom">
-            <Button variant="contained" color="primary" fullWidth  className={classes.button}>
-              Chat
-          </Button>
-          </Link>
-            </Grid> */}
-
-
-            {/* <Grid item xs={12} sm={6}>
-            <Link to="/JoinGame">
-            <Button variant="contained" color="primary" fullWidth  className={classes.button}>
-              Join A Game
-          </Button>
-          </Link>
-            </Grid> */}
-
           </form>
           <Box mt={5}>
             <Copyright />
@@ -444,64 +416,6 @@ function Home() {
 
 }
 
-/*
-
-function PrintGuestLoginDialog(props){
-  const {handleCloseGuestLoginWindow,  guestLoginWindowOpen} = props;
-  const [gameID, setGameID] = React.useState("");
-  const [currentGameNickName, setCurrentGameNickName] = React.useState('');
-
-  const startGame = ()=>{
-      //todo
-      console.log("starting game!");
-      console.log("game ID:", gameID);
-      console.log('user nickname: ', currentGameNickName);
-      handleCloseGuestLoginWindow();
-  }
-  return(
-      <Dialog open={guestLoginWindowOpen} onClose={handleCloseGuestLoginWindow} aria-labelledby="form-dialog-title">
-      <DialogTitle id="form-dialog-title">Select Room Name</DialogTitle>
-      <DialogContent>
-        <DialogContentText>
-        </DialogContentText>
-        <Grid container spacing={2}>
-        <Grid item xs={12}>
-        <TextField
-          autoFocus
-          margin="dense"
-          id="roomID"
-          label="Room ID"
-          onChange={(event)=>{
-            setGameID(event.target.value);
-          }}
-        />
-        </Grid>
-        <Grid item xs={12}>
-        <TextField
-          autoFocus
-          margin="dense"
-          id="nickName"
-          label="Nick Name"
-          onChange={(event)=>{
-              setCurrentGameNickName(event.target.value);
-          }}
-        />
-        </Grid>
-        </Grid>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleCloseGuestLoginWindow} color="primary">
-          Cancel
-        </Button>
-        <Button onClick={startGame} color="primary">
-              Start
-        </Button>
-      </DialogActions>
-    </Dialog>
-
-  );
-}
-*/
 
 export function SignIn() {
 
@@ -533,9 +447,9 @@ export function SignIn() {
                 <Grid item xs={12}>
                   <Typography variant="h1" component="h2" gutterBottom className={classes.root}>
                     Sign In
-      </Typography>
+                  </Typography>
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={6}>
                   <TextField
                     error={isWrongLogin}
                     id="EmailInput"
@@ -549,7 +463,7 @@ export function SignIn() {
                     onChange={updateField}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={6}>
 
                   <TextField
                     error={isWrongLogin}
