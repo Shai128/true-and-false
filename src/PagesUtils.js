@@ -126,10 +126,7 @@ export function PrintJoinGameDialog(props) {
   const [gameIDHelperText, setGameIDHelperText] = React.useState('');
   const [isLoading, setIsLoading] = React.useState(false);
   const [serverError, setServerError] = React.useState(false);
-  const onCloseWindow = () => {
-    resetDisplaysContent();
-    handleCloseWindow();
-  }
+
 
   const displayInvalidNickName = () => {
     setNickNameHelperText('Invalid nick name');
@@ -152,6 +149,10 @@ export function PrintJoinGameDialog(props) {
     setvalidNickName(true);
     setValidGameID(true);
     setGameID('');
+  }
+  const onCloseWindow = () => {
+    resetDisplaysContent();
+    handleCloseWindow();
   }
 
   const validData = (gameID, nickName) => {

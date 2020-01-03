@@ -151,14 +151,18 @@ function PrintPlayers(props) {
       paddingLeft: theme.spacing(4),
     },
   }));
-  const players = props.players;
+  if (isUndefined(props.players))
+    props.players = [];
+  const [players, setPlayers] = React.useState(props.players.filter(player => player.email !== getUserFromProps(props).email));
   const classes = useStyles();
   let initial_open = players.slice();
   initial_open.fill(false);
   const [open, setOpen] = React.useState(initial_open);
   const [playerInfoDialogOpen, setPlayerInfoDialogOpen] = React.useState(initial_open);
   const [user, setUser] = React.useState(getUserFromProps(props));
-  getCurrentUserFromSession(user, setUser);
+  getCurrentUserFromSession(user, setUser, (u) => {
+    setPlayers(players.filter(player => player.email !== u.email));
+  });
   const openPlayerWindow = (index) => {
     let new_arr = playerInfoDialogOpen.slice();
     new_arr[index] = true;
@@ -171,6 +175,13 @@ function PrintPlayers(props) {
     new_arr[index] = false;
     setPlayerInfoDialogOpen(new_arr);
   }
+
+  if (players.length === 0) {
+    return (<Typography component="h6">
+      You were the only player in that game!
+    </Typography>);
+  }
+
   return (<List className={classes.root}>
     {players.map((player) => {
       player.nickName = isUndefined(player.nickName) ? player.nickname : player.nickName
@@ -250,7 +261,8 @@ function PrintPlayerInfo(props) {
         <Grid container spacing={2}>
           <Grid item xs={6}>
             <Typography component="h4" variant={texts_variant}>
-              First Name:</Typography>
+              First Name:
+              </Typography>
           </Grid>
           <Grid item xs={6}>
             <Paper className={classes.root}>
