@@ -48,7 +48,7 @@ export function PrintGames(props) {
   return (<List className={classes.list}>
     {games.map((game) => {
       var room_name = game.room_name;
-      var id = games.indexOf(game);
+      var id = game.id;
       var date = game.date
       return (
         <React.Fragment key={id}>

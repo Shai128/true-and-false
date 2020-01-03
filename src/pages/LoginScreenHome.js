@@ -176,16 +176,17 @@ function getTwoRecentGames(user) {
   let participated = user.gameHistory; /*getParticipatedGames().slice(0);*/
   var participated_len = participated.length
   var recent_games = [];
-  if (participated_len >= 0)
-    recent_games.push({
-      id: participated_len - 1,
-      ...participated[participated_len - 1]
-    })
   if (participated_len >= 1)
     recent_games.push({
       id: participated_len - 2,
       ...participated[participated_len - 2]
     })
+  if (participated_len >= 0)
+    recent_games.push({
+      id: participated_len - 1,
+      ...participated[participated_len - 1]
+    })
+
   /*
   let created = getCreatedGames().slice(0);
   let games_num = created.length > participated.length ? created.length : participated.length;
