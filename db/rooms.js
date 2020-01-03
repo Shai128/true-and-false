@@ -394,7 +394,7 @@ async function getRoomSize(room_id, success, failure) {
 
 async function get_available_users(room_id, success, failure) {
     roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
-        if (err) failure(statusCodes.ROOM_NOT_FOUND);
+        if (err || room == null) failure(statusCodes.ROOM_NOT_FOUND);
         else {
             var res = [];
             var i = 0, j = 0;
