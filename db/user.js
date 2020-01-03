@@ -3,7 +3,7 @@ const { isUndefined, removeUnReadMessagesFromCertainUser } = require("../src/Uti
 const salt = '' //todo: change to a real good salt
 const iterations = 1000;
 const LAST_MESSAGES_LIMIT = 100
-const USER_ALREADY_EXISTS = 'user already exists error'
+const {statusCodes} = require("../src/Utils")
 const userSchema = new mongoose.Schema(
     {
         email: String,
@@ -90,7 +90,8 @@ function createUser(user, success, failure) {
         }
         else {
             console.log("dbuser:", dbUser)
-            failure(USER_ALREADY_EXISTS)
+            console.log(statusCodes)
+            failure(statusCodes.USER_EXISTS)
         }
     })
 }
@@ -249,7 +250,7 @@ async function findUser(user_data, success, failure) {
         user_data.email,
         (users) => {
             if (users.length !== 1) {
-                failure("no email " + user_data.email + " found.");
+                failure(statusCodes.USER_DOES_NOT_EXIST);
             } else {
                 success(users[0]);
             }
@@ -329,9 +330,6 @@ async function updateUser(userID, userEmail, user, success, failure) {
 
 }
 
-
-
-exports.USER_ALREADY_EXISTS = USER_ALREADY_EXISTS
 exports.removeUnReadMessagesFromCertainUserInDB = removeUnReadMessagesFromCertainUserInDB
 exports.createUser = createUser
 exports.findUser = findUser

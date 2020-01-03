@@ -1,5 +1,10 @@
-const okStatus = 200;
-const USER_ALREADY_EXISTS_STATUS = 501;
+const statusCodes = {
+    OK: 200,
+    UNDEFINED: 500,
+    USER_EXISTS: 501,
+    USER_DOES_NOT_EXIST: 502,
+    PASSWORD_MISMATCH: 503
+}
 const serverIP = 'localhost'
 const httpServerIP = 'http://' + serverIP
 const server = httpServerIP + ':8000'
@@ -39,11 +44,10 @@ function isNumeric(num) {
     return !isNaN(num)
 }
 exports.isNumeric = isNumeric
-exports.okStatus = okStatus
 exports.isUndefined = isUndefined
 exports.removeUnReadMessagesFromCertainUser = removeUnReadMessagesFromCertainUser
 exports.passwordIsStrongEnough = passwordIsStrongEnough
 exports.validEmail = validEmail
 exports.serverIP = serverIP;
 exports.server = server;
-exports.USER_ALREADY_EXISTS_STATUS = USER_ALREADY_EXISTS_STATUS
+exports.statusCodes = statusCodes
