@@ -222,10 +222,10 @@ function GetSentencesComponentsByList(props) {
         ))}
       </List>
       <Grid container spacing={2}>
-        <Grid item xs={12} style={{ justifyContent: 'center' }}>
+        <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
           <IconButton id={"add" + props.type + "SentenceBTN"}
-            style={{ justifyContent: 'center', width: '100%' }}
-            edge="start"
+            style={{ display: 'flex', justifyContent: 'center', }}
+            //edge="start"
             color="primary"
             aria-label="open drawer"
             onClick={handleAddSentence}
