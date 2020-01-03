@@ -3,7 +3,7 @@ const { isUndefined, removeUnReadMessagesFromCertainUser } = require("../src/Uti
 const salt = '' //todo: change to a real good salt
 const iterations = 1000;
 const LAST_MESSAGES_LIMIT = 100
-const {statusCodes} = require("../src/Utils")
+const { statusCodes } = require("../src/Utils")
 const userSchema = new mongoose.Schema(
     {
         email: String,
