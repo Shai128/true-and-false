@@ -286,18 +286,22 @@ export function logIn(user, onSuccess, onFailure) {
         params: user,
         credentials: 'include'
     }).then(response => {
+        console.log('ok status: ', okStatus);
         console.log("response:", response)
         console.log("response status:", response.status)
         if (response.status !== okStatus) {
             reject(response.status);
-            if (!isUndefined(onFailure))
+            if (!isUndefined(onFailure)) {
+                console.log('http request failed. activating onFailire with status: ', response.status);
                 onFailure(response.status);
+            }
         } else {
             return new Promise(function (resolve, reject) {
                 resolve(response.json());
             })
         }
     }).then(user => {
+        console.log('tried to log in and got from server: ', user)
         if (!userIsUpdated(user)) {
             return;
         }

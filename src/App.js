@@ -529,6 +529,7 @@ export function SignIn() {
                           history.push("/LoginScreen");
                         },
                         (status) => { // onFailure funciton
+                          console.log("login failed. status: ", status);
                           setIsLoading(false);
                           if (status === statusCodes.PASSWORD_MISMATCH)
                             setIsWrongLogin(true);

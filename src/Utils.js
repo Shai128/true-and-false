@@ -5,6 +5,7 @@ const statusCodes = {
     USER_DOES_NOT_EXIST: 502,
     PASSWORD_MISMATCH: 503
 }
+const okStatus = statusCodes.OK;
 const serverIP = 'localhost'
 const httpServerIP = 'http://' + serverIP
 const server = httpServerIP + ':8000'
@@ -51,3 +52,4 @@ exports.validEmail = validEmail
 exports.serverIP = serverIP;
 exports.server = server;
 exports.statusCodes = statusCodes
+exports.okStatus = okStatus
