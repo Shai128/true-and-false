@@ -291,7 +291,7 @@ export function logIn(user, onSuccess, onFailure) {
         if (response.status !== okStatus) {
             reject(response.status);
             if (!isUndefined(onFailure))
-                onFailure();
+                onFailure(response.status);
         } else {
             return new Promise(function (resolve, reject) {
                 resolve(response.json());
@@ -311,6 +311,8 @@ export function logIn(user, onSuccess, onFailure) {
         console.log('now we have in local storage: ', JSON.parse(localStorage.getItem(user_in_session_key)));
 
     }, fail_status => {
+        if (!isUndefined(onFailure))
+            onFailure(fail_status);
         console.log("failed, status:", fail_status)
     });
 }

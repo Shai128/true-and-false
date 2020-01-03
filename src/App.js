@@ -23,7 +23,7 @@ import { LoginScreenRouter as LoginScreen } from './pages/LoginScreen.js';
 import { Chat as ChatRoom } from './pages/Chat.js';
 import { JoinGame } from './pages/JoinGame.js';
 import { PrintJoinGameDialog, DisplayLoading, AutoRedirectToLoginScreenIfUserInSession } from './PagesUtils.js';
-import { validEmail, passwordIsStrongEnough, isUndefined, USER_ALREADY_EXISTS_STATUS } from './Utils.js'
+import { validEmail, passwordIsStrongEnough, isUndefined, statusCodes } from './Utils.js'
 import { emptyUser, logIn, signUp } from './user.js'
 //import { createBrowserHistory } from '../../../AppData/Local/Microsoft/TypeScript/3.6/node_modules/@types/history';
 function Copyright() {
@@ -276,7 +276,7 @@ function SignUp() {
                     history.push("/LoginScreen/MySentences");
                   });
                 }, (error_status) => {
-                  if (error_status === USER_ALREADY_EXISTS_STATUS) {
+                  if (error_status === statusCodes.USER_EXISTS) {
                     setUserAlreadyExists(true);
                   }
 
@@ -286,7 +286,7 @@ function SignUp() {
               Sign Up
           </Button>
             <Grid container justify="center">
-              <Grid item justify='center' xs={12}>
+              <Grid item xs={12}>
                 {userAlreadyExists && <Typography variant="h6" style={{ color: 'red' }}>
                   That email is taken. Try another.
           </Typography>}
@@ -425,6 +425,8 @@ export function SignIn() {
   const [user, setUser] = useState(emptyUser());
   const [isLoading, setIsLoading] = useState(false);
   const [isWrongLogin, setIsWrongLogin] = useState(false);
+  const [serverError, setServerError] = useState(false);
+
   const [emailError, setEmailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [emailHelperText, setEmailHelperText] = useState('');
@@ -437,6 +439,7 @@ export function SignIn() {
     });
   };
   const resetDisplay = () => {
+    setServerError(false);
     setEmailError(false);
     setPasswordError(false);
     setEmailHelperText('');
@@ -525,9 +528,12 @@ export function SignIn() {
                           console.log('logged in and frontend got data: ', user);
                           history.push("/LoginScreen");
                         },
-                        () => { // onFailure funciton
+                        (status) => { // onFailure funciton
                           setIsLoading(false);
-                          setIsWrongLogin(true);
+                          if (status === statusCodes.PASSWORD_MISMATCH)
+                            setIsWrongLogin(true);
+                          else
+                            setServerError(true);
                         });
 
                     }}>
@@ -536,8 +542,15 @@ export function SignIn() {
                 </Grid>
                 <Grid item xs={12}>
                   {isWrongLogin && <Typography variant="h6" style={{ textAlign: 'center', color: 'red' }}>
-                    Your email and password does not match
+                    Your email and password does not match.
           </Typography>}
+
+                </Grid>
+                <Grid item xs={12}>
+                  {serverError && <Typography variant="h6" style={{ textAlign: 'center', color: 'red' }}>
+                    Server error occured.
+          </Typography>}
+
                 </Grid>
               </Grid>
             </form>
