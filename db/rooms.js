@@ -9,6 +9,8 @@ const UNVAILABLE_STATE = 2;
 const AVAILABLE_STATE = 1;
 const PLAYERS_AMOUNT = 10;
 
+const {statusCodes} = require("../src/Utils.js")
+
 const roomSchema = new mongoose.Schema(
     {
         room_id: { type: Number, unique: true, required: true },
@@ -51,7 +53,7 @@ async function findRoomById(room_id, success, failure) {
         room_id,
         (rooms) => {
             if (rooms.length !== 1) {
-                failure("no room with id " + room_id + " found.");
+                failure(statusCodes.ROOM_NOT_FOUND);
             } else {
                 success(rooms[0]);
             }
@@ -62,7 +64,7 @@ async function findRoomByField(field, value, success, failure) {
     var query = {};
     query[field] = value;
     return roomModel.find(query, (err, docs) => {
-        if (err) { failure(err) } else { success(docs); }
+        if (err) { failure(statusCodes.ROOM_NOT_FOUND) } else { success(docs); }
     });
 }
 
@@ -70,7 +72,9 @@ async function findRoomByField(field, value, success, failure) {
 
 async function findUserByEmailInRoomByRoomID(room_id, email, success, fail) { //room_id: int, email: string
     roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
-        if (err) fail('Room with id' + room_id + 'does not exist');
+        console.log("err:", err)
+        console.log("room:", room)
+        if (err || room === null) fail(statusCodes.ROOM_NOT_FOUND);
         else {
             var arr_users = room.users_in_room;
             // console.log('got here: '+arr_users[0].email);
@@ -82,7 +86,7 @@ async function findUserByEmailInRoomByRoomID(room_id, email, success, fail) { //
                     success(arr_users[i])
                 }
             }
-            if (flag_not_found) { fail('User with email ' + email + ' was not found in room with id ' + room_id) }
+            if (flag_not_found) { fail(statusCodes.USER_DOES_NOT_EXIST) }
         }
     });
 }
@@ -181,7 +185,7 @@ async function addRoomToUserGameHistory(userEmail, reducedRoomObject) {
 
 async function deleteUserByEmailInRoomByRoomID(room_id, email, success, fail) { //room_id: int, email: string
     roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
-        if (err) fail('Room with id' + room_id + 'does not exist');
+        if (err) fail(statusCodes.ROOM_NOT_FOUND);
         else {
             console.log('got here');
             if (!room) room = { users_in_room: [], state_array: [] }
@@ -192,7 +196,7 @@ async function deleteUserByEmailInRoomByRoomID(room_id, email, success, fail) { 
                 if (arr_users[i] != undefined && arr_users[i].email == email) { j = i; flag_not_found = 0; }
 
             }
-            if (flag_not_found) { fail('User with email ' + email + ' was not found in room with id ' + room_id) }
+            if (flag_not_found) { fail(statusCodes.USER_DOES_NOT_EXIST) }
             else {
                 room.state_array[j] = INVALID_STATE;
                 roomModel.findOneAndUpdate({ room_id: room_id }, { $set: { state_array: room.state_array } }, () => {
@@ -210,7 +214,7 @@ async function deleteUserByEmailInRoomByRoomID(room_id, email, success, fail) { 
 
                             await roomModel.remove({ room_id: room_id });
                             roomsGlobalArrayModel.findOne({ array_id: 1 }).exec(function (err, arr) {
-                                if (err) { fail('shit'); console.log('should not get here') }
+                                if (err) { fail(statusCodes.UNDEFINED); console.log('should not get here') }
                                 else {
                                     console.log('the array is:', arr.array);
                                     arr.array[room_id] = false;
@@ -232,12 +236,21 @@ async function deleteUserByEmailInRoomByRoomID(room_id, email, success, fail) { 
     );
 }
 
+/**
+ *  returns true iff someone in users has the same nickname as user but different email
+ */
+async function nicknameTaken(users, user) {
+    return users.filter(
+        userObject => userObject.nickname === user.nickname 
+        && userObject.email !== user.email
+        ).length !== 0
+}
 
 async function addUserObjectToRoom(room_id, user, success, fail) {
     //console.log('got here 3');
     console.log("inside addUserObjectToRoom the user:", user)
     roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
-        if (err) fail('Room with id' + room_id + 'does not exist');
+        if (err) fail(statusCodes.ROOM_NOT_FOUND);
         else {
             var already_in_room = false;
             // check if user already in room. if so -- just update it's status
@@ -247,6 +260,10 @@ async function addUserObjectToRoom(room_id, user, success, fail) {
                     room.state_array[i] = AVAILABLE_STATE;
                     already_in_room = true;
                 }
+            }
+
+            if (nicknameTaken(room.users_in_room, user)) {
+                fail(statusCodes.NICKNAME_TAKEN)
             }
 
             var arr_users = room.users_in_room;
@@ -281,12 +298,12 @@ async function addUserObjectToRoom(room_id, user, success, fail) {
 async function addUserToRoom(room_id, email, success, fail) {
     console.log('addUserToRoom got params: room_id: ', room_id + " email: ", email);
     roomModel.find({ room_id: room_id }, (err, docs) => {
-        var room = docs[0]
-        if (room === undefined) { fail("room does not exist"); return }
-        if (err) { fail(err) } else {
+        if (err) { fail(statusCodes.ROOM_NOT_FOUND) } else {
+            var room = docs[0]
+        if (room === undefined) { fail(statusCodes.ROOM_NOT_FOUND); return }
             console.log('addUserToRoom. room ', room_id + "found. ");
             userModel.findOne({ email: email }).exec(function (err2, user) {
-                if (err2) fail('trying to add user to room. ', room_id + ' User with email' + email + 'does not exist');
+                if (err2) fail(statusCodes.USER_DOES_NOT_EXIST);
                 else {
                     console.log('addUserToRoom found user: ', user);
                     var false_array = new Array(PLAYERS_AMOUNT).fill(false);
@@ -317,7 +334,7 @@ async function addUserToRoom(room_id, email, success, fail) {
 
 async function createRoom(room_name, success, failure) {
     roomsGlobalArrayModel.findOne({ array_id: 1 }).exec(function (err, global_array) {
-        if (err) { failure('unexpected error occured during fetching the rooms global array') }
+        if (err) { failure(statusCodes.UNDEFINED) }
         else {
 
             if (isUndefined(global_array)) {
@@ -330,7 +347,7 @@ async function createRoom(room_name, success, failure) {
                 //saves the user in the db
                 new_global_array.save((err) => {
                     if (err)
-                        failure(err)
+                        failure(statusCodes.UNDEFINED)
                     else
                         success()
                 });
@@ -360,7 +377,7 @@ async function createRoom(room_name, success, failure) {
             // console.log("saving new room:", newRoom)
             //saves the room in the db
             newRoom.save((err) => {
-                if (err) { console.log(err); failure('failed creating a room') } else {
+                if (err) { console.log(err); failure(statusCodes.UNDEFINED) } else {
                     roomsGlobalArrayModel.findOneAndUpdate({ array_id: global_array.array_id }, { $set: { array: global_array.array } }, () => { success(room_id) }
                     );
                 }
@@ -371,13 +388,13 @@ async function createRoom(room_name, success, failure) {
 
 async function getRoomSize(room_id, success, failure) {
     roomModel.find({ room_id: room_id }, (err, docs) => {
-        if (err) { failure(err) } else { success(docs[0].users_in_room.length) }
+        if (err) { failure(statusCodes.ROOM_NOT_FOUND) } else { success(docs[0].users_in_room.length) }
     });
 }
 
 async function get_available_users(room_id, success, failure) {
     roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
-        if (err) failure('Room with id' + room_id + 'does not exist');
+        if (err) failure(statusCodes.ROOM_NOT_FOUND);
         else {
             var res = [];
             var i = 0, j = 0;
@@ -398,7 +415,7 @@ async function changeUserAvailability(room_id, email, status, success, fail) {
     console.log("inside db changeUserAvailability")
     console.log("roomId:", room_id, "email:", email)
     roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
-        if (err) fail('Room with id' + room_id + 'does not exist');
+        if (err) fail(statusCodes.ROOM_NOT_FOUND);
         else {
             var i, not_found = 1;
             for (i = 0; i < room.users_in_room.length; i++) {
@@ -410,7 +427,7 @@ async function changeUserAvailability(room_id, email, status, success, fail) {
                     break;
                 }
             }
-            if (not_found) fail('User with email ' + email + ' was not found in room with id ' + room_id);
+            if (not_found) fail(statusCodes.USER_NOT_IN_ROOM);
             else {
                 roomModel.findOneAndUpdate({ room_id: room_id }, { $set: { state_array: room.state_array } },
                     () => { success('Successfully changed the availabilty of user with email ' + email + ' in room with id ' + room_id); })
@@ -422,7 +439,7 @@ async function changeUserAvailability(room_id, email, status, success, fail) {
 }
 async function get_unavailable_users(room_id, success, failure) {
     roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
-        if (err) failure('Room with id' + room_id + 'does not exist');
+        if (err) failure(statusCodes.ROOM_NOT_FOUND);
         else {
             var res = [];
             var i, j = 0;
@@ -441,7 +458,7 @@ async function get_unavailable_users(room_id, success, failure) {
 
 async function getAllSentencesArray(room_id, success, failure) { //room_id: int
     roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
-        if (err) failure('Room with id' + room_id + 'does not exist');
+        if (err) failure(statusCodes.ROOM_NOT_FOUND);
         else {//console.log('got here:'+room.all_sentences)
 
             success(room.all_sentences)
