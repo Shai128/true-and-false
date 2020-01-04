@@ -9,7 +9,7 @@ const UNVAILABLE_STATE = 2;
 const AVAILABLE_STATE = 1;
 const PLAYERS_AMOUNT = 10;
 
-const {statusCodes} = require("../src/Utils.js")
+const { statusCodes } = require("../src/Utils.js")
 
 const roomSchema = new mongoose.Schema(
     {
@@ -239,11 +239,11 @@ async function deleteUserByEmailInRoomByRoomID(room_id, email, success, fail) { 
 /**
  *  returns true iff someone in users has the same nickname as user but different email
  */
-async function nicknameTaken(users, user) {
+function nicknameTaken(users, user) {
     return users.filter(
-        userObject => userObject.nickname === user.nickname 
-        && userObject.email !== user.email
-        ).length !== 0
+        userObject => userObject.nickname === user.nickname
+            && userObject.email !== user.email
+    ).length !== 0
 }
 
 async function addUserObjectToRoom(room_id, user, success, fail) {
@@ -300,7 +300,7 @@ async function addUserToRoom(room_id, email, success, fail) {
     roomModel.find({ room_id: room_id }, (err, docs) => {
         if (err) { fail(statusCodes.ROOM_NOT_FOUND) } else {
             var room = docs[0]
-        if (room === undefined) { fail(statusCodes.ROOM_NOT_FOUND); return }
+            if (room === undefined) { fail(statusCodes.ROOM_NOT_FOUND); return }
             console.log('addUserToRoom. room ', room_id + "found. ");
             userModel.findOne({ email: email }).exec(function (err2, user) {
                 if (err2) fail(statusCodes.USER_DOES_NOT_EXIST);

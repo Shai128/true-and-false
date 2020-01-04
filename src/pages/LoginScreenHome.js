@@ -288,9 +288,9 @@ function PrintCreateGameDialog(props) {
     createRoom(gameName, currentUser, currentGameNickName, history, () => {
       setIsLoading(false);
     },
-      () => {
-        setServerError(true);
+      (errorStatus) => {
         setIsLoading(false);
+        setServerError(true);
       }
     );
   }
