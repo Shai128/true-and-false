@@ -91,8 +91,7 @@ function findGame(game, success, failure) {
   })
 }
 function tryout() {
-  deleteUserByEmailInRoomByRoomID(0, 'alon@gmail.com', (fg) => { }, (fg) => { console.log(fg) });
-  //createRoom('schoo',(fg)=>{},(fg)=>{console.log(fg)});
+  resetDatabase(50, () => {console.log("successfuly reset database")}, (err) => console.log(err))
 }
 //tryout();
 // uncomment this to reset server
@@ -423,7 +422,7 @@ app.get('/userSentences/:opponentId/:roomId', (req, res) => {
     req.params.opponentId,
     (userObject) => { // find the given user
       console.log('in userSentences found user: ', userObject);
-      getAllSentencesArray(
+      getAllSentencesArray( 
         req.params.roomId,
         (allSentences) => { // find the global sentences array to extract lies
           var extracted_truths = userObject.true_sentences.map(x => x.value)
