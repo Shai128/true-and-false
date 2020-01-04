@@ -18,7 +18,10 @@ import { getUserFromProps, getCurrentUserFromSession, userIsUpdated } from '../u
 
 
 import { forwardRef } from 'react';
+import Grid from '@material-ui/core/Grid';
+
 import ArrowForwardIcon from '@material-ui/icons/ArrowForward';
+import EqualizerIcon from '@material-ui/icons/Equalizer';
 import AddBox from '@material-ui/icons/AddBox';
 import ArrowUpward from '@material-ui/icons/ArrowUpward';
 import Check from '@material-ui/icons/Check';
@@ -36,7 +39,6 @@ import Search from '@material-ui/icons/Search';
 import ViewColumn from '@material-ui/icons/ViewColumn';
 
 const tableIcons = {
-  Goto: forwardRef((props, ref) => <ArrowForwardIcon {...props} ref={ref} />), 
   Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
   Check: forwardRef((props, ref) => <Check {...props} ref={ref} />),
   Clear: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
@@ -112,17 +114,19 @@ function GamesList(props) {
   var games = props.games.map(mapFunc);
   games.reverse();
   const cellStyle = {
-    width: 100,
-    maxWidth: 100,
+    //width: 50,
+    //maxWidth: 70,
     height: 80
   }
   const headerStyle = {
-    width: 50,
-    maxWidth: 50
+    //width: 50,
+    //maxWidth: 80
   }
   let history = useHistory();
   return (
-    <div style={{ height: '240', marginTop: 10, width: 450 }}>
+    <Grid Container>
+      <Grid item xs={11}>
+      <div style={{ height: '240', marginTop: 10, marginLeft:30}}>
       <MaterialTable
         title="Games"
         icons={tableIcons}
@@ -151,9 +155,16 @@ function GamesList(props) {
             [{
               icon: ()=>{return(<ArrowForwardIcon />)}, tooltip: 'Go To Game Page',
               onClick: (event, rowData) => {history.push('/LoginScreen/Home/GamePage/'+rowData.id)}
-            },]}
+            },
+            {
+              icon: ()=>{return(<EqualizerIcon />)}, tooltip: 'Go To Statistics Page',
+              onClick: (event, rowData) => {history.push('/LoginScreen/Home/Statistics/'+rowData.id)}
+            }]}
           />
     </div>
+      </Grid>
+    </Grid>
+    
   
     )
   }
