@@ -125,8 +125,8 @@ function GamesList(props) {
   let history = useHistory();
   return (
     <Grid Container>
-      <Grid item xs={11}>
-      <div style={{ height: '240', marginTop: 10, marginLeft:30, maxWidth: 350}}>
+      <Grid item xs={12}>
+      <div style={{ height: '240', marginTop: 10, marginLeft:30}}>
       <MaterialTable
         title="Games"
         icons={tableIcons}
