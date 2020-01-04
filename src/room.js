@@ -30,6 +30,8 @@ export function createRoom(roomName, currentuser, currentGameNickName, history, 
         }
     }).then(roomAndUserObject => {
         console.log("received roomAndUserObject:", roomAndUserObject)
+        if (isUndefined(roomAndUserObject) || isUndefined(roomAndUserObject.roomObject))
+            return;
         if (!isUndefined(onSuccess))
             onSuccess(roomAndUserObject);
         let new_user = JSON.parse(JSON.stringify(currentuser));
@@ -74,6 +76,8 @@ export function joinRoom(roomID, currentuser, currentGameNickName, history, onSu
             })
         }
     }).then(roomAndUserObject => {
+        if (isUndefined(roomAndUserObject) || isUndefined(roomAndUserObject.roomObject))
+            return;
         if (!isUndefined(onSuccess))
             onSuccess(roomAndUserObject);
         let new_user = JSON.parse(JSON.stringify(currentuser));

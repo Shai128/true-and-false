@@ -74,11 +74,11 @@ export function JoinGame(props) {
   const useStylesRoomName = makeStyles(theme => ({
     title: {
       fontFamily: '"Segoe UI"',
-     // fontFamily: 'sans-serif',
+      // fontFamily: 'sans-serif',
       fontWeight: 'bold',
       fontSize: 48,
       marginTop: 0,
-   //   width: 600,
+      //   width: 600,
       height: 60,
       justifyContent: 'center',
       alignItems: 'center',
@@ -86,7 +86,7 @@ export function JoinGame(props) {
     roomNumber: {
       fontSize: 36,
       marginTop: 0,
-  //    width: 400,
+      //    width: 400,
       height: 50,
       justifyContent: 'center',
       alignItems: 'center',
@@ -95,7 +95,7 @@ export function JoinGame(props) {
     userTitle: {
       fontSize: 28,
       marginTop: 0,
-  //    width: 400,
+      //    width: 400,
       height: 50,
       justifyContent: 'center',
       alignItems: 'center',
@@ -125,13 +125,13 @@ export function JoinGame(props) {
     /*
        userInfo: {email: ..., nickName:...}
     */
-  //  var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
-  //  newPlayersAvailable.push({ email: userInfo.email, nickname: userInfo.nickName })
-  //  setPlayersAvailable(newPlayersAvailable)
+    //  var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
+    //  newPlayersAvailable.push({ email: userInfo.email, nickname: userInfo.nickName })
+    //  setPlayersAvailable(newPlayersAvailable)
 
-  var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersAvailable));
-  newPlayersAvailable.push({ email: userInfo.email, nickname: userInfo.nickName })
-  setPlayersList({PlayersAvailable: newPlayersAvailable,PlayersUnAvailable: PlayersList.PlayersUnAvailable})
+    var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersAvailable));
+    newPlayersAvailable.push({ email: userInfo.email, nickname: userInfo.nickName })
+    setPlayersList({ PlayersAvailable: newPlayersAvailable, PlayersUnAvailable: PlayersList.PlayersUnAvailable })
 
   });
 
@@ -142,15 +142,15 @@ export function JoinGame(props) {
        userInfo: {email: ..., nickName:...}
     */
 
-  //  var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
-  //  const index = (PlayersAvailable).findIndex(user => user.email === userInfo.email)
-  //  newPlayersAvailable.splice(index,1)
-  //  setPlayersAvailable(newPlayersAvailable)
+    //  var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
+    //  const index = (PlayersAvailable).findIndex(user => user.email === userInfo.email)
+    //  newPlayersAvailable.splice(index,1)
+    //  setPlayersAvailable(newPlayersAvailable)
 
-  var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersAvailable));
-  const index = (newPlayersAvailable).findIndex(user => user.email === userInfo.email)
-  newPlayersAvailable.splice(index,1)
-  setPlayersList({PlayersAvailable: newPlayersAvailable,PlayersUnAvailable: PlayersList.PlayersUnAvailable})
+    var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersAvailable));
+    const index = (newPlayersAvailable).findIndex(user => user.email === userInfo.email)
+    newPlayersAvailable.splice(index, 1)
+    setPlayersList({ PlayersAvailable: newPlayersAvailable, PlayersUnAvailable: PlayersList.PlayersUnAvailable })
 
 
   });
@@ -158,24 +158,24 @@ export function JoinGame(props) {
   socket.off('userAvailable')
   socket.on("userAvailable", function (userInfo) {
 
-  //  var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersUnAvailable));
-  //  const index = (newPlayersUnAvailable).findIndex(user => user.email === userInfo)
-  //  var current_user = newPlayersUnAvailable[index]
-  //  newPlayersUnAvailable.splice(index,1)
-  //  setPlayersUnAvailable(newPlayersUnAvailable)
-       
-  //  var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
-  //  newPlayersAvailable.push(current_user)
-  //  setPlayersAvailable(newPlayersAvailable)
+    //  var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersUnAvailable));
+    //  const index = (newPlayersUnAvailable).findIndex(user => user.email === userInfo)
+    //  var current_user = newPlayersUnAvailable[index]
+    //  newPlayersUnAvailable.splice(index,1)
+    //  setPlayersUnAvailable(newPlayersUnAvailable)
+
+    //  var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
+    //  newPlayersAvailable.push(current_user)
+    //  setPlayersAvailable(newPlayersAvailable)
 
 
-  var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersUnAvailable));
-  const index = (newPlayersUnAvailable).findIndex(user => user.email === userInfo)
-  var current_user = newPlayersUnAvailable[index]
-  newPlayersUnAvailable.splice(index,1)      
-  var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersAvailable));
-  newPlayersAvailable.push(current_user)
-  setPlayersList({PlayersAvailable: newPlayersAvailable,PlayersUnAvailable: newPlayersUnAvailable})
+    var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersUnAvailable));
+    const index = (newPlayersUnAvailable).findIndex(user => user.email === userInfo)
+    var current_user = newPlayersUnAvailable[index]
+    newPlayersUnAvailable.splice(index, 1)
+    var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersAvailable));
+    newPlayersAvailable.push(current_user)
+    setPlayersList({ PlayersAvailable: newPlayersAvailable, PlayersUnAvailable: newPlayersUnAvailable })
 
 
   });
@@ -183,28 +183,28 @@ export function JoinGame(props) {
   socket.off('userUnAvailable')
   socket.on("userUnAvailable", function (userInfo) {
 
-   console.log(CurrentUser.email, "got userUnAvailable", "userInfo:", userInfo);
+    console.log(CurrentUser.email, "got userUnAvailable", "userInfo:", userInfo);
 
-  //  var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
-  //  const index = (newPlayersAvailable).findIndex(user => user.email === userInfo)
-  //  var current_user = newPlayersAvailable[index]
-  //  newPlayersAvailable.splice(index,1)
-  //  setPlayersUnAvailable(newPlayersAvailable)
-       
-  //  var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersUnAvailable));
-  //  newPlayersUnAvailable.push(current_user)
-  //  setPlayersAvailable(newPlayersUnAvailable)
+    //  var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
+    //  const index = (newPlayersAvailable).findIndex(user => user.email === userInfo)
+    //  var current_user = newPlayersAvailable[index]
+    //  newPlayersAvailable.splice(index,1)
+    //  setPlayersUnAvailable(newPlayersAvailable)
 
-  //  console.log( "got newPlayers list ", newPlayersAvailable, newPlayersUnAvailable);
+    //  var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersUnAvailable));
+    //  newPlayersUnAvailable.push(current_user)
+    //  setPlayersAvailable(newPlayersUnAvailable)
+
+    //  console.log( "got newPlayers list ", newPlayersAvailable, newPlayersUnAvailable);
 
 
-  var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersAvailable));
-  const index = (newPlayersAvailable).findIndex(user => user.email === userInfo)
-  var current_user = newPlayersAvailable[index]
-  newPlayersAvailable.splice(index,1)
-  var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersUnAvailable));
-  newPlayersUnAvailable.push(current_user)
-  setPlayersList({PlayersAvailable: newPlayersAvailable,PlayersUnAvailable: newPlayersUnAvailable})
+    var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersAvailable));
+    const index = (newPlayersAvailable).findIndex(user => user.email === userInfo)
+    var current_user = newPlayersAvailable[index]
+    newPlayersAvailable.splice(index, 1)
+    var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersUnAvailable));
+    newPlayersUnAvailable.push(current_user)
+    setPlayersList({ PlayersAvailable: newPlayersAvailable, PlayersUnAvailable: newPlayersUnAvailable })
 
 
   });
@@ -370,45 +370,45 @@ export function JoinGame(props) {
       <PrintAnswerPlayerDialog WindowOpen={GotInvitationWindow} setWindowOpen={setGotInvitationWindow} onAccept={onAccept} onDecline={onDecline} SenderInfoName={SenderInfoName} />
       <Grid spacing={1} container>
 
-      <Grid spacing={1} item xs = {12}>
-      <div style={{ float: 'right', marginRight: 10, marginTop: 10, }}>
-        <Button id="leaveRoomBTN" variant="contained" color="primary" onClick={leaveRoom} className={classes.button}>
-          Leave the room
+        <Grid spacing={1} item xs={12}>
+          <div style={{ float: 'right', marginRight: 10, marginTop: 10, }}>
+            <Button id="leaveRoomBTN" variant="contained" color="primary" onClick={leaveRoom} className={classes.button}>
+              Leave the room
       </Button>
-      </div>
-      </Grid>
-
-      <Grid item spacing={1}  xs = {12} justify="center">
-        <div style={{ textAlign: 'center'}}>
-        <Typography id="roomNameHeader" variant="h3" className={classes.title}>
-          Room Name:
-      {CurrentRoom.room_name}
-        </Typography>
-        </div>
+          </div>
         </Grid>
-      
 
-      <Grid item spacing={1}  xs = {12} justify="center">
-      <div style={{ textAlign: 'center'}}>
-        <Typography id="roomNumberHeader" variant="h4" className={classes.roomNumber}>
-          Room Number:
+        <Grid item spacing={1} xs={12} justify="center">
+          <div style={{ textAlign: 'center' }}>
+            <Typography id="roomNameHeader" variant="h3" className={classes.title}>
+              Room Name:
+      {CurrentRoom.room_name}
+            </Typography>
+          </div>
+        </Grid>
+
+
+        <Grid item spacing={1} xs={12} justify="center">
+          <div style={{ textAlign: 'center' }}>
+            <Typography id="roomNumberHeader" variant="h4" className={classes.roomNumber}>
+              Room Number:
      {CurrentRoom.room_id}
-        </Typography>
-        </div>
-      </Grid>
+            </Typography>
+          </div>
+        </Grid>
 
 
-      <Grid item spacing={1}  xs = {12} justify="center">
-      <div style={{ textAlign: 'center'}}>
-        <Typography id="userNameHeader" justify="center" variant="h5" className={classes.userTitle}>
-          User Name:
+        <Grid item spacing={1} xs={12} justify="center">
+          <div style={{ textAlign: 'center' }}>
+            <Typography id="userNameHeader" justify="center" variant="h5" className={classes.userTitle}>
+              User Name:
       {CurrentUser.nickName}
-        </Typography>
-        </div>
-      </Grid>
+            </Typography>
+          </div>
+        </Grid>
       </Grid>
 
-{/* 
+      {/* 
       <Grid container spacing={3} justify="center">
         <HomepageImage />
       </Grid> */}
@@ -492,12 +492,12 @@ export function JoinGame(props) {
         console.log('reading users available from data from server 2 ', newPlayersAvailable);
         const index = (newPlayersAvailable).findIndex(user => user.email === CurrentUser.email)
         console.log('reading users available from data from server 3 - index : ', index);
-        newPlayersAvailable.splice(index,1)
+        newPlayersAvailable.splice(index, 1)
         console.log('reading users available from DB. newPlayersAvailable 4', newPlayersAvailable);
-       // setPlayersAvailable(newPlayersAvailable)
+        // setPlayersAvailable(newPlayersAvailable)
         var newPlayersUnAvailable = JSON.parse(JSON.stringify(data.PlayersUnAvailable));
-     //   setPlayersUnAvailable(newPlayersUnAvailable);
-        setPlayersList({PlayersAvailable: newPlayersAvailable,PlayersUnAvailable: newPlayersUnAvailable})
+        //   setPlayersUnAvailable(newPlayersUnAvailable);
+        setPlayersList({ PlayersAvailable: newPlayersAvailable, PlayersUnAvailable: newPlayersUnAvailable })
         setRoomUpdated(true);
       }
     }, fail_status => {
