@@ -26,7 +26,7 @@ const {
   findUserByEmailInRoomByRoomID,
   getAllSentencesArray
 } = require("../db/rooms") //imports all room functions
-const { isUndefined } = require('../src/Utils.js');
+const { isUndefined, statusCodes } = require('../src/Utils.js');
 const {
   getRandomSentence,
   standardErrorHandling,
@@ -166,7 +166,7 @@ function serverLoginUser(req, res) {
           + data.password
           + " does not match for email: "
           + data.email);
-        standardErrorHandling(res, "password does not match");
+        standardErrorHandling(res, statusCodes.PASSWORD_MISMATCH);
       }
     }, (err) => { standardErrorHandling(res, err) });
 }

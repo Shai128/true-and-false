@@ -189,7 +189,6 @@ export function PrintJoinGameDialog(props) {
             break;
           default:
             setServerError(true);
-
         }
         setIsLoading(false);
       })

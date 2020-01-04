@@ -851,7 +851,7 @@ export function PlayerListAvailable(props) {
 
                 <TableRow hover role="checkbox" tabIndex={-1} key={row.email}>
                   {columnsForAvailable.map(column => {
-                    console.log('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!row: ', row)
+                    console.log('row: ', row)
                     const value = row.nickname;
                     const firstLetter = value.substring(0, 1)
 

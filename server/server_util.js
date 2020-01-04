@@ -1,4 +1,4 @@
-const { isUndefined} = require("../src/Utils")
+const { isUndefined, statusCodes} = require("../src/Utils")
 
 function updateGame(game, success, failure) { } // placeholder
 
@@ -18,7 +18,7 @@ function getIdentifierFromSession(req, success, failure) {
   console.log("session:", req.session)
 
   if (isUndefined(req.session.userInfo) || !req.session.userInfo.email) {
-    failure("session does not exist");
+    failure(statusCodes.NOT_LOGGED_IN);
     logDiv();
   } else {
     const id = req.session.userInfo.email;
@@ -32,7 +32,7 @@ function getUserInfoFromSession(req, success, failure) {
   logDiv("getUserINFOFromSession")
   console.log("session:", req.session);
   const info = req.session.userInfo;
-  if (!info) { logDiv(); failure("session does not exist") } else {
+  if (!info) { logDiv(); failure(statusCodes.NOT_LOGGED_IN) } else {
     console.log("info from session:", info)
     logDiv()
     success(info)
