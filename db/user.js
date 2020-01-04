@@ -84,8 +84,10 @@ function createUser(user, success, failure) {
             newUser.save((err) => {
                 if (err)
                     failure(statusCodes.UNDEFINED)
-                else
+                else {
+                    console.log('succeeded to create a new user');
                     success()
+                }
             })
         }
         else {
