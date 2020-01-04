@@ -126,7 +126,7 @@ function GamesList(props) {
   return (
     <Grid Container>
       <Grid item xs={11}>
-      <div style={{ height: '240', marginTop: 10, marginLeft:30}}>
+      <div style={{ height: '240', marginTop: 10, marginLeft:30, maxWidth: 350}}>
       <MaterialTable
         title="Games"
         icons={tableIcons}
