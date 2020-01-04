@@ -7,7 +7,8 @@ const statusCodes = {
     ROOM_NOT_FOUND: 504,
     USER_NOT_IN_ROOM: 505,
     NICKNAME_TAKEN: 506,
-    BAD_PARAMS: 507
+    BAD_PARAMS: 507,
+    NOT_LOGGED_IN: 508
 }
 const okStatus = statusCodes.OK;
 const serverIP = 'localhost'
