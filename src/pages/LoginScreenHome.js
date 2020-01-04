@@ -16,29 +16,30 @@ import clsx from 'clsx';
 import Divider from '@material-ui/core/Divider';
 
 import {
-    useHistory,
-    useRouteMatch,
-    Switch,
-    Route,
-  } from "react-router-dom";
-import {GamePage} from './GamePage.js';
-import {userIsUpdated, getCreatedGames, getParticipatedGames, getCurrentUserFromSession as getCurrentUser, getUserFromProps} from './../user';
-import {PrintGames, PrintJoinGameDialog, DisplayLoading} from './../PagesUtils';
-import {createRoom} from './../room.js'
-export function LoginScreenHome(props){
-    let { path, url } = useRouteMatch();
-    let user = getUserFromProps(props);
-    return(
-        <Switch>
+  useHistory,
+  useRouteMatch,
+  Switch,
+  Route,
+} from "react-router-dom";
+import { GamePage } from './GamePage.js';
+import { userIsUpdated, getCurrentUserFromSession as getCurrentUser, getUserFromProps } from './../user';
+import { PrintGames, PrintJoinGameDialog, DisplayLoading } from './../PagesUtils';
+import { createRoom } from './../room.js'
+import { isUndefined } from './../Utils.js'
+export function LoginScreenHome(props) {
+  let { path, url } = useRouteMatch();
+  let user = getUserFromProps(props);
+  return (
+    <Switch>
 
-        <Route exact path={path}>
-        <Home path = {path} url = {url} user={user}/>
-        </Route>
+      <Route exact path={path}>
+        <Home path={path} url={url} user={user} />
+      </Route>
 
-        <Route path={`${path}/GamePage/:id`} exact component={GamePage} user={user} />
-        </Switch>
+      <Route path={`${path}/GamePage/:id`} exact component={GamePage} user={user} />
+    </Switch>
 
-);
+  );
 }
 
 function Home(props) {
@@ -92,14 +93,14 @@ function Home(props) {
   }));
 
 
-    const classes = useStyles();
-    const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
-    const [currentUser, setCurrentUser] = React.useState(getUserFromProps(props));
-    getCurrentUser(currentUser, setCurrentUser);
-    
-    if(!userIsUpdated(currentUser)){
-      return (<DisplayLoading/>);
-    }
+  const classes = useStyles();
+  const fixedHeightPaper = clsx(classes.paper, classes.fixedHeight);
+  const [currentUser, setCurrentUser] = React.useState(getUserFromProps(props));
+  getCurrentUser(currentUser, setCurrentUser);
+
+  if (!userIsUpdated(currentUser)) {
+    return (<DisplayLoading />);
+  }
 
   if (!userIsUpdated(currentUser)) {
     return (<DisplayLoading />);
@@ -114,8 +115,8 @@ function Home(props) {
               <Grid container spacing={3}>
                 <Grid item xs={12}>
 
-            <Typography id="welcomeMessage" component="h1" variant="h2" justify="center">
-              Welcome {currentUser.firstName}!
+                  <Typography id="welcomeMessage" component="h1" variant="h2" justify="center">
+                    Welcome {currentUser.firstName}!
         </Typography>
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -146,32 +147,47 @@ function Home(props) {
           </Grid>
 
           <Grid item xs={12}>
-          <Paper className={fixedHeightPaper}>
-            <Grid container spacing={3}>
-            <Grid item xs={12}>
+            <Paper className={fixedHeightPaper}>
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
 
-            <Typography component="h4" variant="h4" justify="center">
-            Recent Games
+                  <Typography component="h4" variant="h4" justify="center">
+                    Recent Games
         </Typography>
-          <Divider/>
-            </Grid>
+                  <Divider />
+                </Grid>
 
-            <Grid item xs={12}>
-                <ShowLastTwoGames url={url} />
-            </Grid>
+                <Grid item xs={12}>
+                  <ShowLastTwoGames user={currentUser} url={url} />
+                </Grid>
 
-            </Grid>
+              </Grid>
             </Paper>
-            </Grid>
-            </Grid>
+          </Grid>
+        </Grid>
 
-          </Container>
-</div>
-    );
+      </Container>
+    </div>
+  );
 
 }
-function getTwoRecentGames() {
-  let participated = getParticipatedGames().slice(0);
+
+function getTwoRecentGames(user) {
+  let participated = user.gameHistory; /*getParticipatedGames().slice(0);*/
+  var participated_len = participated.length
+  var recent_games = [];
+  if (participated_len >= 1)
+    recent_games.push({
+      id: participated_len - 2,
+      ...participated[participated_len - 2]
+    })
+  if (participated_len >= 0)
+    recent_games.push({
+      id: participated_len - 1,
+      ...participated[participated_len - 1]
+    })
+
+  /*
   let created = getCreatedGames().slice(0);
   let games_num = created.length > participated.length ? created.length : participated.length;
   let recent_games = [];
@@ -186,7 +202,7 @@ function getTwoRecentGames() {
     else
       recent_games.push(participated[game_index]);
   }
-
+  */
   return recent_games;
 
 
@@ -215,7 +231,7 @@ function ShowLastTwoGames(props) {
     },
   }));
 
-  const games = getTwoRecentGames();
+  const games = getTwoRecentGames(props.user);
   const classes = usegameListItemsStyles();
   let url = props.url;
   return (<PrintGames games={games} classes={classes} url={url} />);
@@ -223,44 +239,75 @@ function ShowLastTwoGames(props) {
 }
 
 
-function PrintCreateGameDialog(props){
-    const {handleCloseCreateGameWindow,  createGameWindowOpen, currentUser} = props;
-    const [gameName, setGameName] = React.useState("");
-    const [currentGameNickName, setCurrentGameNickName] = React.useState(currentUser.nickName);
-    let history = useHistory();
-    const startGame = ()=>{
-/*
-        //var user = //todo- get user from session
-        var roomData = {
-          roomName: gameName,
-          user: user
-        }
+function PrintCreateGameDialog(props) {
+  const { handleCloseCreateGameWindow, createGameWindowOpen, currentUser } = props;
+  const [gameName, setGameName] = React.useState("");
+  const [currentGameNickName, setCurrentGameNickName] = React.useState(currentUser.nickName);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [serverError, setServerError] = React.useState(false);
+  const [roomNameError, setRoomNameError] = React.useState(false);
+  const [roomNameHelperText, setRoomNameHelperText] = React.useState('');
+  const [nickNameError, setNickNameError] = React.useState(false);
+  const [nickNameHelperText, setNickNameHelperText] = React.useState('');
 
-        socket.on('roomOpened', function(roomID){
-          //todo- redirect to room page
-        });
+  let history = useHistory();
 
-        socket.emit('openRoom', roomData)
-*/
-        
-
-        console.log("starting game!");
-        console.log("game name:", gameName);
-        console.log('user nickname: ', currentGameNickName);
-        createRoom(gameName, currentUser, currentGameNickName, history);
-        //handleCloseCreateGameWindow();
-        //todo: redirect to room page
+  const resetDisplay = () => {
+    setRoomNameError(false);
+    setRoomNameHelperText('');
+    setServerError(false);
+    setNickNameError(false);
+    setNickNameHelperText('');
+    setGameName('');
+  }
+  const validData = (gameName, nickName) => {
+    var isValid = true
+    if (isUndefined(gameName) || gameName === '') {
+      setRoomNameError(true);
+      setRoomNameHelperText('Please provide a room name');
+      isValid = false;
     }
-    return(
-        <Dialog id = "openRoomPopUp" open={createGameWindowOpen} onClose={handleCloseCreateGameWindow} aria-labelledby="form-dialog-title">
-        <DialogTitle id="form-dialog-title">Create a Room</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-          </DialogContentText>
-          <Grid container spacing={2}>
+    if (isUndefined(nickName) || nickName === '') {
+      setNickNameError(true);
+      setNickNameHelperText('Please provide a nick name');
+      isValid = false;
+    }
+    return isValid;
+  }
+
+  const startGame = () => {
+    console.log("startGame");
+    resetDisplay();
+    if (!validData(gameName, currentGameNickName))
+      return;
+
+    setIsLoading(true);
+    console.log("starting game!");
+    console.log("game name:", gameName);
+    console.log('user nickname: ', currentGameNickName);
+    createRoom(gameName, currentUser, currentGameNickName, history, () => {
+      setIsLoading(false);
+    },
+      () => {
+        setServerError(true);
+        setIsLoading(false);
+      }
+    );
+  }
+  if (isLoading)
+    return (<DisplayLoading />);
+  return (
+    <Dialog id="openRoomPopUp" open={createGameWindowOpen} onClose={handleCloseCreateGameWindow} aria-labelledby="form-dialog-title">
+      <DialogTitle id="form-dialog-title">Create a Room</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+        </DialogContentText>
+        <Grid container spacing={2}>
           <Grid item xs={12}>
             <TextField
               autoFocus
+              error={roomNameError}
+              helperText={roomNameHelperText}
               margin="dense"
               id="roomName"
               label="Room Name"
@@ -270,16 +317,23 @@ function PrintCreateGameDialog(props){
             />
           </Grid>
           <Grid item xs={12}>
-          <TextField
-            autoFocus
-            margin="dense"
-            id="nickName"
-            label="Nick Name"
-            defaultValue={currentUser.nickName}
-            onChange={(event)=>{
+            <TextField
+              autoFocus
+              error={nickNameError}
+              helperText={nickNameHelperText}
+              margin="dense"
+              id="nickName"
+              label="Nick Name"
+              defaultValue={currentUser.nickName}
+              onChange={(event) => {
                 setCurrentGameNickName(event.target.value);
               }}
             />
+          </Grid>
+          <Grid item xs={12}>
+            {serverError && <Typography variant="h6" style={{ textAlign: 'center', color: 'red' }}>
+              Server error occured.
+            </Typography>}
           </Grid>
         </Grid>
       </DialogContent>

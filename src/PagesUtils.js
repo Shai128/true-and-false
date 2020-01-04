@@ -10,10 +10,10 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import Typography from '@material-ui/core/Typography'
 import {
-      Link,
-      useHistory,
-  } from "react-router-dom";
-import {isUndefined} from './Utils.js';
+  Link,
+  useHistory,
+} from "react-router-dom";
+import { isUndefined } from './Utils.js';
 
 import ChatIcon from '@material-ui/icons/Chat';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -26,43 +26,59 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import {socket, getUserFromProps, getCurrentUserFromDB} from './user.js';
-import {useStyles} from './App.js';
-import {joinRoom} from './room.js';
-export function PrintGames(props){
-    const games =props.games;
-    const classes = props.classes;
-    const user = getUserFromProps(props);
-    let url = props.url;
-    return (<List className={classes.list}>
-          {games.map(({ name, id, date, playersNum }) => (
-            <React.Fragment key={id}>
-              <Link to={
-                {
-                  pathname: `${url}/GamePage/`+id,
-                  game: games[id],
-                  user: user,
-                }
-              }
-              >
-              <ListItem button  className={classes.gamesListItems}>
-                <ListItemText primary={name} secondary={date} />
-              </ListItem>
-              </Link>
-            </React.Fragment>
-          ))}
-        </List>);
+import { getUserFromProps, getCurrentUserFromDB } from './user.js';
+import { useStyles } from './App.js';
+import { joinRoom } from './room.js';
+import { isNumeric } from './Utils.js'
+
+
+export function PrintGames(props) {
+  const games = props.games;
+  const classes = props.classes;
+  const user = getUserFromProps(props);
+  let url = props.url;
+
+  if (games.length === 0)
+    return (<div>
+      <Typography variant="h5" component="h3" justify="center">
+        You haven't played yet!
+    </Typography>
+    </div>)
+  games.reverse();
+  return (<List className={classes.list}>
+    {games.map((game) => {
+      var room_name = game.room_name;
+      var id = game.id;
+      var date = game.date
+      return (
+        <React.Fragment key={id}>
+          <Link to={
+            {
+              pathname: `${url}/GamePage/` + id,
+              game: games[id],
+              user: user,
+            }
+          }
+          >
+            <ListItem button className={classes.gamesListItems}>
+              <ListItemText primary={room_name} secondary={date} />
+            </ListItem>
+          </Link>
+        </React.Fragment>
+      )
+    })}
+  </List>);
 }
 
-export function DisplayLoading(){
+export function DisplayLoading() {
   return (
     <div
-     style={{
+      style={{
         position: 'absolute', left: '50%', top: '50%',
         transform: 'translate(-50%, -50%)'
-    }}>
+      }}>
 
-  <ReactLoading type={"bars"} color={"#000"} height={667} width={375} />
+      <ReactLoading type={"bars"} color={"#000"} height={667} width={375} />
     </div>
   );
 }
@@ -71,142 +87,150 @@ export function DisplayLoading(){
 /**
  * display a db error message and displaying a return-back-to-home button
  */
-export function DisplayDBError(){
+export function DisplayDBError() {
 
 
   return (
 
     <div className="App" >
-          <header className="App-header" >
-          <Container component="main" maxWidth="xs">
-            <CssBaseline />
+      <header className="App-header" >
+        <Container component="main" maxWidth="xs">
+          <CssBaseline />
 
-              <Typography variant="h4" style={{color:'black', marginBottom: '30px', width:'100%'}}>
-              An error occured. Could not read from DB.
+          <Typography variant="h4" style={{ color: 'black', marginBottom: '30px', width: '100%' }}>
+            An error occured. Could not read from DB.
               </Typography>
 
-              <Link to="/LoginScreen">
-                <Button variant="contained" color="primary" fullWidth>
-                Return to home screen
+          <Link to="/LoginScreen">
+            <Button variant="contained" color="primary" fullWidth>
+              Return to home screen
             </Button>
-              </Link> 
+          </Link>
 
-          </Container>
-          </header>
-          
-          </div>
+        </Container>
+      </header>
+
+    </div>
   );
 }
 
 
 
-export function PrintJoinGameDialog(props){  
-  const {handleCloseWindow,  WindowOpen, currentUser} = props;
+export function PrintJoinGameDialog(props) {
+  const { handleCloseWindow, WindowOpen, currentUser } = props;
   const [gameID, setGameID] = React.useState("");
   const [currentGameNickName, setCurrentGameNickName] = React.useState(currentUser.nickName);
   const [validGameID, setValidGameID] = React.useState(true);
   const [validNickName, setvalidNickName] = React.useState(true);
   const [nickNameHelperText, setNickNameHelperText] = React.useState('');
   const [gameIDHelperText, setGameIDHelperText] = React.useState('');
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [serverError, setServerError] = React.useState(false);
 
 
-  const onCloseWindow = ()=>{
-    resetDisplaysContent();
-    handleCloseWindow();
+  const displayInvalidNickName = () => {
+    setNickNameHelperText('Invalid nick name');
+    setvalidNickName(false);
   }
-
-  const displayNickNameTaken = ()=>{
+  const displayNickNameTaken = () => {
     setNickNameHelperText('This nick name is taken');
     setvalidNickName(false);
   }
 
-  const displayWrongGameID = ()=>{
-    setGameIDHelperText('Wrong game ID');
+  const displayWrongGameID = () => {
+    setGameIDHelperText('Wrong room ID');
     setValidGameID(false);
   }
 
-  const resetDisplaysContent = ()=>{
+  const resetDisplaysContent = () => {
+    setServerError(false);
     setGameIDHelperText('');
     setNickNameHelperText('');
     setvalidNickName(true);
     setValidGameID(true);
+    setGameID('');
   }
-  socket.on('joinedRoom', function(roomID){
-    //todo- redirect to room page (dan't page)
-  });
+  const onCloseWindow = () => {
+    resetDisplaysContent();
+    handleCloseWindow();
+  }
 
-  socket.on('nickNameTaken', function(){
-    displayNickNameTaken();
-    //todo- open message 'try a different name'
-  });
+  const validData = (gameID, nickName) => {
+    var isValid = true;
+    if (isUndefined(gameID) || gameID === '' || !isNumeric(gameID)) {
+      displayWrongGameID();
+      isValid = false;
+    }
+    if (isUndefined(nickName) || nickName === '') {
+      displayInvalidNickName();
+      isValid = false;
+    }
+    return isValid;
+  }
 
-  socket.on('wrongRoomID', function(){
-    displayWrongGameID();
 
-  });
   let history = useHistory();
-  const joinGame = ()=>{
-/*
-    //var user = //todo- get user from session
-    var roomData = {
-      roomName: gameName,
-      user: user
-    }
+  const joinGame = () => {
+    resetDisplaysContent();
+    if (!validData(gameID, currentGameNickName))
+      return;
+    setIsLoading(true);
 
-    
-    var user = {
-      //todo- get socketID from session
-      //socketID: ,
-      gameNickName: currentGameNickName
-    }
-    var data = {
-      user: user,
-      roomID: gameID
-    }
-
-    socket.emit('joinRoom', data);
-*/
-
-      console.log("starting game!");
-      console.log("game ID:", gameID);
-      console.log('user nickname: ', currentGameNickName);
-      joinRoom(gameID, currentUser, currentGameNickName, history )
+    console.log("starting game!");
+    console.log("game ID:", gameID);
+    console.log('user nickname: ', currentGameNickName);
+    joinRoom(gameID, currentUser, currentGameNickName, history, () => { setIsLoading(false); }, () => {
+      //todo: show only one of these:
+      displayNickNameTaken();
+      displayWrongGameID();
+      setServerError(true);
+      setIsLoading(false);
+    })
   }
-  return(
-      <Dialog id = "openRoomPopUp" open={WindowOpen} onClose={onCloseWindow} aria-labelledby="form-dialog-title">
+
+  if (isLoading)
+    return (<DisplayLoading />);
+
+  return (
+    <Dialog id="openRoomPopUp" open={WindowOpen} onClose={onCloseWindow} aria-labelledby="form-dialog-title">
       <DialogTitle id="form-dialog-title">Join a Room</DialogTitle>
       <DialogContent>
         <DialogContentText>
         </DialogContentText>
         <Grid container spacing={2}>
           <Grid item xs={12}>
-        <TextField
-          error = {!validGameID}
-          helperText={gameIDHelperText}
-          autoFocus
-          margin="dense"
-          id="room_id"
-          label="Room ID"
-          onChange={(event)=>{
-            setGameID(event.target.value);
-          }}
-        />
-        </Grid>
-        <Grid item xs={12}>
+            <TextField
+              error={!validGameID}
+              helperText={gameIDHelperText}
+              autoFocus
+              margin="dense"
+              id="room_id"
+              label="Room ID"
+              onChange={(event) => {
+                setGameID(event.target.value);
+              }}
+            />
+          </Grid>
+          <Grid item xs={12}>
 
-        <TextField
-          error={!validNickName}
-          helperText={nickNameHelperText}
-          autoFocus
-          margin="dense"
-          id="nickName"
-          label="Nick Name"
-          defaultValue={currentUser.nickName}
-          onChange={(event)=>{
-              setCurrentGameNickName(event.target.value);
-          }}
-        />
-        </Grid>
+            <TextField
+              error={!validNickName}
+              helperText={nickNameHelperText}
+              autoFocus
+              margin="dense"
+              id="nickName"
+              label="Nick Name"
+              defaultValue={currentUser.nickName}
+              onChange={(event) => {
+                setCurrentGameNickName(event.target.value);
+              }}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            {serverError && <Typography variant="h6" style={{ textAlign: 'center', color: 'red' }}>
+              Server error occured.
+          </Typography>}
+          </Grid>
         </Grid>
       </DialogContent>
       <DialogActions>
@@ -214,7 +238,7 @@ export function PrintJoinGameDialog(props){
           Cancel
         </Button>
         <Button id="startBTN" onClick={joinGame} color="primary">
-              Start
+          Start
         </Button>
       </DialogActions>
     </Dialog>
@@ -222,128 +246,131 @@ export function PrintJoinGameDialog(props){
   );
 }
 
-export function PrintMessages(props){
-  
-    const useStyles = makeStyles(theme => ({
-      root: {
-        width: '100%',
-        maxWidth: 360,
-        overflowX: 'hidden', overflowY: "auto",
-        backgroundColor: theme.palette.background.paper,
-        overflowWrap: 'break-word',
-      },
-    }));
-    const classes = useStyles();
-    const url = props.url;
-    const messages =props.messages;
-    const user = getUserFromProps(props);
-    var index =0;
-    const shortMessage = (message) =>{
-      if(message.length >10)
-        return message.slice(0,10)+'...';
-      return message;
-    }
-    console.log('messages: ', messages);
-    let history = useHistory();
-    return (
-      <div className={classes.root}>
-        <List >
-          {messages.map((message) => (
-            <React.Fragment key={index++}>
-              <ListItem id={"message" + index} className={classes.root} button onClick={()=>{
-                history.push({
-                  pathname: `${url}/ChatRoom/`+message.authorEmail,
-                  user: user,
-                })
-              }}>
-                <ListItemText primary={message.authorName + ": "+shortMessage(message.messageContent)} /*secondary={date}*/ />
-              </ListItem>
-            </React.Fragment>
-          ))}
-        </List>
-      </div>
-        );
+export function PrintMessages(props) {
+
+  const useStyles = makeStyles(theme => ({
+    root: {
+      width: '100%',
+      maxWidth: 360,
+      overflowX: 'hidden', overflowY: "auto",
+      backgroundColor: theme.palette.background.paper,
+      overflowWrap: 'break-word',
+    },
+  }));
+  const classes = useStyles();
+  const url = props.url;
+  const messages = props.messages;
+  const user = getUserFromProps(props);
+  var index = 0;
+  const shortMessage = (message) => {
+    if (message.length > 10)
+      return message.slice(0, 10) + '...';
+    return message;
+  }
+  console.log('messages: ', messages);
+  let history = useHistory();
+  return (
+    <div className={classes.root}>
+      <List >
+        {messages.map((message) => (
+          <React.Fragment key={index++}>
+            <ListItem id={"message" + index} className={classes.root} button onClick={() => {
+              history.push({
+                pathname: `${url}/ChatRoom/` + message.authorEmail,
+                user: user,
+              })
+            }}>
+              <ListItemText primary={message.authorName + ": " + shortMessage(message.messageContent)} /*secondary={date}*/ />
+            </ListItem>
+          </React.Fragment>
+        ))}
+      </List>
+    </div>
+  );
 
 }
 
 
 
-export function PrintChats(props){
-  var messeges_by_addressee  = JSON.parse(JSON.stringify(props.chats));
-  
+export function PrintChats(props) {
+  var messeges_by_addressee = JSON.parse(JSON.stringify(props.chats));
+
   const classes = useStyles();
   let history = useHistory();
-  if(isUndefined(messeges_by_addressee) || messeges_by_addressee.length ===0)
-    messeges_by_addressee=[];
+  if (isUndefined(messeges_by_addressee) || messeges_by_addressee.length === 0)
+    messeges_by_addressee = [];
   const user = getUserFromProps(props);
-  let index =0;
+  let index = 0;
   var chats = [];
-  for(let chat of messeges_by_addressee){
-    let last_message = chat.messages[ chat.messages.length-1];
-    last_message.delivery_timestamp =  Date.parse(last_message.delivery_timestamp)
+  for (let chat of messeges_by_addressee) {
+    let last_message = chat.messages[chat.messages.length - 1];
+    last_message.delivery_timestamp = Date.parse(last_message.delivery_timestamp)
     chats.push(last_message);
     console.log(last_message);
   }
-  chats.sort((message1, message2)=>{return message1.delivery_timestamp<message2.delivery_timestamp? 1: -1});
+  chats.sort((message1, message2) => { return message1.delivery_timestamp < message2.delivery_timestamp ? 1 : -1 });
   return (<List className={classes.list}>
-        {chats.map((chat) => (
-          
-          <React.Fragment key={index++}>
-            
-            <ListItem button  onClick={()=>{
-            history.push({
-              pathname: `/LoginScreen/ChatRoom/`+chat.otherUserEmail,
-              user: user,
-            })
-          }} >
-              <ListItemText primary={chat.otherUserEmail} secondary={
-                
-                (chat.authorEmail === user.email? 'You: ' : (chat.authorName +": ")) +
-                  chat.messageContent
-                } />
-            </ListItem>
-          </React.Fragment>
-        ))}
-      </List>);
+    {chats.map((chat) => (
+
+      <React.Fragment key={index++}>
+
+        <ListItem button onClick={() => {
+          history.push({
+            pathname: `/LoginScreen/ChatRoom/` + chat.otherUserEmail,
+            user: user,
+          })
+        }} >
+          <ListItemText primary={chat.otherUserEmail} secondary={
+
+            (chat.authorEmail === user.email ? 'You: ' : (chat.authorName + ": ")) +
+            chat.messageContent
+          } />
+        </ListItem>
+      </React.Fragment>
+    ))}
+  </List>);
 }
 
 /**
  * 
  * @param {email - the email of the other user. user: current user (not neccessary)} props 
  */
-export function ChatButton(props){
+export function ChatButton(props) {
   let history = useHistory();
   return (
-      <ListItem id = {props.id} button onClick={()=>{history.push({
-        pathname: `/LoginScreen/ChatRoom/`+props.email,
+    <ListItem id = {props.id} button onClick={() => {
+      history.push({
+        pathname: `/LoginScreen/ChatRoom/` + props.email,
         user: props.user
-      })}}>
-         
+      })
+    }}>
+
       <Grid container alignContent='center' direction='column' alignItems='center' justify='center'>
-      <Grid item xs={5}>
-        <ListItemIcon >
-          <ChatIcon />
-        </ListItemIcon>
+        <Grid item xs={5}>
+          <ListItemIcon >
+            <ChatIcon />
+          </ListItemIcon>
         </Grid>
         <Grid item xs={7}>
-        <ListItemText primary="Chat"/>
+          <ListItemText primary="Chat" />
         </Grid>
-        </Grid>
-        </ListItem>
-      
+      </Grid>
+    </ListItem>
+
   );
 }
 
-export function AutoRedirectToLoginScreenIfUserInSession(history){
-  getCurrentUserFromDB(()=>{}, ()=>{
+export function AutoRedirectToLoginScreenIfUserInSession(history) {
+  getCurrentUserFromDB(() => { }, () => {
 
     var locationArr = history.location.pathname.split("/");
     var len = locationArr.length;
-    var page = locationArr[len-1];
-    if( page === 'SignIn' || page === '' || page === 'SignUp'){
+    var page = locationArr[len - 1];
+    if (page === 'SignIn' || page === '' || page === 'SignUp') {
       history.push({
         pathname: '/LoginScreen',
       });
 
-  }});
+    }
+  });
 }

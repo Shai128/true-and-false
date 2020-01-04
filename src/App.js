@@ -23,8 +23,8 @@ import { LoginScreenRouter as LoginScreen } from './pages/LoginScreen.js';
 import { Chat as ChatRoom } from './pages/Chat.js';
 import { JoinGame } from './pages/JoinGame.js';
 import { PrintJoinGameDialog, DisplayLoading, AutoRedirectToLoginScreenIfUserInSession } from './PagesUtils.js';
-import { validEmail, passwordIsStrongEnough, isUndefined } from './Utils.js'
-import { emptyUser, logIn } from './user.js'
+import { validEmail, passwordIsStrongEnough, isUndefined, statusCodes } from './Utils.js'
+import { emptyUser, logIn, signUp } from './user.js'
 //import { createBrowserHistory } from '../../../AppData/Local/Microsoft/TypeScript/3.6/node_modules/@types/history';
 function Copyright() {
   return (
@@ -49,7 +49,7 @@ export const useStyles = makeStyles(theme => ({
     },
   },
   paper: {
-    marginTop: theme.spacing(8),
+    marginTop: theme.spacing(4),
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -81,6 +81,7 @@ export const useStyles = makeStyles(theme => ({
     display: 'none',
   },
   root: {
+    textAlign: 'center',
     width: '100%',
     maxWidth: 500,
     color: '#000000'
@@ -105,6 +106,8 @@ export const useStyles = makeStyles(theme => ({
 function SignUp() {
   const classes = useStyles();
   const [user, setUser] = useState(emptyUser);
+  const [userAlreadyExists, setUserAlreadyExists] = useState(false);
+
   const initMessages = {
     errorPassword: false,
     errorConfirmPassword: false,
@@ -122,18 +125,6 @@ function SignUp() {
       [e.target.name]: e.target.value
     });
   };
-
-  /*const errorEmail = 'errorEmail', emailHelperText= 'emailHelperText',
-   errorPassword='errorPassword', passwordHelperText='passwordHelperText',
-   firstNameHelperText='firstNameHelperText', errorFirstName='errorFirstName';
-  const changeTextMessage = (error, errorName, helperText, helperTextName) =>{
-    setTextsMessages({
-      ...textsMessages,
-      [errorName]: error,
-      [helperTextName]: helperText
-    });
-  }
-*/
 
   /**
    * returns true is the user is valid or false if it is not.
@@ -271,32 +262,37 @@ function SignUp() {
               color="primary"
               className={classes.submit}
               onClick={() => {
+                setUserAlreadyExists(false);
                 if (!validUser())
                   return;
                 // let data = new FormData();
                 // data.append( "json", JSON.stringify(user));
 
-
-                fetch('http://localhost:8000/user', {
-                  method: 'POST', // *GET, POST, PUT, DELETE, etc.
-                  headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                  },
-                  credentials: 'include',
-                  body: 'json=' + JSON.stringify(user)
-                }).then((data) => {
+                signUp(user, () => {
                   logIn(user, (data) => {
                     // todo: check if the email is already in the db!!
                     console.log('frontend got data: ', data);
                     // console.log('data.status: ', data.status)
                     history.push("/LoginScreen/MySentences");
                   });
-                })
+                }, (error_status) => {
+                  if (error_status === statusCodes.USER_EXISTS) {
+                    setUserAlreadyExists(true);
+                  }
 
+                })
               }}>
 
               Sign Up
           </Button>
+            <Grid container justify="center">
+              <Grid item xs={12}>
+                {userAlreadyExists && <Typography variant="h6" style={{ color: 'red' }}>
+                  That email is taken. Try another.
+          </Typography>}
+              </Grid>
+
+            </Grid>
             <Grid container justify="center">
               <Grid item>
                 <Link to="/SignIn" variant="body2">
@@ -398,16 +394,7 @@ function Home() {
       </Button>
                 </Link>
               </Grid>
-              {/* 
-            <Grid item xs={12} sm={6}>
-              <Link to="/LoginScreen">
-                <Button variant="contained" color="primary" fullWidth className={classes.button}>
-                  LoginScreen
-          </Button>
-              </Link>
-            </Grid> */}
 
-              {/* <Grid item xs={12} sm={6}> */}
               <Button variant="contained" color="primary" fullWidth onClick={handleClickGuestLogin} className={classes.button}>
                 Guest Login
             </Button>
@@ -416,26 +403,6 @@ function Home() {
               handleCloseWindow={handleCloseGuestLoginWindow}
               WindowOpen={guestLoginWindowOpen}
               currentUser={emptyUser()} />
-            {/* </Grid> */}
-
-            {/* 
-          <Grid item xs={12} sm={6}>
-            <Link to="/ChatRoom">
-            <Button variant="contained" color="primary" fullWidth  className={classes.button}>
-              Chat
-          </Button>
-          </Link>
-            </Grid> */}
-
-
-            {/* <Grid item xs={12} sm={6}>
-            <Link to="/JoinGame">
-            <Button variant="contained" color="primary" fullWidth  className={classes.button}>
-              Join A Game
-          </Button>
-          </Link>
-            </Grid> */}
-
           </form>
           <Box mt={5}>
             <Copyright />
@@ -449,64 +416,6 @@ function Home() {
 
 }
 
-/*
-
-function PrintGuestLoginDialog(props){
-  const {handleCloseGuestLoginWindow,  guestLoginWindowOpen} = props;
-  const [gameID, setGameID] = React.useState("");
-  const [currentGameNickName, setCurrentGameNickName] = React.useState('');
-
-  const startGame = ()=>{
-      //todo
-      console.log("starting game!");
-      console.log("game ID:", gameID);
-      console.log('user nickname: ', currentGameNickName);
-      handleCloseGuestLoginWindow();
-  }
-  return(
-      <Dialog open={guestLoginWindowOpen} onClose={handleCloseGuestLoginWindow} aria-labelledby="form-dialog-title">
-      <DialogTitle id="form-dialog-title">Select Room Name</DialogTitle>
-      <DialogContent>
-        <DialogContentText>
-        </DialogContentText>
-        <Grid container spacing={2}>
-        <Grid item xs={12}>
-        <TextField
-          autoFocus
-          margin="dense"
-          id="roomID"
-          label="Room ID"
-          onChange={(event)=>{
-            setGameID(event.target.value);
-          }}
-        />
-        </Grid>
-        <Grid item xs={12}>
-        <TextField
-          autoFocus
-          margin="dense"
-          id="nickName"
-          label="Nick Name"
-          onChange={(event)=>{
-              setCurrentGameNickName(event.target.value);
-          }}
-        />
-        </Grid>
-        </Grid>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleCloseGuestLoginWindow} color="primary">
-          Cancel
-        </Button>
-        <Button onClick={startGame} color="primary">
-              Start
-        </Button>
-      </DialogActions>
-    </Dialog>
-
-  );
-}
-*/
 
 export function SignIn() {
 
@@ -516,6 +425,12 @@ export function SignIn() {
   const [user, setUser] = useState(emptyUser());
   const [isLoading, setIsLoading] = useState(false);
   const [isWrongLogin, setIsWrongLogin] = useState(false);
+  const [serverError, setServerError] = useState(false);
+
+  const [emailError, setEmailError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
+  const [emailHelperText, setEmailHelperText] = useState('');
+  const [passwordHelperText, setPasswordHelperText] = useState('');
 
   const updateField = e => {
     setUser({
@@ -523,6 +438,29 @@ export function SignIn() {
       [e.target.name]: e.target.value
     });
   };
+  const resetDisplay = () => {
+    setServerError(false);
+    setEmailError(false);
+    setPasswordError(false);
+    setEmailHelperText('');
+    setPasswordHelperText('');
+    setIsWrongLogin(false);
+  }
+  const validUser = (user) => {
+    var isValid = true;
+    if (!validEmail(user.email)) {
+      setEmailError(true);
+      setEmailHelperText("Please provide a valid email address")
+      isValid = false;
+    }
+
+    if (!passwordIsStrongEnough(user.password)) {
+      setPasswordError(true);
+      setPasswordHelperText("please provide a strong password");
+      isValid = false;
+    }
+    return isValid;
+  }
   if (isLoading)
     return (<DisplayLoading />);
   return (
@@ -538,11 +476,12 @@ export function SignIn() {
                 <Grid item xs={12}>
                   <Typography variant="h1" component="h2" gutterBottom className={classes.root}>
                     Sign In
-      </Typography>
+                  </Typography>
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={6}>
                   <TextField
-                    error={isWrongLogin}
+                    error={emailError}
+                    helperText={emailHelperText}
                     id="EmailInput"
                     className={classes.textField}
                     label="Email"
@@ -554,10 +493,11 @@ export function SignIn() {
                     onChange={updateField}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid item xs={6}>
 
                   <TextField
-                    error={isWrongLogin}
+                    error={passwordError}
+                    helperText={passwordHelperText}
                     id="PasswordInput"
                     label="Password"
                     className={classes.textField}
@@ -575,7 +515,10 @@ export function SignIn() {
 
                   <Button id="submit" variant="contained" color="primary" fullWidth className={classes.button}
                     onClick={() => {
-                      setIsWrongLogin(false);
+                      resetDisplay();
+                      if (!validUser(user)) {
+                        return
+                      }
                       setIsLoading(true);
                       console.log("sending sign in");
 
@@ -585,16 +528,31 @@ export function SignIn() {
                           console.log('logged in and frontend got data: ', user);
                           history.push("/LoginScreen");
                         },
-                        () => { // onFailure funciton
+                        (status) => { // onFailure funciton
+                          console.log("login failed. status: ", status);
                           setIsLoading(false);
-                          setIsWrongLogin(true);
+                          if (status === statusCodes.PASSWORD_MISMATCH)
+                            setIsWrongLogin(true);
+                          else
+                            setServerError(true);
                         });
 
                     }}>
                     Sign In
       </Button>
                 </Grid>
-                {isWrongLogin ? 'your email and password does not match' : ''}
+                <Grid item xs={12}>
+                  {isWrongLogin && <Typography variant="h6" style={{ textAlign: 'center', color: 'red' }}>
+                    Your email and password does not match.
+          </Typography>}
+
+                </Grid>
+                <Grid item xs={12}>
+                  {serverError && <Typography variant="h6" style={{ textAlign: 'center', color: 'red' }}>
+                    Server error occured.
+          </Typography>}
+
+                </Grid>
               </Grid>
             </form>
           </div>

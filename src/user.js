@@ -1,21 +1,22 @@
 
-import {okStatus, isUndefined} from './Utils.js'
+import { okStatus, server, isUndefined } from './Utils.js'
 import { reject } from 'q';
-const server = 'http://localhost:8000';
+
+
 const user_in_session_key = 'user in session key'
-const  players= [{firstName: 'alon', nickName: 'alon', email:'123@gmail.com'}, {firstName: 'km', nickName: 'debil', email:'k@gmai.com',}, {firstName: 'Dan', nickName: 'Halif', email: 'dan@gmail.com'}];
-export function getCreatedGames(){
+const players = [{ firstName: 'alon', nickName: 'alon', email: '123@gmail.com' }, { firstName: 'km', nickName: 'debil', email: 'k@gmai.com', }, { firstName: 'Dan', nickName: 'Halif', email: 'dan@gmail.com' }];
+export function getCreatedGames() {
     var arr = [];
-    arr[3] =  {
+    arr[3] = {
         name: 'my best room',
-        id:3,
+        id: 3,
         date: '8.11.2019',
         playersNum: 3,
         players: players
-        };
+    };
     arr[0] = {
         name: "koby's room",
-        id:0,
+        id: 0,
         date: '6.11.2016',
         playersNum: 20,
         players: players
@@ -24,34 +25,35 @@ export function getCreatedGames(){
 }
 
 
-export function getParticipatedGames(){
+export function getParticipatedGames() {
     var arr = [];
-    arr[1] ={
+    arr[1] = {
         name: 'I love this game!',
         id: 1,
         date: '20.3.2017',
         playersNum: 5,
-        players:players
+        players: players
     };
     arr[2] = {
         name: 'join my game!',
         id: 2,
         date: '22.3.2017',
         playersNum: 100,
-        players:players
-        };
+        players: players
+    };
     return arr;
 }
 
 
 const io = require('socket.io-client');
-export const socket = io.connect(server, {query: "user_id="+getUserFromLocalStorage().email});
+console.log('server: ', server)
+export const socket = io.connect(server, { query: "user_id=" + getUserFromLocalStorage().email });
 
 
 /**
  * a dummy function that returns an empty user;
  */
-export function getCurrentUser(){
+export function getCurrentUser() {
     return emptyUser();
 }
 
@@ -64,9 +66,9 @@ export function getCurrentUser(){
  * @param {function that activates in case of failure} onFailure
  * @param {function that activates in case of success} onSuccess
  */
-export function getCurrentUserFromSession(user, setUser, onSuccess , onFailure){
-    
-    if(userIsUpdated(user)){
+export function getCurrentUserFromSession(user, setUser, onSuccess, onFailure) {
+
+    if (userIsUpdated(user)) {
         /*
         if(!isUndefined(onSuccess))
             onSuccess(user);
@@ -75,13 +77,13 @@ export function getCurrentUserFromSession(user, setUser, onSuccess , onFailure){
     }
     /** getting the current user from the local storage, if exists */
     var storage_user = getUserFromLocalStorage();
-    if(userIsUpdated(storage_user)){
+    if (userIsUpdated(storage_user)) {
         setUser(storage_user);
-        if(!isUndefined(onSuccess))
+        if (!isUndefined(onSuccess))
             onSuccess(storage_user);
         return;
     }
-    
+
 
     getCurrentUserFromDB(setUser, onSuccess, onFailure);
 }
@@ -90,12 +92,12 @@ export function getCurrentUserFromSession(user, setUser, onSuccess , onFailure){
 /**
  * read the user that was saved in the local storage and calls setUser with the user we found.
  */
-export function getUserFromLocalStorage(){
+export function getUserFromLocalStorage() {
     console.log('entered getUserFromLocalStorage function');
     var storage_user = (localStorage.getItem(user_in_session_key));
-    if(!isUndefined(storage_user)){
+    if (!isUndefined(storage_user)) {
         var parsed_storage_user = JSON.parse(storage_user);
-        if(userIsUpdated(parsed_storage_user)){
+        if (userIsUpdated(parsed_storage_user)) {
             fillUserUndefinedData(parsed_storage_user);
             console.log('used local storage to get: ', parsed_storage_user)
             return parsed_storage_user;
@@ -104,10 +106,10 @@ export function getUserFromLocalStorage(){
     return emptyUser();
 }
 
-function fillUserUndefinedData(user){
-    if(isUndefined(user.true_sentences))
+function fillUserUndefinedData(user) {
+    if (isUndefined(user.true_sentences))
         user.true_sentences = [];
-    if(isUndefined(user.false_sentences))
+    if (isUndefined(user.false_sentences))
         user.false_sentences = [];
 }
 
@@ -119,54 +121,54 @@ function fillUserUndefinedData(user){
  * @param {function that activates in case of failure} onFailure
  * @param {function that activates in case of success} onSuccess
  */
-export function getCurrentUserFromDB(setUser, onSuccess , onFailure){
-    
+export function getCurrentUserFromDB(setUser, onSuccess, onFailure) {
 
-    fetch(server+'/getUserFromSession', {
-    method: 'GET', // *GET, POST, PUT, DELETE, etc.
-    headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    credentials: 'include'
+
+    fetch(server + '/getUserFromSession', {
+        method: 'GET', // *GET, POST, PUT, DELETE, etc.
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        credentials: 'include'
     }).then(response => {
-    console.log("response:", response)
-    console.log("response status:", response.status)
-    if (response.status !== okStatus) {
-        reject(response.status);
-        if(!isUndefined(onFailure))
-            onFailure();
-    } else {
-        return new Promise(function(resolve, reject) {
-        resolve(response.json());
-        })
-    }
+        console.log("response:", response)
+        console.log("response status:", response.status)
+        if (response.status !== okStatus) {
+            reject(response.status);
+            if (!isUndefined(onFailure))
+                onFailure();
+        } else {
+            return new Promise(function (resolve, reject) {
+                resolve(response.json());
+            })
+        }
     }).then(user => {
-        if(!userIsUpdated(user)){
+        if (!userIsUpdated(user)) {
             return;
         }
         fillUserUndefinedData(user);
-        if(!isUndefined(onSuccess))
+        if (!isUndefined(onSuccess))
             onSuccess(user);
         console.log('frontend got data: ', user);
         setUser(user);
         /** saving the user we just got to local storage, so next time we will access the user from local storage */
         updateUserInLocalStorage(user);
-        
+
 
     }, fail_status => {
-    console.log("failed, status:", fail_status)
+        console.log("failed, status:", fail_status)
     });
 }
 
 
-export function updateUserInLocalStorage(user){
+export function updateUserInLocalStorage(user) {
     console.log("entered updateUserInLocalStorage")
     localStorage.setItem(user_in_session_key, JSON.stringify(user))
     console.log('saved in local storage: ', user)
-    console.log('now we have in local storage: ',  JSON.parse(localStorage.getItem(user_in_session_key)));
+    console.log('now we have in local storage: ', JSON.parse(localStorage.getItem(user_in_session_key)));
 }
 
-export function logOut(){
+export function logOut() {
     socket.emit("logout");
     fetch(server + '/logout', {
         method: 'GET', // *GET, POST, PUT, DELETE, etc.
@@ -174,19 +176,19 @@ export function logOut(){
             'Content-Type': 'application/x-www-form-urlencoded'
         },
         credentials: 'include'
-        })
-    .then(response => {
-        console.log("response status:", response.status)
-        if (response.status !== okStatus) {
-            reject(response.status);
-        } else {
-            return new Promise(function(resolve, reject) {
-            resolve(response);
-            })
-        }
-    }, fail_status => {
-        console.log("failed, status:", fail_status);
-    });
+    })
+        .then(response => {
+            console.log("response status:", response.status)
+            if (response.status !== okStatus) {
+                reject(response.status);
+            } else {
+                return new Promise(function (resolve, reject) {
+                    resolve(response);
+                })
+            }
+        }, fail_status => {
+            console.log("failed, status:", fail_status);
+        });
     localStorage.removeItem(user_in_session_key);
 }
 
@@ -195,7 +197,7 @@ export function logOut(){
  * @param {the user that is checked if updated} user 
  * returns true if the user has an email.
  */
-export function userIsUpdated(user){
+export function userIsUpdated(user) {
     return !isUndefined(user) && !isUndefined(user.email) && user.email !== '';
 }
 
@@ -204,22 +206,22 @@ export function userIsUpdated(user){
  * @param {the user to be updated to the DB} user 
  * edits the user with the same user_.id and puts instead the given user
  */
-export function updateUserToDB(user){
+export function updateUserToDB(user) {
     updateUserInLocalStorage(user);
-    fetch(server+'/userupdate/'+user._id, {
-                method: 'POST', // *GET, POST, PUT, DELETE, etc.
-                headers: {
-                  'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                credentials: 'include',
-                body: 'json=' + JSON.stringify(user)
-              });
+    fetch(server + '/userupdate/' + user._id, {
+        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        credentials: 'include',
+        body: 'json=' + JSON.stringify(user)
+    });
 }
 
 /**
  * returns a user with no content. can be used as an initial value for a user.
  */
-export function emptyUser(){
+export function emptyUser() {
     return {
         firstName: '',
         nickName: '',
@@ -238,15 +240,15 @@ export function emptyUser(){
  * @param {the props that contains the user} props 
  * returns the user from the props. if the props doesn't contain a user, it returns an empty user.
  */
-export function getUserFromProps(props){
-    if(!isUndefined(props) &&!isUndefined(props.location) && !isUndefined(props.location.user)
-     && userIsUpdated(props.location.user))
+export function getUserFromProps(props) {
+    if (!isUndefined(props) && !isUndefined(props.location) && !isUndefined(props.location.user)
+        && userIsUpdated(props.location.user))
         return props.location.user;
-        
-    if(!isUndefined(props) &&!isUndefined(props.user) && userIsUpdated(props.user))
+
+    if (!isUndefined(props) && !isUndefined(props.user) && userIsUpdated(props.user))
         return props.user;
 
-    if(!isUndefined(props) &&!isUndefined(props.location) && !isUndefined(props.location.InfoObject) && userIsUpdated(props.InfoObject))
+    if (!isUndefined(props) && !isUndefined(props.location) && !isUndefined(props.location.InfoObject) && userIsUpdated(props.InfoObject))
         return props.user;
     return emptyUser();
 }
@@ -275,92 +277,98 @@ export function getUserFromPropsOrFromSession(props, setUser){
  * @param {a function that will be executed after failure} onFailure
  * tries to log in with the given user. saves the user in the session in case of successful login.
  */
-export function logIn(user, onSuccess, onFailure){
-    fetch(server+'/user/'+user.email+'/'+user.password, {
+export function logIn(user, onSuccess, onFailure) {
+    fetch(server + '/user/' + user.email + '/' + user.password, {
         method: 'GET', // *GET, POST, PUT, DELETE, etc.
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
         },
         params: user,
         credentials: 'include'
-        }).then(response => {
-            console.log("response:", response)
-            console.log("response status:", response.status)
-            if (response.status !== okStatus) {
-                reject(response.status);
-                if(!isUndefined(onFailure))
-                    onFailure();
-            } else {
-                return new Promise(function(resolve, reject) {
-                resolve(response.json());
-                })
+    }).then(response => {
+        console.log('ok status: ', okStatus);
+        console.log("response:", response)
+        console.log("response status:", response.status)
+        if (response.status !== okStatus) {
+            reject(response.status);
+            if (!isUndefined(onFailure)) {
+                console.log('http request failed. activating onFailire with status: ', response.status);
+                onFailure(response.status);
             }
-            }).then(user => {
-                if(!userIsUpdated(user)){
-                    return;
-                }
-                if(!isUndefined(user))
-                    onSuccess(user);
-                socket.emit('login', {email: user.email,user_id: user.email, nickName: user.nickName});
-                console.log('frontend got data: ', user);
-                /** saving the user we just got to local storage, so next time we will access the user from local storage */
-                localStorage.setItem(user_in_session_key, JSON.stringify(user));
-                console.log('saved in local storage: ', user)
-                console.log('now we have in local storage: ',  JSON.parse(localStorage.getItem(user_in_session_key)));
-        
-            }, fail_status => {
-            console.log("failed, status:", fail_status)
-            });   
+        } else {
+            return new Promise(function (resolve, reject) {
+                resolve(response.json());
+            })
+        }
+    }).then(user => {
+        console.log('tried to log in and got from server: ', user)
+        if (!userIsUpdated(user)) {
+            return;
+        }
+        if (!isUndefined(user))
+            onSuccess(user);
+        socket.emit('login', { email: user.email, user_id: user.email, nickName: user.nickName });
+        console.log('frontend got data: ', user);
+        /** saving the user we just got to local storage, so next time we will access the user from local storage */
+        localStorage.setItem(user_in_session_key, JSON.stringify(user));
+        console.log('saved in local storage: ', user)
+        console.log('now we have in local storage: ', JSON.parse(localStorage.getItem(user_in_session_key)));
+
+    }, fail_status => {
+        if (!isUndefined(onFailure))
+            onFailure(fail_status);
+        console.log("failed, status:", fail_status)
+    });
 }
 
-export function resetUnreadMessages(email){
-    fetch(server + '/user/resetUnReadMessages/'+email, {
+export function resetUnreadMessages(email) {
+    fetch(server + '/user/resetUnReadMessages/' + email, {
         method: 'POST', // *GET, POST, PUT, DELETE, etc.
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
         },
         credentials: 'include'
-        })
-    .then(response => {
-        console.log("response status:", response.status)
-        if (response.status !== okStatus) {
-            reject(response.status);
-        } else {
-            return new Promise(function(resolve, reject) {
-            resolve(response);
-            })
-        }
-    }, fail_status => {
-        console.log("failed, status:", fail_status);
-    });
+    })
+        .then(response => {
+            console.log("response status:", response.status)
+            if (response.status !== okStatus) {
+                reject(response.status);
+            } else {
+                return new Promise(function (resolve, reject) {
+                    resolve(response);
+                })
+            }
+        }, fail_status => {
+            console.log("failed, status:", fail_status);
+        });
     var user = getUserFromLocalStorage();
     user.unReadMessages = [];
     updateUserInLocalStorage(user);
 }
 
 
-export function resetUnreadMessagesFromCertainUser(email, otherUserEmail){
-    if(isUndefined(email) || isUndefined(otherUserEmail) || email ==='' || otherUserEmail ==='')
+export function resetUnreadMessagesFromCertainUser(email, otherUserEmail) {
+    if (isUndefined(email) || isUndefined(otherUserEmail) || email === '' || otherUserEmail === '')
         return;
-    fetch(server + '/user/resetUnReadMessagesFromCertainUser/'+email+'/'+otherUserEmail, {
+    fetch(server + '/user/resetUnReadMessagesFromCertainUser/' + email + '/' + otherUserEmail, {
         method: 'POST', // *GET, POST, PUT, DELETE, etc.
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
         },
         credentials: 'include'
-        })
-    .then(response => {
-        console.log("response status:", response.status)
-        if (response.status !== okStatus) {
-            reject(response.status);
-        } else {
-            return new Promise(function(resolve, reject) {
-            resolve(response);
-            })
-        }
-    }, fail_status => {
-        console.log("failed, status:", fail_status);
-    });
+    })
+        .then(response => {
+            console.log("response status:", response.status)
+            if (response.status !== okStatus) {
+                reject(response.status);
+            } else {
+                return new Promise(function (resolve, reject) {
+                    resolve(response);
+                })
+            }
+        }, fail_status => {
+            console.log("failed, status:", fail_status);
+        });
     var user = getUserFromLocalStorage();
     user.unReadMessages = removeUnReadMessagesFromCertainUser(user, otherUserEmail)
     updateUserInLocalStorage(user);
@@ -371,18 +379,47 @@ export function resetUnreadMessagesFromCertainUser(email, otherUserEmail){
  * @param {the user we read from} user 
  * @param {the other user that the (first) given user's unReadMessages will be ereased from} otherUserEmail 
  */
-export function removeUnReadMessagesFromCertainUser(user, otherUserEmail){
+export function removeUnReadMessagesFromCertainUser(user, otherUserEmail) {
     var unReadMessages = user.unReadMessages;
     var newUnReadArray = []
-    for(let message of unReadMessages){
-        if(message.authorEmail !== otherUserEmail)
+    for (let message of unReadMessages) {
+        if (message.authorEmail !== otherUserEmail)
             newUnReadArray.push(message);
     }
     return newUnReadArray;
 }
 
 
-export function validOldPassword(oldPassword, enteredOldPassword){
+export function validOldPassword(oldPassword, enteredOldPassword) {
     return oldPassword === enteredOldPassword // todo: hash the entered old password
-  }
-  
+}
+
+export function signUp(user, onSuccess, onFailure) {
+    fetch(server + '/user', {
+        method: 'POST', // *GET, POST, PUT, DELETE, etc.
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        credentials: 'include',
+        body: 'json=' + JSON.stringify(user)
+
+    }).then(response => {
+        console.log("response:", response)
+        console.log("response status:", response.status)
+        if (response.status !== okStatus) {
+            reject(response.status);
+            if (!isUndefined(onFailure))
+                onFailure(response.status);
+        } else {
+            return new Promise(function (resolve, reject) {
+                resolve(response.json());
+            })
+        }
+    }).then((data) => {
+        if (!userIsUpdated(data))
+            return;
+        if (!isUndefined(onSuccess))
+            onSuccess(data);
+    })
+}
+

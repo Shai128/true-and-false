@@ -163,7 +163,7 @@ function GetSentencesComponentsByList(props) {
 
   const classes = listStyles();
   const sentences = props.sentences;
-  const typeOfSentences = sentences
+  //const typeOfSentences = sentences
 
   const setSentences = props.setSentences;
   //const [sentences, setSentences] = useState(props.sentences);
@@ -194,7 +194,7 @@ function GetSentencesComponentsByList(props) {
                   className={classes.textField}
                   variant="filled"
                   fullWidth
-                  label={'Sentence ' + (id + 1)}
+                  //label={'Sentence ' + (id + 1)}
                   value={value}
                   InputProps={{ className: classes.white }}
                   onChange={(event) => {
@@ -223,10 +223,10 @@ function GetSentencesComponentsByList(props) {
         ))}
       </List>
       <Grid container spacing={2}>
-        <Grid item xs={12} style={{ justifyContent: 'center' }}>
+        <Grid item xs={12} style={{ display: 'flex', justifyContent: 'center' }}>
           <IconButton id={"add" + props.type + "SentenceBTN"}
-            style={{ justifyContent: 'center', width: '100%' }}
-            edge="start"
+            style={{ display: 'flex', justifyContent: 'center', }}
+            //edge="start"
             color="primary"
             aria-label="open drawer"
             onClick={handleAddSentence}
