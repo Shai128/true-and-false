@@ -1,8 +1,9 @@
 import { okStatus, serverIP, isUndefined } from './Utils.js'
 import { reject } from 'q';
-const server = serverIP + ':8000'
+const server = "http://"+ serverIP + ':8000'
 export function getSentencesFromDB(opponentId, room, onSuccess, onFailure) {
 
+  console.log("request:", server + '/userSentences/' + opponentId + '/' + room.room_id)
   fetch(server + '/userSentences/' + opponentId + '/' + room.room_id, {
     method: 'GET', // *GET, POST, PUT, DELETE, etc.
     headers: {
