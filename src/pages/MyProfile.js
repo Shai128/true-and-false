@@ -38,6 +38,7 @@ const useButtonStyles = makeStyles({
 
 
 export function MyProfile(props) {
+
   let init_user = getUserFromProps(props);
   const classes = AppUseStyles();
   const buttonClasses = useButtonStyles();
