@@ -46,7 +46,7 @@ export function getParticipatedGames() {
 
 
 const io = require('socket.io-client');
-console.log('server: ', server)
+console.log('user.js server: ', server)
 export const socket = io.connect(server, { query: "user_id=" + getUserFromLocalStorage().email });
 
 

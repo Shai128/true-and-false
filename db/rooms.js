@@ -185,6 +185,7 @@ async function addRoomToUserGameHistory(userEmail, reducedRoomObject) {
 
 async function deleteUserByEmailInRoomByRoomID(room_id, email, success, fail) { //room_id: int, email: string
     roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
+        console.log("found room:", room)
         if (err) fail(statusCodes.ROOM_NOT_FOUND);
         else {
             console.log('got here');

@@ -13,10 +13,10 @@ const statusCodes = {
 const okStatus = statusCodes.OK;
 var ip = require("ip");
 console.log("ip: ", ip.address());
-const serverIP = ip.address;
+const serverIP = ip.address();
 const httpServerIP = 'http://' + serverIP
 const server = httpServerIP + ':8000'
-console.log('server: ', server)
+console.log('utils server: ', server)
 function isUndefined(val) {
     return val === 'undefined' || typeof val === 'undefined' || val == null;
 }
