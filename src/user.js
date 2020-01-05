@@ -2,7 +2,7 @@
 import { okStatus, server, isUndefined } from './Utils.js'
 import { reject } from 'q';
 
-
+console.log("user.js server that got from utils: ", server);
 const user_in_session_key = 'user in session key'
 const players = [{ firstName: 'alon', nickName: 'alon', email: '123@gmail.com' }, { firstName: 'km', nickName: 'debil', email: 'k@gmai.com', }, { firstName: 'Dan', nickName: 'Halif', email: 'dan@gmail.com' }];
 export function getCreatedGames() {

@@ -11,7 +11,8 @@ const statusCodes = {
     NOT_LOGGED_IN: 508
 }
 const okStatus = statusCodes.OK;
-var ip = require("ip");
+
+const ip = require('ip');
 console.log("ip: ", ip.address());
 const serverIP = ip.address();
 const httpServerIP = 'http://' + serverIP
