@@ -30,7 +30,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import clsx from 'clsx';
 import { getUserFromProps, getCurrentUserFromSession } from './../user.js';
 import { PrintChats, DisplayLoading } from './../PagesUtils.js'
-import { isUndefined } from './../Utils.js'
+import { isUndefined , server } from './../Utils.js'
 
 
 const okStatus = 200;
@@ -103,6 +103,12 @@ export function JoinGame(props) {
     },
   }));
 
+  const userStates = {
+    INVALID: 0,
+    AVAILABLE: 1,
+    UNAVAILABLE: 2
+  }
+
   const [GotInvitationWindow, setGotInvitationWindow] = React.useState(false);
   let history = useHistory();
   const classes = useStylesRoomName();
@@ -112,6 +118,29 @@ export function JoinGame(props) {
   const fixedHeightPaper = clsx(classes1.paper, classes1.fixedHeight);
   const [inputName, setInputName] = React.useState('');
   const [helperText, setHelperText] = React.useState('');
+
+
+
+  history.listen((location, action) => {
+    console.log('location: ', location)
+    console.log('action: ', action)
+    // location is an object like window.location
+    let arr = location.pathname.split('/');
+    let site = arr[arr.length - 1]
+    console.log('site: ', site);
+    if (site === 'JoinGame'){
+      socket.emit('changeUserAvailability', {
+        newAvailability: userStates.AVAILABLE, userId: CurrentUser.email, roomId: CurrentRoom.room_id
+      })
+   }
+    else if (site !== 'JoinGame'){
+        socket.emit('changeUserAvailability', {
+          newAvailability: userStates.UNAVAILABLE, userId: CurrentUser.email, roomId: CurrentRoom.room_id
+        })
+    }
+  })
+
+
 
 
   if (!isUpdatedData) {
@@ -209,12 +238,6 @@ export function JoinGame(props) {
 
   });
 
-  const userStates = {
-    INVALID: 0,
-    AVAILABLE: 1,
-    UNAVAILABLE: 2
-  }
-
 
   socket.off('userAccept')
 
@@ -289,7 +312,7 @@ export function JoinGame(props) {
   })
 
   const leaveRoom = () => {
-    fetch('http://localhost:8000/leaveRoom/' + CurrentRoom.room_id, {
+    fetch(server + '/leaveRoom/' + CurrentRoom.room_id, {
       method: 'GET', // *GET, POST, PUT, DELETE, etc.
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -469,7 +492,7 @@ export function JoinGame(props) {
   );
 
   function InitTheRoom(props) {
-    fetch('http://localhost:8000/userList/' + props, {
+    fetch(server + '/userList/' + props, {
       method: 'GET', // *GET, POST, PUT, DELETE, etc.
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
