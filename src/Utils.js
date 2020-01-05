@@ -3,10 +3,17 @@ const statusCodes = {
     UNDEFINED: 500,
     USER_EXISTS: 501,
     USER_DOES_NOT_EXIST: 502,
-    PASSWORD_MISMATCH: 503
+    PASSWORD_MISMATCH: 503,
+    ROOM_NOT_FOUND: 504,
+    USER_NOT_IN_ROOM: 505,
+    NICKNAME_TAKEN: 506,
+    BAD_PARAMS: 507,
+    NOT_LOGGED_IN: 508
 }
 const okStatus = statusCodes.OK;
-const serverIP = 'localhost'
+var ip = require("ip");
+console.log("ip: ", ip.address());
+const serverIP = ip.address;
 const httpServerIP = 'http://' + serverIP
 const server = httpServerIP + ':8000'
 console.log('server: ', server)

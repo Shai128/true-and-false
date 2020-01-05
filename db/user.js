@@ -83,9 +83,11 @@ function createUser(user, success, failure) {
             //saves the user in the db
             newUser.save((err) => {
                 if (err)
-                    failure(err)
-                else
+                    failure(statusCodes.UNDEFINED)
+                else {
+                    console.log('succeeded to create a new user');
                     success()
+                }
             })
         }
         else {
@@ -99,7 +101,7 @@ function createUser(user, success, failure) {
 async function updateLastActiveAt(email, date, success, fail) {
     console.log(date);
     userModel.findOneAndUpdate({ email: email }, { $set: { last_active_at: date } }, (err, doc) => {
-        if (err) fail('failed updated the last_active_at field of user with email ' + email)
+        if (err) fail(statusCodes.UNDEFINED)
         else success('Successfully updated the last_active_at field of user with email ' + email);
     });
 }
@@ -114,7 +116,7 @@ async function updateLastActiveAt(email, date, success, fail) {
 async function addUnReadMessage(email, message_data, success, fail) {
 
     userModel.findOne({ email: email }).exec(function (err, user) {
-        if (err) fail('User with email' + email + 'does not exist');
+        if (err) fail(statusCodes.USER_DOES_NOT_EXIST);
         else {
 
             var extract_data = {
@@ -173,7 +175,7 @@ async function resetUnReadMessage(email, success) {
 async function removeUnReadMessagesFromCertainUserInDB(email, otherUserEmail, success, fail) {
     userModel.findOne({ email: email }).exec(function (err, user) {
 
-        if (err) fail('User with email' + email + 'does not exist');
+        if (err) fail(statusCodes.USER_DOES_NOT_EXIST);
         else {
 
             var unReadMessages = removeUnReadMessagesFromCertainUser(user, otherUserEmail)
@@ -192,7 +194,7 @@ async function addMessegesByAddressee(user_email, message_data, otherUserEmail, 
 
     userModel.findOne({ email: user_email }).exec(function (err, user) {
 
-        if (err) fail('User with email' + user_email + 'does not exist');
+        if (err) fail(statusCodes.USER_DOES_NOT_EXIST);
         else {
             var extract_data = {
                 authorEmail
@@ -263,7 +265,7 @@ async function deleteUser(data, success, failure) {
     const docs = await userModel.deleteOne({ email: data.email });
     console.log("docs:" + docs);
     if (!docs) {
-        failure("no user with mail " + data.email + " found");
+        failure(statusCodes.USER_DOES_NOT_EXIST);
     } else {
         success("user with mail " + data.email + "was deleted successfuly");
     }
@@ -281,7 +283,7 @@ async function findUserByField(field, value, success, failure) {
     var query = {};
     query[field] = value;
     return userModel.find(query, (err, docs) => {
-        if (err) { failure(err) } else { success(docs) }
+        if (err) { failure(statusCodes.USER_DOES_NOT_EXIST) } else { success(docs) }
     });
 }
 
@@ -304,7 +306,7 @@ async function updateUser(userID, userEmail, user, success, failure) {
     else if (!isUndefined(userEmail))
         res = await userModel.replaceOne({ email: userEmail }, user); //res.nModified = # updated documents
     else {
-        failure('bad updateUser params. user was not updated');
+        failure(statusCodes.BAD_PARAMS);
         return;
     }
 
@@ -313,13 +315,13 @@ async function updateUser(userID, userEmail, user, success, failure) {
         //console.log('updated user. new user: ', user)
     }
     else if (res.n == 0 && res.nModified == 0) {
-        failure('could not find a user to update')
+        failure(statusCodes.USER_DOES_NOT_EXIST)
     }
     else if (res.n == 1 && res.nModified == 0) {
-        failure('user found, could not update')
+        failure(statusCodes.UNDEFINED)
     }
     else {
-        failure('fatal error occured.')
+        failure(statusCodes.UNDEFINED)
     }
     // userModel.findOneAndUpdate({email: data.email}, { $set:{array:global_array.array}},()=>
 

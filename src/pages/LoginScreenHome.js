@@ -176,12 +176,12 @@ function getTwoRecentGames(user) {
   let participated = user.gameHistory; /*getParticipatedGames().slice(0);*/
   var participated_len = participated.length
   var recent_games = [];
-  if (participated_len >= 1)
+  if (participated_len >= 2)
     recent_games.push({
       id: participated_len - 2,
       ...participated[participated_len - 2]
     })
-  if (participated_len >= 0)
+  if (participated_len >= 1)
     recent_games.push({
       id: participated_len - 1,
       ...participated[participated_len - 1]
@@ -288,9 +288,9 @@ function PrintCreateGameDialog(props) {
     createRoom(gameName, currentUser, currentGameNickName, history, () => {
       setIsLoading(false);
     },
-      () => {
-        setServerError(true);
+      (errorStatus) => {
         setIsLoading(false);
+        setServerError(true);
       }
     );
   }

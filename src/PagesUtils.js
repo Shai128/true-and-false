@@ -29,8 +29,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import { getUserFromProps, getCurrentUserFromDB } from './user.js';
 import { useStyles } from './App.js';
 import { joinRoom } from './room.js';
-import { isNumeric } from './Utils.js'
-
+import { isNumeric, statusCodes } from './Utils.js'
 
 export function PrintGames(props) {
   const games = props.games;
@@ -179,13 +178,20 @@ export function PrintJoinGameDialog(props) {
     console.log("starting game!");
     console.log("game ID:", gameID);
     console.log('user nickname: ', currentGameNickName);
-    joinRoom(gameID, currentUser, currentGameNickName, history, () => { setIsLoading(false); }, () => {
-      //todo: show only one of these:
-      displayNickNameTaken();
-      displayWrongGameID();
-      setServerError(true);
-      setIsLoading(false);
-    })
+    joinRoom(gameID, currentUser, currentGameNickName, history, () => { setIsLoading(false); },
+      (errorStatus) => {
+        switch (errorStatus) {
+          case statusCodes.ROOM_NOT_FOUND:
+            displayWrongGameID();
+            break;
+          case statusCodes.NICKNAME_TAKEN:
+            displayNickNameTaken();
+            break;
+          default:
+            setServerError(true);
+        }
+        setIsLoading(false);
+      })
   }
 
   if (isLoading)

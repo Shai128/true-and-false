@@ -21,6 +21,8 @@ export function createRoom(roomName, currentuser, currentGameNickName, history, 
         console.log("response status:", response.status)
         if (response.status !== okStatus) {
             reject(response.status);
+            if (!isUndefined(onFailure))
+                onFailure(response.status);
         } else {
             return new Promise(function (resolve, reject) {
                 resolve(response.json());
@@ -28,6 +30,8 @@ export function createRoom(roomName, currentuser, currentGameNickName, history, 
         }
     }).then(roomAndUserObject => {
         console.log("received roomAndUserObject:", roomAndUserObject)
+        if (isUndefined(roomAndUserObject) || isUndefined(roomAndUserObject.roomObject))
+            return;
         if (!isUndefined(onSuccess))
             onSuccess(roomAndUserObject);
         let new_user = JSON.parse(JSON.stringify(currentuser));
@@ -40,7 +44,7 @@ export function createRoom(roomName, currentuser, currentGameNickName, history, 
 
     }, fail_status => {
         if (!isUndefined(onFailure))
-            onFailure();
+            onFailure(fail_status);
         console.log("failed, status:", fail_status)
     });
 }
@@ -64,12 +68,16 @@ export function joinRoom(roomID, currentuser, currentGameNickName, history, onSu
         console.log("response status:", response.status)
         if (response.status !== okStatus) {
             reject(response.status);
+            if (!isUndefined(onFailure))
+                onFailure(response.status);
         } else {
             return new Promise(function (resolve, reject) {
                 resolve(response.json());
             })
         }
     }).then(roomAndUserObject => {
+        if (isUndefined(roomAndUserObject) || isUndefined(roomAndUserObject.roomObject))
+            return;
         if (!isUndefined(onSuccess))
             onSuccess(roomAndUserObject);
         let new_user = JSON.parse(JSON.stringify(currentuser));
@@ -82,7 +90,7 @@ export function joinRoom(roomID, currentuser, currentGameNickName, history, onSu
 
     }, fail_status => {
         if (!isUndefined(onFailure))
-            onFailure();
+            onFailure(fail_status);
         console.log("failed, status:", fail_status)
     });
 }

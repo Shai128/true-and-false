@@ -107,6 +107,7 @@ function SignUp() {
   const classes = useStyles();
   const [user, setUser] = useState(emptyUser);
   const [userAlreadyExists, setUserAlreadyExists] = useState(false);
+  const [serverError, setServerError] = useState(false);
 
   const initMessages = {
     errorPassword: false,
@@ -279,6 +280,8 @@ function SignUp() {
                   if (error_status === statusCodes.USER_EXISTS) {
                     setUserAlreadyExists(true);
                   }
+                  else
+                    setServerError(true);
 
                 })
               }}>
@@ -289,6 +292,11 @@ function SignUp() {
               <Grid item xs={12}>
                 {userAlreadyExists && <Typography variant="h6" style={{ color: 'red' }}>
                   That email is taken. Try another.
+          </Typography>}
+              </Grid>
+              <Grid item xs={12}>
+                {serverError && <Typography variant="h6" style={{ color: 'red' }}>
+                  Server error occured.
           </Typography>}
               </Grid>
 

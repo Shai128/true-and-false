@@ -404,6 +404,7 @@ export function signUp(user, onSuccess, onFailure) {
         body: 'json=' + JSON.stringify(user)
 
     }).then(response => {
+        console.log('got response from signup.');
         console.log("response:", response)
         console.log("response status:", response.status)
         if (response.status !== okStatus) {
@@ -412,13 +413,12 @@ export function signUp(user, onSuccess, onFailure) {
                 onFailure(response.status);
         } else {
             return new Promise(function (resolve, reject) {
-                resolve(response.json());
+                resolve(response);
             })
         }
     }).then((data) => {
-        if (!userIsUpdated(data))
-            return;
-        if (!isUndefined(onSuccess))
+        console.log('tried to sign up and got data: ', data);
+        if (!isUndefined(data))
             onSuccess(data);
     })
 }
