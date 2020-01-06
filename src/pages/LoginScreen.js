@@ -363,7 +363,7 @@ function LoginScreen(props) {
                 currentUser.unReadMessages = [];
               }}
               trigger={
-                <IconButton edge="start" color="inherit" className={classes.menuButton}>
+                <IconButton id="notificationsBTN" edge="start" color="inherit" className={classes.menuButton}>
                   <Badge badgeContent={unreadMessages.length} color="secondary">
                     <NotificationsIcon />
                   </Badge>
@@ -374,13 +374,16 @@ function LoginScreen(props) {
               closeOnDocumentClick>
               <div className={classes.root}
                 style={{ height: '200px', overflowX: 'hidden', overflowY: "auto", }}>
-                <Container component="main" maxWidth="xs">
+                <div id="notificationsPopUp">
+                  <Container component="main" maxWidth="xs">
 
-                  <Typography variant="h6" style={{ color: 'black' }} >
-                    <PrintMessages url={url} messages={unreadMessages} user={currentUser} onPageChange={onPageChange} />
-                  </Typography>
+                    <Typography variant="h6" style={{ color: 'black' }} >
+                      <PrintMessages url={url} messages={unreadMessages} user={currentUser} onPageChange={onPageChange} />
+                    </Typography>
 
-                </Container>
+                  </Container>
+                </div>
+
               </div>
             </Popup>
 

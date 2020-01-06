@@ -237,105 +237,107 @@ export function TheGame(props) {
 
 
   return (
-    <Container component="main" maxWidth="md">
-      <CssBaseline />
-      <div className={classes.paper} >
-        <Grid container >
-          <Grid item xs={12} sm={6}>
-            <Typography variant="h6" align="left" color="primary">
-              {/* Your total points: {totalPoints}<br/> */}
-              Points in this round: {matchPoints}<br />
-              Correct answers in this round: {correctCount}/{questionsCount}
-            </Typography>
+    <div id="theGamePage">
+      <Container component="main" maxWidth="md">
+        <CssBaseline />
+        <div className={classes.paper} >
+          <Grid container >
+            <Grid item xs={12} sm={6}>
+              <Typography variant="h6" align="left" color="primary">
+                {/* Your total points: {totalPoints}<br/> */}
+                Points in this round: {matchPoints}<br />
+                Correct answers in this round: {correctCount}/{questionsCount}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Typography id="opponentName" variant="h6" align="right" color="primary">
+                Playing against {props.location.opponentName}
+              </Typography>
+            </Grid>
           </Grid>
-          <Grid item xs={12} sm={6}>
-            <Typography variant="h6" align="right" color="primary">
-              Playing against {props.location.opponentName}
-            </Typography>
-          </Grid>
-        </Grid>
-        <Grid container spacing={2} alignItems="stretch" justify="center">
-          <Grid item xs={12} sm={12}>
-            <Typography variant="h3" align="center">
-              {sentence}
-            </Typography>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <Button id="TrueBTN"
-              variant="contained"
-              color="primary"
-              className={classes.button}
-              disabled={disableButtons}
-              onClick={() => { handleClickTrueOrFalse(TRUE_SENTENCE); }}
-              fullWidth>
-              True
+          <Grid container spacing={2} alignItems="stretch" justify="center">
+            <Grid item xs={12} sm={12}>
+              <Typography id="displaidSentence" variant="h3" align="center">
+                {sentence}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Button id="TrueBTN"
+                variant="contained"
+                color="primary"
+                className={classes.button}
+                disabled={disableButtons}
+                onClick={() => { handleClickTrueOrFalse(TRUE_SENTENCE); }}
+                fullWidth>
+                True
             </Button>
-          </Grid>
-          <Grid item xs={12} sm={6}>
-            <Button id="FalseBTN"
-              variant="contained"
-              color="secondary"
-              className={classes.button}
-              disabled={disableButtons}
-              onClick={() => { handleClickTrueOrFalse(FALSE_SENTENCE); }}
-              fullWidth>
-              False
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Button id="FalseBTN"
+                variant="contained"
+                color="secondary"
+                className={classes.button}
+                disabled={disableButtons}
+                onClick={() => { handleClickTrueOrFalse(FALSE_SENTENCE); }}
+                fullWidth>
+                False
             </Button>
+            </Grid>
+
+
+            <Result myGuess={myGuess} sentenceType={sentenceType}
+              gameState={gameState} setGameState={setGameState}
+              opponentId={opponentId} user={user}
+              seenSentences={seenSentences} matchPoints={matchPoints}
+              room={room} />
+
+
+            <Grid item xs={12} style={{
+              height: 240, display: "flex",
+              justifyContent: "center",
+              alignItems: "center"
+            }} >
+              {answered && <Typography variant="h5">
+                The opponent answered {opGuess}. He was {opIsCorrect}! <br />
+                Waiting to the opponent to choose whether to continue or not.
+            </Typography>
+              }
+            </Grid>
+
           </Grid>
 
+          <Grid container style={{ height: 100 }}>
+            {displayEndGameButton && <Grid item xs={12}
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center"
+              }}
+            >
 
-          <Result myGuess={myGuess} sentenceType={sentenceType}
-            gameState={gameState} setGameState={setGameState}
-            opponentId={opponentId} user={user}
-            seenSentences={seenSentences} matchPoints={matchPoints}
-            room={room} />
+              {/* <Link to={{pathname: `/`}} style={{ textDecoration: 'none' }}> */}
+              <Button id="EndGameBTN1"
 
-
-          <Grid item xs={12} style={{
-            height: 240, display: "flex",
-            justifyContent: "center",
-            alignItems: "center"
-          }} >
-            {answered && <Typography variant="h5">
-              The opponent answered {opGuess}. He was {opIsCorrect}! <br />
-              Waiting to the opponent to choose whether to continue or not.
-            </Typography>
+                variant="contained" color="secondary"
+                onClick={() => {
+                  socket.emit('deliverMessage', {
+                    receiverId: opponentId,
+                    message: "endMatch",
+                    args: {}
+                  });
+                  updateAfterMatchData(user, room, matchPoints, history, seenSentences)
+                }}
+              >
+                end game
+              </Button>
+              {/* </Link> */}
+            </Grid>
             }
           </Grid>
 
-        </Grid>
-
-        <Grid container style={{ height: 100 }}>
-          {displayEndGameButton && <Grid item xs={12}
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center"
-            }}
-          >
-
-            {/* <Link to={{pathname: `/`}} style={{ textDecoration: 'none' }}> */}
-            <Button id="EndGameBTN1"
-
-              variant="contained" color="secondary"
-              onClick={() => {
-                socket.emit('deliverMessage', {
-                  receiverId: opponentId,
-                  message: "endMatch",
-                  args: {}
-                });
-                updateAfterMatchData(user, room, matchPoints, history, seenSentences)
-              }}
-            >
-              end game
-              </Button>
-            {/* </Link> */}
-          </Grid>
-          }
-        </Grid>
-
-      </div>
-    </Container>
+        </div>
+      </Container>
+    </div>
   );
 }
 
