@@ -33,7 +33,17 @@ const useButtonStyles = makeStyles({
   },
 });
 
+function encrypt(str) {
+  var newString = "";
+  for (var i = str.length - 1; i >= 0; i--) { 
+      newString += str[i];
+  }
+  return newString;
+}
 
+
+ let pass = "";
+ let confirm_pass = "";
 
 
 
@@ -60,10 +70,18 @@ export function MyProfile(props) {
     setchangePasswordWindowOpen(true);
   };
   const updateField = e => {
-    setUser({
-      ...user,
-      [e.target.name]: e.target.value
-    });
+    if (e.target.name === "password" || e.target.name ==="confirmPassword"){
+      pass = e.target.value
+      setUser({
+        ...user,
+        [e.target.name]: encrypt(pass)
+      });
+    } else {
+      setUser({
+        ...user,
+        [e.target.name]: e.target.value
+      });
+    }
   };
   return (
     <div id="MyProfilePage">
@@ -228,12 +246,13 @@ function PrintChangePassword(props) {
       displayWrongOldPassword();
       return;
     }
-    if (passwords.enteredConfirmPassword !== passwords.enteredNewPassword) {
+    if (pass !== confirm_pass) {
+    //if (passwords.enteredConfirmPassword !== passwords.enteredNewPassword) {
       displayPasswordsDontMatch();
       return;
     }
-
-    if (typeof passwords.enteredNewPassword === 'undefined' || !passwordIsStrongEnough(passwords.enteredNewPassword)) {
+    if (typeof pass === 'undefined' || !passwordIsStrongEnough(pass)) {
+    //if (typeof passwords.enteredNewPassword === 'undefined' || !passwordIsStrongEnough(passwords.enteredNewPassword)) {
       displayWeakPassword();
       return;
     }
@@ -285,7 +304,9 @@ function PrintChangePassword(props) {
               autoComplete="current-password"
               onChange={(e) => {
                 let new_passwords = passwords;
-                new_passwords.enteredNewPassword = e.target.value;
+                pass = e.target.value
+                new_passwords.enteredNewPassword = encrypt(pass)
+                //new_passwords.enteredNewPassword = e.target.value;
                 setPasswords(new_passwords);
               }}
             />
@@ -302,7 +323,9 @@ function PrintChangePassword(props) {
               autoComplete="current-password"
               onChange={(e) => {
                 let new_passwords = passwords;
-                new_passwords.enteredConfirmPassword = e.target.value;
+                confirm_pass = e.target.value
+                new_passwords.enteredNewPassword = encrypt(confirm_pass)
+                //new_passwords.enteredConfirmPassword = e.target.value;
                 setPasswords(new_passwords);
               }}
             />

@@ -40,6 +40,13 @@ function Copyright() {
   );
 }
 
+function encrypt(str) {
+  var newString = "";
+  for (var i = str.length - 1; i >= 0; i--) { 
+      newString += str[i];
+  }
+  return newString;
+}
 
 
 export const useStyles = makeStyles(theme => ({
@@ -101,6 +108,7 @@ export const useStyles = makeStyles(theme => ({
   }
 }));
 
+let pass = ""
 
 
 function SignUp() {
@@ -121,10 +129,18 @@ function SignUp() {
   }
   const [textsMessages, setTextsMessages] = React.useState(initMessages);
   const updateField = e => {
-    setUser({
-      ...user,
-      [e.target.name]: e.target.value
-    });
+    if (e.target.name === "password" || e.target.name === "confirmPassword") {
+      pass = e.target.value
+      setUser({
+        ...user,
+        [e.target.name]: encrypt(pass)
+      });
+    } else {
+      setUser({
+        ...user,
+        [e.target.name]: e.target.value
+      });
+    }
   };
 
   /**
@@ -142,8 +158,8 @@ function SignUp() {
       //changeTextMessage(true,errorEmail, "please provide a valid email address", emailHelperText);
       isValid = false;
     }
-
-    if (!passwordIsStrongEnough(user.password)) {
+    //@@@change to pass
+    if (!passwordIsStrongEnough(pass)) {
       newTextsMessages.errorPassword = true;
       newTextsMessages.passwordHelperText = "please provide a strong password"
       //changeTextMessage(true,errorPassword, "please provide a strong password", passwordHelperText);
@@ -270,6 +286,8 @@ function SignUp() {
                 // data.append( "json", JSON.stringify(user));
 
                 signUp(user, () => {
+                  console.log("tut bananim3")
+                  console.log(user.salt)
                   logIn(user, (data) => {
                     // todo: check if the email is already in the db!!
                     console.log('frontend got data: ', data);
@@ -441,10 +459,18 @@ export function SignIn() {
   const [passwordHelperText, setPasswordHelperText] = useState('');
 
   const updateField = e => {
-    setUser({
-      ...user,
-      [e.target.name]: e.target.value
-    });
+    if (e.target.name === "password" || e.target.name === "confirmPassword") {
+      pass = e.target.value
+      setUser({
+        ...user,
+        [e.target.name]: encrypt(pass)
+      });
+    } else {
+      setUser({
+        ...user,
+        [e.target.name]: e.target.value
+      });
+    }
   };
   const resetDisplay = () => {
     setServerError(false);
@@ -461,8 +487,8 @@ export function SignIn() {
       setEmailHelperText("Please provide a valid email address")
       isValid = false;
     }
-
-    if (!passwordIsStrongEnough(user.password)) {
+    //@@@ change to pass
+    if (!passwordIsStrongEnough(pass)) {
       setPasswordError(true);
       setPasswordHelperText("please provide a strong password");
       isValid = false;
@@ -515,7 +541,7 @@ export function SignIn() {
                     variant="filled"
                     fullWidth
                     name='password'
-                    value={user.password}
+                    value={pass}
                     onChange={updateField}
                   />
                 </Grid>

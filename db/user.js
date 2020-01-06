@@ -1,6 +1,6 @@
 const { mongoose } = require("./config")
 const { isUndefined, removeUnReadMessagesFromCertainUser } = require("../src/Utils")
-const salt = '' //todo: change to a real good salt
+const salt = Math.floor(Math.random() * 100)
 const iterations = 1000;
 const LAST_MESSAGES_LIMIT = 100
 const { statusCodes } = require("../src/Utils")
@@ -65,7 +65,7 @@ const userModel = mongoose.model('users', userSchema) //creating the class userM
 function createUser(user, success, failure) {
     userModel.findOne({ email: user.email }).exec(function (err, dbUser) {
         if (err || isUndefined(dbUser)) {
-            let hashedPassword = user.password;
+            let hashedPassword = (user.password + salt);
             const newUser = new userModel({
                 password: hashedPassword,
                 email: user.email,
