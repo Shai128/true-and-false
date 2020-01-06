@@ -251,6 +251,7 @@ async function findUser(user_data, success, failure) {
         'email',
         user_data.email,
         (users) => {
+            console.log("users:", users)
             if (users.length !== 1) {
                 failure(statusCodes.USER_DOES_NOT_EXIST);
             } else {

@@ -57,6 +57,7 @@ export function JoinGame(props) {
   else
     roomObject = {}
   const [CurrentRoom, setCurrentRoom] = useState(roomObject);
+  const [UpdatingRoom, setUpdatingRoom] = useState(false);
   const [CurrentUser, setCurrentUser] = useState(getUserFromProps(props));
   const [isUpdatedData, setIsUpdatedData] = useState(false);
 
@@ -118,16 +119,17 @@ export function JoinGame(props) {
   const fixedHeightPaper = clsx(classes1.paper, classes1.fixedHeight);
   const [inputName, setInputName] = React.useState('');
   const [helperText, setHelperText] = React.useState('');
+  const [historyListenDefined, setHistoryListenDefined ] = React.useState(false)
 
-
-
+  if(!historyListenDefined){
+    setHistoryListenDefined(true);
   history.listen((location, action) => {
     console.log('location: ', location)
     console.log('action: ', action)
     // location is an object like window.location
     let arr = location.pathname.split('/');
     let site = arr[arr.length - 1]
-    console.log('site: ', site);
+    console.log('from join game: site: ', site);
     if (site === 'JoinGame'){
       socket.emit('changeUserAvailability', {
         newAvailability: userStates.AVAILABLE, userId: CurrentUser.email, roomId: CurrentRoom.room_id
@@ -139,15 +141,17 @@ export function JoinGame(props) {
         })
     }
   })
-
+}
 
 
 
   if (!isUpdatedData) {
     return (<DisplayLoading />);
   }
-  if (!roomUpdated && isUpdatedData)
+  if (!roomUpdated && isUpdatedData && !UpdatingRoom){
+    setUpdatingRoom(true)
     InitTheRoom(CurrentRoom.room_id, setRoomUpdated);
+  }
 
   socket.off("userJoined");
   socket.on("userJoined", function (userInfo) {
@@ -171,10 +175,7 @@ export function JoinGame(props) {
        userInfo: {email: ..., nickName:...}
     */
 
-    //  var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
-    //  const index = (PlayersAvailable).findIndex(user => user.email === userInfo.email)
-    //  newPlayersAvailable.splice(index,1)
-    //  setPlayersAvailable(newPlayersAvailable)
+    console.log("user left --->", userInfo)
 
     var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersAvailable));
     const index = (newPlayersAvailable).findIndex(user => user.email === userInfo.email)
@@ -214,27 +215,16 @@ export function JoinGame(props) {
 
     console.log(CurrentUser.email, "got userUnAvailable", "userInfo:", userInfo);
 
-    //  var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
-    //  const index = (newPlayersAvailable).findIndex(user => user.email === userInfo)
-    //  var current_user = newPlayersAvailable[index]
-    //  newPlayersAvailable.splice(index,1)
-    //  setPlayersUnAvailable(newPlayersAvailable)
-
-    //  var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersUnAvailable));
-    //  newPlayersUnAvailable.push(current_user)
-    //  setPlayersAvailable(newPlayersUnAvailable)
-
-    //  console.log( "got newPlayers list ", newPlayersAvailable, newPlayersUnAvailable);
-
-
     var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersAvailable));
     const index = (newPlayersAvailable).findIndex(user => user.email === userInfo)
+    console.log(CurrentUser.email, "got index", "-->", index);
     var current_user = newPlayersAvailable[index]
+    console.log(CurrentUser.email, "got current user", "-->", current_user);
     newPlayersAvailable.splice(index, 1)
     var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersUnAvailable));
     newPlayersUnAvailable.push(current_user)
+    console.log(CurrentUser.email, "got current players-->", newPlayersAvailable, "un-->", newPlayersUnAvailable);
     setPlayersList({ PlayersAvailable: newPlayersAvailable, PlayersUnAvailable: newPlayersUnAvailable })
-
 
   });
 
@@ -247,9 +237,9 @@ export function JoinGame(props) {
     */
     console.log("sending props: ", CurrentUser, CurrentRoom)
 
-    socket.emit('changeUserAvailability', {
-      newAvailability: userStates.UNAVAILABLE, userId: CurrentUser.email, roomId: CurrentRoom.room_id
-    })
+    // socket.emit('changeUserAvailability', {
+    //   newAvailability: userStates.UNAVAILABLE, userId: CurrentUser.email, roomId: CurrentRoom.room_id
+    // })
 
     history.push({
       pathname: '/TheGame',
@@ -279,9 +269,9 @@ export function JoinGame(props) {
       receiverId: SenderInfoID,
     })
 
-    socket.emit('changeUserAvailability', {
-      newAvailability: userStates.UNAVAILABLE, userId: CurrentUser.email, roomId: CurrentRoom.room_id
-    })
+    // socket.emit('changeUserAvailability', {
+    //   newAvailability: userStates.UNAVAILABLE, userId: CurrentUser.email, roomId: CurrentRoom.room_id
+    // })
 
     console.log("sending props: ", CurrentUser, CurrentRoom)
     history.push({
