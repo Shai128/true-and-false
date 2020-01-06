@@ -286,8 +286,7 @@ function SignUp() {
                 // data.append( "json", JSON.stringify(user));
 
                 signUp(user, () => {
-                  console.log("tut bananim3")
-                  console.log(user.salt)
+                  
                   logIn(user, (data) => {
                     // todo: check if the email is already in the db!!
                     console.log('frontend got data: ', data);

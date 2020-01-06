@@ -279,8 +279,7 @@ export function getUserFromPropsOrFromSession(props, setUser){
  */
 export function logIn(user, onSuccess, onFailure) {
     //@@@ change user to the same user but with encrypted password
-    console.log("tut bananim")
-    console.log(user.salt)
+    
     fetch(server + '/user/' + user.email + '/' + user.password, {
         method: 'GET', // *GET, POST, PUT, DELETE, etc.
         headers: {

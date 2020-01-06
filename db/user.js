@@ -1,6 +1,8 @@
+const crypto = require("crypto-js");
+
 const { mongoose } = require("./config")
 const { isUndefined, removeUnReadMessagesFromCertainUser } = require("../src/Utils")
-const salt = Math.floor(Math.random() * 100)
+const salt = crypto.lib.WordArray.random(128/8)
 const iterations = 1000;
 const LAST_MESSAGES_LIMIT = 100
 const { statusCodes } = require("../src/Utils")
@@ -65,7 +67,7 @@ const userModel = mongoose.model('users', userSchema) //creating the class userM
 function createUser(user, success, failure) {
     userModel.findOne({ email: user.email }).exec(function (err, dbUser) {
         if (err || isUndefined(dbUser)) {
-            let hashedPassword = (user.password + salt);
+            let hashedPassword = crypto.PBKDF2(user.password, salt, {keySize: 512/32, iterations: iterations}).toString();
             const newUser = new userModel({
                 password: hashedPassword,
                 email: user.email,

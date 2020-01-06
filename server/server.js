@@ -1,3 +1,5 @@
+const crypto = require("crypto-js");
+
 const express = require("express") //express contains functions including app, which is the server
 const {
   createUser,
@@ -141,8 +143,7 @@ function serverCreateUser(req, res) {
 
 function serverLoginUser(req, res) {
   logDiv('user login')
-  console.log("tut bananim2")
-  console.log(req.params.salt)
+  
   let data = {
     email: req.params.email,
     password: req.params.password
@@ -150,7 +151,11 @@ function serverLoginUser(req, res) {
 
   findUser(data,
     (found_user) => {
-      if (found_user.password === (data.password + found_user.salt)) { // TODO: should later change to hash(password)
+      let hashedPassword = crypto.PBKDF2(data.password, found_user.salt, {keySize: 512/32, iterations: found_user.iterations}).toString();
+      console.log(found_user.salt)
+      console.log(found_user.iterations)
+      console.log(data.password)
+      if (found_user.password === hashedPassword) {
         //  console.log("data", data, "foundUser:", found_user)
         req.session.userInfo = {
           email: found_user["email"],
@@ -163,7 +168,7 @@ function serverLoginUser(req, res) {
         res.status(200).send(JSON.stringify(found_user));
       } else {
         console.log("the password: "
-          + (data.password + found_user.salt)
+          + hashedPassword
           + " does not match for email: "
           + data.email);
         standardErrorHandling(res, statusCodes.PASSWORD_MISMATCH);
