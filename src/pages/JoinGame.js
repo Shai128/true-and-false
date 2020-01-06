@@ -120,10 +120,12 @@ export function JoinGame(props) {
   const [inputName, setInputName] = React.useState('');
   const [helperText, setHelperText] = React.useState('');
   const [historyListenDefined, setHistoryListenDefined ] = React.useState(false)
+  var unlisten = ()=>{};
 
   if(!historyListenDefined){
+    console.log("got here historyListenDefined");
     setHistoryListenDefined(true);
-  history.listen((location, action) => {
+   unlisten = history.listen((location, action) => {
     console.log('location: ', location)
     console.log('action: ', action)
     // location is an object like window.location
@@ -302,6 +304,9 @@ export function JoinGame(props) {
   })
 
   const leaveRoom = () => {
+
+    unlisten();
+
     fetch(server + '/leaveRoom/' + CurrentRoom.room_id, {
       method: 'GET', // *GET, POST, PUT, DELETE, etc.
       headers: {
