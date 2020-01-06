@@ -1,4 +1,4 @@
-const { isUndefined, statusCodes} = require("../src/Utils")
+const { isUndefined, statusCodes } = require("../src/Utils")
 
 function updateGame(game, success, failure) { } // placeholder
 
