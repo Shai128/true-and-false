@@ -24,6 +24,7 @@ import {
   BrowserRouter as Router,
   useHistory,
 } from "react-router-dom";
+import {createBrowserHistory} from 'history'
 import { ChatButton } from './../PagesUtils.js';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
@@ -121,11 +122,12 @@ export function JoinGame(props) {
   const [helperText, setHelperText] = React.useState('');
   const [historyListenDefined, setHistoryListenDefined ] = React.useState(false)
   var unlisten = ()=>{};
+  let browserHistory = createBrowserHistory();
 
   if(!historyListenDefined){
     console.log("got here historyListenDefined");
     setHistoryListenDefined(true);
-   unlisten = history.listen((location, action) => {
+   unlisten = browserHistory.listen((location, action) => {
     console.log('location: ', location)
     console.log('action: ', action)
     // location is an object like window.location
