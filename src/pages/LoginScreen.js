@@ -53,6 +53,7 @@ import { SignIn } from './../App.js'
 import { ChatLobby } from './ChatLobby.js';
 import { JoinGame } from './JoinGame.js'
 import { TheGame } from './TheGame.js'
+import { PointsTable } from './PointsTable.js'
 import { isUndefined } from './../Utils.js';
 const drawerWidth = 240;
 const useStyles = makeStyles(theme => ({
@@ -152,6 +153,7 @@ export function LoginScreenRouter() {
           <LoginScreen />
         </Route>
         <Route path={"/TheGame"} exact component={TheGame} />
+        <Route path={"/PointsTable"} exact component={PointsTable} />
 
       </Switch>
     </Router>
@@ -430,6 +432,7 @@ function LoginScreen(props) {
             <Route path={`${path}/ChatRoom/:email`} component={Chat} />
             <Route path={`${path}/JoinGame`} exact component={JoinGame} user={currentUser} />
             <Route path={`/TheGame`} exact component={TheGame} />
+            <Route path={`/PointsTable`} exact component={PointsTable} />
 
 
             <Route path="/SignIn">
