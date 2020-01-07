@@ -1,4 +1,3 @@
-
 import { okStatus, server, isUndefined } from './Utils.js'
 import { reject } from 'q';
 
@@ -280,6 +279,9 @@ export function getUserFromPropsOrFromSession(props, setUser){
 export function logIn(user, onSuccess, onFailure) {
     //@@@ change user to the same user but with encrypted password
     
+    console.log("user@@@", user)
+
+
     fetch(server + '/user/' + user.email + '/' + user.password, {
         method: 'GET', // *GET, POST, PUT, DELETE, etc.
         headers: {

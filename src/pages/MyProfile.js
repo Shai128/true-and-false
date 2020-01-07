@@ -17,6 +17,8 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import { useStyles as AppUseStyles } from './../App.js';
 import { getCurrentUserFromSession as getCurrentUser, updateUserToDB, getUserFromProps, validOldPassword } from './../user.js'
 import { passwordIsStrongEnough } from './../Utils.js'
+import crypto from "crypto-js";
+
 const useButtonStyles = makeStyles({
   root: {
     background: props =>
@@ -44,7 +46,7 @@ function encrypt(str) {
 
  let pass = "";
  let confirm_pass = "";
-
+ let old_pass = "";
 
 
 export function MyProfile(props) {
@@ -262,6 +264,7 @@ function PrintChangePassword(props) {
     let user_to_save = oldUser;
     user_to_save.password = passwords.enteredNewPassword;
     setOldUser(user_to_save);
+    user_to_save.password = crypto.PBKDF2(passwords.enteredNewPassword, user_to_save.salt, {keySize: 512/32, iterations: user_to_save.iterations}).toString()
     updateUserToDB(user_to_save);
     displayPasswordSuccessfullyChanged();
   }
@@ -286,7 +289,8 @@ function PrintChangePassword(props) {
               autoComplete="current-password"
               onChange={(e) => {
                 let new_passwords = passwords;
-                new_passwords.enteredOldPassword = e.target.value;
+                old_pass = e.target.value
+                new_passwords.enteredOldPassword = encrypt(old_pass);
                 setPasswords(new_passwords);
               }}
             />
