@@ -243,8 +243,13 @@ function PrintChangePassword(props) {
 
 
   const onClickSave = () => {
+    console.log("im here")
+    console.log(oldUser.password)
+    console.log(passwords.enteredOldPassword)
+    console.log(oldUser.salt.toString())
+    let hashedPassword = crypto.PBKDF2(passwords.enteredOldPassword, oldUser.salt.toString(), {keySize: 512/32, iterations: oldUser.iterations}).toString()
     resetDisplaysContent();
-    if (!validOldPassword(oldUser.password, passwords.enteredOldPassword)) {
+    if (!validOldPassword(oldUser.password, hashedPassword)) {
       displayWrongOldPassword();
       return;
     }
@@ -260,11 +265,12 @@ function PrintChangePassword(props) {
     }
 
     // the new given password is valid
-    setNewPassword(passwords.enteredNewPassword);
+    setNewPassword(hashedPassword);
     let user_to_save = oldUser;
-    user_to_save.password = passwords.enteredNewPassword;
+    user_to_save.password = hashedPassword;
     setOldUser(user_to_save);
-    user_to_save.password = crypto.PBKDF2(passwords.enteredNewPassword, user_to_save.salt, {keySize: 512/32, iterations: user_to_save.iterations}).toString()
+    console.log("im here2")
+    console.log(user_to_save)
     updateUserToDB(user_to_save);
     displayPasswordSuccessfullyChanged();
   }
