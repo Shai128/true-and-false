@@ -24,14 +24,14 @@ import {
   BrowserRouter as Router,
   useHistory,
 } from "react-router-dom";
-import {createBrowserHistory} from 'history'
+import { createBrowserHistory } from 'history'
 import { ChatButton } from './../PagesUtils.js';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
 import clsx from 'clsx';
 import { getUserFromProps, getCurrentUserFromSession } from './../user.js';
 import { PrintChats, DisplayLoading } from './../PagesUtils.js'
-import { isUndefined , server } from './../Utils.js'
+import { isUndefined, server } from './../Utils.js'
 
 
 const okStatus = 200;
@@ -120,39 +120,40 @@ export function JoinGame(props) {
   const fixedHeightPaper = clsx(classes1.paper, classes1.fixedHeight);
   const [inputName, setInputName] = React.useState('');
   const [helperText, setHelperText] = React.useState('');
-  const [historyListenDefined, setHistoryListenDefined ] = React.useState(false)
-  var unlisten = ()=>{};
-  let browserHistory = createBrowserHistory();
+  const [historyListenDefined, setHistoryListenDefined] = React.useState(false)
+  var unlisten = () => { };
+  let browserHistory = useHistory();
 
-  if(!historyListenDefined){
+  if (!historyListenDefined) {
     console.log("got here historyListenDefined");
-    setHistoryListenDefined(true);
-   unlisten = browserHistory.listen((location, action) => {
-    console.log('location: ', location)
-    console.log('action: ', action)
-    // location is an object like window.location
-    let arr = location.pathname.split('/');
-    let site = arr[arr.length - 1]
-    console.log('from join game: site: ', site);
-    if (site === 'JoinGame'){
-      socket.emit('changeUserAvailability', {
-        newAvailability: userStates.AVAILABLE, userId: CurrentUser.email, roomId: CurrentRoom.room_id
-      })
-   }
-    else if (site !== 'JoinGame'){
+    unlisten = browserHistory.listen((location, action) => {
+      console.log('location: ', location)
+      console.log('action: ', action)
+      // location is an object like window.location
+      let arr = location.pathname.split('/');
+      let site = arr[arr.length - 1]
+      console.log('from join game: site: ', site);
+      if (site === 'JoinGame') {
+        socket.emit('changeUserAvailability', {
+          newAvailability: userStates.AVAILABLE, userId: CurrentUser.email, roomId: CurrentRoom.room_id
+        })
+      }
+      else if (site !== 'JoinGame') {
         socket.emit('changeUserAvailability', {
           newAvailability: userStates.UNAVAILABLE, userId: CurrentUser.email, roomId: CurrentRoom.room_id
         })
-    }
-  })
-}
+      }
+    });
+    setHistoryListenDefined(true);
+
+  }
 
 
 
   if (!isUpdatedData) {
     return (<DisplayLoading />);
   }
-  if (!roomUpdated && isUpdatedData && !UpdatingRoom){
+  if (!roomUpdated && isUpdatedData && !UpdatingRoom) {
     setUpdatingRoom(true)
     InitTheRoom(CurrentRoom.room_id, setRoomUpdated);
   }
@@ -307,7 +308,6 @@ export function JoinGame(props) {
 
   const leaveRoom = () => {
 
-    unlisten();
 
     fetch(server + '/leaveRoom/' + CurrentRoom.room_id, {
       method: 'GET', // *GET, POST, PUT, DELETE, etc.
@@ -327,6 +327,8 @@ export function JoinGame(props) {
       console.log("failed. status: ", fail_status)
     })
     history.push("/LoginScreen/Home"); // moves to home page
+    unlisten();
+
   };
 
 
