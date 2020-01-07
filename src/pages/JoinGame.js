@@ -375,6 +375,10 @@ export function JoinGame(props) {
         <Button id="leaveRoomBTN" variant="contained" color="primary" onClick={leaveRoom} className={classes.button}>
           Leave the room
       </Button>
+      </div>
+      </Grid>
+      <Grid spacing={1} item xs = {12}>
+      <div style={{ float: 'right', marginRight: 10, marginTop: 10, }}>
       <Button id="pointsTableBTN" variant="contained" color="primary" className={classes.button}
         onClick={()=>{history.push({
           pathname: '/PointsTable',
@@ -383,7 +387,7 @@ export function JoinGame(props) {
         >
           POINTS TABLE
       </Button>
-      </div>
+      </div>      
       </Grid>
 
       <Grid item spacing={1}  xs = {12} justify="center">
