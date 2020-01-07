@@ -564,7 +564,7 @@ export function SignIn() {
                         (status) => { // onFailure funciton
                           console.log("login failed. status: ", status);
                           setIsLoading(false);
-                          if (status === statusCodes.PASSWORD_MISMATCH)
+                          if (status === statusCodes.PASSWORD_MISMATCH || status === statusCodes.USER_DOES_NOT_EXIST)
                             setIsWrongLogin(true);
                           else
                             setServerError(true);

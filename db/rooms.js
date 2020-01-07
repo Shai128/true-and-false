@@ -300,6 +300,7 @@ async function addUserToRoom(room_id, email, success, fail) {
     console.log('addUserToRoom got params: room_id: ', room_id + " email: ", email);
     roomModel.find({ room_id: room_id }, (err, docs) => {
         if (err) { fail(statusCodes.ROOM_NOT_FOUND) } else {
+            console.log("docs:", docs)
             var room = docs[0]
             if (room === undefined) { fail(statusCodes.ROOM_NOT_FOUND); return }
             console.log('addUserToRoom. room ', room_id + "found. ");
@@ -416,7 +417,7 @@ async function changeUserAvailability(room_id, email, status, success, fail) {
     console.log("inside db changeUserAvailability")
     console.log("roomId:", room_id, "email:", email)
     roomModel.findOne({ room_id: room_id }).exec(function (err, room) {
-        if (err) fail(statusCodes.ROOM_NOT_FOUND);
+        if (err || isUndefined(room)) fail(statusCodes.ROOM_NOT_FOUND);
         else {
             var i, not_found = 1;
             for (i = 0; i < room.users_in_room.length; i++) {
