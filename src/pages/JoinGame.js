@@ -375,6 +375,14 @@ export function JoinGame(props) {
         <Button id="leaveRoomBTN" variant="contained" color="primary" onClick={leaveRoom} className={classes.button}>
           Leave the room
       </Button>
+      <Button id="pointsTableBTN" variant="contained" color="primary" className={classes.button}
+        onClick={()=>{history.push({
+          pathname: '/PointsTable',
+          roomId: CurrentRoom.room_id,
+        })}}
+        >
+          POINTS TABLE
+      </Button>
       </div>
       </Grid>
 
