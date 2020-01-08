@@ -105,7 +105,8 @@ function Home(props) {
   if (!userIsUpdated(currentUser)) {
     return (<DisplayLoading />);
   }
-
+  var img = currentUser.imageData.replace(/ /g,"+")
+  
   return (
     <div id="LoginScreenHomePage">
       <Container maxWidth="lg" className={classes.container}>
@@ -114,11 +115,16 @@ function Home(props) {
             <Paper className={fixedHeightPaper}>
               <Grid container spacing={3}>
                 <Grid item xs={12}>
+                  
 
-                  <Typography id="welcomeMessage" component="h1" variant="h2" justify="center">
-                    Welcome {currentUser.firstName}!
+                  <Typography id="welcomeMessage" component="h1" variant="h2" justify="center" >
+                  <img src={`${img}`} width="120" height='120'  /> Welcome {currentUser.firstName}!
         </Typography>
+        
+                 
+
                 </Grid>
+
                 <Grid item xs={12} sm={6}>
 
                   <Button id="createNewRoomBTN" variant="contained" color="primary" fullWidth className={classes.button} onClick={handleClickCreateGameWindow}>

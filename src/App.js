@@ -110,6 +110,14 @@ export const useStyles = makeStyles(theme => ({
 
 let pass = ""
 
+function encodeImageFileAsURL(element) {
+  var file = element.files[0];
+  var reader = new FileReader();
+  reader.onloadend = function() {
+    console.log('RESULT', reader.result)
+  }
+  reader.readAsDataURL(file);
+}
 
 function SignUp() {
   const classes = useStyles();
@@ -141,6 +149,13 @@ function SignUp() {
         [e.target.name]: e.target.value
       });
     }
+  };
+
+  const updateImage = e => {
+    setUser({
+      ...user,
+      [e.target.name]: e.target.src
+    });
   };
 
   /**
@@ -183,7 +198,7 @@ function SignUp() {
   }
 
   let history = useHistory();
-
+  //TODO: https://www.w3schools.com/js/js_htmldom_css.asp try to preview the chosen image with help from here
   return (
     <div id="SignUpPage">
       <Container component="main" maxWidth="xs">
@@ -269,6 +284,38 @@ function SignUp() {
                 />
               </Grid>
 
+              <p className="process__details"> Avatar Upload </p>
+
+              <input type='file'  name='imageData' className="avatarImageupload" onChange={e => {
+                const preview = document.querySelector('img');
+                const file = document.querySelector('input[type=file]').files[0];
+                const reader = new FileReader();
+                var data 
+                reader.addEventListener("load", function () {
+                  // convert image file to base64 string
+                  preview.src = reader.result;
+                  data = reader.result
+                }, false);
+                
+                reader.onloadend = function() {
+                  
+                  var tempUser = user
+                  tempUser.imageData = reader.result
+                  setUser(tempUser)
+                }
+                
+                if (file) {
+                  reader.readAsDataURL(file);
+                }
+               //updateImage(e, data)
+                
+                //updateField(e)
+
+              }} />
+
+              <img src='' className="process_image" width='90' height='90' name='imageData' alt='upload'  /> 
+
+              
 
             </Grid>
             <Button

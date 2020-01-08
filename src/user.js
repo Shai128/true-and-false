@@ -231,6 +231,9 @@ export function emptyUser() {
         createdGames: [],
         participatedGames: [],
         confirmPassword: '',
+        imageData: '', 
+        contentType: 'img/jpg'
+
     }
 }
 
