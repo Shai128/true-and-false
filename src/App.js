@@ -284,8 +284,7 @@ function SignUp() {
                 />
               </Grid>
 
-              <p className="process__details"> Avatar Upload </p>
-
+              
               <input type='file'  name='imageData' className="avatarImageupload" onChange={e => {
                 const preview = document.querySelector('img');
                 const file = document.querySelector('input[type=file]').files[0];
@@ -313,7 +312,7 @@ function SignUp() {
 
               }} />
 
-              <img src='' className="process_image" width='90' height='90' name='imageData' alt='upload'  /> 
+              <img src='' className="process_image" width='90' height='90'  /> 
 
               
 
