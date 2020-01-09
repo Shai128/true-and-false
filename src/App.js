@@ -25,6 +25,7 @@ import { JoinGame } from './pages/JoinGame.js';
 import { PrintJoinGameDialog, DisplayLoading, AutoRedirectToLoginScreenIfUserInSession } from './PagesUtils.js';
 import { validEmail, passwordIsStrongEnough, isUndefined, statusCodes } from './Utils.js'
 import { emptyUser, logIn, signUp } from './user.js'
+import { TheGame } from './pages/TheGame.js'
 //import { createBrowserHistory } from '../../../AppData/Local/Microsoft/TypeScript/3.6/node_modules/@types/history';
 function Copyright() {
   return (
@@ -42,8 +43,8 @@ function Copyright() {
 
 function encrypt(str) {
   var newString = "";
-  for (var i = str.length - 1; i >= 0; i--) { 
-      newString += str[i];
+  for (var i = str.length - 1; i >= 0; i--) {
+    newString += str[i];
   }
   return newString;
 }
@@ -286,7 +287,7 @@ function SignUp() {
                 // data.append( "json", JSON.stringify(user));
 
                 signUp(user, () => {
-                  
+
                   logIn(user, (data) => {
                     // todo: check if the email is already in the db!!
                     console.log('frontend got data: ', data);
@@ -343,7 +344,9 @@ function LinksPage() {
         <Route exact path="/">
           <Home />
         </Route>
-
+        <Route exact path="/TheGame">
+          <TheGame />
+        </Route>
         <Route exact path="/SignIn">
           <SignIn />
         </Route>
