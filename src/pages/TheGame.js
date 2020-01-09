@@ -15,7 +15,7 @@ import {
 
 
 import { socket, updateUserToDB, getUserFromLocalStorage, } from './../user.js';
-import { updateGameInLocalStorage, getGameFromLocalStorage, } from './../user_game.ts';
+import { updateGameInLocalStorage, getGameFromLocalStorage, } from './../user_game';
 
 import { DisplayLoading, DisplayDBError } from './../PagesUtils.js'
 import { isUndefined } from './../Utils.js'

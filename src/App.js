@@ -422,10 +422,12 @@ function Home() {
       </Button>
                 </Link>
               </Grid>
+              <Grid item xs={12}>
 
-              <Button variant="contained" color="primary" fullWidth onClick={handleClickGuestLogin} className={classes.button}>
-                Guest Login
+                <Button variant="contained" color="primary" fullWidth onClick={handleClickGuestLogin} className={classes.button}>
+                  Guest Login
             </Button>
+              </Grid>
             </Grid>
             <PrintJoinGameDialog
               handleCloseWindow={handleCloseGuestLoginWindow}
