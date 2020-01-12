@@ -498,7 +498,7 @@ export function JoinGame(props) {
 
       <PlayerListAvailable type={"Available"} PlayersAvailable={PlayersList.PlayersAvailable} CurrentUser={CurrentUser} />
 
-      <PlayerListUnAvailable type={"Unavailable"} PlayersUnAvailable={PlayersList.PlayersUnAvailable} />
+      <PlayerListUnAvailable type={"Unavailable"} PlayersUnAvailable={PlayersList.PlayersUnAvailable} CurrentUser={CurrentUser} />
 
 
     </div>
@@ -693,7 +693,7 @@ export function PlayerListUnAvailable(props) {
     setPage(newPage);
   };
 
-  const { PlayersUnAvailable } = props;
+  const { PlayersUnAvailable, CurrentUser } = props;
 
   return (
     <Paper className={classes.root}>
@@ -715,10 +715,14 @@ export function PlayerListUnAvailable(props) {
           <TableBody>
 
             {PlayersUnAvailable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => {
-
+              if (isUndefined(row) || row.email === CurrentUser.email)
+              return (<div />);
               {/* <Avatar src = {firstLetter}>
                   </Avatar> */}
               console.log("rowww:", row)
+              if(row === undefined){
+                return;
+              }
               return (
                 <TableRow hover role="checkbox" tabIndex={-1} key={row.email}>
                   {columnsForUnAvailable.map(column => {
@@ -894,7 +898,7 @@ const { PlayersAvailable, CurrentUser } = props;
           </TableHead>
           <TableBody>
             {console.log(PlayersAvailable)}
-            {PlayersAvailable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).filter(row => !isUndefined(row) && row.email !== CurrentUser.email).map(row => {
+            {PlayersAvailable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => {
               if (isUndefined(row) || row.email === CurrentUser.email)
                 return (<div />);
               {/* <Avatar src = {firstLetter}>
