@@ -24,13 +24,18 @@ import {
   BrowserRouter as Router,
   useHistory,
 } from "react-router-dom";
+import ReactLoading from "react-loading";
+import MaterialTable from 'material-table';
+
+import CssBaseline from '@material-ui/core/CssBaseline';
+
 import { createBrowserHistory } from 'history'
 import { ChatButton } from './../PagesUtils.js';
 import IconButton from '@material-ui/core/IconButton';
 import SearchIcon from '@material-ui/icons/Search';
 import clsx from 'clsx';
 import { getUserFromProps, getCurrentUserFromSession } from './../user.js';
-import { PrintChats, DisplayLoading } from './../PagesUtils.js'
+import { PrintChats } from './../PagesUtils.js'
 import { isUndefined, server } from './../Utils.js'
 
 
@@ -151,7 +156,7 @@ export function JoinGame(props) {
 
 
   if (!isUpdatedData) {
-    return (<DisplayLoading />);
+    return (<DisplayLoadingGame />);
   }
   if (!roomUpdated && isUpdatedData && !UpdatingRoom) {
     setUpdatingRoom(true)
@@ -371,20 +376,6 @@ export function JoinGame(props) {
     );
   }
 
-  const handleClickSearch = (event) => {
-    setHelperText('');
-    // var currentUserFound = (PlayersAvailable.map(User => (User.nickname == event)))[0];
-    // handleClickInvitePlayer(currentUserFound.email,currentUserFound.nickname)
-    // if(!validEmail(inputName)){
-    //     setHelperText('Please provide a valid email');
-    //     return;
-    // }
-    // else
-    // history.push({
-    //     pathname: '/LoginScreen/ChatRoom/'+inputName,
-    //     user: user,
-    //     })
-  }
 
   return (
     <div id="joinGamePage">
@@ -399,18 +390,20 @@ export function JoinGame(props) {
       </Button>
           </div>
         </Grid>
-      <Grid spacing={1} item xs = {12}>
-      <div style={{ float: 'right', marginRight: 10, marginTop: 10, }}>
-      <Button id="pointsTableBTN" variant="contained" color="primary" className={classes.button}
-        onClick={()=>{history.push({
-          pathname: '/PointsTable',
-          roomId: CurrentRoom.room_id,
-        })}}
-        >
-          POINTS TABLE
+        <Grid spacing={1} item xs={12}>
+          <div style={{ float: 'right', marginRight: 10, marginTop: 10, }}>
+            <Button id="pointsTableBTN" variant="contained" color="primary" className={classes.button}
+              onClick={() => {
+                history.push({
+                  pathname: '/PointsTable',
+                  roomId: CurrentRoom.room_id,
+                })
+              }}
+            >
+              POINTS TABLE
       </Button>
-      </div>      
-      </Grid>
+          </div>
+        </Grid>
 
         <Grid item spacing={1} xs={12} justify="center">
           <div style={{ textAlign: 'center' }}>
@@ -456,7 +449,7 @@ export function JoinGame(props) {
           <Grid item xs={12}>
             <Typography component="h8" variant="h5">
               Enter a user's name and start to play!
-                    </Typography>
+             </Typography>
           </Grid>
           <Grid item xs={4}>
             <TextField
@@ -470,12 +463,14 @@ export function JoinGame(props) {
               autoComplete="nickname"
               onKeyPress={(ev) => {
                 if (ev.key === 'Enter') {
-                  handleClickSearch(ev);
+              //    handleClickSearch(inputName);
+                //  return (<GamesList user={inputName}/>);
                 }
               }
               }
               onChange={(event) => {
                 setInputName(event.target.value);
+                console.log("namee --->", inputName);
               }}
             />
           </Grid>
@@ -501,6 +496,10 @@ export function JoinGame(props) {
     </div>
 
   );
+
+  function handleClickSearch(){
+    
+  }
 
   function InitTheRoom(props) {
     fetch(server + '/userList/' + props, {
@@ -543,14 +542,14 @@ export function JoinGame(props) {
 // ------------------------------------------------------------------------------------------------------
 // ------------------------------------------------------------------------------------------------------
 
-function HomepageImage() {
-  // const url = 'https://6sense.com/wp-content/uploads/2018/10/2-truths_Canva-011.png';
-  // const url = 'https://3.bp.blogspot.com/-dPiQYG83TVM/Tom3QSzuYpI/AAAAAAAACcM/3qlVVHdjtT4/s1600/Truth_or_Lie_.png';
-  const url = 'https://steemitimages.com/p/D5zH9SyxCKd9GJ4T6rkBdeqZw1coQAaQyCUzUF4FozBvW77pHd44QbfXeeya4Ah28LcdgWFSabaBmuZJgxUXrgCTAr69vWz41v4bEikrEuR2G48JcWt62S4JH37qmY3Vi9qfie?format=match&mode=fit';
-  return (
-    <img src={url} style={{ width: 450 }} alt='true or lie' />
-  );
-}
+// function HomepageImage() {
+//   // const url = 'https://6sense.com/wp-content/uploads/2018/10/2-truths_Canva-011.png';
+//   // const url = 'https://3.bp.blogspot.com/-dPiQYG83TVM/Tom3QSzuYpI/AAAAAAAACcM/3qlVVHdjtT4/s1600/Truth_or_Lie_.png';
+//   const url = 'https://steemitimages.com/p/D5zH9SyxCKd9GJ4T6rkBdeqZw1coQAaQyCUzUF4FozBvW77pHd44QbfXeeya4Ah28LcdgWFSabaBmuZJgxUXrgCTAr69vWz41v4bEikrEuR2G48JcWt62S4JH37qmY3Vi9qfie?format=match&mode=fit';
+//   return (
+//     <img src={url} style={{ width: 450 }} alt='true or lie' />
+//   );
+// }
 
 
 function InvitePlayerWaitingImage() {
@@ -612,11 +611,6 @@ const avatarPicAvailable = [
 
 ];
 
-const avatarPic = [
-  'N',
-  'N',
-  'S',
-];
 
 const useStyles = makeStyles({
   root: {
@@ -775,6 +769,15 @@ export function PlayerListUnAvailable(props) {
 
 export function PlayerListAvailable(props) {
 
+ //function handleClickSearch(name){
+    // const email = 
+ 
+    // callToDialog(email);
+  // }
+
+const { PlayersAvailable, CurrentUser } = props;
+
+
   socket.off('userDecline')
   socket.on("userDecline", function (userInfo) {
     /*
@@ -808,7 +811,7 @@ export function PlayerListAvailable(props) {
         <DialogActions>
 
           <Grid container justify="center">
-            <InvitePlayerWaitingImage />
+            <DisplayLoadingGameInvitation />
           </Grid>
 
         </DialogActions>
@@ -852,7 +855,6 @@ export function PlayerListAvailable(props) {
     setPage(0);
   };
 
-  const { PlayersAvailable, CurrentUser } = props;
   console.log("Current user is --- >", CurrentUser);
 
 
@@ -961,6 +963,38 @@ export function PlayerListAvailable(props) {
     </Paper>
   );
 }
+
+
+export function DisplayLoadingGame() {
+  return (
+    <div
+      style={{
+        position: 'absolute', left: '50%', top: '50%',
+        transform: 'translate(-50%, -50%)'
+      }}>
+
+      <ReactLoading type={"bars"} color={"#000"} height={667} width={375} />
+    </div>
+  );
+}
+
+
+
+
+export function DisplayLoadingGameInvitation() {
+  return (
+    <div
+      style={{
+        // position: 'absolute', left: '50%', top: '50%',
+        //   transform: 'translate(-50%, -50%)'
+      }}>
+
+      <ReactLoading type={"bars"} color={"#000"} height={200} width={200} />
+    </div>
+  );
+}
+
+
 
 
 
