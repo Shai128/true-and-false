@@ -19,7 +19,7 @@ const httpServerIP = 'http://' + serverIP
 const server = httpServerIP + ':8000'
 console.log('utils server: ', server)
 function isUndefined(val) {
-    return val === 'undefined' || typeof val === 'undefined' || val == null;
+    return val === 'undefined' || typeof val === 'undefined' || val == null || val === null;
 }
 
 

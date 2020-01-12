@@ -598,30 +598,52 @@ io.on('connection', function (socket) {
     UNAVAILABLE: 2
   }
   socket.on('changeUserAvailability', function (args) {
+    
     logDiv('changeUserAvailability')
-    console.log("args:", args)
-    changeUserAvailability(
-      args.roomId,
-      args.userId,
-      args.newAvailability,
-      (succ) => {
-        console.log("database operation successful")
-        console.log(succ)
-        console.log("new availability:", args.newAvailability)
-        // TODO: should the user socket leave the room?
-        if (args.newAvailability === userStates.AVAILABLE) {
-          // user becomes available -- his socket should rejoin the room
-          console.log("emmiting available to", args.roomId, "with args", args.userId)
-          socket.join(args.roomId.toString())
-          io.to(args.roomId).emit('userAvailable', args.userId)
-        } else {
-          // user goes unavailable -- his socket should leave the room
-          console.log("emmiting unavailable to", args.roomId, "with args", args.userId)
-          io.to(args.roomId).emit('userUnAvailable', args.userId)
-          socket.leave(args.roomId.toString())
-        }
+
+    var userEmail = socket.handshake.session.userInfo.email;
+    console.log("email:",userEmail);
+
+    findUser(
+      { email: userEmail },
+      (userObject) => {
+        const roomId = userObject.roomObject.room_id;
+        console.log("the current room:", roomId);
+        args.roomId = roomId
+        args.userId = userEmail
+
+        console.log("newRoomId:", args.roomId, "newUserId:", args.userId)
+
+
+
+        console.log("args:", args)
+        changeUserAvailability(
+          args.roomId,
+          args.userId,
+          args.newAvailability,
+          (succ) => {
+            console.log("database operation successful")
+            console.log(succ)
+            console.log("new availability:", args.newAvailability)
+            // TODO: should the user socket leave the room?
+            if (args.newAvailability === userStates.AVAILABLE) {
+              // user becomes available -- his socket should rejoin the room
+              console.log("emmiting available to", args.roomId, "with args", args.userId)
+              socket.join(args.roomId.toString())
+              io.to(args.roomId).emit('userAvailable', args.userId)
+            } else {
+              // user goes unavailable -- his socket should leave the room
+              console.log("emmiting unavailable to", args.roomId, "with args", args.userId)
+              io.to(args.roomId).emit('userUnAvailable', args.userId)
+              socket.leave(args.roomId.toString())
+            }
+          },
+          (err) => console.log(err)
+        )
+
+
       },
-      (err) => console.log(err)
+      (err) => failure(err)
     )
   })
 
