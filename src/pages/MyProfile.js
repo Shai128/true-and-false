@@ -87,7 +87,9 @@ export function MyProfile(props) {
       });
     }
   };
-  var img = user.imageData.replace(/ /g,"+")
+  var img 
+  if (currentUser.imageData)
+    img = currentUser.imageData.replace(/ /g,"+")
   return (
     <div id="MyProfilePage">
       <Container component="main" maxWidth="xs">

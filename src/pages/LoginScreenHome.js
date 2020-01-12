@@ -105,8 +105,9 @@ function Home(props) {
   if (!userIsUpdated(currentUser)) {
     return (<DisplayLoading />);
   }
-  var img = currentUser.imageData.replace(/ /g,"+")
-  
+  var img 
+  if (currentUser.imageData)
+    img = currentUser.imageData.replace(/ /g,"+")
   return (
     <div id="LoginScreenHomePage">
       <Container maxWidth="lg" className={classes.container}>
