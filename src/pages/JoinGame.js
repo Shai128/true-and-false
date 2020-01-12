@@ -133,6 +133,7 @@ export function JoinGame(props) {
       let arr = location.pathname.split('/');
       let site = arr[arr.length - 1]
       console.log('from join game: site: ', site);
+      console.log("the current room:", CurrentRoom)
       if (site === 'JoinGame') {
         socket.emit('changeUserAvailability', {
           newAvailability: userStates.AVAILABLE, userId: CurrentUser.email, roomId: CurrentRoom.room_id
@@ -221,7 +222,7 @@ export function JoinGame(props) {
     console.log(CurrentUser.email, "got userUnAvailable", "userInfo:", userInfo);
 
     var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersAvailable));
-    const index = (newPlayersAvailable).findIndex(user => user.email === userInfo)
+    const index = (newPlayersAvailable).findIndex(user => !isUndefined(user) && user.email === userInfo)
     console.log(CurrentUser.email, "got index", "-->", index);
     var current_user = newPlayersAvailable[index]
     console.log(CurrentUser.email, "got current user", "-->", current_user);
@@ -700,9 +701,8 @@ export function PlayerListUnAvailable(props) {
 
               {/* <Avatar src = {firstLetter}>
                   </Avatar> */}
-
+              console.log("rowww:", row)
               return (
-
                 <TableRow hover role="checkbox" tabIndex={-1} key={row.email}>
                   {columnsForUnAvailable.map(column => {
 
@@ -875,7 +875,7 @@ export function PlayerListAvailable(props) {
           </TableHead>
           <TableBody>
             {console.log(PlayersAvailable)}
-            {PlayersAvailable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => {
+            {PlayersAvailable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).filter(row => !isUndefined(row) && row.email !== CurrentUser.email).map(row => {
               if (isUndefined(row) || row.email === CurrentUser.email)
                 return (<div />);
               {/* <Avatar src = {firstLetter}>
@@ -914,7 +914,7 @@ export function PlayerListAvailable(props) {
                             </Grid>
 
                             <Grid item xs={2}>
-                              <Button id={row.nickname + "InviteBTN"} variant="contained" color="primary" fullWidth onClick={() => { handleClickInvitePlayer(row.email, CurrentUser.nickName) }} className={classes.button}>
+                              <Button id={row.nickname + "InviteBTN"} variant="contained" color="primary" fullWidth onClick={() => {handleClickInvitePlayer(row.email, CurrentUser.nickName) }} className={classes.button}>
                                 Invite to Game
                     </Button>
                             </Grid>
