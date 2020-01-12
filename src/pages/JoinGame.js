@@ -70,6 +70,9 @@ export function JoinGame(props) {
   getCurrentUserFromSession(CurrentUser, setCurrentUser, (user) => { console.log('got user from session: ', user); setCurrentRoom(user.roomObject); setIsUpdatedData(true) }, () => { });
 
   const [roomUpdated, setRoomUpdated] = useState(false);
+
+  const [PlayersListOld, setPlayersListOld] = useState([]);
+
   const [PlayersList, setPlayersList] = useState({
     PlayersAvailable: [],
     PlayersUnAvailable: []
@@ -463,8 +466,12 @@ export function JoinGame(props) {
               name="nickname"
               autoComplete="nickname"
               onKeyPress={(ev) => {
+                // if(ev.key !== "Enter"){
+                //    setPlayersList({ PlayersAvailable: PlayersListOld, PlayersUnAvailable: PlayersList.PlayersUnAvailable })  
+                // }
+
                 if (ev.key === 'Enter') {
-              //    handleClickSearch(inputName);
+                  handleClickSearch(inputName);
                 //  return (<GamesList user={inputName}/>);
                 }
               }
@@ -476,7 +483,7 @@ export function JoinGame(props) {
             />
           </Grid>
           <Grid item xs={2}>
-            <IconButton /*type="submit"*/ className={classes.iconButton} onClick={handleClickSearch} aria-label="search">
+            <IconButton /*type="submit"*/ className={classes.iconButton} onClick={()=>handleClickSearch(inputName)} aria-label="search">
               <SearchIcon />
             </IconButton>
           </Grid>
@@ -498,8 +505,22 @@ export function JoinGame(props) {
 
   );
 
-  function handleClickSearch(){
-    
+  function handleClickSearch(name){
+    var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersAvailable));
+    const index = (newPlayersAvailable).findIndex(user => user.nickname === name)
+    if(index < 0)
+      return;
+    var current_user = newPlayersAvailable[index]
+    if(current_user === undefined)
+      return;
+
+    var OldPlayersAvailable = JSON.parse(JSON.stringify(newPlayersAvailable));
+    setPlayersListOld(OldPlayersAvailable);
+
+    newPlayersAvailable = []
+    newPlayersAvailable.push(current_user)
+    var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersUnAvailable));
+    setPlayersList({ PlayersAvailable: newPlayersAvailable, PlayersUnAvailable: newPlayersUnAvailable })  
   }
 
   function InitTheRoom(props) {
@@ -532,6 +553,8 @@ export function JoinGame(props) {
         var newPlayersUnAvailable = JSON.parse(JSON.stringify(data.PlayersUnAvailable));
         //   setPlayersUnAvailable(newPlayersUnAvailable);
         setPlayersList({ PlayersAvailable: newPlayersAvailable, PlayersUnAvailable: newPlayersUnAvailable })
+        setPlayersListOld(newPlayersAvailable)
+
         setRoomUpdated(true);
       }
     }, fail_status => {
@@ -768,12 +791,6 @@ export function PlayerListUnAvailable(props) {
 
 
 export function PlayerListAvailable(props) {
-
- //function handleClickSearch(name){
-    // const email = 
- 
-    // callToDialog(email);
-  // }
 
 const { PlayersAvailable, CurrentUser } = props;
 
