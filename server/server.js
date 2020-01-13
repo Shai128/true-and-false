@@ -38,7 +38,7 @@ const {
   getUserInfoFromSession,
   convertUserListFormat,
 } = require("./server_util")
-
+var fs = require('fs')
 const mongoose = require("../db/config")
 var session = require("express-session");
 const MongoStore = require("connect-mongo")(session);
@@ -65,7 +65,8 @@ app.use(session);
 
 app.use(express.json())
 app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: true }))
+//app.use(bodyParser.json({limit: '10mb', extended: true}))
+app.use(bodyParser.urlencoded({limit: '10mb', extended: true}))
 
 
 app.use(function (req, res, next) {
@@ -135,7 +136,10 @@ app.get('/logout', (req, res) => {
 })
 
 function serverCreateUser(req, res) {
+  //var imgData = req.body.json.imageData
   let data = JSON.parse(req.body.json)
+  //data.imageData = fs.readFileSync(req.file.imageData);
+  //data.contentType = 'image/jpg'
   console.log('trying to create user with data: ' + JSON.stringify(data));
   createUser(data,
     () => { res.status(200).send("success") }, (err) => { standardErrorHandling(res, err) });
