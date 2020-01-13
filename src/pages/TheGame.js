@@ -456,12 +456,12 @@ function updateAfterMatchData(user, room, matchPoints, history, seenSentences) {
   newUser.score += matchPoints
   socket.emit('updateUserInRoom', { roomId: room.room_id, user: newUser }) // todo: complete data
 
-  // socket.emit('changeUserAvailability', {
-  //   newAvailability: userStates.AVAILABLE, userId: user.email, roomId: room.room_id
-  // })
+  socket.emit('changeUserAvailability', {
+    newAvailability: userStates.AVAILABLE, userId: user.email, roomId: room.room_id
+  })
 
   history.push({
     pathname: '/LoginScreen/JoinGame',
-    InfoObject: { userObject: newUser, roomObject: room }
+    InfoObject: { userObject: newUser, roomObject: room, returnFromGame: true, }
   });
 }

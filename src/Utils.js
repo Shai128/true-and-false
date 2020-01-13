@@ -13,8 +13,8 @@ const statusCodes = {
 const okStatus = statusCodes.OK;
 var ip = require("ip");
 console.log("ip: ", ip.address());
-const serverIP = ip.address();
-//const serverIP = " 192.168.206.1"
+//const serverIP = ip.address();
+const serverIP = "192.168.43.125"
 const httpServerIP = 'http://' + serverIP
 const server = httpServerIP + ':8000'
 console.log('utils server: ', server)
