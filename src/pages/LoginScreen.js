@@ -153,7 +153,7 @@ export function LoginScreenRouter() {
           <LoginScreen />
         </Route>
         <Route path={"/TheGame"} exact component={TheGame} />
-        <Route path={"/PointsTable"} exact component={PointsTable} />
+        <Route path={"/ScoreTable"} exact component={PointsTable} />
 
       </Switch>
     </Router>
@@ -432,7 +432,7 @@ function LoginScreen(props) {
             <Route path={`${path}/ChatRoom/:email`} component={Chat} />
             <Route path={`${path}/JoinGame`} exact component={JoinGame} user={currentUser} />
             <Route path={`/TheGame`} exact component={TheGame} />
-            <Route path={`/PointsTable`} exact component={PointsTable} />
+            <Route path={`/ScoreTable`} exact component={PointsTable} />
 
 
             <Route path="/SignIn">

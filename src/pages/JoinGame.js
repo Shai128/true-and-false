@@ -431,15 +431,14 @@ export function JoinGame(props) {
         </Grid>
         <Grid spacing={1} item xs={12}>
           <div style={{ float: 'right', marginRight: 10, marginTop: 10, }}>
-            <Button id="pointsTableBTN" variant="contained" color="primary" className={classes.button}
+      <Button id="scoreTableBTN" variant="contained" color="primary" className={classes.button}
               onClick={() => {
-                history.push({
-                  pathname: '/PointsTable',
+          pathname: '/ScoreTable',
                   roomId: CurrentRoom.room_id,
                 })
               }}
             >
-              POINTS TABLE
+          SCORE TABLE
       </Button>
           </div>
         </Grid>

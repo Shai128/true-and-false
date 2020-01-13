@@ -449,11 +449,13 @@ function getSentence(truths, lies, seenSentences, setTruths, setLies, setSeenSen
 }
 
 function updateAfterMatchData(user, room, matchPoints, history, seenSentences) {
-  console.log("update after user points: ", matchPoints)
-
   let newUser = JSON.parse(JSON.stringify(user));
   newUser.already_seen_sentences = seenSentences
+  if (isNaN(newUser.score)){
+    newUser.score = 0
+  }
   newUser.score += matchPoints
+  console.log("update after user points: ", newUser)
   socket.emit('updateUserInRoom', { roomId: room.room_id, user: newUser }) // todo: complete data
 
   socket.emit('changeUserAvailability', {
