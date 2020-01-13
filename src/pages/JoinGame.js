@@ -32,6 +32,7 @@ import clsx from 'clsx';
 import { getUserFromProps, getCurrentUserFromSession } from './../user.js';
 import { PrintChats, DisplayLoading } from './../PagesUtils.js'
 import { isUndefined, server } from './../Utils.js'
+import { Hidden } from '@material-ui/core';
 
 
 const okStatus = 200;
@@ -388,116 +389,119 @@ export function JoinGame(props) {
 
   return (
     <div id="joinGamePage">
+      <div className={classes.paper} >
+        <PrintAnswerPlayerDialog WindowOpen={GotInvitationWindow} setWindowOpen={setGotInvitationWindow} onAccept={onAccept} onDecline={onDecline} SenderInfoName={SenderInfoName} />
+        <Grid spacing={1} container>
 
-      <PrintAnswerPlayerDialog WindowOpen={GotInvitationWindow} setWindowOpen={setGotInvitationWindow} onAccept={onAccept} onDecline={onDecline} SenderInfoName={SenderInfoName} />
-      <Grid spacing={1} container>
-
-        <Grid spacing={1} item xs={12}>
-          <div style={{ float: 'right', marginRight: 10, marginTop: 10, }}>
-            <Button id="leaveRoomBTN" variant="contained" color="primary" onClick={leaveRoom} className={classes.button}>
-              Leave the room
+          <Grid spacing={1} item xs={12}>
+            <div style={{ float: 'right', marginRight: 10, marginTop: 10, }}>
+              <Button id="leaveRoomBTN" variant="contained" color="primary" onClick={leaveRoom} className={classes.button}>
+                Leave the room
       </Button>
-          </div>
-        </Grid>
-      <Grid spacing={1} item xs = {12}>
-      <div style={{ float: 'right', marginRight: 10, marginTop: 10, }}>
-      <Button id="pointsTableBTN" variant="contained" color="primary" className={classes.button}
-        onClick={()=>{history.push({
-          pathname: '/PointsTable',
-          roomId: CurrentRoom.room_id,
-        })}}
-        >
-          POINTS TABLE
+            </div>
+          </Grid>
+          <Grid spacing={1} item xs={12}>
+            <div style={{ float: 'right', marginRight: 10, marginTop: 10, }}>
+              <Button id="pointsTableBTN" variant="contained" color="primary" className={classes.button}
+                onClick={() => {
+                  history.push({
+                    pathname: '/PointsTable',
+                    roomId: CurrentRoom.room_id,
+                  })
+                }}
+              >
+                POINTS TABLE
       </Button>
-      </div>      
-      </Grid>
-
-        <Grid item spacing={1} xs={12} justify="center">
-          <div style={{ textAlign: 'center' }}>
-            <Typography id="roomNameHeader" variant="h3" className={classes.title}>
-              Room Name:
+            </div>
+          </Grid>
+          <Grid container spacing={2} padding={20} alignItems="stretch" justify="center">
+            <Grid item numberoflines={3} spacing={1} xs={12} padding={20} justify="center">
+              <div style={{ textAlign: 'center', overflow:'hidden'}}>
+                <Typography id="roomNameHeader" variant="h4" className={classes.title}>
+                  Room Name:
       {CurrentRoom.room_name}
-            </Typography>
-          </div>
-        </Grid>
+                </Typography>
+              </div>
+            </Grid>
 
 
-        <Grid item spacing={1} xs={12} justify="center">
-          <div style={{ textAlign: 'center' }}>
-            <Typography id="roomNumberHeader" variant="h4" className={classes.roomNumber}>
-              Room Number:
+            <Grid item spacing={1} padding={20} xs={12} justify="center">
+              <div style={{ textAlign: 'center' }}>
+                <Typography id="roomNumberHeader" variant="h4" className={classes.roomNumber}>
+                  Room Number:
      {CurrentRoom.room_id}
-            </Typography>
-          </div>
-        </Grid>
+                </Typography>
+              </div>
+            </Grid>
 
 
-        <Grid item spacing={1} xs={12} justify="center">
-          <div style={{ textAlign: 'center' }}>
-            <Typography id="userNameHeader" justify="center" variant="h5" className={classes.userTitle}>
-              User Name:
+            <Grid item spacing={1} xs={12} justify="center">
+              <div style={{ textAlign: 'center' }}>
+                <Typography id="userNameHeader" justify="center" variant="h5" className={classes.userTitle}>
+                  User Name:
       {CurrentUser.nickName}
-            </Typography>
-          </div>
-        </Grid>
-      </Grid>
+                </Typography>
+              </div>
+            </Grid>
+          </Grid>
 
-      {/* 
+          {/* 
       <Grid container spacing={3} justify="center">
         <HomepageImage />
       </Grid> */}
 
 
-      {/* ******************************************************************************************** */}
+          {/* ******************************************************************************************** */}
 
-      {/* <Grid container spacing={3} justify="center"> */}
-      <div component="form" className={fixedHeightPaper}>
-        <Grid container>
-          <Grid item xs={12}>
-            <Typography component="h8" variant="h5">
-              Enter a user's name and start to play!
+          {/* <Grid container spacing={3} justify="center"> */}
+          <div component="form" className={fixedHeightPaper}>
+            <Grid container>
+              <Grid item xs={12}>
+                <Typography component="h8" variant="h5">
+                  Enter a user's name and start to play!
                     </Typography>
-          </Grid>
-          <Grid item xs={4}>
-            <TextField
-              className={classes.input}
-              placeholder="Enter a user's name"
-              fullWidth
-              variant="outlined"
-              helperText={helperText}
-              id="nickname"
-              name="nickname"
-              autoComplete="nickname"
-              onKeyPress={(ev) => {
-                if (ev.key === 'Enter') {
-                  handleClickSearch(ev);
-                }
-              }
-              }
-              onChange={(event) => {
-                setInputName(event.target.value);
-              }}
-            />
-          </Grid>
-          <Grid item xs={2}>
-            <IconButton /*type="submit"*/ className={classes.iconButton} onClick={handleClickSearch} aria-label="search">
-              <SearchIcon />
-            </IconButton>
-          </Grid>
+              </Grid>
+              <Grid item xs={4}>
+                <TextField
+                  className={classes.input}
+                  placeholder="Enter a user's name"
+                  fullWidth
+                  variant="outlined"
+                  helperText={helperText}
+                  id="nickname"
+                  name="nickname"
+                  autoComplete="nickname"
+                  onKeyPress={(ev) => {
+                    if (ev.key === 'Enter') {
+                      handleClickSearch(ev);
+                    }
+                  }
+                  }
+                  onChange={(event) => {
+                    setInputName(event.target.value);
+                  }}
+                />
+              </Grid>
+              <Grid item xs={2}>
+                <IconButton /*type="submit"*/ className={classes.iconButton} onClick={handleClickSearch} aria-label="search">
+                  <SearchIcon />
+                </IconButton>
+              </Grid>
+            </Grid>
+
+          </div>
+
+          {/* </Grid> */}
+
+
+          {/* ******************************************************************************************** */}
+
+          <PlayerListAvailable type={"Available"} PlayersAvailable={PlayersList.PlayersAvailable} CurrentUser={CurrentUser} />
+
+          <PlayerListUnAvailable type={"Unavailable"} PlayersUnAvailable={PlayersList.PlayersUnAvailable} />
         </Grid>
 
       </div>
-
-      {/* </Grid> */}
-
-
-      {/* ******************************************************************************************** */}
-
-      <PlayerListAvailable type={"Available"} PlayersAvailable={PlayersList.PlayersAvailable} CurrentUser={CurrentUser} />
-
-      <PlayerListUnAvailable type={"Unavailable"} PlayersUnAvailable={PlayersList.PlayersUnAvailable} />
-
-
     </div>
 
   );
