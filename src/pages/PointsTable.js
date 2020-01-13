@@ -12,6 +12,7 @@ import { reject } from 'q';
 import { useState } from 'react';
 import Button from '@material-ui/core/Button';
 import {useHistory} from "react-router-dom";
+import { isUndefined, server } from './../Utils.js'
 
 // const useStyles = makeStyles({
 //     table: {
@@ -38,7 +39,7 @@ export function PointsTable(props) {
     let history = useHistory();
     //props = {roomId: 1}
 
-    fetch('http://localhost:8000/userList/' + props.location.roomId, {
+    fetch(server + '/userList/' + props.location.roomId, {
       method: 'GET', // *GET, POST, PUT, DELETE, etc.
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
