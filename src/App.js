@@ -26,6 +26,8 @@ import { PrintJoinGameDialog, DisplayLoading, AutoRedirectToLoginScreenIfUserInS
 import { validEmail, passwordIsStrongEnough, isUndefined, statusCodes } from './Utils.js'
 import { emptyUser, logIn, signUp } from './user.js'
 //import { createBrowserHistory } from '../../../AppData/Local/Microsoft/TypeScript/3.6/node_modules/@types/history';
+const defaultImg = require('./defaultAvatar.png')
+var file_size_under_10 = true
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
@@ -287,7 +289,14 @@ function SignUp() {
               
               <input type='file'  name='imageData' className="avatarImageupload" onChange={e => {
                 const preview = document.querySelector('img');
+                let file_size = document.querySelector('input[type=file]').files[0].size;
                 const file = document.querySelector('input[type=file]').files[0];
+                if (file_size > 1e+7){
+                  window.alert("Image size is bigger than 10MB, Please smaller image");
+                  file_size_under_10 = false
+                  return
+                }
+                file_size_under_10 = true
                 const reader = new FileReader();
                 var data 
                 reader.addEventListener("load", function () {
@@ -312,7 +321,7 @@ function SignUp() {
 
               }} />
 
-              <img src='' className="process_image" width='90' height='90'  /> 
+              <img src={defaultImg} width='90' height='90' border="0" /> 
 
               
 
@@ -325,6 +334,10 @@ function SignUp() {
               color="primary"
               className={classes.submit}
               onClick={() => {
+                if (!file_size_under_10){
+                  window.alert("Image size is bigger than 10MB, Please smaller image")
+                  return
+                }
                 setUserAlreadyExists(false);
                 if (!validUser())
                   return;

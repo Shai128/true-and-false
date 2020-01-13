@@ -87,7 +87,7 @@ export function MyProfile(props) {
       });
     }
   };
-  var img 
+  var img = require('../defaultAvatar.png')
   if (currentUser.imageData)
     img = currentUser.imageData.replace(/ /g,"+")
   return (
@@ -97,7 +97,7 @@ export function MyProfile(props) {
         <div className={classes.paper} >
           <Typography component="h1" variant="h2" justify="center">
             My Profile 
-            <img src={`${img}`} width="120" height='120'  />
+            <img src={`${img}`} width="120" height='120'  border-style='none' />
           </Typography>
 
           <form className={classes.form} noValidate>

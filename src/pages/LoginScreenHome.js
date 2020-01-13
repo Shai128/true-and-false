@@ -41,7 +41,7 @@ export function LoginScreenHome(props) {
 
   );
 }
-
+const defaultImg = require('../defaultAvatar.png')
 function Home(props) {
   let url = props.url;
   const [createGameWindowOpen, setCreateGameWindowOpen] = React.useState(false);
@@ -105,9 +105,10 @@ function Home(props) {
   if (!userIsUpdated(currentUser)) {
     return (<DisplayLoading />);
   }
-  var img 
+  var img = defaultImg
   if (currentUser.imageData)
     img = currentUser.imageData.replace(/ /g,"+")
+    
   return (
     <div id="LoginScreenHomePage">
       <Container maxWidth="lg" className={classes.container}>
@@ -119,7 +120,7 @@ function Home(props) {
                   
 
                   <Typography id="welcomeMessage" component="h1" variant="h2" justify="center" >
-                  <img src={`${img}`} width="120" height='120'  /> Welcome {currentUser.firstName}!
+                  <img src={`${img}`} width="120" height='120' border-style='none' /> Welcome {currentUser.firstName}!
         </Typography>
         
                  
