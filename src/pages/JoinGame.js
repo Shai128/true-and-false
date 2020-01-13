@@ -433,7 +433,8 @@ export function JoinGame(props) {
           <div style={{ float: 'right', marginRight: 10, marginTop: 10, }}>
       <Button id="scoreTableBTN" variant="contained" color="primary" className={classes.button}
               onClick={() => {
-          pathname: '/ScoreTable',
+                history.push({
+                pathname: '/ScoreTable',
                   roomId: CurrentRoom.room_id,
                 })
               }}
