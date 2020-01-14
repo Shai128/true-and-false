@@ -2,7 +2,7 @@ const crypto = require("crypto-js");
 
 const { mongoose } = require("./config")
 const { isUndefined, removeUnReadMessagesFromCertainUser } = require("../src/Utils")
-const salt = crypto.lib.WordArray.random(128/8).toString()
+const salt = crypto.lib.WordArray.random(128 / 8).toString()
 const iterations = 1000;
 const LAST_MESSAGES_LIMIT = 100
 const { statusCodes } = require("../src/Utils")
@@ -51,7 +51,9 @@ const userSchema = new mongoose.Schema(
         correctCount: Number,
         score: Number,
         matchPoints: Number,
-
+        imageData: String, 
+        contentType: String
+        
     });
 const userModel = mongoose.model('users', userSchema) //creating the class userModel. a class of types
 // that comply the conditions of {userSchema and document}
@@ -67,8 +69,8 @@ const userModel = mongoose.model('users', userSchema) //creating the class userM
 function createUser(user, success, failure) {
     userModel.findOne({ email: user.email }).exec(function (err, dbUser) {
         if (err || isUndefined(dbUser)) {
-            let hashedPassword = crypto.PBKDF2(user.password, salt, {keySize: 512/32, iterations: iterations}).toString();
-            
+            let hashedPassword = crypto.PBKDF2(user.password, salt, { keySize: 512 / 32, iterations: iterations }).toString();
+
             const newUser = new userModel({
                 password: hashedPassword,
                 email: user.email,
@@ -80,7 +82,9 @@ function createUser(user, success, failure) {
                 roomObject: {
                     room_id: -1,
                     room_name: "no room"
-                }
+                },
+                imageData: user.imageData,
+                contentType: user.contentType
             });
             console.log("created new user:", newUser);
             //saves the user in the db

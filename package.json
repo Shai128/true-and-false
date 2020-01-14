@@ -19,6 +19,7 @@
     "material-ui-icons": "^1.0.0-beta.36",
     "material-ui-table": "^0.1.2",
     "mongoose": "^5.7.7",
+    "multer": "^1.4.2",
     "nodemon": "^1.19.4",
     "puppeteer": "^2.0.0",
     "react": "^16.11.0",

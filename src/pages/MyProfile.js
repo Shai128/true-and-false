@@ -15,7 +15,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
 import { useStyles as AppUseStyles } from './../App.js';
-import { getCurrentUserFromSession as getCurrentUser, updateUserToDB, getUserFromProps, validOldPassword } from './../user.js'
+import { getCurrentUserFromSession as getCurrentUser, updateUserToDB, getUserFromProps, validOldPassword, getCurrentUserFromDB } from './../user.js'
 import { passwordIsStrongEnough } from './../Utils.js'
 import crypto from "crypto-js";
 
@@ -52,9 +52,11 @@ function encrypt(str) {
 export function MyProfile(props) {
 
   let init_user = getUserFromProps(props);
+  let image_init_user = getUserFromProps(props);
   const classes = AppUseStyles();
   const buttonClasses = useButtonStyles();
   const [user, setUser] = React.useState(init_user);
+  const [currentUser, setCurrentUser] = React.useState(image_init_user);
   getCurrentUser(user, setUser);
   const [oldUser, setOldUser] = React.useState(user);
 
@@ -85,13 +87,17 @@ export function MyProfile(props) {
       });
     }
   };
+  var img = require('../defaultAvatar.png')
+  if (currentUser.imageData)
+    img = currentUser.imageData.replace(/ /g,"+")
   return (
     <div id="MyProfilePage">
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper} >
           <Typography component="h1" variant="h2" justify="center">
-            My Profile
+            My Profile 
+            <img src={`${img}`} width="120" height='120'  border-style='none' />
           </Typography>
 
           <form className={classes.form} noValidate>
@@ -143,6 +149,8 @@ export function MyProfile(props) {
                   onChange={updateField}
                 />
               </Grid>
+
+
               <Grid container justify='center'  >
                 <Button id="changePasswordBTN" className={buttonClasses.root} justify="center" onClick={() => { handleClickChangePasswordWindow(true) }}>
                   Change Password

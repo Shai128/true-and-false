@@ -38,7 +38,7 @@ const {
   getUserInfoFromSession,
   convertUserListFormat,
 } = require("./server_util")
-
+var fs = require('fs')
 const mongoose = require("../db/config")
 var session = require("express-session");
 const MongoStore = require("connect-mongo")(session);
@@ -65,7 +65,8 @@ app.use(session);
 
 app.use(express.json())
 app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: true }))
+//app.use(bodyParser.json({limit: '10mb', extended: true}))
+app.use(bodyParser.urlencoded({limit: '10mb', extended: true}))
 
 
 app.use(function (req, res, next) {
@@ -135,7 +136,10 @@ app.get('/logout', (req, res) => {
 })
 
 function serverCreateUser(req, res) {
+  //var imgData = req.body.json.imageData
   let data = JSON.parse(req.body.json)
+  //data.imageData = fs.readFileSync(req.file.imageData);
+  //data.contentType = 'image/jpg'
   console.log('trying to create user with data: ' + JSON.stringify(data));
   createUser(data,
     () => { res.status(200).send("success") }, (err) => { standardErrorHandling(res, err) });
@@ -143,7 +147,7 @@ function serverCreateUser(req, res) {
 
 function serverLoginUser(req, res) {
   logDiv('user login')
-  
+
   let data = {
     email: req.params.email,
     password: req.params.password
@@ -151,7 +155,7 @@ function serverLoginUser(req, res) {
 
   findUser(data,
     (found_user) => {
-      let hashedPassword = crypto.PBKDF2(data.password, found_user.salt, {keySize: 512/32, iterations: found_user.iterations}).toString();
+      let hashedPassword = crypto.PBKDF2(data.password, found_user.salt, { keySize: 512 / 32, iterations: found_user.iterations }).toString();
 
       if (found_user.password === hashedPassword) {
         //  console.log("data", data, "foundUser:", found_user)
@@ -598,30 +602,52 @@ io.on('connection', function (socket) {
     UNAVAILABLE: 2
   }
   socket.on('changeUserAvailability', function (args) {
+    
     logDiv('changeUserAvailability')
-    console.log("args:", args)
-    changeUserAvailability(
-      args.roomId,
-      args.userId,
-      args.newAvailability,
-      (succ) => {
-        console.log("database operation successful")
-        console.log(succ)
-        console.log("new availability:", args.newAvailability)
-        // TODO: should the user socket leave the room?
-        if (args.newAvailability === userStates.AVAILABLE) {
-          // user becomes available -- his socket should rejoin the room
-          console.log("emmiting available to", args.roomId, "with args", args.userId)
-          socket.join(args.roomId.toString())
-          io.to(args.roomId).emit('userAvailable', args.userId)
-        } else {
-          // user goes unavailable -- his socket should leave the room
-          console.log("emmiting unavailable to", args.roomId, "with args", args.userId)
-          io.to(args.roomId).emit('userUnAvailable', args.userId)
-          socket.leave(args.roomId.toString())
-        }
+
+    var userEmail = socket.handshake.session.userInfo.email;
+    console.log("email:",userEmail);
+
+    findUser(
+      { email: userEmail },
+      (userObject) => {
+        const roomId = userObject.roomObject.room_id;
+        console.log("the current room:", roomId);
+        args.roomId = roomId
+        args.userId = userEmail
+
+        console.log("newRoomId:", args.roomId, "newUserId:", args.userId)
+
+
+
+        console.log("args:", args)
+        changeUserAvailability(
+          args.roomId,
+          args.userId,
+          args.newAvailability,
+          (succ) => {
+            console.log("database operation successful")
+            console.log(succ)
+            console.log("new availability:", args.newAvailability)
+            // TODO: should the user socket leave the room?
+            if (args.newAvailability === userStates.AVAILABLE) {
+              // user becomes available -- his socket should rejoin the room
+              console.log("emmiting available to", args.roomId, "with args", args.userId)
+              socket.join(args.roomId.toString())
+              io.to(args.roomId).emit('userAvailable', args.userId)
+            } else {
+              // user goes unavailable -- his socket should leave the room
+              console.log("emmiting unavailable to", args.roomId, "with args", args.userId)
+              io.to(args.roomId).emit('userUnAvailable', args.userId)
+              socket.leave(args.roomId.toString())
+            }
+          },
+          (err) => console.log(err)
+        )
+
+
       },
-      (err) => console.log(err)
+      (err) => failure(err)
     )
   })
 

@@ -25,7 +25,10 @@ import { JoinGame } from './pages/JoinGame.js';
 import { PrintJoinGameDialog, DisplayLoading, AutoRedirectToLoginScreenIfUserInSession } from './PagesUtils.js';
 import { validEmail, passwordIsStrongEnough, isUndefined, statusCodes } from './Utils.js'
 import { emptyUser, logIn, signUp } from './user.js'
+import { TheGame } from './pages/TheGame.js'
 //import { createBrowserHistory } from '../../../AppData/Local/Microsoft/TypeScript/3.6/node_modules/@types/history';
+const defaultImg = require('./defaultAvatar.png')
+var file_size_under_10 = true
 function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
@@ -42,8 +45,8 @@ function Copyright() {
 
 function encrypt(str) {
   var newString = "";
-  for (var i = str.length - 1; i >= 0; i--) { 
-      newString += str[i];
+  for (var i = str.length - 1; i >= 0; i--) {
+    newString += str[i];
   }
   return newString;
 }
@@ -110,6 +113,14 @@ export const useStyles = makeStyles(theme => ({
 
 let pass = ""
 
+function encodeImageFileAsURL(element) {
+  var file = element.files[0];
+  var reader = new FileReader();
+  reader.onloadend = function() {
+    console.log('RESULT', reader.result)
+  }
+  reader.readAsDataURL(file);
+}
 
 function SignUp() {
   const classes = useStyles();
@@ -141,6 +152,13 @@ function SignUp() {
         [e.target.name]: e.target.value
       });
     }
+  };
+
+  const updateImage = e => {
+    setUser({
+      ...user,
+      [e.target.name]: e.target.src
+    });
   };
 
   /**
@@ -183,7 +201,7 @@ function SignUp() {
   }
 
   let history = useHistory();
-
+  //TODO: https://www.w3schools.com/js/js_htmldom_css.asp try to preview the chosen image with help from here
   return (
     <div id="SignUpPage">
       <Container component="main" maxWidth="xs">
@@ -269,6 +287,44 @@ function SignUp() {
                 />
               </Grid>
 
+              
+              <input type='file'  name='imageData' className="avatarImageupload" onChange={e => {
+                const preview = document.querySelector('img');
+                let file_size = document.querySelector('input[type=file]').files[0].size;
+                const file = document.querySelector('input[type=file]').files[0];
+                if (file_size > 1e+7){
+                  window.alert("Image size is bigger than 10MB, Please smaller image");
+                  file_size_under_10 = false
+                  return
+                }
+                file_size_under_10 = true
+                const reader = new FileReader();
+                var data 
+                reader.addEventListener("load", function () {
+                  // convert image file to base64 string
+                  preview.src = reader.result;
+                  data = reader.result
+                }, false);
+                
+                reader.onloadend = function() {
+                  
+                  var tempUser = user
+                  tempUser.imageData = reader.result
+                  setUser(tempUser)
+                }
+                
+                if (file) {
+                  reader.readAsDataURL(file);
+                }
+               //updateImage(e, data)
+                
+                //updateField(e)
+
+              }} />
+
+              <img src={defaultImg} width='90' height='90' border="0" /> 
+
+              
 
             </Grid>
             <Button
@@ -279,6 +335,10 @@ function SignUp() {
               color="primary"
               className={classes.submit}
               onClick={() => {
+                if (!file_size_under_10){
+                  window.alert("Image size is bigger than 10MB, Please smaller image")
+                  return
+                }
                 setUserAlreadyExists(false);
                 if (!validUser())
                   return;
@@ -286,7 +346,7 @@ function SignUp() {
                 // data.append( "json", JSON.stringify(user));
 
                 signUp(user, () => {
-                  
+
                   logIn(user, (data) => {
                     // todo: check if the email is already in the db!!
                     console.log('frontend got data: ', data);
@@ -343,7 +403,9 @@ function LinksPage() {
         <Route exact path="/">
           <Home />
         </Route>
-
+        <Route exact path="/TheGame">
+          <TheGame />
+        </Route>
         <Route exact path="/SignIn">
           <SignIn />
         </Route>
@@ -419,10 +481,12 @@ function Home() {
       </Button>
                 </Link>
               </Grid>
+              <Grid item xs={12}>
 
-              <Button variant="contained" color="primary" fullWidth onClick={handleClickGuestLogin} className={classes.button}>
-                Guest Login
+                <Button variant="contained" color="primary" fullWidth onClick={handleClickGuestLogin} className={classes.button}>
+                  Guest Login
             </Button>
+              </Grid>
             </Grid>
             <PrintJoinGameDialog
               handleCloseWindow={handleCloseGuestLoginWindow}

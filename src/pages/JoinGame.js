@@ -415,9 +415,9 @@ export function JoinGame(props) {
             </div>
           </Grid>
           <Grid container spacing={2} padding={20} alignItems="stretch" justify="center">
-            <Grid item numberoflines={3} spacing={1} xs={12} padding={20} justify="center">
-              <div style={{ textAlign: 'center', overflow:'hidden'}}>
-                <Typography id="roomNameHeader" variant="h4" className={classes.title}>
+            <Grid item spacing={1} xs={12} padding={20} justify="center">
+              <div style={{ textAlign: 'center'}}>
+                <Typography id="roomNameHeader" variant="h4" numberOfLines={3} className={classes.title}>
                   Room Name:
       {CurrentRoom.room_name}
                 </Typography>
@@ -425,7 +425,7 @@ export function JoinGame(props) {
             </Grid>
 
 
-            <Grid item spacing={1} padding={20} xs={12} justify="center">
+            <Grid container item spacing={1} padding={20} xs={12} justify="center">
               <div style={{ textAlign: 'center' }}>
                 <Typography id="roomNumberHeader" variant="h4" className={classes.roomNumber}>
                   Room Number:
@@ -435,7 +435,7 @@ export function JoinGame(props) {
             </Grid>
 
 
-            <Grid item spacing={1} xs={12} justify="center">
+            <Grid container item spacing={1} xs={12} justify="center">
               <div style={{ textAlign: 'center' }}>
                 <Typography id="userNameHeader" justify="center" variant="h5" className={classes.userTitle}>
                   User Name:

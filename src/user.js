@@ -3,6 +3,7 @@ import { reject } from 'q';
 
 
 const user_in_session_key = 'user in session key'
+
 const players = [{ firstName: 'alon', nickName: 'alon', email: '123@gmail.com' }, { firstName: 'km', nickName: 'debil', email: 'k@gmai.com', }, { firstName: 'Dan', nickName: 'Halif', email: 'dan@gmail.com' }];
 export function getCreatedGames() {
     var arr = [];
@@ -105,6 +106,9 @@ export function getUserFromLocalStorage() {
     return emptyUser();
 }
 
+
+
+
 function fillUserUndefinedData(user) {
     if (isUndefined(user.true_sentences))
         user.true_sentences = [];
@@ -166,6 +170,7 @@ export function updateUserInLocalStorage(user) {
     console.log('saved in local storage: ', user)
     console.log('now we have in local storage: ', JSON.parse(localStorage.getItem(user_in_session_key)));
 }
+
 
 export function logOut() {
     socket.emit("logout");
@@ -231,6 +236,9 @@ export function emptyUser() {
         createdGames: [],
         participatedGames: [],
         confirmPassword: '',
+        imageData: '', 
+        contentType: 'img/jpg'
+
     }
 }
 
@@ -278,7 +286,7 @@ export function getUserFromPropsOrFromSession(props, setUser){
  */
 export function logIn(user, onSuccess, onFailure) {
     //@@@ change user to the same user but with encrypted password
-    
+
     console.log("user@@@", user)
 
 
