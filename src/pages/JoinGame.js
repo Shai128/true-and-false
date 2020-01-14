@@ -41,6 +41,12 @@ import { isUndefined, server } from './../Utils.js'
 
 const okStatus = 200;
 
+export const userStates = {
+  INVALID: 0,
+  AVAILABLE: 1,
+  UNAVAILABLE: 2
+}
+
 export function JoinGame(props) {
   // props contains: 
   // userObject: {
@@ -123,11 +129,7 @@ export function JoinGame(props) {
     },
   }));
 
-  const userStates = {
-    INVALID: 0,
-    AVAILABLE: 1,
-    UNAVAILABLE: 2
-  }
+
 
   const [GotInvitationWindow, setGotInvitationWindow] = React.useState(false);
   let history = useHistory();

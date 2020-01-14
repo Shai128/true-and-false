@@ -147,7 +147,7 @@ function serverCreateUser(req, res) {
 
 function serverLoginUser(req, res) {
   logDiv('user login')
-  
+
   let data = {
     email: req.params.email,
     password: req.params.password
@@ -155,7 +155,7 @@ function serverLoginUser(req, res) {
 
   findUser(data,
     (found_user) => {
-      let hashedPassword = crypto.PBKDF2(data.password, found_user.salt, {keySize: 512/32, iterations: found_user.iterations}).toString();
+      let hashedPassword = crypto.PBKDF2(data.password, found_user.salt, { keySize: 512 / 32, iterations: found_user.iterations }).toString();
 
       if (found_user.password === hashedPassword) {
         //  console.log("data", data, "foundUser:", found_user)

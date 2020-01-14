@@ -329,7 +329,7 @@ export function Chat(props) {
               user.roomObject.room_id !== -1 &&
               <Grid item xs={12} >
 
-                <Button id = "backToRoomBTN" className={buttonClasses.root} fullWidth
+                <Button id="backToRoomBTN" className={buttonClasses.root} fullWidth
                   onClick={() => { history.push('/LoginScreen/JoinGame') }}>
                   Return Back To Game
             </Button>

@@ -14,11 +14,13 @@ import {
 } from "react-router-dom";
 
 
-import { socket, emptyUser } from './../user.js';
+import { socket, updateUserToDB, getUserFromLocalStorage, } from './../user.js';
+import { updateGameInLocalStorage, getGameFromLocalStorage, } from './../user_game';
 
 import { DisplayLoading, DisplayDBError } from './../PagesUtils.js'
 import { isUndefined } from './../Utils.js'
 import { getSentencesFromDB } from './../game.js'
+import { userStates } from './JoinGame.js'
 const NO_MORE_SENTENCES = "no more sentences"
 const TRUE_SENTENCE = "true sentence"
 const FALSE_SENTENCE = "false sentence"
@@ -31,11 +33,6 @@ const OPPONENT_TURN_MESSAGE = "Opponent's turn. The sentence is: "
 const BONUS_POINTS_FOR_CORRECT_ANSWER = 3;
 const BONUS_POINTS_FOR_WRONG_ANSWER = 1;
 const NO_MORE_SENTENCES_MESSAGE_TO_USER = "There are no more sentences to display!!"
-const userStates = {
-  INVALID: 0,
-  AVAILABLE: 1,
-  UNAVAILABLE: 2
-}
 
 
 export function TheGame(props) {
@@ -43,42 +40,78 @@ export function TheGame(props) {
   const classes = AppUseStyles();
   console.log("props: ", props)
   const [DBError, setDBError] = React.useState(false);
+  const [isPropsInitialized, setIsPropsInitialized] = React.useState(false);
+
+
   if (isUndefined(props) || isUndefined(props.location)) {
-    setDBError(true);
+    let localStorageGame = getGameFromLocalStorage()
+    console.log('the data from local storage is: ', localStorageGame);
     props = {
       location: {
-        user: emptyUser(),
-        room: {},
-        opponentId: '',
-        turn: true
+        ...localStorageGame,
+        user: getUserFromLocalStorage()
       }
     }
   }
+  else if (!isPropsInitialized) {
+    setIsPropsInitialized(true);
+    console.log('initializing props');
+    let gameToStore = {
+      opponentName: props.location.opponentName,
+      room: props.location.room,
+      opponentId: props.location.opponentId,
+      turn: props.location.turn,
+      score: 0,
+      questionsCount: 0,
+      correctCount: 0,
+      gameState: INITIAL_STATE,
+      sentence: '',
+      noMoreSentences: false,
+      sentenceType: '',
+      disableButtons: false,
+      myGuess: '',
+      answered: false,
+      matchPoints: 0,
+      seenSentences: isUndefined(props.location.user.already_seen_sentences) ? [] : props.location.user.already_seen_sentences,
+      lies: [],
+      truths: [],
+      opIsCorrect: "",
+      opGuess: '',
+    }
+    props = {
+      location: {
+        ...gameToStore,
+        user: getUserFromLocalStorage()
+      }
+    }
+    updateGameInLocalStorage(gameToStore)
+
+
+  }
+
   const user = props.location.user;
   const room = props.location.room;
-  const [opponentId, setOpponentId] = React.useState(props.location.opponentId); /////////////////////// todo: change to const
-  const [answered, setAnswered] = React.useState(false);
-  const [noMoreSentences, setNoMoreSentences] = React.useState(false);
+  const opponentId = props.location.opponentId;
+  const [answered, setAnswered] = React.useState(props.location.answered);
+  const [noMoreSentences, setNoMoreSentences] = React.useState(props.location.noMoreSentences);
   let myturn = props.location.turn;
-  const [questionsCount, setQuestionsCount] = React.useState(0);
-  const [correctCount, setCorrectCount] = React.useState(0);
-  const [sentence, setSentence] = React.useState("");
-  const [opGuess, setOpGuess] = React.useState("");
-  const [opIsCorrect, setOpIsCorrect] = React.useState("");
-  const [truths, setTruths] = React.useState([]);
-  const [lies, setLies] = React.useState([]);
+  const [questionsCount, setQuestionsCount] = React.useState(props.location.questionsCount);
+  const [correctCount, setCorrectCount] = React.useState(props.location.correctCount);
+  const [sentence, setSentence] = React.useState(props.location.sentence);
+  const [opGuess, setOpGuess] = React.useState(props.location.opGuess);
+  const [opIsCorrect, setOpIsCorrect] = React.useState(props.location.opIsCorrect);
+  const [truths, setTruths] = React.useState(props.location.truths);
+  const [lies, setLies] = React.useState(props.location.lies);
   const [isFinishedLoading, setIsFinishedLoading] = React.useState(false);
-  let initial_seen = isUndefined(user.already_seen_sentences) ? [] : user.already_seen_sentences
-  const [seenSentences, setSeenSentences] = React.useState(initial_seen);
+  const [seenSentences, setSeenSentences] = React.useState(props.location.seenSentences);
   const [startedReadingFromDB, setStartedReadingFromDB] = React.useState(false);
-  const [matchPoints, setMatchPoints] = React.useState(0);
-  const [displayEndGameButton, setDisplayEndGameButton] = React.useState(true);
+  const [matchPoints, setMatchPoints] = React.useState(props.location.score);
+  const [displayEndGameButton, setDisplayEndGameButton] = React.useState(props.location.displayEndGameButton);
 
-  // const [isFirstTurn, setIsFirstTurn] =  React.useState(true);
-  const [gameState, setGameState] = React.useState(INITIAL_STATE);
-  const [sentenceType, setSentenceType] = React.useState(''); // can be TRUE_SENTENCE or FALSE_SENTENCE
-  const [myGuess, setMyGuess] = React.useState(''); // can be TRUE_SENTENCE or FALSE_SENTENCE.
-  const [disableButtons, setDisableButtons] = React.useState(false); // can be TRUE_SENTENCE or FALSE_SENTENCE.
+  const [gameState, setGameState] = React.useState(props.location.gameState);
+  const [sentenceType, setSentenceType] = React.useState(props.location.sentenceType); // can be TRUE_SENTENCE or FALSE_SENTENCE
+  const [myGuess, setMyGuess] = React.useState(props.location.myGuess); // can be TRUE_SENTENCE or FALSE_SENTENCE.
+  const [disableButtons, setDisableButtons] = React.useState(props.location.disableButtons);
 
 
   useEffect(
@@ -97,8 +130,39 @@ export function TheGame(props) {
       if (noMoreSentences)
         setSentence(NO_MORE_SENTENCES_MESSAGE_TO_USER);
     },
-    [gameState, noMoreSentences]
+    [gameState, noMoreSentences, matchPoints, props.location.room, props.location.opponentId, props.location.user,]
   )
+
+  useEffect(
+    () => {
+      let gameToStore = {
+        opponentName: props.location.opponentName,
+        room: props.location.room,
+        opponentId: props.location.opponentId,
+        turn: gameState === MY_TURN_STATE ? true : false,
+        score: matchPoints,
+        matchPoints: matchPoints,
+        questionsCount: questionsCount,
+        correctCount: correctCount,
+        gameState: gameState,
+        noMoreSentences: noMoreSentences,
+        sentence: sentence,
+        disableButtons: disableButtons,
+        myGuess: myGuess,
+        sentenceType: sentenceType,
+        displayEndGameButton: displayEndGameButton,
+        seenSentences: seenSentences,
+        lies: lies,
+        truths: truths,
+        opIsCorrect: opIsCorrect,
+        opGuess: opGuess,
+        answered: answered,
+
+      }
+      updateGameInLocalStorage(gameToStore)
+    },
+  )
+
   if (DBError) {
     return <DisplayDBError history={history} />
   }
@@ -133,6 +197,7 @@ export function TheGame(props) {
     console.log('received message displayAnswer. args:', args);
     setOpGuess(args.guess === TRUE_SENTENCE ? 'TRUE' : 'FALSE');
     setOpIsCorrect(args.isCorrect ? 'right' : 'wrong');
+    setGameState(OPPONENT_TURN_SENTENCE_CHOSEN_STATE);
     setAnswered(true);
   });
 
@@ -451,11 +516,12 @@ function getSentence(truths, lies, seenSentences, setTruths, setLies, setSeenSen
 function updateAfterMatchData(user, room, matchPoints, history, seenSentences) {
   let newUser = JSON.parse(JSON.stringify(user));
   newUser.already_seen_sentences = seenSentences
-  if (isNaN(newUser.score)){
+  if (isNaN(newUser.score)) {
     newUser.score = 0
   }
   newUser.score += matchPoints
   console.log("update after user points: ", newUser)
+  updateUserToDB(newUser);
   socket.emit('updateUserInRoom', { roomId: room.room_id, user: newUser }) // todo: complete data
 
   socket.emit('changeUserAvailability', {
