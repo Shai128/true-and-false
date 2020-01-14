@@ -451,6 +451,24 @@ app.get('/userSentences/:opponentId/:roomId', (req, res) => {
   )
 })
 
+
+  /**
+   * returns the mini-object that represents a given user in a given room.
+   * contains already_seen_sentences and score.
+   */
+  app.get('/getUserObjectInRoom/:roomId/:userId', (req, res) => {
+    logDiv('getUserObjectInRoom')
+    findUserByEmailInRoomByRoomID(
+      req.params.roomId,
+      req.params.userId,
+      (userObject) => { // find the given user
+        res.status(200).send(JSON.stringify(userObject))
+      },
+      (err) => standardErrorHandling(res, err)
+    )
+
+  })
+
 /**
  * Returns an object containing the lists of available
  * and unavailable users in a given room.
@@ -716,6 +734,7 @@ io.on('connection', function (socket) {
     message_copy.delivery_timestamp = new Date();
     addUnReadMessage(userEmail, message_copy, () => { }, (err) => { console.log(err) });
   }
+
   /**
     * updates an existing user in a room with after match data
     * i.e. updates it's seen sentences and score.
