@@ -612,23 +612,23 @@ io.on('connection', function (socket) {
       { email: userEmail },
       (userObject) => {
         const roomId = userObject.roomObject.room_id;
-        console.log("the current room:", roomId);
+      //  console.log("the current room:", roomId);
         args.roomId = roomId
         args.userId = userEmail
 
-        console.log("newRoomId:", args.roomId, "newUserId:", args.userId)
+      //  console.log("newRoomId:", args.roomId, "newUserId:", args.userId)
 
 
 
-        console.log("args:", args)
+     //   console.log("args:", args)
         changeUserAvailability(
           args.roomId,
           args.userId,
           args.newAvailability,
           (succ) => {
-            console.log("database operation successful")
-            console.log(succ)
-            console.log("new availability:", args.newAvailability)
+         //   console.log("database operation successful")
+           // console.log(succ)
+           // console.log("new availability:", args.newAvailability)
             // TODO: should the user socket leave the room?
             if (args.newAvailability === userStates.AVAILABLE) {
               // user becomes available -- his socket should rejoin the room
@@ -647,7 +647,7 @@ io.on('connection', function (socket) {
 
 
       },
-      (err) => failure(err)
+      (err) => console.log(err)
     )
   })
 
@@ -733,11 +733,14 @@ io.on('connection', function (socket) {
       (roomObject) => {
         console.log('roomObject: ', roomObject);
         // update only the correct user in the room
-        roomObject.users_in_room.filter(x => !isUndefined(x))
-        roomObject.users_in_room.map(
+        roomObject.users_in_room = roomObject.users_in_room.filter(x => !isUndefined(x))
+        roomObject.users_in_room = roomObject.users_in_room.map(
           (userObject) => {
-            return ((userObject.email === data.user.email) ?
-              data.user : userObject)
+            if (userObject.email === data.user.email) {
+              userObject.score = data.user.score
+              userObject.already_seen_sentences = data.user.already_seen_sentences
+            }
+            return userObject
           }
         )
 
