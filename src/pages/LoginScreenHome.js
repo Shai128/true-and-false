@@ -280,11 +280,7 @@ function PrintCreateGameDialog(props) {
       setNickNameHelperText('Please provide a nick name');
       isValid = false;
     }
-    if(gameName.length >= 20){
-      setRoomNameError(true);
-      setRoomNameHelperText('Please provide a shorter room name');
-      isValid = false;
-    }
+    
     return isValid;
   }
 

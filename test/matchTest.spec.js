@@ -21,23 +21,23 @@ const player1 = {
     nickname: faker.name.firstName(),
     email: faker.internet.email(),
     password: faker.random.alphaNumeric(10),
-    trueSentences: [faker.random.words(faker.random.number({ min: 2, max: 4 })), faker.random.words(faker.random.number({ min: 2, max: 4 })), faker.random.words(faker.random.number({ min: 2, max: 4 }))],
-    falseSentences: [faker.random.words(faker.random.number({ min: 2, max: 4 })), faker.random.words(faker.random.number({ min: 2, max: 4 })), faker.random.words(faker.random.number({ min: 2, max: 4 }))]
+    trueSentences: [faker.random.words(faker.random.number({ min: 2, max: 4 })), faker.random.words(faker.random.number({ min: 2, max: 4 }))],
+    falseSentences: [faker.random.words(faker.random.number({ min: 2, max: 4 })), faker.random.words(faker.random.number({ min: 2, max: 4 }))]
 };
 const player2 = {
     name: faker.name.firstName(),
     nickname: faker.name.firstName(),
     email: faker.internet.email(),
     password: faker.random.alphaNumeric(10),
-    trueSentences: [faker.random.words(faker.random.number({ min: 2, max: 4 })), faker.random.words(faker.random.number({ min: 2, max: 4 })), faker.random.words(faker.random.number({ min: 2, max: 4 }))],
-    falseSentences: [faker.random.words(faker.random.number({ min: 2, max: 4 })), faker.random.words(faker.random.number({ min: 2, max: 4 })), faker.random.words(faker.random.number({ min: 2, max: 4 }))]
+    trueSentences: [faker.random.words(faker.random.number({ min: 2, max: 4 })), faker.random.words(faker.random.number({ min: 2, max: 4 }))],
+    falseSentences: [faker.random.words(faker.random.number({ min: 2, max: 4 })), faker.random.words(faker.random.number({ min: 2, max: 4 }))]
 };
 
 beforeAll(async () => {
 
     browser = await puppeteer.launch({
         headless: false,
-        slowMo: 40,
+        slowMo: 20,
         args: [`--window-size=${width},${height}`]
     });
 
@@ -50,8 +50,8 @@ beforeAll(async () => {
     //page = await browser.newPage();
 
     //page = await browser.newPage();
-    //await page.emulate(iPhone);
-    await page.setViewport({ width, height });
+    await page.emulate(iPhone);
+    //await page.setViewport({ width, height });
 
     await page.goto(APP);
     await page.waitForSelector('#TrueAndFalseHomePage')
@@ -62,8 +62,8 @@ beforeAll(async () => {
     //page = await browser.newPage();
 
     //page = await browser.newPage();
-    //await page.emulate(iPhone);
-    await page2.setViewport({ width, height });
+    await page2.emulate(iPhone);
+    //await page2.setViewport({ width, height });
 
     await page2.goto(APP);
     await page2.waitForSelector('#TrueAndFalseHomePage')
@@ -147,18 +147,18 @@ describe("matchTest", () => {
         ]);
         await page.click("#TrueSentence0");
         await page.type("#TrueSentence0", player1.trueSentences[0]);
-        await Promise.all([
-            page.waitForSelector("#TrueSentence1"),
-            page.click('#addTrueSentenceBTN')
-        ]);
-        await page.click("#TrueSentence1");
-        await page.type("#TrueSentence1", player1.trueSentences[1]);
-        await Promise.all([
-            page.waitForSelector("#TrueSentence2"),
-            page.click('#addTrueSentenceBTN')
-        ]);
-        await page.click("#TrueSentence2");
-        await page.type("#TrueSentence2", player1.trueSentences[2]);
+        // await Promise.all([
+        //     page.waitForSelector("#TrueSentence1"),
+        //     page.click('#addTrueSentenceBTN')
+        // ]);
+        // await page.click("#TrueSentence1");
+        // await page.type("#TrueSentence1", player1.trueSentences[1]);
+        // await Promise.all([
+        //     page.waitForSelector("#TrueSentence2"),
+        //     page.click('#addTrueSentenceBTN')
+        // ]);
+        // await page.click("#TrueSentence2");
+        // await page.type("#TrueSentence2", player1.trueSentences[2]);
 
         //fill in player1 false sentences
         await Promise.all([
@@ -167,18 +167,18 @@ describe("matchTest", () => {
         ]);
         await page.click("#FalseSentence0");
         await page.type("#FalseSentence0", player1.falseSentences[0]);
-        await Promise.all([
-            page.waitForSelector("#FalseSentence1"),
-            page.click('#addFalseSentenceBTN')
-        ]);
-        await page.click("#FalseSentence1");
-        await page.type("#FalseSentence1", player1.falseSentences[1]);
-        await Promise.all([
-            page.waitForSelector("#FalseSentence2"),
-            page.click('#addFalseSentenceBTN')
-        ]);
-        await page.click("#FalseSentence2");
-        await page.type("#FalseSentence2", player1.falseSentences[2]);
+        // await Promise.all([
+        //     page.waitForSelector("#FalseSentence1"),
+        //     page.click('#addFalseSentenceBTN')
+        // ]);
+        // await page.click("#FalseSentence1");
+        // await page.type("#FalseSentence1", player1.falseSentences[1]);
+        // await Promise.all([
+        //     page.waitForSelector("#FalseSentence2"),
+        //     page.click('#addFalseSentenceBTN')
+        // ]);
+        // await page.click("#FalseSentence2");
+        // await page.type("#FalseSentence2", player1.falseSentences[2]);
 
 
         //fill in player2 true sentences
@@ -188,18 +188,18 @@ describe("matchTest", () => {
         ]);
         await page2.click("#TrueSentence0");
         await page2.type("#TrueSentence0", player2.trueSentences[0]);
-        await Promise.all([
-            page2.waitForSelector("#TrueSentence1"),
-            page2.click('#addTrueSentenceBTN')
-        ]);
-        await page2.click("#TrueSentence1");
-        await page2.type("#TrueSentence1", player2.trueSentences[1]);
-        await Promise.all([
-            page2.waitForSelector("#TrueSentence2"),
-            page2.click('#addTrueSentenceBTN')
-        ]);
-        await page2.click("#TrueSentence2");
-        await page2.type("#TrueSentence2", player2.trueSentences[2]);
+        // await Promise.all([
+        //     page2.waitForSelector("#TrueSentence1"),
+        //     page2.click('#addTrueSentenceBTN')
+        // ]);
+        // await page2.click("#TrueSentence1");
+        // await page2.type("#TrueSentence1", player2.trueSentences[1]);
+        // await Promise.all([
+        //     page2.waitForSelector("#TrueSentence2"),
+        //     page2.click('#addTrueSentenceBTN')
+        // ]);
+        // await page2.click("#TrueSentence2");
+        // await page2.type("#TrueSentence2", player2.trueSentences[2]);
 
         //fill in player2 false sentences
         await Promise.all([
@@ -208,18 +208,18 @@ describe("matchTest", () => {
         ]);
         await page2.click("#FalseSentence0");
         await page2.type("#FalseSentence0", player2.falseSentences[0]);
-        await Promise.all([
-            page2.waitForSelector("#FalseSentence1"),
-            page2.click('#addFalseSentenceBTN')
-        ]);
-        await page2.click("#FalseSentence1");
-        await page2.type("#FalseSentence1", player2.falseSentences[1]);
-        await Promise.all([
-            page2.waitForSelector("#FalseSentence2"),
-            page2.click('#addFalseSentenceBTN')
-        ]);
-        await page2.click("#FalseSentence2");
-        await page2.type("#FalseSentence2", player2.falseSentences[2]);
+        // await Promise.all([
+        //     page2.waitForSelector("#FalseSentence1"),
+        //     page2.click('#addFalseSentenceBTN')
+        // ]);
+        // await page2.click("#FalseSentence1");
+        // await page2.type("#FalseSentence1", player2.falseSentences[1]);
+        // await Promise.all([
+        //     page2.waitForSelector("#FalseSentence2"),
+        //     page2.click('#addFalseSentenceBTN')
+        // ]);
+        // await page2.click("#FalseSentence2");
+        // await page2.type("#FalseSentence2", player2.falseSentences[2]);
 
         await Promise.all([
             page.waitForNavigation(),
@@ -309,79 +309,79 @@ describe("matchTest", () => {
 
     }, 700000);
 
-    test("successfull chat routine", async () => {
-        //player1 sends player2 a message
-        await page.waitForSelector("#" + player2.nickname + "Available" + "ChatBTN")
+    // test("successfull chat routine", async () => {
+    //     //player1 sends player2 a message
+    //     await page.waitForSelector("#" + player2.nickname + "Available" + "ChatBTN")
 
-        await Promise.all([
-            page.waitForNavigation(),
-            page.click("#" + player2.nickname + "Available" + "ChatBTN")
-        ]);
-        await page.waitForSelector('#chatPage')
+    //     await Promise.all([
+    //         page.waitForNavigation(),
+    //         page.click("#" + player2.nickname + "Available" + "ChatBTN")
+    //     ]);
+    //     await page.waitForSelector('#chatPage')
 
-        var friends_email = await page.evaluate(() => document.getElementById('email').textContent)
-        expect(friends_email).toBe(player2.email)
+    //     var friends_email = await page.evaluate(() => document.getElementById('email').textContent)
+    //     expect(friends_email).toBe(player2.email)
 
-        await page.click("#message");
-        await page.type("#message", "Hi!");
-        await page.click("#sendBTN");
+    //     await page.click("#message");
+    //     await page.type("#message", "Hi!");
+    //     await page.click("#sendBTN");
 
-        //player2 enters the chat page
-        console.log("W1")
-        //await page2.waitForSelector("#1notifications")
-        await page2.waitFor(1000);
-        console.log("W2")
-        await Promise.all([
-            page2.waitForSelector("#notificationsPopUp"),
-            page2.click("#notificationsBTN")
-        ]);
-        console.log("W3")
-        await Promise.all([
-            page2.waitForNavigation(),
-            page2.click("#message1")
-        ]);
-        await page2.waitForSelector('#chatPage')
-        //await page2.waitForSelector("#MSG:" + "Hi!")
+    //     //player2 enters the chat page
+    //     console.log("W1")
+    //     //await page2.waitForSelector("#1notifications")
+    //     await page2.waitFor(1000);
+    //     console.log("W2")
+    //     await Promise.all([
+    //         page2.waitForSelector("#notificationsPopUp"),
+    //         page2.click("#notificationsBTN")
+    //     ]);
+    //     console.log("W3")
+    //     await Promise.all([
+    //         page2.waitForNavigation(),
+    //         page2.click("#message1")
+    //     ]);
+    //     await page2.waitForSelector('#chatPage')
+    //     //await page2.waitForSelector("#MSG:" + "Hi!")
 
-        friends_email = await page2.evaluate(() => document.getElementById('email').textContent)
-        expect(friends_email).toBe(player1.email)
+    //     friends_email = await page2.evaluate(() => document.getElementById('email').textContent)
+    //     expect(friends_email).toBe(player1.email)
 
-        //player1 and player2 talk
-        await page2.click("#message");
-        await page2.type("#message", "My mom says i shouldn't talk to strangers...");
-        await Promise.all([
-            //page.waitForSelector("#MSG:" + "My "),
-            page2.click("#sendBTN")
-        ]);
+    //     //player1 and player2 talk
+    //     await page2.click("#message");
+    //     await page2.type("#message", "My mom says i shouldn't talk to strangers...");
+    //     await Promise.all([
+    //         //page.waitForSelector("#MSG:" + "My "),
+    //         page2.click("#sendBTN")
+    //     ]);
 
-        await page.click("#message");
-        await page.type("#message", "so let's get to know each other by playing a game!");
-        await Promise.all([
-            //page2.waitForSelector("#MSG:" + "so "),
-            page.click("#sendBTN")
-        ]);
+    //     await page.click("#message");
+    //     await page.type("#message", "so let's get to know each other by playing a game!");
+    //     await Promise.all([
+    //         //page2.waitForSelector("#MSG:" + "so "),
+    //         page.click("#sendBTN")
+    //     ]);
 
-        await page2.click("#message");
-        await page2.type("#message", "OK!, let's go!");
-        await Promise.all([
-            //page.waitForSelector("#MSG:" + "OK!"),
-            page2.click("#sendBTN")
-        ]);
+    //     await page2.click("#message");
+    //     await page2.type("#message", "OK!, let's go!");
+    //     await Promise.all([
+    //         //page.waitForSelector("#MSG:" + "OK!"),
+    //         page2.click("#sendBTN")
+    //     ]);
 
-        //both players return to room
-        await Promise.all([
-            //page.waitForSelector("#MSG:" + "OK!"),
-            page.waitForNavigation(),
-            page.click("#backToRoomBTN"),
-            page2.waitForNavigation(),
-            page2.click("#backToRoomBTN")
-        ]);
-        expect(page.url() === APP + "LoginScreen/JoinGame" || page2.url() === APP + "JoinGame").toBeTruthy();//redirect to room page
-        expect(page2.url() === APP + "LoginScreen/JoinGame" || page2.url() === APP + "JoinGame").toBeTruthy();//redirect to room page
-        await page.waitForSelector('#joinGamePage')
-        await page2.waitForSelector('#joinGamePage')
-        await page.waitFor(5000)
-    }, 700000);
+    //     //both players return to room
+    //     await Promise.all([
+    //         //page.waitForSelector("#MSG:" + "OK!"),
+    //         page.waitForNavigation(),
+    //         page.click("#backToRoomBTN"),
+    //         page2.waitForNavigation(),
+    //         page2.click("#backToRoomBTN")
+    //     ]);
+    //     expect(page.url() === APP + "LoginScreen/JoinGame" || page2.url() === APP + "JoinGame").toBeTruthy();//redirect to room page
+    //     expect(page2.url() === APP + "LoginScreen/JoinGame" || page2.url() === APP + "JoinGame").toBeTruthy();//redirect to room page
+    //     await page.waitForSelector('#joinGamePage')
+    //     await page2.waitForSelector('#joinGamePage')
+    //     await page.waitFor(5000)
+    // }, 700000);
 
     test("successfull match invitation", async () => {
         await page.waitForSelector("#" + player2.nickname + "InviteBTN")
@@ -432,7 +432,7 @@ describe("matchTest", () => {
 
     test("successfull match", async () => {
         console.log("got here1")
-
+        await page.screenshot({path: 'the_game.png'});
         //check that the opponent's name is correct
         var someText = await page.evaluate(() => document.getElementById('opponentName').textContent)
         expect(someText).toEqual(`Playing against ${player2.nickname}`);//correct nickname
