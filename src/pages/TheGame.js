@@ -18,9 +18,10 @@ import { socket, updateUserToDB, getUserFromLocalStorage, } from './../user.js';
 import { updateGameInLocalStorage, getGameFromLocalStorage, } from './../user_game';
 
 import { DisplayLoading, DisplayDBError } from './../PagesUtils.js'
-import { isUndefined } from './../Utils.js'
+import { isUndefined, colors } from './../Utils.js'
 import { getSentencesFromDB } from './../game.js'
 import { userStates } from './JoinGame.js'
+import { LinearProgress } from '@material-ui/core';
 const NO_MORE_SENTENCES = "no more sentences"
 const TRUE_SENTENCE = "true sentence"
 const FALSE_SENTENCE = "false sentence"
@@ -299,96 +300,43 @@ export function TheGame(props) {
     });
   }
 
-
+  let color = colors[Math.floor(Math.random() * colors.length)]
+  let index = Math.floor(Math.random() * 3)
 
   return (
-    <div id="theGamePage">
+    <div id="theGamePage"
+      style={{
+        background: 'linear-gradient(80deg, ' + color[index % 3] + ' 30%, rgba(0,0,0,0) 30%),'
+          + 'linear-gradient(45deg, ' + color[(index + 1) % 3] + ' 65%, ' + color[(index + 2) % 3] + ' 65%'
+      }}>
       <Container component="main" maxWidth="md">
         <CssBaseline />
-        <div className={classes.paper} >
-          <Grid container >
+        <div className={classes.paper}>
+          <Grid container>
             <Grid item xs={12} sm={6}>
-              <Typography variant="h6" align="left" color="primary">
+              <Typography variant="h6" align="left" style={{ color: "white", textShadow: "1px 1px 3px black" }}>
                 {/* Your total points: {totalPoints}<br/> */}
                 Points in this round: {matchPoints}<br />
                 Correct answers in this round: {correctCount}/{questionsCount}
               </Typography>
             </Grid>
             <Grid item xs={12} sm={6}>
-              <Typography id="opponentName" variant="h6" align="right" color="primary">
+              <Typography id="opponentName" variant="h6" align="right" style={{ color: "white", textShadow: "1px 1px 3px black" }}>
                 Playing against {props.location.opponentName}
               </Typography>
             </Grid>
-          </Grid>
-          <Grid container spacing={2} alignItems="stretch" justify="center">
-            <Grid item xs={12} sm={12}>
-              <Typography id="displaidSentence" variant="h3" align="center">
-                {sentence}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Button id="TrueBTN"
-                variant="contained"
-                color="primary"
-                className={classes.button}
-                disabled={disableButtons}
-                onClick={() => { handleClickTrueOrFalse(TRUE_SENTENCE); }}
-                fullWidth
-                style={{ height: 100, marginTop: 10 }}>
-                  <Typography variant="h3" align="center">
-                  True
-                  </Typography>
-            </Button>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Button id="FalseBTN"
-                variant="contained"
-                color="secondary"
-                className={classes.button}
-                disabled={disableButtons}
-                onClick={() => { handleClickTrueOrFalse(FALSE_SENTENCE); }}
-                fullWidth
-                style={{ height: 100, marginTop: 10 }}>
-                  <Typography variant="h3" align="center">
-                  False
-                  </Typography>
-            </Button>
-            </Grid>
 
-
-            <Result myGuess={myGuess} sentenceType={sentenceType}
-              gameState={gameState} setGameState={setGameState}
-              opponentId={opponentId} user={user}
-              seenSentences={seenSentences} matchPoints={matchPoints}
-              room={room} />
-
-
-            <Grid item xs={12} style={{
-              height: 240, display: "flex",
-              justifyContent: "center",
-              alignItems: "center"
-            }} >
-              {answered && <Typography variant="h5">
-                The opponent answered {opGuess}. He was {opIsCorrect}! <br />
-                Waiting to the opponent to choose whether to continue or not.
-            </Typography>
-              }
-            </Grid>
-
-          </Grid>
-
-          <Grid container style={{ height: 100 }}>
             {displayEndGameButton && <Grid item xs={12}
               style={{
                 display: "flex",
-                justifyContent: "center",
+                justifyContent: "left",
                 alignItems: "center"
               }}
             >
 
               {/* <Link to={{pathname: `/`}} style={{ textDecoration: 'none' }}> */}
               <Button id="EndGameBTN1"
-
+                style={{ background: color[(index + 2) % 3] }}
                 variant="contained" color="secondary"
                 onClick={() => {
                   socket.emit('deliverMessage', {
@@ -399,11 +347,69 @@ export function TheGame(props) {
                   updateAfterMatchData(user, room, matchPoints, history, seenSentences)
                 }}
               >
+                <Typography justify="center" style={{ color: 'white', textShadow: "1px 1px 3px black" }}>
                 end game
+              </Typography>
               </Button>
               {/* </Link> */}
             </Grid>
             }
+
+          </Grid>
+          <Grid container spacing={1} alignItems="stretch" justify="center">
+            <Grid item xs={12} sm={12}>
+              <Typography variant="h4" align="center" style={{ color: "white", textShadow: "1px 1px 3px black" }}>
+                {sentence}
+              </Typography>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Button id="TrueBTN"
+                variant="contained"
+                color="primary"
+                disabled={disableButtons}
+                onClick={() => { handleClickTrueOrFalse(TRUE_SENTENCE); }}
+                fullWidth
+                style={{ height: 150, marginTop: 10, backgroundColor: color[(index) % 3], boxShadow: "2px 2px 5px black" }}>
+                <Typography variant="h3" align="center" style={{ color:'white', textShadow: "1px 1px 3px black" }}>
+                  True
+                  </Typography>
+              </Button>
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <Button id="FalseBTN"
+                variant="contained"
+                color="primary"
+                className={classes.button}
+                disabled={disableButtons}
+                onClick={() => { handleClickTrueOrFalse(FALSE_SENTENCE); }}
+                fullWidth
+                style={{ height: 150, marginTop: 10, backgroundColor: color[(index + 2) % 3], boxShadow: "2px 2px 5px black" }}>
+                <Typography variant="h3" align="center" style={{ color:'white', textShadow: "1px 1px 3px black" }}>
+                  False
+                  </Typography>
+              </Button>
+            </Grid>
+
+
+            <Result myGuess={myGuess} sentenceType={sentenceType}
+              gameState={gameState} setGameState={setGameState}
+              opponentId={opponentId} user={user}
+              seenSentences={seenSentences} matchPoints={matchPoints}
+              room={room} color={color} index={index} />
+
+
+            <Grid item xs={12} style={{
+              height: 240, display: "flex",
+              justifyContent: "center",
+              alignItems: "center"
+            }} >
+              {answered && <Typography variant="h5" style={{ color: 'white', textShadow: "1px 1px 3px black" }}>
+                The opponent answered {opGuess}. He was {opIsCorrect}! <br />
+                Waiting to the opponent to choose whether to continue or not.
+            </Typography>
+              }
+            </Grid>
+
           </Grid>
 
         </div>
@@ -414,7 +420,8 @@ export function TheGame(props) {
 
 // display my selection result
 function Result(props) {
-
+  const color = props.color
+  const index = props.index
   const RIGHT_RESULT = "You are right!!";
   const WRONG_RESULT = "You are wrong :(";
   const UNINITIALIZED_RESULT = "";
@@ -431,13 +438,14 @@ function Result(props) {
     <Container component="main" maxWidth="sm">
       <div>
         <Grid container spacing={2} justify="center">
-          <Typography variant="h2" justify="center">
+          <Typography variant="h2" justify="center" style={{ color: 'white', textShadow: "1px 1px 3px black" }}>
             <br />
             {result}
           </Typography>
 
           <Grid item xs={12} sm={6}>
             <Button id="NextSentenceBTN"
+              style={{ backgroundColor: color[(index) % 3] }}
               variant="contained" color="primary" fullWidth
               onClick={() => {
                 setResult(UNINITIALIZED_RESULT);
@@ -449,13 +457,17 @@ function Result(props) {
                   args: {}
                 });
               }}>
-              next sentence
+              <Typography justify="center" style={{ color: 'white', textShadow: "1px 1px 3px black" }}>
+                next sentence
+              </Typography>
+
             </Button>
           </Grid>
           <Grid item xs={12} sm={6}>
 
             <Button id="EndGameBTN"
               variant="contained" color="secondary" fullWidth
+              style={{ backgroundColor: color[(index + 2) % 3] }}
               onClick={() => { /////////////////// todo: check implementation in backend
                 socket.emit('deliverMessage', {
                   receiverId: opponentId,
@@ -465,7 +477,9 @@ function Result(props) {
                 updateAfterMatchData(user, room, matchPoints, history, seenSentences)
               }}
             >
-              end game
+              <Typography justify="center" style={{ color: 'white', textShadow: "1px 1px 3px black" }}>
+                end game
+              </Typography>
               </Button>
           </Grid>
 
