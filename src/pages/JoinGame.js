@@ -19,7 +19,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import { socket } from '../user.js';
+import { socket, updateUserInLocalStorage } from '../user.js';
 import {
   BrowserRouter as Router,
   useHistory,
@@ -82,7 +82,7 @@ export function JoinGame(props) {
 
   const [ReturnFromGame, setReturnFromGame] = useState(false);
 
-  if(!ReturnFromGame && (!isUndefined(props) && !isUndefined(props.location) && !isUndefined(props.location.InfoObject)) && !isUndefined(props.location.InfoObject.returnFromGame) && (props.location.InfoObject.returnFromGame)){
+  if (!ReturnFromGame && (!isUndefined(props) && !isUndefined(props.location) && !isUndefined(props.location.InfoObject)) && !isUndefined(props.location.InfoObject.returnFromGame) && (props.location.InfoObject.returnFromGame)) {
     InitTheRoom(CurrentRoom.room_id, setRoomUpdated);
     setReturnFromGame(true);
   }
@@ -190,7 +190,7 @@ export function JoinGame(props) {
     var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersAvailable));
 
     const index = (newPlayersAvailable).findIndex(user => user.email === userInfo.email)
-    if(index === -1){
+    if (index === -1) {
       newPlayersAvailable.push({ email: userInfo.email, nickname: userInfo.nickName })
     }
     setPlayersList({ PlayersAvailable: newPlayersAvailable, PlayersUnAvailable: PlayersList.PlayersUnAvailable })
@@ -208,13 +208,13 @@ export function JoinGame(props) {
 
     var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersAvailable));
     const index = (newPlayersAvailable).findIndex(user => user.email === userInfo.email)
-    if(index === -1){
+    if (index === -1) {
       InitTheRoom(CurrentRoom.room_id, setRoomUpdated);
-   }
-   else{
-    newPlayersAvailable.splice(index, 1)
-    setPlayersList({ PlayersAvailable: newPlayersAvailable, PlayersUnAvailable: PlayersList.PlayersUnAvailable })
-   }
+    }
+    else {
+      newPlayersAvailable.splice(index, 1)
+      setPlayersList({ PlayersAvailable: newPlayersAvailable, PlayersUnAvailable: PlayersList.PlayersUnAvailable })
+    }
 
   });
 
@@ -237,11 +237,11 @@ export function JoinGame(props) {
     var index = (newPlayersUnAvailable).findIndex(user => user.email === userInfo)
     console.log(CurrentUser.email, "got index ", index);
 
-    if(index === -1){
+    if (index === -1) {
       InitTheRoom(CurrentRoom.room_id, setRoomUpdated);
-     }
+    }
 
-   else{
+    else {
       index = (newPlayersUnAvailable).findIndex(user => user.email === userInfo)
       var current_user = newPlayersUnAvailable[index]
       console.log(CurrentUser.email, "got current user ", current_user);
@@ -250,7 +250,7 @@ export function JoinGame(props) {
       var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersAvailable));
 
       index = (newPlayersAvailable).findIndex(user => user.email === current_user.email)
-      if(index === -1){
+      if (index === -1) {
         newPlayersAvailable.push({ email: current_user.email, nickname: current_user.nickname })
       }
       setPlayersList({ PlayersAvailable: newPlayersAvailable, PlayersUnAvailable: newPlayersUnAvailable })
@@ -269,16 +269,16 @@ export function JoinGame(props) {
     console.log(CurrentUser.email, "got index", "-->", index);
     var current_user = newPlayersAvailable[index]
     console.log(CurrentUser.email, "got current user", "-->", current_user);
-    if(index === -1){
+    if (index === -1) {
       InitTheRoom(CurrentRoom.room_id, setRoomUpdated);
-   }
-   else{
-    newPlayersAvailable.splice(index, 1)
-    var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersUnAvailable));
-    newPlayersUnAvailable.push(current_user)
-    console.log(CurrentUser.email, "got current players-->", newPlayersAvailable, "un-->", newPlayersUnAvailable);
-    setPlayersList({ PlayersAvailable: newPlayersAvailable, PlayersUnAvailable: newPlayersUnAvailable })
-   }
+    }
+    else {
+      newPlayersAvailable.splice(index, 1)
+      var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersUnAvailable));
+      newPlayersUnAvailable.push(current_user)
+      console.log(CurrentUser.email, "got current players-->", newPlayersAvailable, "un-->", newPlayersUnAvailable);
+      setPlayersList({ PlayersAvailable: newPlayersAvailable, PlayersUnAvailable: newPlayersUnAvailable })
+    }
 
   });
 
@@ -349,6 +349,12 @@ export function JoinGame(props) {
 
   const leaveRoom = () => {
 
+    var new_user = { ...CurrentUser }
+    new_user.roomObject = {
+      room_id: -1,
+      room_name: "no room"
+    }
+    updateUserInLocalStorage(new_user)
 
     fetch(server + '/leaveRoom/' + CurrentRoom.room_id, {
       method: 'GET', // *GET, POST, PUT, DELETE, etc.
@@ -414,7 +420,7 @@ export function JoinGame(props) {
 
   var img = require('../defaultAvatar.png')
   if (CurrentUser.imageData)
-    img = CurrentUser.imageData.replace(/ /g,"+")
+    img = CurrentUser.imageData.replace(/ /g, "+")
 
   return (
     <div id="joinGamePage">
@@ -431,21 +437,21 @@ export function JoinGame(props) {
         </Grid>
         <Grid spacing={1} item xs={12}>
           <div style={{ float: 'right', marginRight: 10, marginTop: 10, }}>
-      <Button id="scoreTableBTN" variant="contained" color="primary" className={classes.button}
+            <Button id="scoreTableBTN" variant="contained" color="primary" className={classes.button}
               onClick={() => {
                 history.push({
-                pathname: '/ScoreTable',
+                  pathname: '/ScoreTable',
                   roomId: CurrentRoom.room_id,
                 })
               }}
             >
-          SCORE TABLE
+              SCORE TABLE
       </Button>
           </div>
         </Grid>
 
         <Grid spacing={1} item xs={12} justify="center">
-            <img src={`${img}`} width="120" height='120'  border-style='none' />
+          <img src={`${img}`} width="120" height='120' border-style='none' />
         </Grid>
 
         <Grid item spacing={1} xs={12} justify="center" container>
@@ -511,7 +517,7 @@ export function JoinGame(props) {
 
                 if (ev.key === 'Enter') {
                   handleClickSearch(inputName);
-                //  return (<GamesList user={inputName}/>);
+                  //  return (<GamesList user={inputName}/>);
                 }
               }
               }
@@ -522,7 +528,7 @@ export function JoinGame(props) {
             />
           </Grid>
           <Grid item xs={2}>
-            <IconButton /*type="submit"*/ className={classes.iconButton} onClick={()=>handleClickSearch(inputName)} aria-label="search">
+            <IconButton /*type="submit"*/ className={classes.iconButton} onClick={() => handleClickSearch(inputName)} aria-label="search">
               <SearchIcon />
             </IconButton>
           </Grid>
@@ -544,13 +550,13 @@ export function JoinGame(props) {
 
   );
 
-  function handleClickSearch(name){
+  function handleClickSearch(name) {
     var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersAvailable));
     const index = (newPlayersAvailable).findIndex(user => user.nickname === name)
-    if(index < 0)
+    if (index < 0)
       return;
     var current_user = newPlayersAvailable[index]
-    if(current_user === undefined)
+    if (current_user === undefined)
       return;
 
     var OldPlayersAvailable = JSON.parse(JSON.stringify(newPlayersAvailable));
@@ -559,7 +565,7 @@ export function JoinGame(props) {
     newPlayersAvailable = []
     newPlayersAvailable.push(current_user)
     var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersUnAvailable));
-    setPlayersList({ PlayersAvailable: newPlayersAvailable, PlayersUnAvailable: newPlayersUnAvailable })  
+    setPlayersList({ PlayersAvailable: newPlayersAvailable, PlayersUnAvailable: newPlayersUnAvailable })
   }
 
   function InitTheRoom(props) {
@@ -586,10 +592,10 @@ export function JoinGame(props) {
         var newPlayersAvailable = JSON.parse(JSON.stringify(data.PlayersAvailable));
         console.log('reading users available from data from server 2 ', newPlayersAvailable);
         const index = (newPlayersAvailable).findIndex(user => user.email === CurrentUser.email)
-        if(index > 0){
-        console.log('reading users available from data from server 3 - index : ', index);
-        newPlayersAvailable.splice(index, 1)
-        console.log('reading users available from DB. newPlayersAvailable 4', newPlayersAvailable);
+        if (index > 0) {
+          console.log('reading users available from data from server 3 - index : ', index);
+          newPlayersAvailable.splice(index, 1)
+          console.log('reading users available from DB. newPlayersAvailable 4', newPlayersAvailable);
         }
         var newPlayersUnAvailable = JSON.parse(JSON.stringify(data.PlayersUnAvailable));
         setPlayersList({ PlayersAvailable: newPlayersAvailable, PlayersUnAvailable: newPlayersUnAvailable })
@@ -749,9 +755,9 @@ export function PlayerListUnAvailable(props) {
 
             {PlayersUnAvailable.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map(row => {
               if (isUndefined(row) || row.email === CurrentUser.email)
-              return (<div />);
+                return (<div />);
               console.log("rowww:", row)
-              if(row === undefined){
+              if (row === undefined) {
                 return;
               }
 
@@ -760,7 +766,7 @@ export function PlayerListUnAvailable(props) {
                   {columnsForUnAvailable.map(column => {
 
                     const value = row.nickname;
-                    
+
                     const firstLetter = value.substring(0, 1)
 
                     return (
@@ -829,7 +835,7 @@ export function PlayerListUnAvailable(props) {
 
 export function PlayerListAvailable(props) {
 
-const { PlayersAvailable, CurrentUser } = props;
+  const { PlayersAvailable, CurrentUser } = props;
 
 
   socket.off('userDecline')
@@ -935,9 +941,9 @@ const { PlayersAvailable, CurrentUser } = props;
                 return (<div />);
               {/* <Avatar src = {firstLetter}>
                 </Avatar> */}
-                // if(row === undefined || row.nickname === undefined){
-                //   return;
-                // }
+              // if(row === undefined || row.nickname === undefined){
+              //   return;
+              // }
 
               return (
 
@@ -972,7 +978,7 @@ const { PlayersAvailable, CurrentUser } = props;
                             </Grid>
 
                             <Grid item xs={2}>
-                              <Button id={row.nickname + "InviteBTN"} variant="contained" color="primary" fullWidth onClick={() => {handleClickInvitePlayer(row.email, CurrentUser.nickName) }} className={classes.button}>
+                              <Button id={row.nickname + "InviteBTN"} variant="contained" color="primary" fullWidth onClick={() => { handleClickInvitePlayer(row.email, CurrentUser.nickName) }} className={classes.button}>
                                 Invite to Game
                     </Button>
                             </Grid>
