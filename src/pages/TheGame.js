@@ -333,8 +333,11 @@ export function TheGame(props) {
                 className={classes.button}
                 disabled={disableButtons}
                 onClick={() => { handleClickTrueOrFalse(TRUE_SENTENCE); }}
-                fullWidth>
-                True
+                fullWidth
+                style={{ height: 100, marginTop: 10 }}>
+                  <Typography variant="h3" align="center">
+                  True
+                  </Typography>
             </Button>
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -344,8 +347,11 @@ export function TheGame(props) {
                 className={classes.button}
                 disabled={disableButtons}
                 onClick={() => { handleClickTrueOrFalse(FALSE_SENTENCE); }}
-                fullWidth>
-                False
+                fullWidth
+                style={{ height: 100, marginTop: 10 }}>
+                  <Typography variant="h3" align="center">
+                  False
+                  </Typography>
             </Button>
             </Grid>
 
