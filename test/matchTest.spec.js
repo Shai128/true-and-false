@@ -384,14 +384,14 @@ describe("matchTest", () => {
     // }, 700000);
 
     test("successfull match invitation", async () => {
-        await page.waitForSelector("#" + player2.nickname + "InviteBTN")
-        await page2.waitForSelector("#" + player1.nickname + "InviteBTN")
+        await page.waitForSelector("#A" + player2.nickname + "InviteBTN")
+        await page2.waitForSelector("#A" + player1.nickname + "InviteBTN")
 
         //player1 invites player2 and cancels it
         await Promise.all([
             page.waitForSelector('#waitingForResponsePopUp'),
             page2.waitForSelector('#receivedInvitationPopUp'),
-            page.click("#" + player2.nickname + "InviteBTN")
+            page.click("#A" + player2.nickname + "InviteBTN")
         ]);
         await Promise.all([
             page.waitFor(() => !document.querySelector("#waitingForResponsePopUp")),
@@ -403,7 +403,7 @@ describe("matchTest", () => {
         await Promise.all([
             page.waitForSelector('#waitingForResponsePopUp'),
             page2.waitForSelector('#receivedInvitationPopUp'),
-            page.click("#" + player2.nickname + "InviteBTN")
+            page.click("#A" + player2.nickname + "InviteBTN")
         ]);
         await Promise.all([
             page.waitFor(() => !document.querySelector("#waitingForResponsePopUp")),
@@ -415,7 +415,7 @@ describe("matchTest", () => {
         await Promise.all([
             page2.waitForSelector('#waitingForResponsePopUp'),
             page.waitForSelector('#receivedInvitationPopUp'),
-            page2.click("#" + player1.nickname + "InviteBTN")
+            page2.click("#A" + player1.nickname + "InviteBTN")
         ]);
         console.log("pls")
         await Promise.all([

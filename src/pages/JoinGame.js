@@ -980,7 +980,7 @@ export function PlayerListAvailable(props) {
                             </Grid>
 
                             <Grid item xs={2}>
-                              <Button id={row.nickname + "InviteBTN"} variant="contained" color="primary" fullWidth onClick={() => { handleClickInvitePlayer(row.email, CurrentUser.nickName) }} className={classes.button}>
+                              <Button id={"A" + row.nickname + "InviteBTN"} variant="contained" color="primary" fullWidth onClick={() => { handleClickInvitePlayer(row.email, CurrentUser.nickName) }} className={classes.button}>
                                 Invite to Game
                     </Button>
                             </Grid>
