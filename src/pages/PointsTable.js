@@ -73,7 +73,7 @@ export function PointsTable(props) {
     
     return(
         <Grid container justify='center' spacing={2}>
-            <Grid item xs={6}>
+            <Grid item xs={11}>
                 <TableContainer component={Paper} align='center'>
                     {/* className={classes.table} */}
                     <Table aria-label="simple table">
