@@ -13,11 +13,11 @@ import {
   useHistory,
 } from "react-router-dom";
 
-
+import { reject } from 'q';
 import { socket, emptyUser } from './../user.js';
 
 import { DisplayLoading, DisplayDBError } from './../PagesUtils.js'
-import { isUndefined } from './../Utils.js'
+import { isUndefined , okStatus, serverIP } from './../Utils.js'
 import { getSentencesFromDB } from './../game.js'
 const NO_MORE_SENTENCES = "no more sentences"
 const TRUE_SENTENCE = "true sentence"
@@ -36,7 +36,7 @@ const userStates = {
   AVAILABLE: 1,
   UNAVAILABLE: 2
 }
-
+const server = "http://"+ serverIP + ':8000'
 
 export function TheGame(props) {
   let history = useHistory();
@@ -54,7 +54,7 @@ export function TheGame(props) {
       }
     }
   }
-  const user = props.location.user;
+  var user = props.location.user;
   const room = props.location.room;
   const [opponentId, setOpponentId] = React.useState(props.location.opponentId); /////////////////////// todo: change to const
   const [answered, setAnswered] = React.useState(false);
@@ -179,6 +179,30 @@ export function TheGame(props) {
   if (!isFinishedLoading) {
     if (!startedReadingFromDB) {
       setStartedReadingFromDB(true);
+
+
+      console.log("request:", server + '/userSentences/' + opponentId + '/' + room.room_id)
+      fetch(server + '/getUserObjectInRoom/' + room.room_id + '/' + opponentId, {
+        method: 'GET', // *GET, POST, PUT, DELETE, etc.
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        credentials: 'include',
+      }).then((response) => {
+        if (response.status !== okStatus) {
+          reject(response.status)
+        } else {
+          return new Promise(function (resolve, reject) {
+            resolve(response.json());
+          })
+        }
+      }).then(data => {
+        user = data
+        console.log('update user from database: ', user)
+      })
+
+
+
       getSentencesFromDB(opponentId, room,
         (data) => {
           console.log('getSentencesFromDB');
