@@ -223,9 +223,9 @@ describe("matchTest", () => {
 
         await Promise.all([
             page.waitForNavigation(),
-            await page.click("#saveBTN"),
+            page.click("#saveBTN"),
             page2.waitForNavigation(),
-            await page2.click("#saveBTN")
+            page2.click("#saveBTN")
         ]);
 
         await page.waitForSelector("#LoginScreenHomePage")
