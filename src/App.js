@@ -23,7 +23,7 @@ import { LoginScreenRouter as LoginScreen } from './pages/LoginScreen.js';
 import { Chat as ChatRoom } from './pages/Chat.js';
 import { JoinGame } from './pages/JoinGame.js';
 import { PrintJoinGameDialog, DisplayLoading, AutoRedirectToLoginScreenIfUserInSession } from './PagesUtils.js';
-import { validEmail, passwordIsStrongEnough, isUndefined, statusCodes } from './Utils.js'
+import { validEmail, passwordIsStrongEnough, isUndefined, statusCodes, colors } from './Utils.js'
 import { emptyUser, logIn, signUp } from './user.js'
 import { TheGame } from './pages/TheGame.js'
 //import { createBrowserHistory } from '../../../AppData/Local/Microsoft/TypeScript/3.6/node_modules/@types/history';
@@ -456,26 +456,36 @@ function Home() {
   const handleCloseGuestLoginWindow = () => {
     setguestLoginWindowOpen(false);
   };
+
+  let color = colors[Math.floor(Math.random() * colors.length)]
+  let index = Math.floor(Math.random() * 3)
+
   return (
-    <div id="TrueAndFalseHomePage">
+    <div id="TrueAndFalseHomePage" 
+    style={{
+      background: 'linear-gradient(80deg, ' + color[index % 3] + ' 30%, rgba(0,0,0,0) 30%),'
+        + 'linear-gradient(45deg, ' + color[(index + 1) % 3] + ' 65%, ' + color[(index + 2) % 3] + ' 65%'
+    }}>
       <Container component="main" maxWidth="md">
         <CssBaseline />
         <div className={classes.paper}>
-          <Typography component="h1" variant="h2">
+          <Typography component="h1" variant="h2" align='center' style={{ color: "white", textShadow: "1px 1px 3px black" }}>
             True and False Home Page
         </Typography>
           <form className={classes.form} noValidate>
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
-                <Link to="/SignIn">
-                  <Button id="signInBTN" variant="contained" color="primary" fullWidth className={classes.button}>
+                <Link to="/SignIn" style={{ textDecoration: 'none' }}>
+                  <Button id="signInBTN" variant="contained" color="primary" fullWidth  style={{ background: color[(index + 2) % 3] }} >
+                  <Typography style={{ color: "white", textShadow: "1px 1px 3px black" }}>
                     Sign In
+                    </Typography>
             </Button>
                 </Link>
 
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Link to="/SignUp">
+                <Link to="/SignUp" style={{ textDecoration: 'none' }}>
                   <Button id="signUpBTN" variant="contained" color="primary" fullWidth className={classes.button}>
                     Sign Up
       </Button>

@@ -36,7 +36,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import clsx from 'clsx';
 import { getUserFromProps, getCurrentUserFromSession } from './../user.js';
 import { PrintChats } from './../PagesUtils.js'
-import { isUndefined, server } from './../Utils.js'
+import { isUndefined, server, colors } from './../Utils.js'
 
 
 const okStatus = 200;
@@ -423,23 +423,28 @@ export function JoinGame(props) {
   var img = require('../defaultAvatar.png')
   if (CurrentUser.imageData)
     img = CurrentUser.imageData.replace(/ /g, "+")
+  
+  let color = colors[Math.floor(Math.random()*colors.length)]
+  let index = Math.floor(Math.random()*3)
 
   return (
-    <div id="joinGamePage">
+    <div id="joinGamePage"
+    style={{background: 'linear-gradient(70deg, ' + color[(index)%3] + ' 60%, ' + color[(index+1)%3] + ' 60%'}}>
 
       <PrintAnswerPlayerDialog WindowOpen={GotInvitationWindow} setWindowOpen={setGotInvitationWindow} onAccept={onAccept} onDecline={onDecline} SenderInfoName={SenderInfoName} />
       <Grid spacing={1} container>
 
         <Grid spacing={1} item xs={12}>
           <div style={{ float: 'right', marginRight: 10, marginTop: 10, }}>
-            <Button id="leaveRoomBTN" variant="contained" color="primary" onClick={leaveRoom} className={classes.button}>
+            <Button id="leaveRoomBTN" variant="contained" style={{backgroundColor: color[(index)%3]}} 
+            onClick={leaveRoom} >
+              <Typography style={{ color: "white", textShadow: "1px 1px 3px black" }}>
               Leave the room
+              </Typography>
       </Button>
           </div>
-        </Grid>
-        <Grid spacing={1} item xs={12}>
-          <div style={{ float: 'right', marginRight: 10, marginTop: 10, }}>
-            <Button id="scoreTableBTN" variant="contained" color="primary" className={classes.button}
+          <div style={{ float: 'left', marginRight: 10, marginTop: 10 }}>
+            <Button id="scoreTableBTN" variant="contained" style={{backgroundColor: color[(index+1)%3]}}
               onClick={() => {
                 history.push({
                   pathname: '/ScoreTable',
@@ -447,9 +452,14 @@ export function JoinGame(props) {
                 })
               }}
             >
+              <Typography style={{ color: "white", textShadow: "1px 1px 3px black" }}>
               SCORE TABLE
+              </Typography>
       </Button>
           </div>
+        </Grid>
+        <Grid spacing={1} item xs={12}>
+          
         </Grid>
 
         <Grid spacing={1} item xs={12} justify="center">
@@ -458,9 +468,9 @@ export function JoinGame(props) {
 
         <Grid item spacing={1} xs={12} justify="center" container>
           <div style={{ textAlign: 'center' }}>
-            <Typography id="roomNameHeader" variant="h3" className={classes.title}>
+            <Typography id="roomNameHeader" variant="h4" style={{color:'white', textShadow: "1px 1px 3px black"}}>
               Room Name:
-      {CurrentRoom.room_name}
+      {" " + CurrentRoom.room_name}
             </Typography>
           </div>
         </Grid>
@@ -468,9 +478,9 @@ export function JoinGame(props) {
 
         <Grid item spacing={1} xs={12} justify="center" container>
           <div style={{ textAlign: 'center' }}>
-            <Typography id="roomNumberHeader" variant="h4" className={classes.roomNumber}>
+            <Typography id="roomNumberHeader" variant="h4" style={{color:'white', textShadow: "1px 1px 3px black"}}>
               Room Number:
-     {CurrentRoom.room_id}
+     {" " + CurrentRoom.room_id}
             </Typography>
           </div>
         </Grid>
@@ -478,9 +488,9 @@ export function JoinGame(props) {
 
         <Grid item spacing={1} xs={12} justify="center" container>
           <div style={{ textAlign: 'center' }}>
-            <Typography id="userNameHeader" justify="center" variant="h5" className={classes.userTitle}>
+            <Typography id="userNameHeader" justify="center" variant="h5" style={{color:'white', textShadow: "1px 1px 3px black"}}>
               User Name:
-      {CurrentUser.nickName}
+      {" " + CurrentUser.nickName}
             </Typography>
           </div>
         </Grid>
@@ -497,11 +507,6 @@ export function JoinGame(props) {
       {/* <Grid container spacing={3} justify="center"> */}
       <div component="form" className={fixedHeightPaper}>
         <Grid container>
-          <Grid item xs={12}>
-            <Typography component="h6" variant="h5">
-              Enter a user's name and start to play!
-             </Typography>
-          </Grid>
           <Grid item xs={4}>
             <TextField
               className={classes.input}
@@ -736,6 +741,8 @@ export function PlayerListUnAvailable(props) {
 
   const { PlayersUnAvailable, CurrentUser } = props;
 
+let color = colors[Math.floor(Math.random()*colors.length)]
+
   return (
     <Paper className={classes.root}>
       <div className={classes.tableWrapper}>
@@ -780,16 +787,17 @@ export function PlayerListUnAvailable(props) {
 
                             <Grid item xs={5} >
                               <Grid container justify="center" alignItems="center">
-                                <Grid item xs={1}>
+                                <Grid item xs={3}>
 
                                   <Avatar>
                                     {firstLetter}
                                   </Avatar>
 
                                 </Grid>
-                                <Grid item xs={1}>
-
+                                <Grid item xs={3}>
+                                <Typography variant="h6">
                                   {column.format && typeof value === 'number' ? column.format(value) : value}
+                                </Typography>
                                 </Grid>
                               </Grid>
 
@@ -964,23 +972,24 @@ export function PlayerListAvailable(props) {
 
                             <Grid item xs={5} >
                               <Grid container justify="center" alignItems="center">
-                                <Grid item xs={1}>
+                                <Grid item xs={3}>
 
                                   <Avatar>
                                     {firstLetter}
                                   </Avatar>
 
                                 </Grid>
-                                <Grid item xs={1}>
-
+                                <Grid item xs={3}>
+                                  <Typography variant="h6">
                                   {column.format && typeof value === 'number' ? column.format(value) : value}
+                                  </Typography>
                                 </Grid>
                               </Grid>
 
                             </Grid>
 
                             <Grid item xs={2}>
-                              <Button id={"A" + row.nickname + "InviteBTN"} variant="contained" color="primary" fullWidth onClick={() => { handleClickInvitePlayer(row.email, CurrentUser.nickName) }} className={classes.button}>
+                              <Button id={"A" + row.nickname + "InviteBTN"} variant="contained" color="primary" fullWidth onClick={() => { handleClickInvitePlayer(row.email, CurrentUser.nickName) }} >
                                 Invite to Game
                     </Button>
                             </Grid>
