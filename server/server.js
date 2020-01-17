@@ -750,14 +750,17 @@ io.on('connection', function (socket) {
     findRoomById(
       data.roomId,
       (roomObject) => {
-        console.log('roomObject: ', roomObject);
+        //console.log('roomObject: ', roomObject);
         // update only the correct user in the room
         roomObject.users_in_room = roomObject.users_in_room.filter(x => !isUndefined(x))
         roomObject.users_in_room = roomObject.users_in_room.map(
           (userObject) => {
             if (userObject.email === data.user.email) {
-              userObject.score = data.user.score
-              userObject.already_seen_sentences = data.user.already_seen_sentences
+              console.log("the user:", userObject)
+              console.log("the new data:", data.user)
+              userObject.score += data.user.score
+              userObject.already_seen_sentences =
+                userObject.already_seen_sentences.concat(data.user.already_seen_sentences)
             }
             return userObject
           }
