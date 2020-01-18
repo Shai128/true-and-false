@@ -3,7 +3,6 @@ const APP = "http://localhost:3000/";
 import 'babel-polyfill';
 const iPhone = puppeteer.devices['iPhone 6'];
 
-
 /*
     READ ME
 
@@ -34,6 +33,7 @@ const height = 600;
 const pass = "000000"
 
 //test parameters
+const TEST_SLOWDOWN = 40 //around 40-60 is regular user behavior
 const INITIALIZE_PLAYERS = false //true for signing up new users and filling up their sentences. false for signing in already registered users.
 const NUM_OF_PLAYERS = 4
 const NUM_OF_ROOMS = 2
@@ -368,7 +368,7 @@ var fourthPhase = function (page1, index1, page2, index2) {
 beforeAll(async () => {
     browser = await puppeteer.launch({
         headless: false,
-        slowMo: 50,
+        slowMo: TEST_SLOWDOWN,
         args: [`--window-size=${width},${height}`]
     });
 });
