@@ -20,13 +20,13 @@ const server = httpServerIP + ':8000'
 console.log('utils server: ', server)
 
 const colors = [['#b8a9c9', '#e06377', '#f9d5e5'],
-                ['#b7d7e8', '#379683', '#c5c6c7'],
-                ['#8ee4af', '#edf5e1', '#5cdb95'],
-                ['#eae7dc', '#d8c3a5', '#e98074'],
-                ['#f0ebf4', '#b39bc8', '#78244c'],
-                ['#303c6c', '#b4dfe5', '#d2fdff'],
-                ['#a16e83', '#cebc81', '#d3e3fc'],
-                ['#028870', '#9fedd7', '#fef9c7']]
+['#b7d7e8', '#379683', '#c5c6c7'],
+['#8ee4af', '#edf5e1', '#5cdb95'],
+['#eae7dc', '#d8c3a5', '#e98074'],
+['#f0ebf4', '#b39bc8', '#78244c'],
+['#303c6c', '#b4dfe5', '#d2fdff'],
+['#a16e83', '#cebc81', '#d3e3fc'],
+['#028870', '#9fedd7', '#fef9c7']]
 exports.colors = colors
 
 function isUndefined(val) {
