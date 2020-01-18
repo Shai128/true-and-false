@@ -653,6 +653,54 @@ io.on('connection', function (socket) {
 
 
   /**
+   * does same as changeUserAvailability but for a list of users
+   * args: 
+   * {
+   *  newAvailability: 2 for unavailable or 1 for available
+   *  users: list of emails
+   *  roomId: the room in which the users are currently participating
+   * }
+   */
+  socket.on('changeAvailabilityAll', function (args) {
+    
+    logDiv('changeAvailabilityAll')
+
+
+        console.log("args:", args)
+        args.users.forEach(userId => {
+          console.log(userId);
+          changeUserAvailability(
+            args.roomId,
+            userId,
+            args.newAvailability,
+            (succ) => {
+              console.log("database operation successful")
+              console.log("new availability:", args.newAvailability)
+              
+              // TODO: should the user socket leave the room?
+              if (args.newAvailability === userStates.AVAILABLE) {
+                // user becomes available -- his socket should rejoin the room
+                var sock = findSocketByUserId(userId)
+                if (!isUndefined(sock)) {sock.join(args.roomId.toString())}
+              } else {
+                // user goes unavailable -- his socket should leave the room
+                var sock = findSocketByUserId(userId)
+                if (!isUndefined(sock)) {sock.leave(args.roomId.toString())}
+              }
+            },
+            (err) => console.log(err)
+          )
+        })
+        console.log("finished access to database")
+
+        if (args.newAvailability === userStates.AVAILABLE) {
+          io.to(args.roomId).emit('AllAvailable', args.users)
+        } else if (args.newAvailability === userStates.UNAVAILABLE) {
+          io.to(args.roomId).emit('AllUnAvailable', args.users)
+        }
+      })
+
+  /**
    * Passes a message from one user to another.
    * 
    * usage format is:

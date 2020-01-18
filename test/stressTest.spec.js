@@ -263,6 +263,7 @@ var playMatch = function (page1, page2) {
 
         await page1.waitForSelector('#joinGamePage')
         await page2.waitForSelector('#joinGamePage')
+
         resolve("yes")
     });
 }
