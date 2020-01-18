@@ -1,9 +1,30 @@
-import faker from "faker";
 import puppeteer from "puppeteer";
 const APP = "http://localhost:3000/";
-const homePage = "http://localhost:3000/LoginScreen/Home"
 import 'babel-polyfill';
 const iPhone = puppeteer.devices['iPhone 6'];
+
+
+/*
+    READ ME
+
+    this is the stress test.
+    parameters can be set to change its stress.
+    the test is divided to 4 phases.
+    all instances run concurrently in each phase.
+    they all syncronize between each 2 phases, meaning they wait until all other instances finish the current phase before continuing to the next one.
+
+    phase 1: sign in and fill sentences OR log in (depending on INITIALIZE_PLAYERS flag).
+        user names are numbers from 0 to NUM_OF_PLAYERS
+    phase 2: create rooms.
+        users 0 to NUM_OF_ROOMS will open a room.
+    phase 3: join rooms.
+        all the remaining users will be split evenly between the created rooms.
+    phase 4: invite to match and play match again and again, NUM_OF_MATCHES_PER_COUPLE times. then leave the room and log out.
+        all users in each room are randomly split into couples (if there is an odd number of players in a room, some user will not play).
+        then each couple is playing matches again and again.
+    
+    to run the test use the command "jest stressTest.spec.js"
+*/
 
 let pages = []
 let page;
@@ -13,14 +34,18 @@ const height = 600;
 const pass = "000000"
 
 //test parameters
+const INITIALIZE_PLAYERS = false //true for signing up new users and filling up their sentences. false for signing in already registered users.
 const NUM_OF_PLAYERS = 4
 const NUM_OF_ROOMS = 2
+const NUM_OF_MATCHES_PER_COUPLE = 2
 const NUM_OF_TRUE_SENTENCES = 2
 const NUM_OF_FALSE_SENTENCES = 2
 const MAX_SETBACK = 3000 //[seconds/1000]
 const MIN_TIME_TO_CHOOSE = 500 //[seconds/1000]
 const MAX_TIME_TO_CHOOSE = 2000 //[seconds/1000]
+const TIME_BETWEEN_PHASES = 300 //[seconds/1000]
 
+//helper functions
 var RemoveElement = function (myArray, randomItem) {
     var index = myArray.indexOf(randomItem);
     if (index > -1) {
@@ -35,6 +60,7 @@ var GetRandomElement = function (myArray, deleteFlag) {
     return randomItem;
 }
 
+//procedures
 var signUp = function (page, index) {
     return new Promise(async function (resolve, reject) {
         await page.waitForSelector('#SignUpPage')
@@ -274,22 +300,27 @@ var logOut = function (page1, page2) {
         resolve("yes")
     });
 }
+
+//phases
 var firstPhase = function (page, index) {
     var setback = Math.floor(Math.random() * MAX_SETBACK);
     return new Promise(async function (resolve, reject) {
         await page.waitForSelector('#TrueAndFalseHomePage')
         await page.waitFor(setback)
-        // await Promise.all([
-        //     page.waitForNavigation(),
-        //     page.click("#signUpBTN"),
-        // ]);
-        // await signUp(page, index)
-        // await fillSentences(page, index)
-        await Promise.all([
-            page.waitForNavigation(),
-            page.click("#signInBTN"),
-        ]);
-        await signIn(page, index)
+        if (INITIALIZE_PLAYERS) {
+            await Promise.all([
+                page.waitForNavigation(),
+                page.click("#signUpBTN"),
+            ]);
+            await signUp(page, index)
+            await fillSentences(page, index)
+        } else {
+            await Promise.all([
+                page.waitForNavigation(),
+                page.click("#signInBTN"),
+            ]);
+            await signIn(page, index)
+        }
         await page.waitForSelector('#LoginScreenHomePage')
         resolve("yes")
     });
@@ -319,10 +350,12 @@ var fourthPhase = function (page1, index1, page2, index2) {
     return new Promise(async function (resolve, reject) {
         await page1.waitForSelector('#joinGamePage')
         await page2.waitForSelector('#joinGamePage')
-        await page1.waitFor(setback)
-
-        await inviteToMatch(page1, index1, page2, index2)
-        await playMatch(page1, page2)
+        var i
+        for (i = 0; i < NUM_OF_MATCHES_PER_COUPLE; i++) {
+            await page1.waitFor(setback)
+            await inviteToMatch(page1, index1, page2, index2)
+            await playMatch(page1, page2)
+        }
         await leaveRoom(page1, page2)
         await logOut(page1, page2)
 
@@ -335,7 +368,7 @@ var fourthPhase = function (page1, index1, page2, index2) {
 beforeAll(async () => {
     browser = await puppeteer.launch({
         headless: false,
-        slowMo: 40,
+        slowMo: 50,
         args: [`--window-size=${width},${height}`]
     });
 });
@@ -357,7 +390,7 @@ describe("stress test", () => {
             await page.goto(APP);
         }
 
-        await page.waitFor(1000)
+        await page.waitFor(TIME_BETWEEN_PHASES)
         let prom
         let promises = []
         for (i = 0; i < NUM_OF_PLAYERS; i++) {
@@ -367,7 +400,7 @@ describe("stress test", () => {
         }
         await Promise.all(promises);
         console.log("first phase completed")
-        await page.waitFor(1000)
+        await page.waitFor(TIME_BETWEEN_PHASES)
 
         let rooms = []
         promises = []
@@ -382,6 +415,7 @@ describe("stress test", () => {
             rooms.push([player_id])
         }
         console.log("second phase completed")
+        await page.waitFor(TIME_BETWEEN_PHASES)
 
         promises = []
         for (i = NUM_OF_ROOMS; i < NUM_OF_PLAYERS; i++) {
@@ -392,7 +426,8 @@ describe("stress test", () => {
         }
         await Promise.all(promises);
         console.log("third phase completed")
-        console.log(rooms)
+        await page.waitFor(TIME_BETWEEN_PHASES)
+        //console.log(rooms)
 
         promises = []
         let page1
@@ -405,9 +440,8 @@ describe("stress test", () => {
             while (players_in_room.length > 1) {
                 player1_id = GetRandomElement(players_in_room, true)
                 player2_id = GetRandomElement(players_in_room, true)
-                console.log(player1_id.toString() + " and " + player2_id.toString())
+                //console.log(player1_id.toString() + " and " + player2_id.toString())
             }
-
             page1 = pages[player1_id].page
             page2 = pages[player2_id].page
             prom = fourthPhase(page1, player1_id, page2, player2_id)
