@@ -198,7 +198,9 @@ export function TheGame(props) {
         }
       }).then(data => {
         user = data
+        setSeenSentences(data.already_seen_sentences)
         console.log('update user from database: ', user)
+        console.log('seen sentences: ', seenSentences)
       })
 
 
@@ -221,12 +223,16 @@ export function TheGame(props) {
             return !seenSentences.includes(x) && !truths.includes(x) && !lies.includes(x);
           }
 
+          console.log("update sentences form DB truths: ", truths, "lies: ", lies)
           trues = trues.filter(validSentence);
           falses = falses.filter(validSentence);
+          trues = trues.filter((sent) => !seenSentences.includes(sent))
+          falses = falses.filter((sent) => !seenSentences.includes(sent))
           setTruths(trues);
           setLies(falses);
           setInitialGameState(trues, falses, seenSentences)
           setIsFinishedLoading(true)
+          console.log("truths: ", truths, "lies: ", lies)
         }, () => { })
     }
     return (<DisplayLoading />);
@@ -430,22 +436,30 @@ function Result(props) {
 
 function getSentence(truths, lies, seenSentences, setTruths, setLies, setSeenSentences) {
   let ans, sentence, info;
+  let trues = truths
+  let falses = lies
+  trues = trues.filter((sent) => !seenSentences.includes(sent))
+  falses = falses.filter((sent) => !seenSentences.includes(sent))
+  console.log('trues:', trues)
+  console.log('falses:', falses)
+  setTruths(trues);
+  setLies(falses);
   console.log('inside getSentence')
-  console.log(truths)
-  console.log(lies)
+  console.log('truthes:', truths)
+  console.log('falses:', lies)
   console.log(seenSentences)
   if ((Math.floor(Math.random() * 2) || lies.length === 0) && truths.length > 0) {
     console.log('choosing a true sentence');
     ans = true;
     //let filtered_trues = trues.filter(x => !seen.includes(x));
     let i = Math.floor(Math.random() * truths.length)
-    setSeenSentences(seenSentences.concat([truths[i]]));
+    setSeenSentences(seenSentences.concat([truths[i]]))
     sentence = truths[i];
 
-    let new_truths = JSON.parse(JSON.stringify(truths));
-    new_truths.splice(i, 1);
-    setTruths(new_truths);
-    info = TRUE_SENTENCE;
+    let new_truths = JSON.parse(JSON.stringify(truths))
+    new_truths.splice(i, 1)
+    setTruths(new_truths)
+    info = TRUE_SENTENCE
   }
   else if (lies.length > 0) {
     console.log('choosing a false sentence');
