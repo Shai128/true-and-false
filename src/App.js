@@ -59,7 +59,7 @@ export const useStyles = makeStyles(theme => ({
     },
   },
   paper: {
-    marginTop: theme.spacing(4),
+    //marginTop: theme.spacing(4),
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
@@ -116,7 +116,7 @@ let pass = ""
 function encodeImageFileAsURL(element) {
   var file = element.files[0];
   var reader = new FileReader();
-  reader.onloadend = function() {
+  reader.onloadend = function () {
     console.log('RESULT', reader.result)
   }
   reader.readAsDataURL(file);
@@ -287,44 +287,44 @@ function SignUp() {
                 />
               </Grid>
 
-              
-              <input type='file'  name='imageData' className="avatarImageupload" onChange={e => {
+
+              <input type='file' name='imageData' className="avatarImageupload" onChange={e => {
                 const preview = document.querySelector('img');
                 let file_size = document.querySelector('input[type=file]').files[0].size;
                 const file = document.querySelector('input[type=file]').files[0];
-                if (file_size > 1e+7){
+                if (file_size > 1e+7) {
                   window.alert("Image size is bigger than 10MB, Please smaller image");
                   file_size_under_10 = false
                   return
                 }
                 file_size_under_10 = true
                 const reader = new FileReader();
-                var data 
+                var data
                 reader.addEventListener("load", function () {
                   // convert image file to base64 string
                   preview.src = reader.result;
                   data = reader.result
                 }, false);
-                
-                reader.onloadend = function() {
-                  
+
+                reader.onloadend = function () {
+
                   var tempUser = user
                   tempUser.imageData = reader.result
                   setUser(tempUser)
                 }
-                
+
                 if (file) {
                   reader.readAsDataURL(file);
                 }
-               //updateImage(e, data)
-                
+                //updateImage(e, data)
+
                 //updateField(e)
 
               }} />
 
-              <img src={defaultImg} width='90' height='90' border="0" /> 
+              <img src={defaultImg} width='90' height='90' border="0" />
 
-              
+
 
             </Grid>
             <Button
@@ -335,7 +335,7 @@ function SignUp() {
               color="primary"
               className={classes.submit}
               onClick={() => {
-                if (!file_size_under_10){
+                if (!file_size_under_10) {
                   window.alert("Image size is bigger than 10MB, Please smaller image")
                   return
                 }
@@ -449,9 +449,6 @@ function Home() {
   const classes = useStyles();
 
   const [guestLoginWindowOpen, setguestLoginWindowOpen] = React.useState(false);
-  const handleClickGuestLogin = () => {
-    setguestLoginWindowOpen(true);
-  };
 
   const handleCloseGuestLoginWindow = () => {
     setguestLoginWindowOpen(false);
@@ -461,11 +458,12 @@ function Home() {
   let index = Math.floor(Math.random() * 3)
 
   return (
-    <div id="TrueAndFalseHomePage" 
-    style={{
-      background: 'linear-gradient(80deg, ' + color[index % 3] + ' 30%, rgba(0,0,0,0) 30%),'
-        + 'linear-gradient(45deg, ' + color[(index + 1) % 3] + ' 65%, ' + color[(index + 2) % 3] + ' 65%'
-    }}>
+    <div id="TrueAndFalseHomePage"
+      style={{
+        height: '100vh',
+        background: 'linear-gradient(80deg, ' + color[index % 3] + ' 30%, rgba(0,0,0,0) 30%),'
+          + 'linear-gradient(45deg, ' + color[(index + 1) % 3] + ' 65%, ' + color[(index + 2) % 3] + ' 65%'
+      }}>
       <Container component="main" maxWidth="md">
         <CssBaseline />
         <div className={classes.paper}>
@@ -476,11 +474,9 @@ function Home() {
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <Link to="/SignIn" style={{ textDecoration: 'none' }}>
-                  <Button id="signInBTN" variant="contained" color="primary" fullWidth  style={{ background: color[(index + 2) % 3] }} >
-                  <Typography style={{ color: "white", textShadow: "1px 1px 3px black" }}>
+                  <Button id="signInBTN" variant="contained" color="primary" className={classes.button} fullWidth /*style={{ background: color[(index + 2) % 3] }}*/ >
                     Sign In
-                    </Typography>
-            </Button>
+                  </Button>
                 </Link>
 
               </Grid>
@@ -492,10 +488,6 @@ function Home() {
                 </Link>
               </Grid>
               <Grid item xs={12}>
-
-                <Button variant="contained" color="primary" fullWidth onClick={handleClickGuestLogin} className={classes.button}>
-                  Guest Login
-            </Button>
               </Grid>
             </Grid>
             <PrintJoinGameDialog
