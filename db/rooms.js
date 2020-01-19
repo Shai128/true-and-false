@@ -189,7 +189,10 @@ async function deleteUserByEmailInRoomByRoomID(room_id, email, success, fail) { 
         if (err) fail(statusCodes.ROOM_NOT_FOUND);
         else {
             console.log('got here');
-            if (!room) room = { users_in_room: [], state_array: [] }
+            if (!room) {
+                console.log("no room found")
+                room = { users_in_room: [], state_array: [] }
+            }
             var arr_users = room.users_in_room;
             var i, j = 0;
             var flag_not_found = 1;

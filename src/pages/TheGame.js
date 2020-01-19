@@ -13,12 +13,13 @@ import {
   useHistory,
 } from "react-router-dom";
 
-
+import { reject } from 'q';
 import { socket, updateUserToDB, getUserFromLocalStorage, } from './../user.js';
 import { updateGameInLocalStorage, getGameFromLocalStorage, } from './../user_game';
 
 import { DisplayLoading, DisplayDBError } from './../PagesUtils.js'
 import { isUndefined, colors } from './../Utils.js'
+import { isUndefined , okStatus, serverIP } from './../Utils.js'
 import { getSentencesFromDB } from './../game.js'
 import { userStates } from './JoinGame.js'
 import { LinearProgress } from '@material-ui/core';
@@ -34,7 +35,7 @@ const OPPONENT_TURN_MESSAGE = "Opponent's turn. The sentence is: "
 const BONUS_POINTS_FOR_CORRECT_ANSWER = 3;
 const BONUS_POINTS_FOR_WRONG_ANSWER = 1;
 const NO_MORE_SENTENCES_MESSAGE_TO_USER = "There are no more sentences to display!!"
-
+const server = "http://"+ serverIP + ':8000'
 
 export function TheGame(props) {
   let history = useHistory();
@@ -90,7 +91,6 @@ export function TheGame(props) {
 
   }
 
-  const user = props.location.user;
   const room = props.location.room;
   const opponentId = props.location.opponentId;
   const [answered, setAnswered] = React.useState(props.location.answered);
@@ -246,30 +246,30 @@ export function TheGame(props) {
     if (!startedReadingFromDB) {
       setStartedReadingFromDB(true);
 
-      // console.log("request:", server + '/userSentences/' + opponentId + '/' + room.room_id)
-      // fetch(server + '/getUserObjectInRoom/' + opponentId + '/' + room.room_id, {
-      //   method: 'GET', // *GET, POST, PUT, DELETE, etc.
-      //   headers: {
-      //     'Content-Type': 'application/x-www-form-urlencoded'
-      //   },
-      //   credentials: 'include',
-      // }).then((response) => {
-      //   if (response.status !== okStatus) {
-      //     reject(response.status)
-      //     if (!isUndefined(onFailure))
-      //       onFailure();
-      //   } else {
-      //     return new Promise(function (resolve, reject) {
-      //       resolve(response.json());
-      //     })
-      //   }
-      // }).then(data => {
-      //   if (!isUndefined(onSuccess))
-      //     onSuccess(data);
-    
-    
-      //   console.log("userSentences received data from server: ", data)
-      // })
+
+      console.log("request:", server + '/userSentences/' + opponentId + '/' + room.room_id)
+      fetch(server + '/getUserObjectInRoom/' + room.room_id + '/' + opponentId, {
+        method: 'GET', // *GET, POST, PUT, DELETE, etc.
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        credentials: 'include',
+      }).then((response) => {
+        if (response.status !== okStatus) {
+          reject(response.status)
+        } else {
+          return new Promise(function (resolve, reject) {
+            resolve(response.json());
+          })
+        }
+      }).then(data => {
+        user = data
+        setSeenSentences(data.already_seen_sentences)
+        console.log('update user from database: ', user)
+        console.log('seen sentences: ', seenSentences)
+      })
+
+
 
       getSentencesFromDB(opponentId, room,
         (data) => {
@@ -289,12 +289,16 @@ export function TheGame(props) {
             return !seenSentences.includes(x) && !truths.includes(x) && !lies.includes(x);
           }
 
+          console.log("update sentences form DB truths: ", truths, "lies: ", lies)
           trues = trues.filter(validSentence);
           falses = falses.filter(validSentence);
+          trues = trues.filter((sent) => !seenSentences.includes(sent))
+          falses = falses.filter((sent) => !seenSentences.includes(sent))
           setTruths(trues);
           setLies(falses);
           setInitialGameState(trues, falses, seenSentences)
           setIsFinishedLoading(true)
+          console.log("truths: ", truths, "lies: ", lies)
         }, () => { })
     }
     return (<DisplayLoading />);
@@ -517,22 +521,30 @@ function Result(props) {
 
 function getSentence(truths, lies, seenSentences, setTruths, setLies, setSeenSentences) {
   let ans, sentence, info;
+  let trues = truths
+  let falses = lies
+  trues = trues.filter((sent) => !seenSentences.includes(sent))
+  falses = falses.filter((sent) => !seenSentences.includes(sent))
+  console.log('trues:', trues)
+  console.log('falses:', falses)
+  setTruths(trues);
+  setLies(falses);
   console.log('inside getSentence')
-  console.log(truths)
-  console.log(lies)
+  console.log('truthes:', truths)
+  console.log('falses:', lies)
   console.log(seenSentences)
   if ((Math.floor(Math.random() * 2) || lies.length === 0) && truths.length > 0) {
     console.log('choosing a true sentence');
     ans = true;
     //let filtered_trues = trues.filter(x => !seen.includes(x));
     let i = Math.floor(Math.random() * truths.length)
-    setSeenSentences(seenSentences.concat([truths[i]]));
+    setSeenSentences(seenSentences.concat([truths[i]]))
     sentence = truths[i];
 
-    let new_truths = JSON.parse(JSON.stringify(truths));
-    new_truths.splice(i, 1);
-    setTruths(new_truths);
-    info = TRUE_SENTENCE;
+    let new_truths = JSON.parse(JSON.stringify(truths))
+    new_truths.splice(i, 1)
+    setTruths(new_truths)
+    info = TRUE_SENTENCE
   }
   else if (lies.length > 0) {
     console.log('choosing a false sentence');
