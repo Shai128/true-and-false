@@ -180,7 +180,7 @@ export function TheGame(props) {
 
   socket.off('endMatch');
   socket.on('endMatch', function () {
-    updateAfterMatchData(user, room, matchPoints, history, seenSentences)
+    updateAfterMatchData(user, room, matchPoints, history, seenSentences, opponentId)
   });
 
   socket.off('displaySentence');
@@ -370,7 +370,7 @@ export function TheGame(props) {
                     message: "endMatch",
                     args: {}
                   });
-                  updateAfterMatchData(user, room, matchPoints, history, seenSentences)
+                  updateAfterMatchData(user, room, matchPoints, history, seenSentences, opponentId)
                 }}
               >
                 <Typography justify="center" style={{ color: 'white', textShadow: "1px 1px 3px black" }}>
@@ -500,7 +500,7 @@ function Result(props) {
                   message: "endMatch",
                   args: {}
                 });
-                updateAfterMatchData(user, room, matchPoints, history, seenSentences)
+                updateAfterMatchData(user, room, matchPoints, history, seenSentences, opponentId)
               }}
             >
               <Typography justify="center" style={{ color: 'white', textShadow: "1px 1px 3px black" }}>
@@ -559,7 +559,7 @@ function getSentence(truths, lies, seenSentences, setTruths, setLies, setSeenSen
   return { sentence: sentence, ans: ans, info: info };
 }
 
-function updateAfterMatchData(user, room, matchPoints, history, seenSentences) {
+function updateAfterMatchData(user, room, matchPoints, history, seenSentences, opponentId) {
   let newUser = JSON.parse(JSON.stringify(user));
   newUser.already_seen_sentences = seenSentences
   if (isNaN(newUser.score)) {
@@ -570,9 +570,16 @@ function updateAfterMatchData(user, room, matchPoints, history, seenSentences) {
   updateUserToDB(newUser);
   socket.emit('updateUserInRoom', { roomId: room.room_id, user: newUser }) // todo: complete data
 
-  socket.emit('changeUserAvailability', {
-    newAvailability: userStates.AVAILABLE, userId: user.email, roomId: room.room_id
+  var users = [user.email, opponentId];
+
+  socket.emit('changeAvailabilityAll', {
+    newAvailability: userStates.AVAILABLE, users: users, roomId: room.room_id
   })
+
+
+  // socket.emit('changeUserAvailability', {
+  //   newAvailability: userStates.AVAILABLE, userId: user.email, roomId: room.room_id
+  // })
 
   history.push({
     pathname: '/LoginScreen/JoinGame',

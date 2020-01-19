@@ -220,18 +220,40 @@ export function JoinGame(props) {
 
   });
 
+
+  socket.off('AllAvailable')
+  socket.on("AllAvailable", function (users) {
+
+    var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersUnAvailable));
+    var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersAvailable));
+    var index = -1;
+    users.forEach(userId => {
+
+    index = (newPlayersUnAvailable).findIndex(user => user.email === userId)
+
+    if (index === -1) {
+      InitTheRoom(CurrentRoom.room_id, setRoomUpdated);
+    }
+
+    else {
+      index = (newPlayersUnAvailable).findIndex(user => user.email === userId)
+      var current_user = newPlayersUnAvailable[index]
+      newPlayersUnAvailable.splice(index, 1)
+      index = (newPlayersAvailable).findIndex(user => user.email === current_user.email)
+      if (index === -1) {
+        newPlayersAvailable.push({ email: current_user.email, nickname: current_user.nickname })
+      }
+    }
+
+    });
+
+    setPlayersList({ PlayersAvailable: newPlayersAvailable, PlayersUnAvailable: newPlayersUnAvailable })
+
+  });
+
+
   socket.off('userAvailable')
   socket.on("userAvailable", function (userInfo) {
-
-    //  var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersUnAvailable));
-    //  const index = (newPlayersUnAvailable).findIndex(user => user.email === userInfo)
-    //  var current_user = newPlayersUnAvailable[index]
-    //  newPlayersUnAvailable.splice(index,1)
-    //  setPlayersUnAvailable(newPlayersUnAvailable)
-
-    //  var newPlayersAvailable = JSON.parse(JSON.stringify(PlayersAvailable));
-    //  newPlayersAvailable.push(current_user)
-    //  setPlayersAvailable(newPlayersAvailable)
 
     console.log(CurrentUser.email, "got user--Available", "userInfo:", userInfo);
     var newPlayersUnAvailable = JSON.parse(JSON.stringify(PlayersList.PlayersUnAvailable));
