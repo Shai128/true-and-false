@@ -80,6 +80,8 @@ export function JoinGame(props) {
   const [roomUpdated, setRoomUpdated] = useState(false);
 
   const [PlayersListOld, setPlayersListOld] = useState([]);
+  const [color, setColor] = useState("")
+  const [colorIndex, setColorIndex] = useState([])
 
   const [PlayersList, setPlayersList] = useState({
     PlayersAvailable: [],
@@ -446,19 +448,21 @@ export function JoinGame(props) {
   if (CurrentUser.imageData)
     img = CurrentUser.imageData.replace(/ /g, "+")
   
-  let color = colors[Math.floor(Math.random()*colors.length)]
-  let index = Math.floor(Math.random()*3)
+  if (color == ''){
+    setColor(colors[Math.floor(Math.random()*colors.length)])
+    setColorIndex(Math.floor(Math.random()*3))
+  }
 
   return (
     <div id="joinGamePage"
-    style={{background: 'linear-gradient(70deg, ' + color[(index)%3] + ' 60%, ' + color[(index+1)%3] + ' 60%'}}>
+    style={{background: 'linear-gradient(70deg, ' + color[(colorIndex)%3] + ' 60%, ' + color[(colorIndex+1)%3] + ' 60%'}}>
 
       <PrintAnswerPlayerDialog WindowOpen={GotInvitationWindow} setWindowOpen={setGotInvitationWindow} onAccept={onAccept} onDecline={onDecline} SenderInfoName={SenderInfoName} />
       <Grid spacing={1} container>
 
         <Grid spacing={1} item xs={12}>
           <div style={{ float: 'right', marginRight: 10, marginTop: 10, }}>
-            <Button id="leaveRoomBTN" variant="contained" style={{backgroundColor: color[(index)%3]}} 
+            <Button id="leaveRoomBTN" variant="contained" style={{backgroundColor: color[(colorIndex)%3]}} 
             onClick={leaveRoom} >
               <Typography style={{ color: "white", textShadow: "1px 1px 3px black" }}>
               Leave the room
@@ -466,7 +470,7 @@ export function JoinGame(props) {
       </Button>
           </div>
           <div style={{ float: 'left', marginRight: 10, marginTop: 10 }}>
-            <Button id="scoreTableBTN" variant="contained" style={{backgroundColor: color[(index+1)%3]}}
+            <Button id="scoreTableBTN" variant="contained" style={{backgroundColor: color[(colorIndex+1)%3]}}
               onClick={() => {
                 history.push({
                   pathname: '/ScoreTable',
