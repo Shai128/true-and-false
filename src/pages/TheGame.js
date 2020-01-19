@@ -90,6 +90,7 @@ export function TheGame(props) {
 
   }
 
+  var user = props.location.user;
   const room = props.location.room;
   const opponentId = props.location.opponentId;
   const [answered, setAnswered] = React.useState(props.location.answered);
