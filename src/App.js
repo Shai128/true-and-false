@@ -287,7 +287,7 @@ function SignUp() {
                 />
               </Grid>
 
-
+              {/* 
               <input type='file' name='imageData' className="avatarImageupload" onChange={e => {
                 const preview = document.querySelector('img');
                 let file_size = document.querySelector('input[type=file]').files[0].size;
@@ -323,7 +323,7 @@ function SignUp() {
               }} />
 
               <img src={defaultImg} width='90' height='90' border="0" />
-
+            */}
 
 
             </Grid>
