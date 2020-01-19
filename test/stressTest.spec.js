@@ -34,7 +34,7 @@ const height = 600;
 const pass = "000000"
 
 //test parameters
-const INITIALIZE_PLAYERS = false //true for signing up new users and filling up their sentences. false for signing in already registered users.
+const INITIALIZE_PLAYERS = true //true for signing up new users and filling up their sentences. false for signing in already registered users.
 const NUM_OF_PLAYERS = 4
 const NUM_OF_ROOMS = 2
 const NUM_OF_MATCHES_PER_COUPLE = 2
