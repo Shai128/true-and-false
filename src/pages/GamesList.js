@@ -156,10 +156,10 @@ function GamesList(props) {
               icon: ()=>{return(<ArrowForwardIcon />)}, tooltip: 'Go To Game Page',
               onClick: (event, rowData) => {history.push('/LoginScreen/Home/GamePage/'+rowData.id)}
             },
-            {
+            /*{
               icon: ()=>{return(<EqualizerIcon />)}, tooltip: 'Go To Statistics Page',
               onClick: (event, rowData) => {history.push('/LoginScreen/Home/Statistics/'+rowData.id)}
-            }]}
+            }*/]}
           />
     </div>
       </Grid>
