@@ -327,7 +327,8 @@ function SignUp() {
 
 
             </Grid>
-            <Button
+            
+            <Button 
               //type="submit"
               id="submit"
               fullWidth
@@ -363,7 +364,10 @@ function SignUp() {
                 })
               }}>
 
-              Sign Up
+                  <Typography style={{ color: "white", textShadow: "1px 1px 3px black" }}>
+                  Sign Up
+                    </Typography>
+              
           </Button>
             <Grid container justify="center">
               <Grid item xs={12}>
@@ -474,16 +478,21 @@ function Home() {
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6}>
                 <Link to="/SignIn" style={{ textDecoration: 'none' }}>
-                  <Button id="signInBTN" variant="contained" color="primary" className={classes.button} fullWidth /*style={{ background: color[(index + 2) % 3] }}*/ >
+                <Button id="signInBTN" variant="contained" color="primary" fullWidth  style={{ background: color[(index + 2) % 3] }} >
+                  <Typography style={{ color: "white", textShadow: "1px 1px 3px black" }}>
                     Sign In
-                  </Button>
+                    </Typography>
+                    </Button>
                 </Link>
 
               </Grid>
               <Grid item xs={12} sm={6}>
                 <Link to="/SignUp" style={{ textDecoration: 'none' }}>
-                  <Button id="signUpBTN" variant="contained" color="primary" fullWidth className={classes.button}>
-                    Sign Up
+                  <Button id="signUpBTN" variant="contained" color="primary" fullWidth style={{ background: color[(index ) % 3] }}>
+
+                    <Typography style={{ color: "white", textShadow: "1px 1px 3px black" }}>
+                  Sign Up
+                    </Typography>
       </Button>
                 </Link>
               </Grid>
@@ -560,11 +569,17 @@ export function SignIn() {
     }
     return isValid;
   }
+
   if (isLoading)
     return (<DisplayLoading />);
+    let color = colors[Math.floor(Math.random() * colors.length)]
+    let index = Math.floor(Math.random() * 3)
   return (
     <div id="SignInPage">
-      <header className="App-header" >
+      <header className="App-header" style={{
+      background: 'linear-gradient(100deg, ' + color[index % 3] + ' 30%, rgba(0,0,0,0) 30%),'
+        + 'linear-gradient(135deg, ' + color[(index + 1) % 3] + ' 65%, ' + color[(index + 2) % 3] + ' 65%'
+    }}>
 
         <Container component="main" maxWidth="xs">
           <CssBaseline />
@@ -573,7 +588,7 @@ export function SignIn() {
 
               <Grid container spacing={5}>
                 <Grid item xs={12}>
-                  <Typography variant="h1" component="h2" gutterBottom className={classes.root}>
+                  <Typography variant="h1" component="h2" gutterBottom style={{ color: "white", textShadow: "1px 1px 3px black" }}>
                     Sign In
                   </Typography>
                 </Grid>
@@ -612,7 +627,7 @@ export function SignIn() {
                 </Grid>
                 <Grid item xs={12}>
 
-                  <Button id="submit" variant="contained" color="primary" fullWidth className={classes.button}
+                  <Button id="submit" variant="contained" color="primary" fullWidth style={{ background: color[(index + 2) % 3] }}
                     onClick={() => {
                       resetDisplay();
                       if (!validUser(user)) {
@@ -637,7 +652,9 @@ export function SignIn() {
                         });
 
                     }}>
-                    Sign In
+                    <Typography style={{ color: "white", textShadow: "1px 1px 3px black" }}>
+Sign In
+                    </Typography>
       </Button>
                 </Grid>
                 <Grid item xs={12}>
