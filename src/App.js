@@ -127,6 +127,8 @@ function SignUp() {
   const [user, setUser] = useState(emptyUser);
   const [userAlreadyExists, setUserAlreadyExists] = useState(false);
   const [serverError, setServerError] = useState(false);
+  const [color, setColor] = useState(colors[Math.floor(Math.random() * colors.length)])
+  const [colorIndex, setColorIndex] = useState(Math.floor(Math.random() * 3))
 
   const initMessages = {
     errorPassword: false,
@@ -203,14 +205,19 @@ function SignUp() {
   let history = useHistory();
   //TODO: https://www.w3schools.com/js/js_htmldom_css.asp try to preview the chosen image with help from here
   return (
-    <div id="SignUpPage">
+    <div id="SignUpPage"
+    style={{
+      height: '100vh',
+      background: 'linear-gradient(80deg, ' + color[colorIndex % 3] + ' 30%, rgba(0,0,0,0) 30%),'
+        + 'linear-gradient(45deg, ' + color[(colorIndex + 1) % 3] + ' 65%, ' + color[(colorIndex + 2) % 3] + ' 65%'
+    }}>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper}>
           <Avatar className={classes.avatar}>
             <LockOutlinedIcon />
           </Avatar>
-          <Typography component="h1" variant="h5">
+          <Typography component="h1" variant="h5" style={{ color: "white", textShadow: "1px 1px 3px black" }}>
             Sign up
         </Typography>
           <form className={classes.form} noValidate>
@@ -333,7 +340,7 @@ function SignUp() {
               id="submit"
               fullWidth
               variant="contained"
-              color="primary"
+              style={{ background: color[(colorIndex + 2) % 3] }}
               className={classes.submit}
               onClick={() => {
                 if (!file_size_under_10) {
