@@ -569,11 +569,18 @@ export function SignIn() {
     }
     return isValid;
   }
-
+  const [color,SetColor]=React.useState(false)
+  const [index,SetIndex]=React.useState(false)
+  const [init,SetInit]=React.useState(false)
+  
   if (isLoading)
     return (<DisplayLoading />);
-    let color = colors[Math.floor(Math.random() * colors.length)]
-    let index = Math.floor(Math.random() * 3)
+     
+    if(!init){
+      SetInit(true)
+    SetColor( colors[Math.floor(Math.random() * colors.length)])
+    SetIndex(Math.floor(Math.random() * 3))
+  }
   return (
     <div id="SignInPage">
       <header className="App-header" style={{
