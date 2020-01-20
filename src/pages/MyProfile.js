@@ -37,16 +37,16 @@ const useButtonStyles = makeStyles({
 
 function encrypt(str) {
   var newString = "";
-  for (var i = str.length - 1; i >= 0; i--) { 
-      newString += str[i];
+  for (var i = str.length - 1; i >= 0; i--) {
+    newString += str[i];
   }
   return newString;
 }
 
 
- let pass = "";
- let confirm_pass = "";
- let old_pass = "";
+let pass = "";
+let confirm_pass = "";
+let old_pass = "";
 
 
 export function MyProfile(props) {
@@ -74,7 +74,7 @@ export function MyProfile(props) {
     setchangePasswordWindowOpen(true);
   };
   const updateField = e => {
-    if (e.target.name === "password" || e.target.name ==="confirmPassword"){
+    if (e.target.name === "password" || e.target.name === "confirmPassword") {
       pass = e.target.value
       setUser({
         ...user,
@@ -89,15 +89,15 @@ export function MyProfile(props) {
   };
   var img = require('../defaultAvatar.png')
   if (currentUser.imageData)
-    img = currentUser.imageData.replace(/ /g,"+")
+    img = currentUser.imageData.replace(/ /g, "+")
   return (
     <div id="MyProfilePage">
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper} >
           <Typography component="h1" variant="h2" justify="center">
-            My Profile 
-            <img src={`${img}`} width="120" height='120'  border-style='none' />
+            My Profile
+            {/*<img src={`${img}`} width="120" height='120'  border-style='none' />*/}
           </Typography>
 
           <form className={classes.form} noValidate>
@@ -255,19 +255,19 @@ function PrintChangePassword(props) {
     console.log(oldUser.password)
     console.log(passwords.enteredOldPassword)
     console.log(oldUser.salt.toString())
-    let hashedPassword = crypto.PBKDF2(passwords.enteredOldPassword, oldUser.salt.toString(), {keySize: 512/32, iterations: oldUser.iterations}).toString()
+    let hashedPassword = crypto.PBKDF2(passwords.enteredOldPassword, oldUser.salt.toString(), { keySize: 512 / 32, iterations: oldUser.iterations }).toString()
     resetDisplaysContent();
     if (!validOldPassword(oldUser.password, hashedPassword)) {
       displayWrongOldPassword();
       return;
     }
     if (pass !== confirm_pass) {
-    //if (passwords.enteredConfirmPassword !== passwords.enteredNewPassword) {
+      //if (passwords.enteredConfirmPassword !== passwords.enteredNewPassword) {
       displayPasswordsDontMatch();
       return;
     }
     if (typeof pass === 'undefined' || !passwordIsStrongEnough(pass)) {
-    //if (typeof passwords.enteredNewPassword === 'undefined' || !passwordIsStrongEnough(passwords.enteredNewPassword)) {
+      //if (typeof passwords.enteredNewPassword === 'undefined' || !passwordIsStrongEnough(passwords.enteredNewPassword)) {
       displayWeakPassword();
       return;
     }

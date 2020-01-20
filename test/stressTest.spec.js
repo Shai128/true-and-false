@@ -34,14 +34,14 @@ const pass = "000000"
 
 //test parameters
 const HEADLESS = true
-const TEST_SLOWDOWN = 30 //around 40-60 is regular user behavior
+const TEST_SLOWDOWN = 40 //around 40-60 is regular user behavior
 const INITIALIZE_PLAYERS = false //true for signing up new users and filling up their sentences. false for signing in already registered users.
 const NUM_OF_PLAYERS = 30
 const NUM_OF_ROOMS = 6
 const NUM_OF_MATCHES_PER_COUPLE = 1
 const NUM_OF_TRUE_SENTENCES = 2
 const NUM_OF_FALSE_SENTENCES = 2
-const MAX_SETBACK = 30000 //[seconds/1000]
+const MAX_SETBACK = 50000 //[seconds/1000]
 const MIN_TIME_TO_CHOOSE = 700 //[seconds/1000]
 const MAX_TIME_TO_CHOOSE = 2300 //[seconds/1000]
 const TIME_BETWEEN_PHASES = 300 //[seconds/1000]
@@ -94,6 +94,20 @@ var signIn = function (page, index) {
             page.waitForNavigation(),
             page.click('#submit')
         ]);
+        var success = true
+        await page.waitForSelector("#LoginScreenHomePage").catch(() => success = false)
+        if (!success) {
+            await page.reload()
+            await page.waitForSelector("#SignInPage")
+            await page.click("#EmailInput");
+            await page.type("#EmailInput", index.toString() + "@gmail.com");
+            await page.click("#PasswordInput");
+            await page.type("#PasswordInput", pass);
+            await Promise.all([
+                page.waitForNavigation(),
+                page.click('#submit')
+            ]);
+        }
         await page.waitForSelector("#LoginScreenHomePage")
         resolve("yes")
     });
@@ -191,7 +205,7 @@ var inviteToMatch = function (page1, index1, page2, index2) {
                 await page1.reload()
                 await page1.waitForSelector('#joinGamePage')
             }
-            if(times_to_try == 2){
+            if (times_to_try == 2) {
                 resolve("bad")
             }
         }
@@ -546,7 +560,7 @@ describe("stress test", () => {
         }
         await Promise.all(promises);
         console.log("sixth phase completed")
-    }, 3000000);
+    }, 30000000);
 });
 
 // for (i = 0; i < NUM_OF_PLAYERS; i++){

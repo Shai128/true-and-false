@@ -107,8 +107,8 @@ function Home(props) {
   }
   var img = defaultImg
   if (currentUser.imageData)
-    img = currentUser.imageData.replace(/ /g,"+")
-    
+    img = currentUser.imageData.replace(/ /g, "+")
+
   return (
     <div id="LoginScreenHomePage">
       <Container maxWidth="lg" className={classes.container}>
@@ -117,13 +117,13 @@ function Home(props) {
             <Paper className={fixedHeightPaper}>
               <Grid container spacing={3}>
                 <Grid item xs={12}>
-                  
+
 
                   <Typography id="welcomeMessage" component="h1" variant="h2" justify="center" >
-                  <img src={`${img}`} width="120" height='120' border-style='none' /> Welcome {currentUser.firstName}!
-        </Typography>
-        
-                 
+                    {/*<img src={`${img}`} width="120" height='120' border-style='none' />*/} Welcome {currentUser.firstName}!
+              </Typography>
+
+
 
                 </Grid>
 
@@ -280,7 +280,7 @@ function PrintCreateGameDialog(props) {
       setNickNameHelperText('Please provide a nick name');
       isValid = false;
     }
-    
+
     return isValid;
   }
 

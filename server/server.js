@@ -451,6 +451,24 @@ app.get('/userSentences/:opponentId/:roomId', (req, res) => {
   )
 })
 
+
+  /**
+   * returns the mini-object that represents a given user in a given room.
+   * contains already_seen_sentences and score.
+   */
+  app.get('/getUserObjectInRoom/:roomId/:userId', (req, res) => {
+    logDiv('getUserObjectInRoom')
+    findUserByEmailInRoomByRoomID(
+      req.params.roomId,
+      req.params.userId,
+      (userObject) => { // find the given user
+        res.status(200).send(JSON.stringify(userObject))
+      },
+      (err) => standardErrorHandling(res, err)
+    )
+
+  })
+
 /**
  * Returns an object containing the lists of available
  * and unavailable users in a given room.
@@ -612,23 +630,23 @@ io.on('connection', function (socket) {
       { email: userEmail },
       (userObject) => {
         const roomId = userObject.roomObject.room_id;
-        console.log("the current room:", roomId);
+      //  console.log("the current room:", roomId);
         args.roomId = roomId
         args.userId = userEmail
 
-        console.log("newRoomId:", args.roomId, "newUserId:", args.userId)
+      //  console.log("newRoomId:", args.roomId, "newUserId:", args.userId)
 
 
 
-        console.log("args:", args)
+     //   console.log("args:", args)
         changeUserAvailability(
           args.roomId,
           args.userId,
           args.newAvailability,
           (succ) => {
-            console.log("database operation successful")
-            console.log(succ)
-            console.log("new availability:", args.newAvailability)
+         //   console.log("database operation successful")
+           // console.log(succ)
+           // console.log("new availability:", args.newAvailability)
             // TODO: should the user socket leave the room?
             if (args.newAvailability === userStates.AVAILABLE) {
               // user becomes available -- his socket should rejoin the room
@@ -647,7 +665,7 @@ io.on('connection', function (socket) {
 
 
       },
-      (err) => failure(err)
+      (err) => console.log(err)
     )
   })
 
@@ -764,6 +782,7 @@ io.on('connection', function (socket) {
     message_copy.delivery_timestamp = new Date();
     addUnReadMessage(userEmail, message_copy, () => { }, (err) => { console.log(err) });
   }
+
   /**
     * updates an existing user in a room with after match data
     * i.e. updates it's seen sentences and score.
@@ -779,13 +798,19 @@ io.on('connection', function (socket) {
     findRoomById(
       data.roomId,
       (roomObject) => {
-        console.log('roomObject: ', roomObject);
+        //console.log('roomObject: ', roomObject);
         // update only the correct user in the room
-        roomObject.users_in_room.filter(x => !isUndefined(x))
-        roomObject.users_in_room.map(
+        roomObject.users_in_room = roomObject.users_in_room.filter(x => !isUndefined(x))
+        roomObject.users_in_room = roomObject.users_in_room.map(
           (userObject) => {
-            return ((userObject.email === data.user.email) ?
-              data.user : userObject)
+            if (userObject.email === data.user.email) {
+              console.log("the user:", userObject)
+              console.log("the new data:", data.user)
+              userObject.score += data.user.score
+              userObject.already_seen_sentences =
+                userObject.already_seen_sentences.concat(data.user.already_seen_sentences)
+            }
+            return userObject
           }
         )
 

@@ -13,12 +13,20 @@ import {
   useHistory,
 } from "react-router-dom";
 
-import { reject } from 'q';
+<<<<<<< HEAD
+
 import { socket, updateUserToDB, getUserFromLocalStorage, } from './../user.js';
 import { updateGameInLocalStorage, getGameFromLocalStorage, } from './../user_game';
 
 import { DisplayLoading, DisplayDBError } from './../PagesUtils.js'
-import { isUndefined, colors, okStatus, serverIP  } from './../Utils.js'
+import { isUndefined, colors } from './../Utils.js'
+=======
+import { reject } from 'q';
+import { socket, emptyUser } from './../user.js';
+
+import { DisplayLoading, DisplayDBError } from './../PagesUtils.js'
+import { isUndefined , okStatus, serverIP } from './../Utils.js'
+>>>>>>> origin/updateAfterGameFixes
 import { getSentencesFromDB } from './../game.js'
 import { userStates } from './JoinGame.js'
 import { LinearProgress } from '@material-ui/core';
@@ -34,7 +42,16 @@ const OPPONENT_TURN_MESSAGE = "Opponent's turn. The sentence is: "
 const BONUS_POINTS_FOR_CORRECT_ANSWER = 3;
 const BONUS_POINTS_FOR_WRONG_ANSWER = 1;
 const NO_MORE_SENTENCES_MESSAGE_TO_USER = "There are no more sentences to display!!"
+<<<<<<< HEAD
+
+=======
+const userStates = {
+  INVALID: 0,
+  AVAILABLE: 1,
+  UNAVAILABLE: 2
+}
 const server = "http://"+ serverIP + ':8000'
+>>>>>>> origin/updateAfterGameFixes
 
 export function TheGame(props) {
   let history = useHistory();
@@ -89,8 +106,12 @@ export function TheGame(props) {
 
 
   }
+<<<<<<< HEAD
 
+  const user = props.location.user;
+=======
   var user = props.location.user;
+>>>>>>> origin/updateAfterGameFixes
   const room = props.location.room;
   const opponentId = props.location.opponentId;
   const [answered, setAnswered] = React.useState(props.location.answered);
@@ -246,6 +267,32 @@ export function TheGame(props) {
     if (!startedReadingFromDB) {
       setStartedReadingFromDB(true);
 
+<<<<<<< HEAD
+      // console.log("request:", server + '/userSentences/' + opponentId + '/' + room.room_id)
+      // fetch(server + '/getUserObjectInRoom/' + opponentId + '/' + room.room_id, {
+      //   method: 'GET', // *GET, POST, PUT, DELETE, etc.
+      //   headers: {
+      //     'Content-Type': 'application/x-www-form-urlencoded'
+      //   },
+      //   credentials: 'include',
+      // }).then((response) => {
+      //   if (response.status !== okStatus) {
+      //     reject(response.status)
+      //     if (!isUndefined(onFailure))
+      //       onFailure();
+      //   } else {
+      //     return new Promise(function (resolve, reject) {
+      //       resolve(response.json());
+      //     })
+      //   }
+      // }).then(data => {
+      //   if (!isUndefined(onSuccess))
+      //     onSuccess(data);
+    
+    
+      //   console.log("userSentences received data from server: ", data)
+      // })
+=======
 
       console.log("request:", server + '/userSentences/' + opponentId + '/' + room.room_id)
       fetch(server + '/getUserObjectInRoom/' + room.room_id + '/' + opponentId, {
@@ -270,6 +317,7 @@ export function TheGame(props) {
       })
 
 
+>>>>>>> origin/updateAfterGameFixes
 
       getSentencesFromDB(opponentId, room,
         (data) => {
