@@ -33,16 +33,17 @@ const height = 600;
 const pass = "000000"
 
 //test parameters
+const HEADLESS = true
 const TEST_SLOWDOWN = 40 //around 40-60 is regular user behavior
 const INITIALIZE_PLAYERS = false //true for signing up new users and filling up their sentences. false for signing in already registered users.
-const NUM_OF_PLAYERS = 4
-const NUM_OF_ROOMS = 2
-const NUM_OF_MATCHES_PER_COUPLE = 2
+const NUM_OF_PLAYERS = 30
+const NUM_OF_ROOMS = 6
+const NUM_OF_MATCHES_PER_COUPLE = 1
 const NUM_OF_TRUE_SENTENCES = 2
 const NUM_OF_FALSE_SENTENCES = 2
-const MAX_SETBACK = 3000 //[seconds/1000]
-const MIN_TIME_TO_CHOOSE = 500 //[seconds/1000]
-const MAX_TIME_TO_CHOOSE = 2000 //[seconds/1000]
+const MAX_SETBACK = 50000 //[seconds/1000]
+const MIN_TIME_TO_CHOOSE = 700 //[seconds/1000]
+const MAX_TIME_TO_CHOOSE = 2300 //[seconds/1000]
 const TIME_BETWEEN_PHASES = 300 //[seconds/1000]
 
 //helper functions
@@ -93,6 +94,20 @@ var signIn = function (page, index) {
             page.waitForNavigation(),
             page.click('#submit')
         ]);
+        var success = true
+        await page.waitForSelector("#LoginScreenHomePage").catch(() => success = false)
+        if (!success) {
+            await page.reload()
+            await page.waitForSelector("#SignInPage")
+            await page.click("#EmailInput");
+            await page.type("#EmailInput", index.toString() + "@gmail.com");
+            await page.click("#PasswordInput");
+            await page.type("#PasswordInput", pass);
+            await Promise.all([
+                page.waitForNavigation(),
+                page.click('#submit')
+            ]);
+        }
         await page.waitForSelector("#LoginScreenHomePage")
         resolve("yes")
     });
@@ -174,10 +189,26 @@ var joinRoom = function (page, room_number) {
 }
 var inviteToMatch = function (page1, index1, page2, index2) {
     return new Promise(async function (resolve, reject) {
+        console.log("invite to game- players " + index1.toString() + " and " + index2.toString())
         await page1.waitForSelector('#joinGamePage')
         await page2.waitForSelector('#joinGamePage')
-        await page1.waitForSelector("#A" + index2.toString() + "InviteBTN")
-
+        //await page1.reload()
+        //await page1.waitForSelector('#joinGamePage')
+        var success = false
+        var times_to_try = 0
+        while (!success) {
+            times_to_try++
+            success = true
+            await page1.waitForSelector("#A" + index2.toString() + "InviteBTN").catch(() => success = false)
+            if (!success) {
+                console.log("bad messege: players " + index1.toString() + " and " + index2.toString())
+                await page1.reload()
+                await page1.waitForSelector('#joinGamePage')
+            }
+            if (times_to_try == 2) {
+                resolve("bad")
+            }
+        }
         await Promise.all([
             page1.waitForSelector('#waitingForResponsePopUp'),
             page2.waitForSelector('#receivedInvitationPopUp'),
@@ -189,6 +220,7 @@ var inviteToMatch = function (page1, index1, page2, index2) {
             page2.click("#acceptBTN")
         ]);
 
+        console.log("start game- players " + index1.toString() + " and " + index2.toString())
         await page1.waitForSelector("#theGamePage");
         await page2.waitForSelector("#theGamePage");
         resolve("yes")
@@ -223,7 +255,7 @@ var playMatch = function (page1, page2) {
                         await page1.click('#FalseBTN')
                     }
                     await page1.waitForSelector("#NextSentenceBTN")
-                    await page1.waitFor(MAX_TIME_TO_CHOOSE - time_to_choose)
+                    await page1.waitFor(MAX_TIME_TO_CHOOSE - time_to_choose + 1000)
                     await Promise.all([
                         page1.waitFor(() => !document.querySelector("#NextSentenceBTN")),
                         page1.click("#NextSentenceBTN")
@@ -242,7 +274,7 @@ var playMatch = function (page1, page2) {
                         await page2.click('#FalseBTN')
                     }
                     await page2.waitForSelector("#NextSentenceBTN")
-                    await page2.waitFor(MAX_TIME_TO_CHOOSE - time_to_choose)
+                    await page2.waitFor(MAX_TIME_TO_CHOOSE - time_to_choose + 1000)
                     await Promise.all([
                         page2.waitFor(() => !document.querySelector("#NextSentenceBTN")),
                         page2.click("#NextSentenceBTN")
@@ -260,6 +292,7 @@ var playMatch = function (page1, page2) {
             page2.waitForNavigation(),
             page1.click("#EndGameBTN1")
         ]);
+        console.log("ended game")
 
         await page1.waitForSelector('#joinGamePage')
         await page2.waitForSelector('#joinGamePage')
@@ -298,6 +331,32 @@ var logOut = function (page1, page2) {
 
         await page1.waitForSelector('#TrueAndFalseHomePage')
         await page2.waitForSelector('#TrueAndFalseHomePage')
+        resolve("yes")
+    });
+}
+var leaveRoom_single = function (page) {
+    return new Promise(async function (resolve, reject) {
+        await page.waitForSelector('#joinGamePage')
+
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click("#leaveRoomBTN")
+        ]);
+
+        await page.waitForSelector("#LoginScreenHomePage")
+        resolve("yes")
+    });
+}
+var logOut_single = function (page) {
+    return new Promise(async function (resolve, reject) {
+        await page.waitForSelector("#LoginScreenHomePage")
+
+        await Promise.all([
+            page.waitForNavigation(),
+            page.click('#logOutBTN')
+        ]);
+
+        //await page.waitForSelector('#TrueAndFalseHomePage')
         resolve("yes")
     });
 }
@@ -357,18 +416,44 @@ var fourthPhase = function (page1, index1, page2, index2) {
             await inviteToMatch(page1, index1, page2, index2)
             await playMatch(page1, page2)
         }
-        await leaveRoom(page1, page2)
-        await logOut(page1, page2)
+        // await leaveRoom(page1, page2)
+        // await logOut(page1, page2)
+        // await page1.waitForSelector('#TrueAndFalseHomePage')
+        // await page2.waitForSelector('#TrueAndFalseHomePage')
 
-        await page1.waitForSelector('#TrueAndFalseHomePage')
-        await page2.waitForSelector('#TrueAndFalseHomePage')
+        await page1.waitForSelector('#joinGamePage')
+        await page2.waitForSelector('#joinGamePage')
+        resolve("yes")
+    });
+}
+var fifthPhase = function (page, index) {
+    var setback = Math.floor(Math.random() * MAX_SETBACK);
+    return new Promise(async function (resolve, reject) {
+        await page.waitForSelector('#joinGamePage')
+
+        await leaveRoom_single(page)
+        //await logOut_single(page)
+        await page.waitForSelector('#LoginScreenHomePage')
+
+        resolve("yes")
+    });
+}
+var sixthPhase = function (page, index) {
+    var setback = Math.floor(Math.random() * MAX_SETBACK);
+    return new Promise(async function (resolve, reject) {
+        await page.waitForSelector('#LoginScreenHomePage')
+
+        //await leaveRoom_single(page)
+        await logOut_single(page)
+        //await page.waitForSelector('#TrueAndFalseHomePage')
+
         resolve("yes")
     });
 }
 
 beforeAll(async () => {
     browser = await puppeteer.launch({
-        headless: false,
+        headless: HEADLESS,
         slowMo: TEST_SLOWDOWN,
         args: [`--window-size=${width},${height}`]
     });
@@ -382,18 +467,23 @@ describe("stress test", () => {
     test("all phases passed!", async () => {
         var i
         let context
+        let prom
+        let promises = []
         for (i = 0; i < NUM_OF_PLAYERS; i++) {
             context = await browser.createIncognitoBrowserContext();
             page = await context.newPage();
             pages.push({ page: page, id: i })
             //await page.emulate(iPhone);
-            await page.setViewport({ width, height });
-            await page.goto(APP);
+            prom = page.setViewport({ width, height });
+            promises.push(prom)
+            prom = page.goto(APP);
+            promises.push(prom)
         }
-
+        await Promise.all(promises);
+        console.log("all tabs opened")
         await page.waitFor(TIME_BETWEEN_PHASES)
-        let prom
-        let promises = []
+
+        promises = []
         for (i = 0; i < NUM_OF_PLAYERS; i++) {
             page = pages[i].page
             prom = firstPhase(page, i)
@@ -450,7 +540,27 @@ describe("stress test", () => {
         }
         await Promise.all(promises);
         console.log("fourth phase completed")
-    }, 3000000);
+        await page1.waitFor(TIME_BETWEEN_PHASES)
+
+        promises = []
+        for (i = 0; i < NUM_OF_PLAYERS; i++) {
+            page = pages[i].page
+            prom = fifthPhase(page, i)
+            promises.push(prom)
+        }
+        await Promise.all(promises);
+        console.log("fifth phase completed")
+        await page.waitFor(TIME_BETWEEN_PHASES)
+
+        promises = []
+        for (i = 0; i < NUM_OF_PLAYERS; i++) {
+            page = pages[i].page
+            prom = sixthPhase(page, i)
+            promises.push(prom)
+        }
+        await Promise.all(promises);
+        console.log("sixth phase completed")
+    }, 30000000);
 });
 
 // for (i = 0; i < NUM_OF_PLAYERS; i++){

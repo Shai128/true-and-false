@@ -231,21 +231,21 @@ export function JoinGame(props) {
     var index = -1;
     users.forEach(userId => {
 
-    index = (newPlayersUnAvailable).findIndex(user => user.email === userId)
-
-    if (index === -1) {
-      InitTheRoom(CurrentRoom.room_id, setRoomUpdated);
-    }
-
-    else {
       index = (newPlayersUnAvailable).findIndex(user => user.email === userId)
-      var current_user = newPlayersUnAvailable[index]
-      newPlayersUnAvailable.splice(index, 1)
-      index = (newPlayersAvailable).findIndex(user => user.email === current_user.email)
+
       if (index === -1) {
-        newPlayersAvailable.push({ email: current_user.email, nickname: current_user.nickname })
+        InitTheRoom(CurrentRoom.room_id, setRoomUpdated);
       }
-    }
+
+      else {
+        index = (newPlayersUnAvailable).findIndex(user => user.email === userId)
+        var current_user = newPlayersUnAvailable[index]
+        newPlayersUnAvailable.splice(index, 1)
+        index = (newPlayersAvailable).findIndex(user => user.email === current_user.email)
+        if (index === -1) {
+          newPlayersAvailable.push({ email: current_user.email, nickname: current_user.nickname })
+        }
+      }
 
     });
 
@@ -447,30 +447,30 @@ export function JoinGame(props) {
   var img = require('../defaultAvatar.png')
   if (CurrentUser.imageData)
     img = CurrentUser.imageData.replace(/ /g, "+")
-  
-  if (color == ''){
-    setColor(colors[Math.floor(Math.random()*colors.length)])
-    setColorIndex(Math.floor(Math.random()*3))
+
+  if (color == '') {
+    setColor(colors[Math.floor(Math.random() * colors.length)])
+    setColorIndex(Math.floor(Math.random() * 3))
   }
 
   return (
     <div id="joinGamePage"
-    style={{background: 'linear-gradient(70deg, ' + color[(colorIndex)%3] + ' 60%, ' + color[(colorIndex+1)%3] + ' 60%'}}>
+      style={{ background: 'linear-gradient(70deg, ' + color[(colorIndex) % 3] + ' 60%, ' + color[(colorIndex + 1) % 3] + ' 60%' }}>
 
       <PrintAnswerPlayerDialog WindowOpen={GotInvitationWindow} setWindowOpen={setGotInvitationWindow} onAccept={onAccept} onDecline={onDecline} SenderInfoName={SenderInfoName} />
       <Grid spacing={1} container>
 
         <Grid spacing={1} item xs={12}>
           <div style={{ float: 'right', marginRight: 10, marginTop: 10, }}>
-            <Button id="leaveRoomBTN" variant="contained" style={{backgroundColor: color[(colorIndex)%3]}} 
-            onClick={leaveRoom} >
+            <Button id="leaveRoomBTN" variant="contained" style={{ backgroundColor: color[(colorIndex) % 3] }}
+              onClick={leaveRoom} >
               <Typography style={{ color: "white", textShadow: "1px 1px 3px black" }}>
-              Leave the room
+                Leave the room
               </Typography>
-      </Button>
+            </Button>
           </div>
           <div style={{ float: 'left', marginRight: 10, marginTop: 10 }}>
-            <Button id="scoreTableBTN" variant="contained" style={{backgroundColor: color[(colorIndex+1)%3]}}
+            <Button id="scoreTableBTN" variant="contained" style={{ backgroundColor: color[(colorIndex + 1) % 3] }}
               onClick={() => {
                 history.push({
                   pathname: '/ScoreTable',
@@ -479,22 +479,22 @@ export function JoinGame(props) {
               }}
             >
               <Typography style={{ color: "white", textShadow: "1px 1px 3px black" }}>
-              SCORE TABLE
+                SCORE TABLE
               </Typography>
-      </Button>
+            </Button>
           </div>
         </Grid>
         <Grid spacing={1} item xs={12}>
-          
+
         </Grid>
 
         <Grid spacing={1} item xs={12} justify="center">
-          <img src={`${img}`} width="120" height='120' border-style='none' />
+          {/*<img src={`${img}`} width="120" height='120' border-style='none' />*/}
         </Grid>
 
         <Grid item spacing={1} xs={12} justify="center" container>
           <div style={{ textAlign: 'center' }}>
-            <Typography id="roomNameHeader" variant="h4" style={{color:'white', textShadow: "1px 1px 3px black"}}>
+            <Typography id="roomNameHeader" variant="h4" style={{ color: 'white', textShadow: "1px 1px 3px black" }}>
               Room Name:
       {" " + CurrentRoom.room_name}
             </Typography>
@@ -504,7 +504,7 @@ export function JoinGame(props) {
 
         <Grid item spacing={1} xs={12} justify="center" container>
           <div style={{ textAlign: 'center' }}>
-            <Typography id="roomNumberHeader" variant="h4" style={{color:'white', textShadow: "1px 1px 3px black"}}>
+            <Typography id="roomNumberHeader" variant="h4" style={{ color: 'white', textShadow: "1px 1px 3px black" }}>
               Room Number:
      {" " + CurrentRoom.room_id}
             </Typography>
@@ -514,7 +514,7 @@ export function JoinGame(props) {
 
         <Grid item spacing={1} xs={12} justify="center" container>
           <div style={{ textAlign: 'center' }}>
-            <Typography id="userNameHeader" justify="center" variant="h5" style={{color:'white', textShadow: "1px 1px 3px black"}}>
+            <Typography id="userNameHeader" justify="center" variant="h5" style={{ color: 'white', textShadow: "1px 1px 3px black" }}>
               User Name:
       {" " + CurrentUser.nickName}
             </Typography>
@@ -767,7 +767,7 @@ export function PlayerListUnAvailable(props) {
 
   const { PlayersUnAvailable, CurrentUser } = props;
 
-let color = colors[Math.floor(Math.random()*colors.length)]
+  let color = colors[Math.floor(Math.random() * colors.length)]
 
   return (
     <Paper className={classes.root}>
@@ -821,9 +821,9 @@ let color = colors[Math.floor(Math.random()*colors.length)]
 
                                 </Grid>
                                 <Grid item xs={3}>
-                                <Typography variant="h6">
-                                  {column.format && typeof value === 'number' ? column.format(value) : value}
-                                </Typography>
+                                  <Typography variant="h6">
+                                    {column.format && typeof value === 'number' ? column.format(value) : value}
+                                  </Typography>
                                 </Grid>
                               </Grid>
 
@@ -1007,7 +1007,7 @@ export function PlayerListAvailable(props) {
                                 </Grid>
                                 <Grid item xs={3}>
                                   <Typography variant="h6">
-                                  {column.format && typeof value === 'number' ? column.format(value) : value}
+                                    {column.format && typeof value === 'number' ? column.format(value) : value}
                                   </Typography>
                                 </Grid>
                               </Grid>
@@ -1092,8 +1092,3 @@ export function DisplayLoadingGameInvitation() {
     </div>
   );
 }
-
-
-
-
-

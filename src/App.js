@@ -287,7 +287,7 @@ function SignUp() {
                 />
               </Grid>
 
-
+              {/* 
               <input type='file' name='imageData' className="avatarImageupload" onChange={e => {
                 const preview = document.querySelector('img');
                 let file_size = document.querySelector('input[type=file]').files[0].size;
@@ -323,7 +323,7 @@ function SignUp() {
               }} />
 
               <img src={defaultImg} width='90' height='90' border="0" />
-
+            */}
 
 
             </Grid>
@@ -470,7 +470,7 @@ function Home() {
       }}>
       <Container component="main" maxWidth="md">
         <CssBaseline />
-        <div className={classes.paper}>
+        <div className={classes.paper} style={{position: "absolute", top: "40%", left: "30%" }}>
           <Typography component="h1" variant="h2" align='center' style={{ color: "white", textShadow: "1px 1px 3px black" }}>
             True and False Home Page
         </Typography>
