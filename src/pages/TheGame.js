@@ -13,15 +13,13 @@ import {
   useHistory,
 } from "react-router-dom";
 
-import { reject } from 'q';
 import { socket, updateUserToDB, getUserFromLocalStorage, } from './../user.js';
 import { updateGameInLocalStorage, getGameFromLocalStorage, } from './../user_game';
 
 import { DisplayLoading, DisplayDBError } from './../PagesUtils.js'
-import { isUndefined, colors, okStatus, serverIP  } from './../Utils.js'
+import { isUndefined, colors, okStatus, serverIP } from './../Utils.js'
 import { getSentencesFromDB } from './../game.js'
 import { userStates } from './JoinGame.js'
-import { LinearProgress } from '@material-ui/core';
 const NO_MORE_SENTENCES = "no more sentences"
 const TRUE_SENTENCE = "true sentence"
 const FALSE_SENTENCE = "false sentence"
@@ -34,7 +32,7 @@ const OPPONENT_TURN_MESSAGE = "Opponent's turn. The sentence is: "
 const BONUS_POINTS_FOR_CORRECT_ANSWER = 3;
 const BONUS_POINTS_FOR_WRONG_ANSWER = 1;
 const NO_MORE_SENTENCES_MESSAGE_TO_USER = "There are no more sentences to display!!"
-const server = "http://"+ serverIP + ':8000'
+const server = "http://" + serverIP + ':8000'
 
 export function TheGame(props) {
   let history = useHistory();
@@ -90,7 +88,7 @@ export function TheGame(props) {
 
   }
 
-  var user = props.location.user;
+  const [user, setUser] = React.useState(props.location.user);
   const room = props.location.room;
   const opponentId = props.location.opponentId;
   const [answered, setAnswered] = React.useState(props.location.answered);
@@ -106,7 +104,7 @@ export function TheGame(props) {
   const [isFinishedLoading, setIsFinishedLoading] = React.useState(false);
   const [seenSentences, setSeenSentences] = React.useState(props.location.seenSentences);
   const [startedReadingFromDB, setStartedReadingFromDB] = React.useState(false);
-  const [matchPoints, setMatchPoints] = React.useState(props.location.score);
+  const [matchPoints, setMatchPoints] = React.useState(props.location.matchPoints);
   const [displayEndGameButton, setDisplayEndGameButton] = React.useState(props.location.displayEndGameButton);
 
   const [gameState, setGameState] = React.useState(props.location.gameState);
@@ -246,33 +244,13 @@ export function TheGame(props) {
     if (!startedReadingFromDB) {
       setStartedReadingFromDB(true);
 
-
-      console.log("request:", server + '/userSentences/' + opponentId + '/' + room.room_id)
-      fetch(server + '/getUserObjectInRoom/' + room.room_id + '/' + opponentId, {
-        method: 'GET', // *GET, POST, PUT, DELETE, etc.
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        credentials: 'include',
-      }).then((response) => {
-        if (response.status !== okStatus) {
-          reject(response.status)
-        } else {
-          return new Promise(function (resolve, reject) {
-            resolve(response.json());
-          })
-        }
-      }).then(data => {
-        user = data
-        setSeenSentences(data.already_seen_sentences)
-        console.log('update user from database: ', user)
-        console.log('seen sentences: ', seenSentences)
-      })
-
-
-
       getSentencesFromDB(opponentId, room,
         (data) => {
+          var new_user = { ...user };
+          new_user.score = data.userObject.score
+          setUser(new_user);
+          var new_seenSentences = seenSentences.concat(data.userObject.already_seen_sentences)
+          setSeenSentences(new_seenSentences);
           console.log('getSentencesFromDB');
           console.log('got data from DB: ', data);
           if (isUndefined(data)) {
@@ -286,17 +264,17 @@ export function TheGame(props) {
             let lies = isUndefined(user.false_sentences) ? [] : user.false_sentences.map(x => x.value);
             let truths = isUndefined(user.true_sentences) ? [] : user.true_sentences.map(x => x.value);
 
-            return !seenSentences.includes(x) && !truths.includes(x) && !lies.includes(x);
+            return !new_seenSentences.includes(x) && !truths.includes(x) && !lies.includes(x);
           }
 
           console.log("update sentences form DB truths: ", truths, "lies: ", lies)
           trues = trues.filter(validSentence);
           falses = falses.filter(validSentence);
-          trues = trues.filter((sent) => !seenSentences.includes(sent))
-          falses = falses.filter((sent) => !seenSentences.includes(sent))
+          trues = trues.filter((sent) => !new_seenSentences.includes(sent))
+          falses = falses.filter((sent) => !new_seenSentences.includes(sent))
           setTruths(trues);
           setLies(falses);
-          setInitialGameState(trues, falses, seenSentences)
+          setInitialGameState(trues, falses, new_seenSentences)
           setIsFinishedLoading(true)
           console.log("truths: ", truths, "lies: ", lies)
         }, () => { })
@@ -378,7 +356,7 @@ export function TheGame(props) {
                 }}
               >
                 <Typography justify="center" style={{ color: 'white', textShadow: "1px 1px 3px black" }}>
-                end game
+                  end game
               </Typography>
               </Button>
               {/* </Link> */}
@@ -400,7 +378,7 @@ export function TheGame(props) {
                 onClick={() => { handleClickTrueOrFalse(TRUE_SENTENCE); }}
                 fullWidth
                 style={{ height: 150, marginTop: 10, backgroundColor: color[(index) % 3], boxShadow: "2px 2px 5px black" }}>
-                <Typography variant="h3" align="center" style={{ color:'white', textShadow: "1px 1px 3px black" }}>
+                <Typography variant="h3" align="center" style={{ color: 'white', textShadow: "1px 1px 3px black" }}>
                   True
                   </Typography>
               </Button>
@@ -414,7 +392,7 @@ export function TheGame(props) {
                 onClick={() => { handleClickTrueOrFalse(FALSE_SENTENCE); }}
                 fullWidth
                 style={{ height: 150, marginTop: 10, backgroundColor: color[(index + 2) % 3], boxShadow: "2px 2px 5px black" }}>
-                <Typography variant="h3" align="center" style={{ color:'white', textShadow: "1px 1px 3px black" }}>
+                <Typography variant="h3" align="center" style={{ color: 'white', textShadow: "1px 1px 3px black" }}>
                   False
                   </Typography>
               </Button>
@@ -510,7 +488,7 @@ function Result(props) {
               <Typography justify="center" style={{ color: 'white', textShadow: "1px 1px 3px black" }}>
                 end game
               </Typography>
-              </Button>
+            </Button>
           </Grid>
 
         </Grid>

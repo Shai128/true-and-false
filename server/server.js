@@ -66,7 +66,7 @@ app.use(session);
 app.use(express.json())
 app.use(bodyParser.json())
 //app.use(bodyParser.json({limit: '10mb', extended: true}))
-app.use(bodyParser.urlencoded({limit: '10mb', extended: true}))
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }))
 
 
 app.use(function (req, res, next) {
@@ -440,7 +440,8 @@ app.get('/userSentences/:opponentId/:roomId', (req, res) => {
 
           res.status(200).send(JSON.stringify({
             truths: extracted_truths,
-            lies: extracted_lies
+            lies: extracted_lies,
+            userObject: userObject
           }))
           logDiv()
         },
@@ -452,22 +453,22 @@ app.get('/userSentences/:opponentId/:roomId', (req, res) => {
 })
 
 
-  /**
-   * returns the mini-object that represents a given user in a given room.
-   * contains already_seen_sentences and score.
-   */
-  app.get('/getUserObjectInRoom/:roomId/:userId', (req, res) => {
-    logDiv('getUserObjectInRoom')
-    findUserByEmailInRoomByRoomID(
-      req.params.roomId,
-      req.params.userId,
-      (userObject) => { // find the given user
-        res.status(200).send(JSON.stringify(userObject))
-      },
-      (err) => standardErrorHandling(res, err)
-    )
+/**
+ * returns the mini-object that represents a given user in a given room.
+ * contains already_seen_sentences and score.
+ */
+app.get('/getUserObjectInRoom/:roomId/:userId', (req, res) => {
+  logDiv('getUserObjectInRoom')
+  findUserByEmailInRoomByRoomID(
+    req.params.roomId,
+    req.params.userId,
+    (userObject) => { // find the given user
+      res.status(200).send(JSON.stringify(userObject))
+    },
+    (err) => standardErrorHandling(res, err)
+  )
 
-  })
+})
 
 /**
  * Returns an object containing the lists of available
@@ -620,33 +621,33 @@ io.on('connection', function (socket) {
     UNAVAILABLE: 2
   }
   socket.on('changeUserAvailability', function (args) {
-    
+
     logDiv('changeUserAvailability')
 
     var userEmail = socket.handshake.session.userInfo.email;
-    console.log("email:",userEmail);
+    console.log("email:", userEmail);
 
     findUser(
       { email: userEmail },
       (userObject) => {
         const roomId = userObject.roomObject.room_id;
-      //  console.log("the current room:", roomId);
+        //  console.log("the current room:", roomId);
         args.roomId = roomId
         args.userId = userEmail
 
-      //  console.log("newRoomId:", args.roomId, "newUserId:", args.userId)
+        //  console.log("newRoomId:", args.roomId, "newUserId:", args.userId)
 
 
 
-     //   console.log("args:", args)
+        //   console.log("args:", args)
         changeUserAvailability(
           args.roomId,
           args.userId,
           args.newAvailability,
           (succ) => {
-         //   console.log("database operation successful")
-           // console.log(succ)
-           // console.log("new availability:", args.newAvailability)
+            //   console.log("database operation successful")
+            // console.log(succ)
+            // console.log("new availability:", args.newAvailability)
             // TODO: should the user socket leave the room?
             if (args.newAvailability === userStates.AVAILABLE) {
               // user becomes available -- his socket should rejoin the room
@@ -680,43 +681,43 @@ io.on('connection', function (socket) {
    * }
    */
   socket.on('changeAvailabilityAll', function (args) {
-    
+
     logDiv('changeAvailabilityAll')
 
 
-        console.log("args:", args)
-        args.users.forEach(userId => {
-          console.log(userId);
-          changeUserAvailability(
-            args.roomId,
-            userId,
-            args.newAvailability,
-            (succ) => {
-              console.log("database operation successful")
-              console.log("new availability:", args.newAvailability)
-              
-              // TODO: should the user socket leave the room?
-              if (args.newAvailability === userStates.AVAILABLE) {
-                // user becomes available -- his socket should rejoin the room
-                var sock = findSocketByUserId(userId)
-                if (!isUndefined(sock)) {sock.join(args.roomId.toString())}
-              } else {
-                // user goes unavailable -- his socket should leave the room
-                var sock = findSocketByUserId(userId)
-                if (!isUndefined(sock)) {sock.leave(args.roomId.toString())}
-              }
-            },
-            (err) => console.log(err)
-          )
-        })
-        console.log("finished access to database")
+    console.log("args:", args)
+    args.users.forEach(userId => {
+      console.log(userId);
+      changeUserAvailability(
+        args.roomId,
+        userId,
+        args.newAvailability,
+        (succ) => {
+          console.log("database operation successful")
+          console.log("new availability:", args.newAvailability)
 
-        if (args.newAvailability === userStates.AVAILABLE) {
-          io.to(args.roomId).emit('AllAvailable', args.users)
-        } else if (args.newAvailability === userStates.UNAVAILABLE) {
-          io.to(args.roomId).emit('AllUnAvailable', args.users)
-        }
-      })
+          // TODO: should the user socket leave the room?
+          if (args.newAvailability === userStates.AVAILABLE) {
+            // user becomes available -- his socket should rejoin the room
+            var sock = findSocketByUserId(userId)
+            if (!isUndefined(sock)) { sock.join(args.roomId.toString()) }
+          } else {
+            // user goes unavailable -- his socket should leave the room
+            var sock = findSocketByUserId(userId)
+            if (!isUndefined(sock)) { sock.leave(args.roomId.toString()) }
+          }
+        },
+        (err) => console.log(err)
+      )
+    })
+    console.log("finished access to database")
+
+    if (args.newAvailability === userStates.AVAILABLE) {
+      io.to(args.roomId).emit('AllAvailable', args.users)
+    } else if (args.newAvailability === userStates.UNAVAILABLE) {
+      io.to(args.roomId).emit('AllUnAvailable', args.users)
+    }
+  })
 
   /**
    * Passes a message from one user to another.
