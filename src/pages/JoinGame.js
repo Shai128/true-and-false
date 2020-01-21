@@ -375,7 +375,9 @@ export function JoinGame(props) {
 
   const leaveRoom = () => {
 
-    var new_user = { ...CurrentUser }
+    var new_user = JSON.parse(JSON.stringify(CurrentUser))
+    new_user.already_seen_sentences = []
+    console.log("removed already_seen_sentences from user. new_user is:", new_user);
     new_user.roomObject = {
       room_id: -1,
       room_name: "no room"

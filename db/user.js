@@ -49,11 +49,11 @@ const userSchema = new mongoose.Schema(
         opponentId: String,
         questionsCount: Number,
         correctCount: Number,
-        score: Number,
+        //score: Number,
         matchPoints: Number,
-        imageData: String, 
+        imageData: String,
         contentType: String
-        
+
     });
 const userModel = mongoose.model('users', userSchema) //creating the class userModel. a class of types
 // that comply the conditions of {userSchema and document}

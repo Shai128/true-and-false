@@ -60,7 +60,7 @@ export function TheGame(props) {
       room: props.location.room,
       opponentId: props.location.opponentId,
       turn: props.location.turn,
-      score: 0,
+      score: props.location.user,
       questionsCount: 0,
       correctCount: 0,
       gameState: INITIAL_STATE,
@@ -80,7 +80,7 @@ export function TheGame(props) {
     props = {
       location: {
         ...gameToStore,
-        user: getUserFromLocalStorage()
+        user: props.location.user//getUserFromLocalStorage()
       }
     }
     updateGameInLocalStorage(gameToStore)
@@ -105,6 +105,7 @@ export function TheGame(props) {
   const [seenSentences, setSeenSentences] = React.useState(props.location.seenSentences);
   const [startedReadingFromDB, setStartedReadingFromDB] = React.useState(false);
   const [matchPoints, setMatchPoints] = React.useState(props.location.matchPoints);
+  console.log("matchpoints: ", matchPoints);
   const [displayEndGameButton, setDisplayEndGameButton] = React.useState(props.location.displayEndGameButton);
 
   const [gameState, setGameState] = React.useState(props.location.gameState);
@@ -139,7 +140,7 @@ export function TheGame(props) {
         room: props.location.room,
         opponentId: props.location.opponentId,
         turn: gameState === MY_TURN_STATE ? true : false,
-        score: matchPoints,
+        score: props.location.score,
         matchPoints: matchPoints,
         questionsCount: questionsCount,
         correctCount: correctCount,
@@ -246,11 +247,11 @@ export function TheGame(props) {
 
       getSentencesFromDB(opponentId, room,
         (data) => {
-          var new_user = { ...user };
-          new_user.score = data.userObject.score
-          setUser(new_user);
-          var new_seenSentences = seenSentences.concat(data.userObject.already_seen_sentences)
-          setSeenSentences(new_seenSentences);
+          //var new_user = { ...user };
+          //new_user.score = data.userObject.score
+          //setUser(new_user);
+          //var new_seenSentences = seenSentences.concat(data.userObject.already_seen_sentences)
+          //setSeenSentences(new_seenSentences);
           console.log('getSentencesFromDB');
           console.log('got data from DB: ', data);
           if (isUndefined(data)) {
@@ -264,17 +265,17 @@ export function TheGame(props) {
             let lies = isUndefined(user.false_sentences) ? [] : user.false_sentences.map(x => x.value);
             let truths = isUndefined(user.true_sentences) ? [] : user.true_sentences.map(x => x.value);
 
-            return !new_seenSentences.includes(x) && !truths.includes(x) && !lies.includes(x);
+            return !seenSentences.includes(x) && !truths.includes(x) && !lies.includes(x);
           }
 
           console.log("update sentences form DB truths: ", truths, "lies: ", lies)
           trues = trues.filter(validSentence);
           falses = falses.filter(validSentence);
-          trues = trues.filter((sent) => !new_seenSentences.includes(sent))
-          falses = falses.filter((sent) => !new_seenSentences.includes(sent))
+          trues = trues.filter((sent) => !seenSentences.includes(sent))
+          falses = falses.filter((sent) => !seenSentences.includes(sent))
           setTruths(trues);
           setLies(falses);
-          setInitialGameState(trues, falses, new_seenSentences)
+          setInitialGameState(trues, falses, seenSentences)
           setIsFinishedLoading(true)
           console.log("truths: ", truths, "lies: ", lies)
         }, () => { })
@@ -310,10 +311,10 @@ export function TheGame(props) {
 
   let color = colors[Math.floor(Math.random() * colors.length)]
   let index = Math.floor(Math.random() * 3)
-  let res1=color[(index) % 3]
-  let res2=color[(index+2) % 3]
-  if (disableButtons){ res1="grey";res2="grey";}
- 
+  let res1 = color[(index) % 3]
+  let res2 = color[(index + 2) % 3]
+  if (disableButtons) { res1 = "grey"; res2 = "grey"; }
+
 
   return (
     <div id="theGamePage"
@@ -381,7 +382,7 @@ export function TheGame(props) {
                 disabled={disableButtons}
                 onClick={() => { handleClickTrueOrFalse(TRUE_SENTENCE); }}
                 fullWidth
-                style={{ height: 150, marginTop: 10, backgroundColor:  res1, boxShadow: "2px 2px 5px black" }}>
+                style={{ height: 150, marginTop: 10, backgroundColor: res1, boxShadow: "2px 2px 5px black" }}>
                 <Typography variant="h3" align="center" style={{ color: 'white', textShadow: "1px 1px 3px black" }}>
                   True
                   </Typography>
