@@ -3,7 +3,7 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
 import MaterialTable from 'material-table';
-
+import { colors} from './../Utils.js'
 import { useStyles as AppUseStyles } from '../App.js';
 import { GamePage } from './GamePage.js'
 import {
@@ -78,6 +78,15 @@ export function GamesListPage(props) {
 
 
 function Home(props) {
+  const [color,SetColor]=React.useState(false)
+  const [index,SetIndex]=React.useState(false)
+  const [init,SetInit]=React.useState(false)
+    
+    if(!init){
+      SetInit(true)
+    SetColor( colors[Math.floor(Math.random() * colors.length)])
+    SetIndex(Math.floor(Math.random() * 3))
+  }
   const classes = AppUseStyles();
   let url = props.url;
   const [user, setUser] = useState(getUserFromProps(props));
@@ -86,10 +95,13 @@ function Home(props) {
     return (<DisplayLoading />)
   }
   return (
-    <Container component="main" maxWidth="xs">
+    <Container component="main"   maxWidth="100v" style={{height: '100vh',
+      background: 'linear-gradient(100deg, ' + color[index % 3] + ' 30%, rgba(0,0,0,0) 30%),'
+        + 'linear-gradient(135deg, ' + color[(index + 1) % 3] + ' 65%, ' + color[(index + 2) % 3] + ' 65%'
+    }}>
       <CssBaseline />
       <div className={classes.paper} >
-        <Typography component="h1" variant="h2" justify="center">
+        <Typography component="h1" variant="h2" justify="center" style={{ color: "white", textShadow: "1px 1px 3px black" }}>
           Games List
             </Typography>
 

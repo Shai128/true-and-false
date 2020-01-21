@@ -16,7 +16,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 
 import { useStyles as AppUseStyles } from './../App.js';
 import { getCurrentUserFromSession as getCurrentUser, updateUserToDB, getUserFromProps, validOldPassword, getCurrentUserFromDB } from './../user.js'
-import { passwordIsStrongEnough } from './../Utils.js'
+import { passwordIsStrongEnough ,colors} from './../Utils.js'
 import crypto from "crypto-js";
 
 const useButtonStyles = makeStyles({
@@ -51,6 +51,15 @@ let old_pass = "";
 
 export function MyProfile(props) {
 
+  const [color,SetColor]=React.useState(false)
+  const [index,SetIndex]=React.useState(false)
+  const [init,SetInit]=React.useState(false)
+    
+    if(!init){
+      SetInit(true)
+    SetColor( colors[Math.floor(Math.random() * colors.length)])
+    SetIndex(Math.floor(Math.random() * 3))
+  }
   let init_user = getUserFromProps(props);
   let image_init_user = getUserFromProps(props);
   const classes = AppUseStyles();
@@ -91,14 +100,21 @@ export function MyProfile(props) {
   if (currentUser.imageData)
     img = currentUser.imageData.replace(/ /g, "+")
   return (
-    <div id="MyProfilePage">
+    <div id="MyProfilePage" style={{  height: '100vh',
+      background: 'linear-gradient(100deg, ' + color[index % 3] + ' 30%, rgba(0,0,0,0) 30%),'
+        + 'linear-gradient(135deg, ' + color[(index + 1) % 3] + ' 65%, ' + color[(index + 2) % 3] + ' 65%'
+    }}>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
         <div className={classes.paper} >
-          <Typography component="h1" variant="h2" justify="center">
+          <Typography component="h1" variant="h2" justify="center" style={{ color: "white", textShadow: "1px 1px 3px black" }}>
             My Profile
             {/*<img src={`${img}`} width="120" height='120'  border-style='none' />*/}
           </Typography>
+
+         
+
+
 
           <form className={classes.form} noValidate>
 

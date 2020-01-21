@@ -13,7 +13,7 @@ import AddCircleTwoToneIcon from '@material-ui/icons/AddCircleTwoTone';
 import IconButton from '@material-ui/core/IconButton';
 import { useStyles as AppUseStyles } from './../App.js';
 import DeleteTwoToneIcon from '@material-ui/icons/DeleteTwoTone';
-
+import {  colors} from './../Utils.js'
 import { updateUserToDB, getCurrentUserFromSession, userIsUpdated, getUserFromProps } from './../user.js'
 import { DisplayLoading } from './../PagesUtils';
 import {
@@ -36,6 +36,15 @@ const useButtonStyles = makeStyles({
 });
 
 export function MySentences(props) {
+  const [color,SetColor]=React.useState(false)
+  const [index,SetIndex]=React.useState(false)
+  const [init,SetInit]=React.useState(false)
+    
+    if(!init){
+      SetInit(true)
+    SetColor( colors[Math.floor(Math.random() * colors.length)])
+    SetIndex(Math.floor(Math.random() * 3))
+  }
   let history = useHistory();
   const classes = AppUseStyles();
   const buttonClasses = useButtonStyles();
@@ -47,11 +56,14 @@ export function MySentences(props) {
     return (<DisplayLoading />);
   }
   return (
-    <div id="MySentencesPage">
+    <div id="MySentencesPage" style={{height: '100vh',
+      background: 'linear-gradient(100deg, ' + color[index % 3] + ' 30%, rgba(0,0,0,0) 30%),'
+        + 'linear-gradient(135deg, ' + color[(index + 1) % 3] + ' 65%, ' + color[(index + 2) % 3] + ' 65%'
+    }}>
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.paper} >
-        <Typography component="h2" variant="h3" justify="center">
+        <Typography component="h2" variant="h3" justify="center" style={{ color: "white", textShadow: "1px 1px 3px black" }}>
           My Sentences
           </Typography>
 

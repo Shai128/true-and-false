@@ -25,10 +25,11 @@ import { GamePage } from './GamePage.js';
 import { userIsUpdated, getCurrentUserFromSession as getCurrentUser, getUserFromProps } from './../user';
 import { PrintGames, PrintJoinGameDialog, DisplayLoading } from './../PagesUtils';
 import { createRoom } from './../room.js'
-import { isUndefined } from './../Utils.js'
+import { isUndefined,colors } from './../Utils.js'
 export function LoginScreenHome(props) {
   let { path, url } = useRouteMatch();
   let user = getUserFromProps(props);
+  
   return (
     <Switch>
 
@@ -44,6 +45,19 @@ export function LoginScreenHome(props) {
 const defaultImg = require('../defaultAvatar.png')
 function Home(props) {
   let url = props.url;
+
+  const [color,SetColor]=React.useState(false)
+  const [index,SetIndex]=React.useState(false)
+  const [init,SetInit]=React.useState(false)
+    
+    if(!init){
+      SetInit(true)
+    SetColor( colors[Math.floor(Math.random() * colors.length)])
+    SetIndex(Math.floor(Math.random() * 3))
+  }
+
+
+  
   const [createGameWindowOpen, setCreateGameWindowOpen] = React.useState(false);
   const [joinGameWindowOpen, setJoinGameWindowOpen] = React.useState(false);
 
@@ -109,13 +123,24 @@ function Home(props) {
   if (currentUser.imageData)
     img = currentUser.imageData.replace(/ /g, "+")
 
+
+
+/////////////////////
+
+
+
+////////////////////
+    
   return (
-    <div id="LoginScreenHomePage">
+    <div id="LoginScreenHomePage" style={{ height: '100vh',
+      background: 'linear-gradient(100deg, ' + color[index % 3] + ' 30%, rgba(0,0,0,0) 30%),'
+        + 'linear-gradient(135deg, ' + color[(index + 1) % 3] + ' 65%, ' + color[(index + 2) % 3] + ' 65%'
+    }}>
       <Container maxWidth="lg" className={classes.container}>
         <Grid container spacing={1}>
-          <Grid item xs={12}>
+          <Grid item xs={12}  >
             <Paper className={fixedHeightPaper}>
-              <Grid container spacing={3}>
+              <Grid container spacing={3} >
                 <Grid item xs={12}>
 
 

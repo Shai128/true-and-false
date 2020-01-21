@@ -344,7 +344,7 @@ function LoginScreen(props) {
 
   return (
     <div>
-      <div className={classes.root}>
+      <div className={classes.root} >
         <CssBaseline />
         <AppBar position="absolute" className={clsx(classes.appBar, open && classes.appBarShift)}>
           <Toolbar className={classes.toolbar}>

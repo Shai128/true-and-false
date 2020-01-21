@@ -310,6 +310,10 @@ export function TheGame(props) {
 
   let color = colors[Math.floor(Math.random() * colors.length)]
   let index = Math.floor(Math.random() * 3)
+  let res1=color[(index) % 3]
+  let res2=color[(index+2) % 3]
+  if (disableButtons){ res1="grey";res2="grey";}
+ 
 
   return (
     <div id="theGamePage"
@@ -377,7 +381,7 @@ export function TheGame(props) {
                 disabled={disableButtons}
                 onClick={() => { handleClickTrueOrFalse(TRUE_SENTENCE); }}
                 fullWidth
-                style={{ height: 150, marginTop: 10, backgroundColor: color[(index) % 3], boxShadow: "2px 2px 5px black" }}>
+                style={{ height: 150, marginTop: 10, backgroundColor:  res1, boxShadow: "2px 2px 5px black" }}>
                 <Typography variant="h3" align="center" style={{ color: 'white', textShadow: "1px 1px 3px black" }}>
                   True
                   </Typography>
@@ -391,7 +395,7 @@ export function TheGame(props) {
                 disabled={disableButtons}
                 onClick={() => { handleClickTrueOrFalse(FALSE_SENTENCE); }}
                 fullWidth
-                style={{ height: 150, marginTop: 10, backgroundColor: color[(index + 2) % 3], boxShadow: "2px 2px 5px black" }}>
+                style={{ height: 150, marginTop: 10, backgroundColor: res2, boxShadow: "2px 2px 5px black" }}>
                 <Typography variant="h3" align="center" style={{ color: 'white', textShadow: "1px 1px 3px black" }}>
                   False
                   </Typography>
